@@ -2,7 +2,7 @@
 #include "rust/api.h"
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_string", (DL_FUNC) &string, 1},
+    {"unextendr_string", (DL_FUNC) &unextendr_string, 1},
     {NULL, NULL, 0}
 };
 

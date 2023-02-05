@@ -2,4 +2,4 @@
 #'
 #' @rdname wrappers
 #' @export
-string <- function(x) .Call(`_string`, x)
+string <- function(x) .Call(unextendr_string, x)

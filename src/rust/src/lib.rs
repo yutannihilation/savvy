@@ -1,6 +1,6 @@
 use libR_sys::SEXP;
 
 #[no_mangle]
-pub extern "C" fn string(x: SEXP) -> SEXP {
+pub extern "C" fn unextendr_string(x: SEXP) -> SEXP {
     x
 }
