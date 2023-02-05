@@ -1,0 +1,1 @@
+SEXP string(SEXP x);

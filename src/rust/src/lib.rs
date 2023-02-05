@@ -1,26 +1,6 @@
-use extendr_api::prelude::*;
+use libR_sys::SEXP;
 
-/// Return a static string.
-///
-/// @export
-#[extendr(use_try_from = true)]
-fn static_string() -> &'static str {
-    "Hello world!"
-}
-
-/// Return a dynamic string.
-///
-/// @export
-#[extendr(use_try_from = true)]
-fn string(input: &str) -> String {
-    input.to_string()
-}
-
-// Macro to generate exports.
-// This ensures exported functions are registered with R.
-// See corresponding C code in `entrypoint.c`.
-extendr_module! {
-    mod unextendr;
-    fn static_string;
-    fn string;
+#[no_mangle]
+pub extern "C" fn string(x: SEXP) -> SEXP {
+    x
 }

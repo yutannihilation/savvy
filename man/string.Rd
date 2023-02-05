@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{string}
 \alias{string}
-\title{Return a dynamic string.}
+\title{Return a static string.}
 \usage{
-string(input)
+string(x)
 }
 \description{
-Return a dynamic string.
+Return a static string.
 }

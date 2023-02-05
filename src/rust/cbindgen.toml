@@ -1,0 +1,30 @@
+language = "C"
+
+# Whether cbindgen's default C/C++ standard imports should be suppressed. These
+# imports are included by default because our generated headers tend to require
+# them (e.g. for uint32_t). Currently, the generated imports are:
+#
+# * for C: <stdarg.h>, <stdbool.h>, <stdint.h>, <stdlib.h>, <uchar.h>
+#
+# * for C++: <cstdarg>, <cstdint>, <cstdlib>, <new>, <cassert> (depending on config)
+#
+# default: false
+no_includes = true
+
+# Whether to make a C header C++ compatible.
+# These will wrap generated functions into a `extern "C"` block, e.g.
+#
+# #ifdef __cplusplus
+# extern "C" {
+# #endif // __cplusplus
+#
+# // Generated functions.
+#
+# #ifdef __cplusplus
+# } // extern "C"
+# #endif // __cplusplus
+#
+# If the language is not C this option won't have any effect.
+#
+# default: false
+cpp_compat = false
