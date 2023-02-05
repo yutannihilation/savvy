@@ -1,0 +1,31 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# unextendr
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## References
+
+* https://notchained.hatenablog.com/entry/2023/01/29/163013
+
+## Functions
+
+```{r}
+library(unextendr)
+
+string("a")
+```
