@@ -2,4 +2,4 @@
 #'
 #' @rdname wrappers
 #' @export
-string <- function(x) .Call(unextendr_string, x)
+to_upper <- function(x) .Call(unextendr_to_upper, x)

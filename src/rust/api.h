@@ -1,1 +1,1 @@
-SEXP unextendr_string(SEXP x);
+SEXP unextendr_to_upper(SEXP x);
