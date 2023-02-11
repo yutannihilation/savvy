@@ -4,6 +4,7 @@ use libR_sys::{
 use std::ffi::CString;
 
 mod error;
+mod protect;
 mod sxp;
 
 // TODO: make this r_println! macro
@@ -26,6 +27,9 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     let x = sxp::StringSxp::try_from(x).unwrap();
 
     let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
+
+    // // Do I need to protect here? Or, as this will be passed to R's side, it's not needed?
+    // protect::PRESERVED_LIST.insert(out);
 
     for i in 0..x.len() {
         let e = &x[i];
