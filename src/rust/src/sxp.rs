@@ -59,7 +59,9 @@ impl Index<usize> for StringSxp {
             // - https://github.com/extendr/extendr/pull/477#issuecomment-1423452814
             let e_utf8 = Rf_translateCharUTF8(e);
 
-            CStr::from_ptr(e_utf8).to_str().unwrap_or_default()
+            // As `e_utf8` is translated into UTF-8, it should be a valid UTF-8
+            // data, so we just unwrap() without considering the invalid cases.
+            CStr::from_ptr(e_utf8).to_str().unwrap()
         }
     }
 }

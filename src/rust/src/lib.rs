@@ -1,5 +1,7 @@
-use libR_sys::{REprintf, R_NilValue, Rf_translateCharUTF8, Rf_xlength, Rprintf, SEXP, STRING_ELT};
-use std::ffi::{CStr, CString};
+use libR_sys::{
+    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf, SET_STRING_ELT, SEXP,
+};
+use std::ffi::CString;
 
 mod error;
 mod sxp;
@@ -23,13 +25,24 @@ fn r_eprint(msg: String) {
 pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     let x = sxp::StringSxp::try_from(x).unwrap();
 
+    let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
+
     for i in 0..x.len() {
         let e = &x[i];
+
         let e_upper = e.to_uppercase();
-        r_eprint(format!("{e_upper}\n\n"));
+
+        // Rf_mkCharLenCE() probably allocates
+        let r_str = Rf_mkCharLenCE(
+            e_upper.as_ptr() as *const i8,
+            e_upper.len() as i32,
+            cetype_t_CE_UTF8,
+        );
+
+        SET_STRING_ELT(out, i as isize, r_str);
     }
 
-    R_NilValue
+    out
 }
 
 // #[no_mangle]
