@@ -7,4 +7,6 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
+anyhow = "1.0.69"
 libR-sys = { git = "https://github.com/extendr/libR-sys" }
+thiserror = "1.0.38"
