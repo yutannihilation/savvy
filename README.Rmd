@@ -36,7 +36,11 @@ times_two_numeric(1.1)
 ### Error Handling
 
 This framework uses [tagged pointer](https://en.wikipedia.org/wiki/Tagged_pointer) to indicate the error.
-This requires some wrappers, but the advantage is that we don't need additional information.
+This requires some wrappers, but the advantage is that we don't need to pass additional data
+and these bit operations should be cheap.
+
+But, as (hopefully) [the stabilization of "C-unwind ABI"](https://github.com/rust-lang/rust/issues/74990#issuecomment-1363473645)
+is not very far, I'm not sure if this is worth considering to implement in extendr.
 
 ### Protection
 
