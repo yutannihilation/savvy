@@ -1,43 +1,39 @@
 #include <Rinternals.h>
 #include "rust/api.h"
 
+static uintptr_t TAGGED_POINTER_MASK = (uintptr_t) 1;
+
 SEXP unextendr_to_upper_wrapper(SEXP x) {
   uintptr_t res = (uintptr_t) unextendr_to_upper(x);
 
-  uintptr_t mask   = (uintptr_t) 1;
-  SEXP res_aligned = (SEXP) (res & ~mask);
-
-  if ((res & mask) == 1) {
+  if ((res & TAGGED_POINTER_MASK) == 1) {
+    SEXP res_aligned = (SEXP) (res & ~TAGGED_POINTER_MASK);
     Rf_error("%s", CHAR(res_aligned));
   }
 
-  return res_aligned;
+  return (SEXP) res;
 }
 
 SEXP unextendr_times_two_int_wrapper(SEXP x) {
   uintptr_t res = (uintptr_t) unextendr_times_two_int(x);
 
-  uintptr_t mask   = (uintptr_t) 1;
-  SEXP res_aligned = (SEXP) (res & ~mask);
-
-  if ((res & mask) == 1) {
+  if ((res & TAGGED_POINTER_MASK) == 1) {
+    SEXP res_aligned = (SEXP) (res & ~TAGGED_POINTER_MASK);
     Rf_error("%s", CHAR(res_aligned));
   }
 
-  return res_aligned;
+  return (SEXP) res;
 }
 
 SEXP unextendr_times_two_numeric_wrapper(SEXP x) {
   uintptr_t res = (uintptr_t) unextendr_times_two_numeric(x);
 
-  uintptr_t mask   = (uintptr_t) 1;
-  SEXP res_aligned = (SEXP) (res & ~mask);
-
-  if ((res & mask) == 1) {
+  if ((res & TAGGED_POINTER_MASK) == 1) {
+    SEXP res_aligned = (SEXP) (res & ~TAGGED_POINTER_MASK);
     Rf_error("%s", CHAR(res_aligned));
   }
 
-  return res_aligned;
+  return (SEXP) res;
 }
 
 static const R_CallMethodDef CallEntries[] = {
