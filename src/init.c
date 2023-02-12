@@ -3,6 +3,7 @@
 
 static const R_CallMethodDef CallEntries[] = {
     {"unextendr_to_upper",       (DL_FUNC) &unextendr_to_upper,       1},
+    {"unextendr_times_two_int",  (DL_FUNC) &unextendr_times_two_int,  1},
 //    {"unextendr_preserve_list",  (DL_FUNC) &unextendr_preserve_list,  0},
     {NULL, NULL, 0}
 };

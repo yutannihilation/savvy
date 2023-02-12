@@ -2,8 +2,8 @@ use std::{ffi::CStr, ops::Index};
 
 use anyhow::{anyhow, Error, Result};
 use libR_sys::{
-    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_translateCharUTF8, Rf_xlength,
-    INTEGER_ELT, SEXP, STRING_ELT,
+    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_translateCharUTF8, Rf_xlength, ALTREP,
+    INTEGER, INTEGER_ELT, SEXP, STRING_ELT,
 };
 
 use crate::error;
@@ -16,19 +16,19 @@ impl Sxp {
     // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
     // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
     fn is_string(&self) -> bool {
-        unsafe { Rf_isString(self.0) != 0 }
+        unsafe { Rf_isString(self.0) == 1 }
     }
 
     fn is_integer(&self) -> bool {
-        unsafe { Rf_isInteger(self.0) != 0 }
+        unsafe { Rf_isInteger(self.0) == 1 }
     }
 
     fn is_real(&self) -> bool {
-        unsafe { Rf_isReal(self.0) != 0 }
+        unsafe { Rf_isReal(self.0) == 1 }
     }
 
     fn is_logical(&self) -> bool {
-        unsafe { Rf_isLogical(self.0) != 0 }
+        unsafe { Rf_isLogical(self.0) == 1 }
     }
 }
 
@@ -39,8 +39,27 @@ impl IntegerSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
-    pub fn elt(&self, i: usize) -> i32 {
+    pub(crate) fn elt(&self, i: usize) -> i32 {
         unsafe { INTEGER_ELT(self.0, i as _) }
+    }
+
+    pub fn iter(&self) -> IntegerSxpIter {
+        // if the vector is an ALTREP, we cannot directly access the underlying
+        // data.
+        let raw = unsafe {
+            if ALTREP(self.0) == 1 {
+                std::ptr::null()
+            } else {
+                INTEGER(self.0)
+            }
+        };
+
+        IntegerSxpIter {
+            sexp: self,
+            raw,
+            i: 0,
+            len: self.len(),
+        }
     }
 }
 
@@ -65,6 +84,33 @@ impl TryFrom<SEXP> for IntegerSxp {
 //             &self.elt(index).clone()
 //         }
 //     }
+
+pub struct IntegerSxpIter<'a> {
+    pub sexp: &'a IntegerSxp,
+    raw: *const i32,
+    i: usize,
+    len: usize,
+}
+
+impl<'a> Iterator for IntegerSxpIter<'a> {
+    type Item = i32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = self.i;
+        self.i += 1;
+
+        if i >= self.len {
+            return None;
+        }
+
+        if self.raw.is_null() {
+            // ALTREP
+            Some(self.sexp.elt(i))
+        } else {
+            unsafe { Some(*(self.raw.add(i))) }
+        }
+    }
+}
 
 pub struct StringSxp(SEXP);
 

@@ -2,9 +2,12 @@
 % Please edit documentation in R/wrappers.R
 \name{to_upper}
 \alias{to_upper}
+\alias{times_two_int}
 \title{Exported Functions}
 \usage{
 to_upper(x)
+
+times_two_int(x)
 }
 \description{
 Exported Functions

@@ -1,5 +1,6 @@
 use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf, SET_STRING_ELT, SEXP,
+    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf, SET_INTEGER_ELT,
+    SET_STRING_ELT, SEXP,
 };
 use std::ffi::CString;
 
@@ -49,8 +50,15 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
-    let x = x;
-    x
+    let x = sxp::IntegerSxp::try_from(x).unwrap();
+
+    let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
+
+    for (i, e) in x.iter().enumerate() {
+        SET_INTEGER_ELT(out, i as isize, e * 2);
+    }
+
+    out
 }
 
 // #[no_mangle]
