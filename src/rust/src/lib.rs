@@ -71,7 +71,7 @@ where
 }
 
 unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
-    let x = StringSxp::try_from(x).context("Convert to Sxp")?;
+    let x = StringSxp::try_from(x)?;
 
     let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
 
@@ -99,9 +99,8 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     wrapper(|| to_upper_inner(x))
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
-    let x = IntegerSxp::try_from(x).unwrap();
+unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
+    let x = IntegerSxp::try_from(x)?;
 
     let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
 
@@ -109,12 +108,16 @@ pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
         SET_INTEGER_ELT(out, i as isize, e * 2);
     }
 
-    out
+    Ok(out)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
-    let x = RealSxp::try_from(x).unwrap();
+pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
+    wrapper(|| times_two_int_inner(x))
+}
+
+unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
+    let x = RealSxp::try_from(x)?;
 
     let out = Rf_allocVector(libR_sys::REALSXP, x.len() as _);
 
@@ -122,17 +125,10 @@ pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
         SET_REAL_ELT(out, i as isize, e * 2.0);
     }
 
-    out
+    Ok(out)
 }
 
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_preserve_list() -> SEXP {
-//     protect::PRESERVED_LIST.inner()
-// }
-
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_set_car(x: SEXP, y: SEXP) -> SEXP {
-//     let c = libR_sys::Rf_cons(x, libR_sys::R_NilValue);
-//     libR_sys::SET_TAG(c, y);
-//     c
-// }
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
+    wrapper(|| times_two_numeric_inner(x))
+}

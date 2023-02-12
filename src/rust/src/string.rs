@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use libR_sys::{Rf_translateCharUTF8, Rf_xlength, SEXP, STRING_ELT};
 
-use crate::sexp::Sxp;
+use crate::{error::get_human_readable_type_name, sexp::Sxp};
 
 pub struct StringSxp(SEXP);
 
@@ -17,7 +17,7 @@ impl StringSxp {
 
     pub fn iter(&self) -> StringSxpIter {
         StringSxpIter {
-            sexp: &self,
+            sexp: self,
             i: 0,
             len: self.len(),
         }
@@ -29,7 +29,9 @@ impl TryFrom<SEXP> for StringSxp {
 
     fn try_from(value: SEXP) -> anyhow::Result<Self> {
         if !Sxp(value).is_string() {
-            return Err(crate::error::UnextendrError::UnexpectedType("???".to_string()).into());
+            let type_name = get_human_readable_type_name(value);
+            let msg = format!("Cannot convert {type_name} to string");
+            return Err(crate::error::UnextendrError::UnexpectedType(msg).into());
         }
         Ok(Self(value))
     }

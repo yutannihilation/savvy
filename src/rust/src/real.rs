@@ -1,6 +1,6 @@
 use libR_sys::{Rf_xlength, ALTREP, REAL, REAL_ELT, SEXP};
 
-use crate::sexp::Sxp;
+use crate::{error::get_human_readable_type_name, sexp::Sxp};
 
 pub struct RealSxp(SEXP);
 
@@ -38,7 +38,9 @@ impl TryFrom<SEXP> for RealSxp {
 
     fn try_from(value: SEXP) -> anyhow::Result<Self> {
         if !Sxp(value).is_real() {
-            return Err(crate::error::UnextendrError::UnexpectedType("???".to_string()).into());
+            let type_name = get_human_readable_type_name(value);
+            let msg = format!("Cannot convert {type_name} to real");
+            return Err(crate::error::UnextendrError::UnexpectedType(msg).into());
         }
         Ok(Self(value))
     }
