@@ -31,9 +31,7 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     // // Do I need to protect here? Or, as this will be passed to R's side, it's not needed?
     // protect::PRESERVED_LIST.insert(out);
 
-    for i in 0..x.len() {
-        let e = &x[i];
-
+    for (i, e) in x.iter().enumerate() {
         let e_upper = e.to_uppercase();
 
         // Rf_mkCharLenCE() probably allocates
@@ -48,6 +46,17 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
 
     out
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
+    let x = x;
+    x
+}
+
+// #[no_mangle]
+// pub unsafe extern "C" fn unextendr_preserve_list() -> SEXP {
+//     protect::PRESERVED_LIST.inner()
+// }
 
 // #[no_mangle]
 // pub unsafe extern "C" fn unextendr_set_car(x: SEXP, y: SEXP) -> SEXP {

@@ -84,4 +84,8 @@ impl ReservedList {
             }
         }
     }
+
+    pub fn inner(&self) -> SEXP {
+        self.0
+    }
 }
