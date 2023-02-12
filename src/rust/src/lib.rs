@@ -1,12 +1,19 @@
-use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf, SET_INTEGER_ELT,
-    SET_STRING_ELT, SEXP,
-};
-use std::ffi::CString;
-
 mod error;
+mod integer;
 mod protect;
-mod sxp;
+mod real;
+mod sexp;
+mod string;
+
+use anyhow::Context;
+use integer::IntegerSxp;
+use libR_sys::{
+    cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_errorcall, Rf_mkCharLenCE, Rprintf,
+    SET_INTEGER_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
+};
+use real::RealSxp;
+use std::ffi::CString;
+use string::StringSxp;
 
 // TODO: make this r_println! macro
 fn r_print(msg: String) {
@@ -23,9 +30,48 @@ fn r_eprint(msg: String) {
     }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
-    let x = sxp::StringSxp::try_from(x).unwrap();
+// cf. https://en.wikipedia.org/wiki/Tagged_pointer
+unsafe fn flag_sexp(x: SEXP, flag: bool) -> SEXP {
+    let p = x as usize | flag as usize;
+    p as _
+}
+
+pub fn wrapper<F>(f: F) -> SEXP
+where
+    F: FnOnce() -> anyhow::Result<SEXP>,
+    F: std::panic::UnwindSafe,
+{
+    match std::panic::catch_unwind(f) {
+        Ok(Ok(res)) => unsafe { flag_sexp(res, false) },
+
+        // Case of an expected error
+        Ok(Err(e)) => unsafe {
+            let msg = e.to_string();
+            let r_error = Rf_mkCharLenCE(
+                msg.as_ptr() as *const i8,
+                msg.len() as i32,
+                cetype_t_CE_UTF8,
+            );
+
+            flag_sexp(r_error, true)
+        },
+
+        // Case of an unexpected error
+        Err(e) => unsafe {
+            let msg = format!("{e:?}");
+            let r_error = Rf_mkCharLenCE(
+                msg.as_ptr() as *const i8,
+                msg.len() as i32,
+                cetype_t_CE_UTF8,
+            );
+
+            flag_sexp(r_error, true)
+        },
+    }
+}
+
+unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
+    let x = StringSxp::try_from(x).context("Convert to Sxp")?;
 
     let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
 
@@ -45,17 +91,35 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
         SET_STRING_ELT(out, i as isize, r_str);
     }
 
-    out
+    Ok(out)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
+    wrapper(|| to_upper_inner(x))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
-    let x = sxp::IntegerSxp::try_from(x).unwrap();
+    let x = IntegerSxp::try_from(x).unwrap();
 
     let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
 
     for (i, e) in x.iter().enumerate() {
         SET_INTEGER_ELT(out, i as isize, e * 2);
+    }
+
+    out
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
+    let x = RealSxp::try_from(x).unwrap();
+
+    let out = Rf_allocVector(libR_sys::REALSXP, x.len() as _);
+
+    for (i, e) in x.iter().enumerate() {
+        SET_REAL_ELT(out, i as isize, e * 2.0);
     }
 
     out

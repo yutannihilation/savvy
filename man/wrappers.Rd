@@ -3,11 +3,14 @@
 \name{to_upper}
 \alias{to_upper}
 \alias{times_two_int}
+\alias{times_two_numeric}
 \title{Exported Functions}
 \usage{
 to_upper(x)
 
 times_two_int(x)
+
+times_two_numeric(x)
 }
 \description{
 Exported Functions

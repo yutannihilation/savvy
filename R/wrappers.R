@@ -15,3 +15,9 @@ to_upper <- function(x) {
 times_two_int <- function(x) {
   .Call(unextendr_times_two_int, x)
 }
+
+#' @rdname wrappers
+#' @export
+times_two_numeric <- function(x) {
+  .Call(unextendr_times_two_numeric, x)
+}
