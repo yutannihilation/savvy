@@ -30,19 +30,23 @@ fn r_eprint(msg: String) {
     }
 }
 
+// This wrapper function handles Error and panicks, and flag it by setting the
+// lowest bit to 1. The lowest bit is supposed to be detected (and then removed)
+// on the corresponding C function.
+//
 // cf. https://en.wikipedia.org/wiki/Tagged_pointer
-unsafe fn flag_sexp(x: SEXP, flag: bool) -> SEXP {
-    let p = x as usize | flag as usize;
-    p as _
-}
-
 pub fn wrapper<F>(f: F) -> SEXP
 where
     F: FnOnce() -> anyhow::Result<SEXP>,
     F: std::panic::UnwindSafe,
 {
     match std::panic::catch_unwind(f) {
-        Ok(Ok(res)) => unsafe { flag_sexp(res, false) },
+        // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
+        // error flag is off, but it's unnecessary because an SEXP should be an
+        // aligned address, otherwise it should have failed before this point,
+        // and unaligned address cannot be restored on the C function's side
+        // anyway.
+        Ok(Ok(res)) => res,
 
         // Case of an expected error
         Ok(Err(e)) => unsafe {
@@ -53,10 +57,11 @@ where
                 cetype_t_CE_UTF8,
             );
 
-            flag_sexp(r_error, true)
+            // set the error flag
+            (r_error as usize | 1) as SEXP
         },
 
-        // Case of an unexpected error
+        // Case of an unexpected error (i.e., panic)
         Err(e) => unsafe {
             let msg = format!("{e:?}");
             let r_error = Rf_mkCharLenCE(
@@ -65,7 +70,8 @@ where
                 cetype_t_CE_UTF8,
             );
 
-            flag_sexp(r_error, true)
+            // set the error flag
+            (r_error as usize | 1) as SEXP
         },
     }
 }
