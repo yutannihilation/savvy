@@ -9,11 +9,12 @@ mod string;
 
 use integer::IntegerSxp;
 use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rf_protect, Rf_unprotect, Rprintf,
-    SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
+    cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
+    Rf_unprotect, Rprintf, SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
 };
 use logical::LogicalSxp;
 use na::NotAvailableValue;
+use protect::PRESERVED_LIST;
 use real::RealSxp;
 use std::ffi::CString;
 use string::StringSxp;
@@ -79,10 +80,17 @@ where
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_init_preserve_list() {
+    PRESERVED_LIST.insert(R_NilValue);
+}
+
 unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
 
-    let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
+    // let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
+    let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
+    let token = PRESERVED_LIST.insert(out);
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -101,7 +109,8 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
         SET_STRING_ELT(out, i as isize, r_str);
     }
 
-    Rf_unprotect(1);
+    // Rf_unprotect(1);
+    PRESERVED_LIST.release(token);
 
     Ok(out)
 }

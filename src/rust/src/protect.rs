@@ -44,6 +44,26 @@ pub(crate) static PRESERVED_LIST: Lazy<ReservedList> = Lazy::new(|| unsafe {
 });
 
 impl ReservedList {
+    // Note that, since PRESERVED_LIST is initialized lazily, .insert() might
+    // invoke several R API calls at the first time. So, such code like
+    //
+    //     let out = Rf_allocVector(STRSXP, len);
+    //     let token = PRESERVED_LIST.insert(out);
+    //
+    // is unsafe in that `out` might be GC-ed before `insert()`. I actually see
+    // the R session crashes. To prevent this, we have two options:
+    //
+    // First idea is to simply PROTECT(). However, this is not very efficient
+    // because the object gets PROTECT()-ed inside `insert()` anyway.
+    //
+    //     let out = Rf_protect(Rf_allocVector(STRSXP, len));
+    //     let token = PRESERVED_LIST.insert(out);
+    //     Rf_unprotect(1);
+    //
+    // Second idea is to make sure the PRESERVED_LIST is initialized. For
+    // example, we can call a function like `init_preserve_list` in .onLoad().
+    // But, probably, better idea is to make this function not directly belong
+    // to `ReservedList`.
     pub fn insert(&self, obj: SEXP) -> SEXP {
         unsafe {
             if (obj == R_NilValue) {

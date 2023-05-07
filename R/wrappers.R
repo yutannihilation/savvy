@@ -27,3 +27,7 @@ times_two_numeric <- function(x) {
 flip_logical <- function(x) {
   .Call(unextendr_flip_logical, x)
 }
+
+.init_preserve_list <- function() {
+  .Call(unextendr_init_preserve_list)
+}
