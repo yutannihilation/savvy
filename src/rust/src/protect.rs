@@ -43,69 +43,44 @@ pub(crate) static PRESERVED_LIST: Lazy<ReservedList> = Lazy::new(|| unsafe {
     ReservedList(r)
 });
 
-impl ReservedList {
-    // Note that, since PRESERVED_LIST is initialized lazily, .insert() might
-    // invoke several R API calls at the first time. So, such code like
-    //
-    //     let out = Rf_allocVector(STRSXP, len);
-    //     let token = PRESERVED_LIST.insert(out);
-    //
-    // is unsafe in that `out` might be GC-ed before `insert()`. I actually see
-    // the R session crashes. To prevent this, we have two options:
-    //
-    // First idea is to simply PROTECT(). However, this is not very efficient
-    // because the object gets PROTECT()-ed inside `insert()` anyway.
-    //
-    //     let out = Rf_protect(Rf_allocVector(STRSXP, len));
-    //     let token = PRESERVED_LIST.insert(out);
-    //     Rf_unprotect(1);
-    //
-    // Second idea is to make sure the PRESERVED_LIST is initialized. For
-    // example, we can call a function like `init_preserve_list` in .onLoad().
-    // But, probably, better idea is to make this function not directly belong
-    // to `ReservedList`.
-    pub fn insert(&self, obj: SEXP) -> SEXP {
-        unsafe {
-            if (obj == R_NilValue) {
-                return R_NilValue;
-            }
-
-            // Protect the object until the operation finishes
-            Rf_protect(obj);
-
-            let token = Rf_protect(Rf_cons(PRESERVED_LIST.0, CDR(PRESERVED_LIST.0)));
-
-            SET_TAG(token, obj);
-            SETCDR(PRESERVED_LIST.0, token);
-
-            if (CDR(token) != R_NilValue) {
-                SETCAR(CDR(token), token);
-            }
-
-            Rf_unprotect(2);
-
-            token
+pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
+    unsafe {
+        if (obj == R_NilValue) {
+            return R_NilValue;
         }
-    }
 
-    pub fn release(&self, token: SEXP) {
-        unsafe {
-            if (token == R_NilValue) {
-                return;
-            }
+        // Protect the object until the operation finishes
+        Rf_protect(obj);
 
-            let before = CAR(token);
-            let after = CDR(token);
+        let preserved = PRESERVED_LIST.0;
+        let token = Rf_protect(Rf_cons(preserved, CDR(preserved)));
 
-            SETCDR(before, after);
+        SET_TAG(token, obj);
+        SETCDR(preserved, token);
 
-            if (after != R_NilValue) {
-                SETCAR(after, before);
-            }
+        if (CDR(token) != R_NilValue) {
+            SETCAR(CDR(token), token);
         }
-    }
 
-    pub fn inner(&self) -> SEXP {
-        self.0
+        Rf_unprotect(2);
+
+        token
+    }
+}
+
+pub fn release_from_preserved_list(token: SEXP) {
+    unsafe {
+        if (token == R_NilValue) {
+            return;
+        }
+
+        let before = CAR(token);
+        let after = CDR(token);
+
+        SETCDR(before, after);
+
+        if (after != R_NilValue) {
+            SETCAR(after, before);
+        }
     }
 }

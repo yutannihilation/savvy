@@ -5,7 +5,6 @@
 \alias{times_two_int}
 \alias{times_two_numeric}
 \alias{flip_logical}
-\alias{init_preserve_list}
 \title{Exported Functions}
 \usage{
 to_upper(x)
@@ -15,8 +14,6 @@ times_two_int(x)
 times_two_numeric(x)
 
 flip_logical(x)
-
-init_preserve_list()
 }
 \description{
 Exported Functions

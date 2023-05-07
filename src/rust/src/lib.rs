@@ -14,7 +14,9 @@ use libR_sys::{
 };
 use logical::LogicalSxp;
 use na::NotAvailableValue;
-use protect::PRESERVED_LIST;
+use protect::{
+    insert_to_preserved_list, release_from_preserved_list, ReservedList, PRESERVED_LIST,
+};
 use real::RealSxp;
 use std::ffi::CString;
 use string::StringSxp;
@@ -80,15 +82,12 @@ where
     }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_init_preserve_list() {
-    PRESERVED_LIST.insert(R_NilValue);
-}
-
 unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
 
-    let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
+    // let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
+    let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
+    let token = insert_to_preserved_list(out);
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -107,7 +106,8 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
         SET_STRING_ELT(out, i as isize, r_str);
     }
 
-    Rf_unprotect(1);
+    // Rf_unprotect(1);
+    release_from_preserved_list(token);
 
     Ok(out)
 }
