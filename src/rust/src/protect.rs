@@ -31,16 +31,16 @@ use libR_sys::{
 };
 use once_cell::sync::Lazy;
 
-pub(crate) struct ReservedList(SEXP);
+pub(crate) struct PreservedList(SEXP);
 
 // cf. https://doc.rust-lang.org/stable/nomicon/send-and-sync.html
-unsafe impl Send for ReservedList {}
-unsafe impl Sync for ReservedList {}
+unsafe impl Send for PreservedList {}
+unsafe impl Sync for PreservedList {}
 
-pub(crate) static PRESERVED_LIST: Lazy<ReservedList> = Lazy::new(|| unsafe {
+pub(crate) static PRESERVED_LIST: Lazy<PreservedList> = Lazy::new(|| unsafe {
     let r = Rf_cons(R_NilValue, R_NilValue);
     R_PreserveObject(r);
-    ReservedList(r)
+    PreservedList(r)
 });
 
 pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {

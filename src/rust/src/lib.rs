@@ -15,7 +15,7 @@ use libR_sys::{
 use logical::LogicalSxp;
 use na::NotAvailableValue;
 use protect::{
-    insert_to_preserved_list, release_from_preserved_list, ReservedList, PRESERVED_LIST,
+    insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
 };
 use real::RealSxp;
 use std::ffi::CString;
