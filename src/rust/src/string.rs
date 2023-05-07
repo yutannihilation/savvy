@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use libR_sys::{Rf_translateCharUTF8, Rf_xlength, SEXP, STRING_ELT};
 
-use crate::{error::get_human_readable_type_name, sexp::Sxp};
+use crate::{error::get_human_readable_type_name, na::NotAvailableValue, sexp::Sxp};
 
 pub struct StringSxp(SEXP);
 
@@ -61,22 +61,15 @@ impl<'a> Iterator for StringSxpIter<'a> {
             let e = self.sexp.elt(i);
 
             // Because `None` means the end of the iterator, we cannot return
-            // `None` even for missing values. So, if we want to reject missing
-            // values, we might need some extra mechanism.
+            // `None` even for missing values.
             if e == libR_sys::R_NaString {
-                return Some("");
+                return Some(Self::Item::na());
             }
 
-            // NOTE: after this point, we no longer can know if the element was
-            // a missing value. extendr tries to propagate the missingnaess by
-            // introducing a sentinel value, but it looks broken to my eyes.
-            //
-            // - https://github.com/extendr/extendr/blob/60f232f0379777cc864de0851d456706456d1845/extendr-api/src/iter.rs#L65-L66
-            // - https://github.com/extendr/extendr/pull/477#issuecomment-1423452814
             let e_utf8 = Rf_translateCharUTF8(e);
 
             // As `e_utf8` is translated into UTF-8, it must be a valid UTF-8
-            // data, so we just unwrap it.
+            // data, so we just unwrap it without any aditional check.
             Some(CStr::from_ptr(e_utf8).to_str().unwrap())
         }
     }

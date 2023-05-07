@@ -1,6 +1,7 @@
 mod error;
 mod integer;
 mod logical;
+mod na;
 mod protect;
 mod real;
 mod sexp;
@@ -13,6 +14,7 @@ use libR_sys::{
     SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
 };
 use logical::LogicalSxp;
+use na::NotAvailableValue;
 use real::RealSxp;
 use std::ffi::CString;
 use string::StringSxp;
@@ -83,13 +85,14 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
 
     let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
 
-    // // Do I need to protect here? Or, as this will be passed to R's side, it's not needed?
-    // protect::PRESERVED_LIST.insert(out);
-
     for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            SET_STRING_ELT(out, i as isize, libR_sys::R_NaString);
+            continue;
+        }
+
         let e_upper = e.to_uppercase();
 
-        // Rf_mkCharLenCE() probably allocates
         let r_str = Rf_mkCharLenCE(
             e_upper.as_ptr() as *const i8,
             e_upper.len() as i32,
@@ -113,12 +116,11 @@ unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
 
     for (i, e) in x.iter().enumerate() {
-        let v = if e == libR_sys::R_NaInt {
-            libR_sys::R_NaInt
+        if e.is_na() {
+            SET_INTEGER_ELT(out, i as isize, i32::na())
         } else {
-            e * 2
-        };
-        SET_INTEGER_ELT(out, i as isize, v);
+            SET_INTEGER_ELT(out, i as isize, e * 2)
+        }
     }
 
     Ok(out)
@@ -135,12 +137,11 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let out = Rf_allocVector(libR_sys::REALSXP, x.len() as _);
 
     for (i, e) in x.iter().enumerate() {
-        let v = if e == libR_sys::R_NaReal {
-            libR_sys::R_NaReal
+        if e.is_na() {
+            SET_REAL_ELT(out, i as isize, f64::na())
         } else {
-            e * 2.0
-        };
-        SET_REAL_ELT(out, i as isize, v);
+            SET_REAL_ELT(out, i as isize, e * 2.0)
+        }
     }
 
     Ok(out)
