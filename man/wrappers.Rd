@@ -4,6 +4,7 @@
 \alias{to_upper}
 \alias{times_two_int}
 \alias{times_two_numeric}
+\alias{flip_logical}
 \title{Exported Functions}
 \usage{
 to_upper(x)
@@ -11,6 +12,8 @@ to_upper(x)
 times_two_int(x)
 
 times_two_numeric(x)
+
+flip_logical(x)
 }
 \description{
 Exported Functions

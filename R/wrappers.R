@@ -21,3 +21,9 @@ times_two_int <- function(x) {
 times_two_numeric <- function(x) {
   .Call(unextendr_times_two_numeric, x)
 }
+
+#' @rdname wrappers
+#' @export
+flip_logical <- function(x) {
+  .Call(unextendr_flip_logical, x)
+}

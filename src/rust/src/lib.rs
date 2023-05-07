@@ -1,5 +1,6 @@
 mod error;
 mod integer;
+mod logical;
 mod protect;
 mod real;
 mod sexp;
@@ -9,8 +10,9 @@ use anyhow::Context;
 use integer::IntegerSxp;
 use libR_sys::{
     cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_errorcall, Rf_mkCharLenCE, Rprintf,
-    SET_INTEGER_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
+    SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
 };
+use logical::LogicalSxp;
 use real::RealSxp;
 use std::ffi::CString;
 use string::StringSxp;
@@ -111,7 +113,12 @@ unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
 
     for (i, e) in x.iter().enumerate() {
-        SET_INTEGER_ELT(out, i as isize, e * 2);
+        let v = if e == libR_sys::R_NaInt {
+            libR_sys::R_NaInt
+        } else {
+            e * 2
+        };
+        SET_INTEGER_ELT(out, i as isize, v);
     }
 
     Ok(out)
@@ -128,7 +135,12 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let out = Rf_allocVector(libR_sys::REALSXP, x.len() as _);
 
     for (i, e) in x.iter().enumerate() {
-        SET_REAL_ELT(out, i as isize, e * 2.0);
+        let v = if e == libR_sys::R_NaReal {
+            libR_sys::R_NaReal
+        } else {
+            e * 2.0
+        };
+        SET_REAL_ELT(out, i as isize, v);
     }
 
     Ok(out)
@@ -137,4 +149,21 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
     wrapper(|| times_two_numeric_inner(x))
+}
+
+unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
+    let x = LogicalSxp::try_from(x)?;
+
+    let out = Rf_allocVector(libR_sys::LGLSXP, x.len() as _);
+
+    for (i, e) in x.iter().enumerate() {
+        SET_LOGICAL_ELT(out, i as isize, !e as i32);
+    }
+
+    Ok(out)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
+    wrapper(|| flip_logical_inner(x))
 }
