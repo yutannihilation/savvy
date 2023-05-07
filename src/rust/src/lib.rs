@@ -7,10 +7,9 @@ mod real;
 mod sexp;
 mod string;
 
-use anyhow::Context;
 use integer::IntegerSxp;
 use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_errorcall, Rf_mkCharLenCE, Rprintf,
+    cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rf_protect, Rf_unprotect, Rprintf,
     SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
 };
 use logical::LogicalSxp;
@@ -83,7 +82,7 @@ where
 unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
 
-    let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
+    let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -102,6 +101,8 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
         SET_STRING_ELT(out, i as isize, r_str);
     }
 
+    Rf_unprotect(1);
+
     Ok(out)
 }
 
@@ -113,7 +114,7 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
 unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = IntegerSxp::try_from(x)?;
 
-    let out = Rf_allocVector(libR_sys::INTSXP, x.len() as _);
+    let out = Rf_protect(Rf_allocVector(libR_sys::INTSXP, x.len() as _));
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -122,6 +123,8 @@ unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
             SET_INTEGER_ELT(out, i as isize, e * 2)
         }
     }
+
+    Rf_unprotect(1);
 
     Ok(out)
 }
@@ -134,7 +137,7 @@ pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
 unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = RealSxp::try_from(x)?;
 
-    let out = Rf_allocVector(libR_sys::REALSXP, x.len() as _);
+    let out = Rf_protect(Rf_allocVector(libR_sys::REALSXP, x.len() as _));
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -143,6 +146,8 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
             SET_REAL_ELT(out, i as isize, e * 2.0)
         }
     }
+
+    Rf_unprotect(1);
 
     Ok(out)
 }
@@ -155,11 +160,13 @@ pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
 unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = LogicalSxp::try_from(x)?;
 
-    let out = Rf_allocVector(libR_sys::LGLSXP, x.len() as _);
+    let out = Rf_protect(Rf_allocVector(libR_sys::LGLSXP, x.len() as _));
 
     for (i, e) in x.iter().enumerate() {
         SET_LOGICAL_ELT(out, i as isize, !e as i32);
     }
+
+    Rf_unprotect(1);
 
     Ok(out)
 }
