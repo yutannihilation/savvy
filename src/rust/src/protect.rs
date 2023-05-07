@@ -68,7 +68,7 @@ impl ReservedList {
         }
     }
 
-    pub fn release(token: SEXP) {
+    pub fn release(&self, token: SEXP) {
         unsafe {
             if (token == R_NilValue) {
                 return;
