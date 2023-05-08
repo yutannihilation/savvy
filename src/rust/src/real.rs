@@ -1,8 +1,12 @@
-use libR_sys::{Rf_xlength, ALTREP, REAL, REAL_ELT, SEXP};
+use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SET_REAL_ELT, SEXP};
 
-use crate::{error::get_human_readable_type_name, sexp::Sxp};
+use crate::{error::get_human_readable_type_name, protect, sexp::Sxp};
 
 pub struct RealSxp(SEXP);
+pub struct OwnedRealSxp {
+    inner: RealSxp,
+    token: SEXP,
+}
 
 impl RealSxp {
     pub fn len(&self) -> usize {
@@ -30,6 +34,49 @@ impl RealSxp {
             i: 0,
             len: self.len(),
         }
+    }
+
+    fn inner(&self) -> SEXP {
+        self.0
+    }
+}
+
+impl OwnedRealSxp {
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub(crate) fn elt(&self, i: usize) -> f64 {
+        self.inner.elt(i)
+    }
+
+    pub fn iter(&self) -> RealSxpIter {
+        self.inner.iter()
+    }
+
+    pub(crate) fn inner(&self) -> SEXP {
+        self.inner.inner()
+    }
+
+    pub fn set_elt(&mut self, i: usize, v: f64) {
+        unsafe {
+            SET_REAL_ELT(self.inner(), i as _, v);
+        }
+    }
+
+    pub fn new(len: usize) -> Self {
+        let out = unsafe { Rf_allocVector(REALSXP, len as _) };
+        let token = protect::insert_to_preserved_list(out);
+        Self {
+            inner: RealSxp(out),
+            token,
+        }
+    }
+}
+
+impl Drop for OwnedRealSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
     }
 }
 

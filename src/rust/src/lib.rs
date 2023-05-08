@@ -17,7 +17,7 @@ use na::NotAvailableValue;
 use protect::{
     insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
 };
-use real::RealSxp;
+use real::{OwnedRealSxp, RealSxp};
 use std::ffi::CString;
 use string::StringSxp;
 
@@ -139,20 +139,19 @@ pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
 
 unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = RealSxp::try_from(x)?;
-
-    let out = Rf_protect(Rf_allocVector(libR_sys::REALSXP, x.len() as _));
+    let mut out = OwnedRealSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            SET_REAL_ELT(out, i as isize, f64::na())
+            out.set_elt(i, f64::na())
         } else {
-            SET_REAL_ELT(out, i as isize, e * 2.0)
+            out.set_elt(i, e * 2.0)
         }
     }
 
     Rf_unprotect(1);
 
-    Ok(out)
+    Ok(out.inner())
 }
 
 #[no_mangle]
