@@ -12,7 +12,7 @@ use libR_sys::{
     cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
     Rf_unprotect, Rprintf, SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
 };
-use logical::LogicalSxp;
+use logical::{LogicalSxp, OwnedLogicalSxp};
 use na::NotAvailableValue;
 use protect::{
     insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
@@ -162,16 +162,15 @@ pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
 
 unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = LogicalSxp::try_from(x)?;
-
-    let out = Rf_protect(Rf_allocVector(libR_sys::LGLSXP, x.len() as _));
+    let mut out = OwnedLogicalSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
-        SET_LOGICAL_ELT(out, i as isize, !e as i32);
+        out.set_elt(i, !e);
     }
 
     Rf_unprotect(1);
 
-    Ok(out)
+    Ok(out.inner())
 }
 
 #[no_mangle]

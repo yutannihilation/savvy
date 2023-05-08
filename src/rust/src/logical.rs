@@ -1,8 +1,14 @@
-use libR_sys::{Rf_xlength, ALTREP, LOGICAL, LOGICAL_ELT, SEXP};
+use libR_sys::{
+    Rf_allocVector, Rf_xlength, ALTREP, LGLSXP, LOGICAL, LOGICAL_ELT, SET_LOGICAL_ELT, SEXP,
+};
 
-use crate::{error::get_human_readable_type_name, sexp::Sxp};
+use crate::{error::get_human_readable_type_name, protect, sexp::Sxp};
 
 pub struct LogicalSxp(SEXP);
+pub struct OwnedLogicalSxp {
+    inner: LogicalSxp,
+    token: SEXP,
+}
 
 impl LogicalSxp {
     pub fn len(&self) -> usize {
@@ -30,6 +36,49 @@ impl LogicalSxp {
             i: 0,
             len: self.len(),
         }
+    }
+
+    fn inner(&self) -> SEXP {
+        self.0
+    }
+}
+
+impl OwnedLogicalSxp {
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub(crate) fn elt(&self, i: usize) -> bool {
+        self.inner.elt(i)
+    }
+
+    pub fn iter(&self) -> LogicalSxpIter {
+        self.inner.iter()
+    }
+
+    pub(crate) fn inner(&self) -> SEXP {
+        self.inner.inner()
+    }
+
+    pub fn set_elt(&mut self, i: usize, v: bool) {
+        unsafe {
+            SET_LOGICAL_ELT(self.inner(), i as _, v as _);
+        }
+    }
+
+    pub fn new(len: usize) -> Self {
+        let out = unsafe { Rf_allocVector(LGLSXP, len as _) };
+        let token = protect::insert_to_preserved_list(out);
+        Self {
+            inner: LogicalSxp(out),
+            token,
+        }
+    }
+}
+
+impl Drop for OwnedLogicalSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
     }
 }
 
