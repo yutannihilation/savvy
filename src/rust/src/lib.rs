@@ -7,7 +7,7 @@ mod real;
 mod sexp;
 mod string;
 
-use integer::IntegerSxp;
+use integer::{IntegerSxp, OwnedIntegerSxp};
 use libR_sys::{
     cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
     Rf_unprotect, Rprintf, SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
@@ -119,20 +119,17 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
 
 unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = IntegerSxp::try_from(x)?;
-
-    let out = Rf_protect(Rf_allocVector(libR_sys::INTSXP, x.len() as _));
+    let mut out = OwnedIntegerSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            SET_INTEGER_ELT(out, i as isize, i32::na())
+            out.set_elt(i, i32::na());
         } else {
-            SET_INTEGER_ELT(out, i as isize, e * 2)
+            out.set_elt(i, e * 2);
         }
     }
 
-    Rf_unprotect(1);
-
-    Ok(out)
+    Ok(out.inner())
 }
 
 #[no_mangle]

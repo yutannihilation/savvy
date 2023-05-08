@@ -1,8 +1,24 @@
-use libR_sys::{Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, SEXP};
+use libR_sys::{
+    Rf_allocVector, Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, INTSXP, SET_INTEGER_ELT, SEXP, STRSXP,
+};
 
-use crate::{error::get_human_readable_type_name, sexp::Sxp};
+use crate::{error::get_human_readable_type_name, protect, sexp::Sxp};
 
+// `IntegerSxp` is a read-only wrapper for SEXPs provided from outside of Rust;
+// since it's the caller's responsibility to PROTECT it, we don't protect it on
+// Rust's side.
+//
+// `OwnedIntegerSxp` is a writable wrapper for SEXPs newly allocated on Rust's
+// side. Since it's us who produce it, we protect it and drop it.
+//
+// This is based on the idea of cpp11's `writable`. Currently this
+// implementation is less-powerful because this doesn't have the copy-on-write
+// feature yet. This is on my TODO list...
 pub struct IntegerSxp(SEXP);
+pub struct OwnedIntegerSxp {
+    inner: IntegerSxp,
+    token: SEXP,
+}
 
 impl IntegerSxp {
     pub fn len(&self) -> usize {
@@ -30,6 +46,49 @@ impl IntegerSxp {
             i: 0,
             len: self.len(),
         }
+    }
+
+    fn inner(&self) -> SEXP {
+        self.0
+    }
+}
+
+impl OwnedIntegerSxp {
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub(crate) fn elt(&self, i: usize) -> i32 {
+        self.inner.elt(i)
+    }
+
+    pub fn iter(&self) -> IntegerSxpIter {
+        self.inner.iter()
+    }
+
+    pub(crate) fn inner(&self) -> SEXP {
+        self.inner.inner()
+    }
+
+    pub fn set_elt(&mut self, i: usize, v: i32) {
+        unsafe {
+            SET_INTEGER_ELT(self.inner(), i as _, v);
+        }
+    }
+
+    pub fn new(len: usize) -> Self {
+        let out = unsafe { Rf_allocVector(INTSXP, len as _) };
+        let token = protect::insert_to_preserved_list(out);
+        Self {
+            inner: IntegerSxp(out),
+            token,
+        }
+    }
+}
+
+impl Drop for OwnedIntegerSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
     }
 }
 
