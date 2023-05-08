@@ -38,6 +38,14 @@ aims for parallel processing, so it needs a hashmap to prevent
 collisions. But, I think it’s not a good idea to use R’s C API
 concurrently anyway, so this should be probably enough.
 
+### Read-only and writable versions of wrappers
+
+cpp11 provides the read-only by default, and [the writable
+version](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics)
+as an option.It seems a good idea to distinguish the external SEXPs and
+the “owned” SEXPs because we have control, when to protect and
+unprotect, only over the latter one.
+
 ### Do we really want embedded usages?
 
 Regarding the concurrency, I’m wondering if it would be simpler if
@@ -59,13 +67,20 @@ our life be simpler a bit?
 ``` r
 library(unextendr)
 
-to_upper("a")
-#> [1] "A"
-times_two_int(1L)
-#> [1] 2
-times_two_numeric(1.1)
-#> [1] 2.2
+to_upper(c("a", NA, "A", "座布団一枚"))
+#> [1] "A"          NA           "A"          "座布団一枚"
+times_two_int(c(1L, NA, 100L, 0L, -1L))
+#> [1]   2  NA 200   0  -2
+times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
+#> [1]  2.2   NA  0.0  Inf -Inf
 ```
+
+## TODOs
+
+- [ ] Support list
+- [ ] Support ALTREP
+- [ ] Use proc-macro
+- [ ] `R_UnwindProtect()`
 
 ## References
 
