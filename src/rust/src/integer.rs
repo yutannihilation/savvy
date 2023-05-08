@@ -4,16 +4,14 @@ use libR_sys::{
 
 use crate::{error::get_human_readable_type_name, protect, sexp::Sxp};
 
+// This is based on the idea of cpp11's `writable`.
+//
 // `IntegerSxp` is a read-only wrapper for SEXPs provided from outside of Rust;
 // since it's the caller's responsibility to PROTECT it, we don't protect it on
 // Rust's side.
 //
 // `OwnedIntegerSxp` is a writable wrapper for SEXPs newly allocated on Rust's
 // side. Since it's us who produce it, we protect it and drop it.
-//
-// This is based on the idea of cpp11's `writable`. Currently this
-// implementation is less-powerful because this doesn't have the copy-on-write
-// feature yet. This is on my TODO list...
 pub struct IntegerSxp(SEXP);
 pub struct OwnedIntegerSxp {
     inner: IntegerSxp,
