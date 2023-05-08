@@ -1,10 +1,17 @@
 use std::ffi::CStr;
 
-use libR_sys::{Rf_translateCharUTF8, Rf_xlength, SEXP, STRING_ELT};
+use libR_sys::{
+    cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength,
+    SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
+};
 
-use crate::{error::get_human_readable_type_name, na::NotAvailableValue, sexp::Sxp};
+use crate::{error::get_human_readable_type_name, na::NotAvailableValue, protect, sexp::Sxp};
 
 pub struct StringSxp(SEXP);
+pub struct OwnedStringSxp {
+    inner: StringSxp,
+    token: SEXP,
+}
 
 impl StringSxp {
     pub fn len(&self) -> usize {
@@ -21,6 +28,58 @@ impl StringSxp {
             i: 0,
             len: self.len(),
         }
+    }
+
+    fn inner(&self) -> SEXP {
+        self.0
+    }
+}
+
+impl OwnedStringSxp {
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub(crate) fn elt(&self, i: usize) -> SEXP {
+        self.inner.elt(i)
+    }
+
+    pub fn iter(&self) -> StringSxpIter {
+        self.inner.iter()
+    }
+
+    pub(crate) fn inner(&self) -> SEXP {
+        self.inner.inner()
+    }
+
+    pub fn set_elt(&mut self, i: usize, v: &str) {
+        unsafe {
+            // We might be able to put `R_NaString` directly without using
+            // <&str>::na(), but probably this is an inevitable cost of
+            // providing <&str>::na().
+            let v_sexp = if v.is_na() {
+                libR_sys::R_NaString
+            } else {
+                Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
+            };
+
+            SET_STRING_ELT(self.inner(), i as _, v_sexp);
+        }
+    }
+
+    pub fn new(len: usize) -> Self {
+        let out = unsafe { Rf_allocVector(STRSXP, len as _) };
+        let token = protect::insert_to_preserved_list(out);
+        Self {
+            inner: StringSxp(out),
+            token,
+        }
+    }
+}
+
+impl Drop for OwnedStringSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
     }
 }
 

@@ -19,7 +19,7 @@ use protect::{
 };
 use real::{OwnedRealSxp, RealSxp};
 use std::ffi::CString;
-use string::StringSxp;
+use string::{OwnedStringSxp, StringSxp};
 
 // TODO: make this r_println! macro
 fn r_print(msg: String) {
@@ -84,32 +84,26 @@ where
 
 unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
+    let mut out = OwnedStringSxp::new(x.len());
 
-    let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
+    // let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
     // let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
     // let token = insert_to_preserved_list(out);
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            SET_STRING_ELT(out, i as isize, libR_sys::R_NaString);
+            out.set_elt(i, <&str>::na());
             continue;
         }
 
         let e_upper = e.to_uppercase();
-
-        let r_str = Rf_mkCharLenCE(
-            e_upper.as_ptr() as *const i8,
-            e_upper.len() as i32,
-            cetype_t_CE_UTF8,
-        );
-
-        SET_STRING_ELT(out, i as isize, r_str);
+        out.set_elt(i, e_upper.as_str());
     }
 
     Rf_unprotect(1);
     // release_from_preserved_list(token);
 
-    Ok(out)
+    Ok(out.inner())
 }
 
 #[no_mangle]
