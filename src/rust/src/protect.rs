@@ -1,9 +1,6 @@
-// This file is based on the implementation of extendr and cpp11.
+// This protection mechanism is basically a simple Rust translation of the
+// implementation of cpp11.
 //
-// extendr:
-// https://github.com/extendr/extendr/blob/master/extendr-api/src/ownership.rs
-//
-// cpp11:
 // https://github.com/r-lib/cpp11/blob/main/inst/include/cpp11/protect.hpp
 //
 // The more explanation on this can be found on the following links:
@@ -21,9 +18,18 @@
 // I'm not immediately sure when this actually happens, but I think I can skip
 // the consideration.
 //
-// Also, extendr manages reference count by itself. I guess this is because it
-// aims for parallel-proof implementation. But, I don't think it's a good idea
-// to call R API parallelly anyway, so I also decided not to consider it.
+// Note that, extendr uses a different mechanism of using HashMap to track the
+// reference counts.
+//
+// https://github.com/extendr/extendr/blob/master/extendr-api/src/ownership.rs
+//
+// I'm not sure why they chose this design, but probably it is because
+//
+// - for parallel-proof implementation
+// - `Robj` might be cloned
+//
+// But, my implementation doesn't implement `Clone` trait, so I don't need to
+// worry that there still exists another instance on dropping it.
 
 use libR_sys::{
     R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
