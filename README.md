@@ -21,11 +21,6 @@ pointer](https://en.wikipedia.org/wiki/Tagged_pointer) to indicate the
 error. This requires some wrappers, but the advantage is that we don’t
 need to pass additional data and these bit operations should be cheap.
 
-But, as (hopefully) [the stabilization of “C-unwind
-ABI”](https://github.com/rust-lang/rust/issues/74990#issuecomment-1363473645)
-is not very far, I’m not sure if this is worth considering to implement
-in extendr.
-
 See [extendr/extendr#278](https://github.com/extendr/extendr/issues/278)
 for more discussion.
 
@@ -73,10 +68,13 @@ times_two_int(c(1L, NA, 100L, 0L, -1L))
 #> [1]   2  NA 200   0  -2
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 #> [1]  2.2   NA  0.0  Inf -Inf
+flip_logical(c(TRUE, FALSE, NA))
+#> [1] FALSE  TRUE  TRUE
 ```
 
 ## TODOs
 
+- [ ] Support Attribute and names
 - [ ] Support list
 - [ ] Support ALTREP
 - [ ] Use proc-macro
