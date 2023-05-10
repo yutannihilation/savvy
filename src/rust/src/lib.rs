@@ -86,10 +86,6 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
     let mut out = OwnedStringSxp::new(x.len());
 
-    // let out = Rf_protect(Rf_allocVector(libR_sys::STRSXP, x.len() as _));
-    // let out = Rf_allocVector(libR_sys::STRSXP, x.len() as _);
-    // let token = insert_to_preserved_list(out);
-
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
             out.set_elt(i, <&str>::na());
@@ -99,9 +95,6 @@ unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
         let e_upper = e.to_uppercase();
         out.set_elt(i, e_upper.as_str());
     }
-
-    Rf_unprotect(1);
-    // release_from_preserved_list(token);
 
     Ok(out.inner())
 }
@@ -143,8 +136,6 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
         }
     }
 
-    Rf_unprotect(1);
-
     Ok(out.inner())
 }
 
@@ -160,8 +151,6 @@ unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, !e);
     }
-
-    Rf_unprotect(1);
 
     Ok(out.inner())
 }
