@@ -15,6 +15,18 @@ times_two_numeric(x)
 
 flip_logical(x)
 }
+\arguments{
+\item{x}{An logical vector.}
+}
+\value{
+A character vector with upper case version of the input.
+
+An integer vector with values multiplied by 2.
+
+A numeric vector with values multiplied by 2.
+
+An logical vector with filled values (\code{NA} is converted to \code{TRUE}).
+}
 \description{
 Exported Functions
 }
