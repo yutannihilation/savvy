@@ -12,16 +12,17 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: "${{ matrix.config.os }} (R: ${{ matrix.config.r }}, rust: ${{ matrix.config.rust }})""
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}
+          - {os: macos-latest,   r: 'release', rust: 'stable'}
+          - {os: windows-latest, r: 'release', rust: 'stable'}
+          - {os: ubuntu-latest,  r: 'release', rust: 'stable'}
+          - {os: ubuntu-latest,  r: 'devel',   rust: 'stable', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release', rust: 'nightly'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -31,6 +32,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: dtolnay/rust-toolchain@nightly
+        if: matrix.config.rust == 'nightly'
 
       - uses: r-lib/actions/setup-pandoc@v2
 
