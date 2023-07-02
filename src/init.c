@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <Rinternals.h>
 #include "rust/api.h"
 
