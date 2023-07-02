@@ -10,10 +10,7 @@ mod string;
 mod unwind_protect_wrapper;
 
 use integer::{IntegerSxp, OwnedIntegerSxp};
-use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
-    Rf_unprotect, Rprintf, SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
-};
+use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
 use logical::{LogicalSxp, OwnedLogicalSxp};
 use na::NotAvailableValue;
 use protect::{

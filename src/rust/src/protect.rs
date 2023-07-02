@@ -51,7 +51,7 @@ pub(crate) static PRESERVED_LIST: Lazy<PreservedList> = Lazy::new(|| unsafe {
 
 pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
     unsafe {
-        if (obj == R_NilValue) {
+        if obj == R_NilValue {
             return R_NilValue;
         }
 
@@ -64,7 +64,7 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         SET_TAG(token, obj);
         SETCDR(preserved, token);
 
-        if (CDR(token) != R_NilValue) {
+        if CDR(token) != R_NilValue {
             SETCAR(CDR(token), token);
         }
 
@@ -76,7 +76,7 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
 
 pub fn release_from_preserved_list(token: SEXP) {
     unsafe {
-        if (token == R_NilValue) {
+        if token == R_NilValue {
             return;
         }
 
@@ -85,7 +85,7 @@ pub fn release_from_preserved_list(token: SEXP) {
 
         SETCDR(before, after);
 
-        if (after != R_NilValue) {
+        if after != R_NilValue {
             SETCAR(after, before);
         }
     }
