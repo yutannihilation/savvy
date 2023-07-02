@@ -7,6 +7,8 @@ mod real;
 mod sexp;
 mod string;
 
+mod unwind_protect_wrapper;
+
 use integer::{IntegerSxp, OwnedIntegerSxp};
 use libR_sys::{
     cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
@@ -20,6 +22,8 @@ use protect::{
 use real::{OwnedRealSxp, RealSxp};
 use std::ffi::CString;
 use string::{OwnedStringSxp, StringSxp};
+
+use unwind_protect_wrapper::unwind_protect;
 
 // TODO: make this r_println! macro
 fn r_print(msg: String) {

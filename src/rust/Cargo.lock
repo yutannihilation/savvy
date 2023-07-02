@@ -9,6 +9,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c7d0618f0e0b7e8ff11427422b64564d5fb0be1940354bfe2e0529b18a9d9b8"
 
 [[package]]
+name = "cc"
+version = "1.0.79"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
+
+[[package]]
 name = "libR-sys"
 version = "0.4.0"
 source = "git+https://github.com/extendr/libR-sys#6a0d96a7061dc2af4c8a841470a8976e16b68100"
@@ -73,6 +79,7 @@ name = "unextendr"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "cc",
  "libR-sys",
  "once_cell",
  "thiserror",
