@@ -45,32 +45,17 @@ fn r_eprint(msg: String) {
 pub fn wrapper<F>(f: F) -> SEXP
 where
     F: FnOnce() -> anyhow::Result<SEXP>,
-    F: std::panic::UnwindSafe,
 {
-    match std::panic::catch_unwind(f) {
+    match f() {
         // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
         // error flag is off, but it's unnecessary because an SEXP should be an
         // aligned address, otherwise it should have failed before this point,
         // and unaligned address cannot be restored on the C function's side
         // anyway.
-        Ok(Ok(res)) => res,
+        Ok(res) => res,
 
-        // Case of an expected error
-        Ok(Err(e)) => unsafe {
-            let msg = e.to_string();
-            let r_error = Rf_mkCharLenCE(
-                msg.as_ptr() as *const i8,
-                msg.len() as i32,
-                cetype_t_CE_UTF8,
-            );
-
-            // set the error flag
-            (r_error as usize | 1) as SEXP
-        },
-
-        // Case of an unexpected error (i.e., panic)
         Err(e) => unsafe {
-            let msg = format!("{e:?}");
+            let msg = e.to_string();
             let r_error = Rf_mkCharLenCE(
                 msg.as_ptr() as *const i8,
                 msg.len() as i32,
