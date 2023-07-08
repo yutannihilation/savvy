@@ -84,13 +84,13 @@ impl Drop for OwnedStringSxp {
 }
 
 impl TryFrom<SEXP> for StringSxp {
-    type Error = anyhow::Error;
+    type Error = crate::error::Error;
 
-    fn try_from(value: SEXP) -> anyhow::Result<Self> {
+    fn try_from(value: SEXP) -> crate::error::Result<Self> {
         if !Sxp(value).is_string() {
             let type_name = get_human_readable_type_name(value);
             let msg = format!("Cannot convert {type_name} to string");
-            return Err(crate::error::UnextendrError::UnexpectedType(msg).into());
+            return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value))
     }

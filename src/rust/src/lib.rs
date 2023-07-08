@@ -7,11 +7,10 @@ mod real;
 mod sexp;
 mod string;
 
+mod unwind_protect_wrapper;
+
 use integer::{IntegerSxp, OwnedIntegerSxp};
-use libR_sys::{
-    cetype_t_CE_UTF8, REprintf, R_NilValue, Rf_allocVector, Rf_mkCharLenCE, Rf_protect,
-    Rf_unprotect, Rprintf, SET_INTEGER_ELT, SET_LOGICAL_ELT, SET_REAL_ELT, SET_STRING_ELT, SEXP,
-};
+use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
 use logical::{LogicalSxp, OwnedLogicalSxp};
 use na::NotAvailableValue;
 use protect::{
@@ -20,6 +19,8 @@ use protect::{
 use real::{OwnedRealSxp, RealSxp};
 use std::ffi::CString;
 use string::{OwnedStringSxp, StringSxp};
+
+use unwind_protect_wrapper::unwind_protect;
 
 // TODO: make this r_println! macro
 fn r_print(msg: String) {
@@ -43,46 +44,37 @@ fn r_eprint(msg: String) {
 // cf. https://en.wikipedia.org/wiki/Tagged_pointer
 pub fn wrapper<F>(f: F) -> SEXP
 where
-    F: FnOnce() -> anyhow::Result<SEXP>,
-    F: std::panic::UnwindSafe,
+    F: FnOnce() -> crate::error::Result<SEXP>,
 {
-    match std::panic::catch_unwind(f) {
+    match f() {
         // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
         // error flag is off, but it's unnecessary because an SEXP should be an
         // aligned address, otherwise it should have failed before this point,
         // and unaligned address cannot be restored on the C function's side
         // anyway.
-        Ok(Ok(res)) => res,
+        Ok(res) => res,
 
-        // Case of an expected error
-        Ok(Err(e)) => unsafe {
-            let msg = e.to_string();
-            let r_error = Rf_mkCharLenCE(
-                msg.as_ptr() as *const i8,
-                msg.len() as i32,
-                cetype_t_CE_UTF8,
-            );
+        Err(e) => match e {
+            // The token is already tagged, so pass it as it is.
+            error::Error::Aborted(token) => token,
 
-            // set the error flag
-            (r_error as usize | 1) as SEXP
-        },
+            // In other cases, return the error string with the tag
+            e => unsafe {
+                let msg = e.to_string();
+                let r_error = Rf_mkCharLenCE(
+                    msg.as_ptr() as *const i8,
+                    msg.len() as i32,
+                    cetype_t_CE_UTF8,
+                );
 
-        // Case of an unexpected error (i.e., panic)
-        Err(e) => unsafe {
-            let msg = format!("{e:?}");
-            let r_error = Rf_mkCharLenCE(
-                msg.as_ptr() as *const i8,
-                msg.len() as i32,
-                cetype_t_CE_UTF8,
-            );
-
-            // set the error flag
-            (r_error as usize | 1) as SEXP
+                // set the error flag
+                (r_error as usize | 1) as SEXP
+            },
         },
     }
 }
 
-unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn to_upper_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
     let mut out = OwnedStringSxp::new(x.len());
 
@@ -104,7 +96,7 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     wrapper(|| to_upper_inner(x))
 }
 
-unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn times_two_int_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = IntegerSxp::try_from(x)?;
     let mut out = OwnedIntegerSxp::new(x.len());
 
@@ -124,7 +116,7 @@ pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
     wrapper(|| times_two_int_inner(x))
 }
 
-unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn times_two_numeric_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = RealSxp::try_from(x)?;
     let mut out = OwnedRealSxp::new(x.len());
 
@@ -144,7 +136,7 @@ pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
     wrapper(|| times_two_numeric_inner(x))
 }
 
-unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn flip_logical_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = LogicalSxp::try_from(x)?;
     let mut out = OwnedLogicalSxp::new(x.len());
 
