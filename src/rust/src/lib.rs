@@ -44,7 +44,7 @@ fn r_eprint(msg: String) {
 // cf. https://en.wikipedia.org/wiki/Tagged_pointer
 pub fn wrapper<F>(f: F) -> SEXP
 where
-    F: FnOnce() -> anyhow::Result<SEXP>,
+    F: FnOnce() -> crate::error::Result<SEXP>,
 {
     match f() {
         // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
@@ -54,21 +54,27 @@ where
         // anyway.
         Ok(res) => res,
 
-        Err(e) => unsafe {
-            let msg = e.to_string();
-            let r_error = Rf_mkCharLenCE(
-                msg.as_ptr() as *const i8,
-                msg.len() as i32,
-                cetype_t_CE_UTF8,
-            );
+        Err(e) => match e {
+            // The token is already tagged, so pass it as it is.
+            error::Error::Aborted(token) => token,
 
-            // set the error flag
-            (r_error as usize | 1) as SEXP
+            // In other cases, return the error string with the tag
+            e => unsafe {
+                let msg = e.to_string();
+                let r_error = Rf_mkCharLenCE(
+                    msg.as_ptr() as *const i8,
+                    msg.len() as i32,
+                    cetype_t_CE_UTF8,
+                );
+
+                // set the error flag
+                (r_error as usize | 1) as SEXP
+            },
         },
     }
 }
 
-unsafe fn to_upper_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn to_upper_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = StringSxp::try_from(x)?;
     let mut out = OwnedStringSxp::new(x.len());
 
@@ -90,7 +96,7 @@ pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     wrapper(|| to_upper_inner(x))
 }
 
-unsafe fn times_two_int_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn times_two_int_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = IntegerSxp::try_from(x)?;
     let mut out = OwnedIntegerSxp::new(x.len());
 
@@ -110,7 +116,7 @@ pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
     wrapper(|| times_two_int_inner(x))
 }
 
-unsafe fn times_two_numeric_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn times_two_numeric_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = RealSxp::try_from(x)?;
     let mut out = OwnedRealSxp::new(x.len());
 
@@ -130,7 +136,7 @@ pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
     wrapper(|| times_two_numeric_inner(x))
 }
 
-unsafe fn flip_logical_inner(x: SEXP) -> anyhow::Result<SEXP> {
+unsafe fn flip_logical_inner(x: SEXP) -> crate::error::Result<SEXP> {
     let x = LogicalSxp::try_from(x)?;
     let mut out = OwnedLogicalSxp::new(x.len());
 
