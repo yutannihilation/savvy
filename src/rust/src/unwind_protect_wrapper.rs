@@ -1,5 +1,8 @@
 use libR_sys::SEXP;
 
+// Since SEXP is not a Send, this needs to be implemented as a different type than thiserror.
+pub type UnwindProtectResult = std::result::Result<SEXP, SEXP>;
+
 extern "C" {
     fn unwind_protect_impl(
         fun: ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void) -> SEXP>,
@@ -7,7 +10,7 @@ extern "C" {
     ) -> SEXP;
 }
 
-pub(crate) unsafe fn unwind_protect<F>(f: F) -> SEXP
+pub unsafe fn unwind_protect<F>(f: F) -> UnwindProtectResult
 where
     F: FnOnce() -> SEXP + Copy,
 {
@@ -23,5 +26,11 @@ where
     let fun_ptr = do_call::<F> as *const ();
     let fun = std::mem::transmute(fun_ptr);
     let data = std::mem::transmute(&f as *const F);
-    unwind_protect_impl(fun, data)
+    let res: SEXP = unwind_protect_impl(fun, data);
+
+    if (res as usize & 1) == 1 {
+        return Err(res);
+    }
+
+    Ok(res)
 }

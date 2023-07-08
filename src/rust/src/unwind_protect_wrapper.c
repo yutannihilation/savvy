@@ -19,7 +19,8 @@ SEXP unwind_protect_impl(SEXP (*fun)(void *data), void *data)
     jmp_buf jmpbuf;
     if (setjmp(jmpbuf))
     {
-        return token;
+        // Tag the pointer
+        return (SEXP)((uintptr_t)token | 1);
     }
 
     SEXP res = R_UnwindProtect(fun, data, not_so_long_jump, &jmpbuf, token);
