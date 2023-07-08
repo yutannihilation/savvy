@@ -5,9 +5,10 @@
 
 void not_so_long_jump(void *jmpbuf, Rboolean jump)
 {
-    (void)(jump); // To suppress the unused parameter warning
-
-    longjmp(*(jmp_buf *)jmpbuf, 1);
+    if (jump == TRUE)
+    {
+        longjmp(*(jmp_buf *)jmpbuf, 1);
+    }
 }
 
 SEXP unwind_protect_impl(SEXP (*fun)(void *data), void *data)
