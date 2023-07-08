@@ -10,7 +10,7 @@ void not_so_long_jump(void *jmpbuf, Rboolean jump)
     longjmp(*(jmp_buf *)jmpbuf, 1);
 }
 
-SEXP unwind_protect(SEXP (*fun)(void *data), void *data)
+SEXP unwind_protect_impl(SEXP (*fun)(void *data), void *data)
 {
     SEXP token = R_MakeUnwindCont();
     R_PreserveObject(token);
