@@ -13,6 +13,7 @@ use sexp::string::{OwnedStringSxp, StringSxp};
 use protect::{
     insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
 };
+use unextendr_macro::unextendr;
 use unwind_protect::unwind_protect;
 
 use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
@@ -147,4 +148,9 @@ unsafe fn flip_logical_inner(x: SEXP) -> crate::error::Result<SEXP> {
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
     wrapper(|| flip_logical_inner(x))
+}
+
+#[unextendr]
+fn foo_foo_foooo() {
+    let _ = 1 + 1;
 }

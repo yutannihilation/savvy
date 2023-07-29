@@ -1,2 +1,2 @@
 [workspace]
-members = ["unextendr"]
+members = ["unextendr", "unextendr-macro"]

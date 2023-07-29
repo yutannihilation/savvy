@@ -10,5 +10,7 @@ crate-type = ["staticlib"]
 libR-sys = { git = "https://github.com/extendr/libR-sys" }
 once_cell = "1"
 
+unextendr-macro = { path = "../unextendr-macro" }
+
 [build-dependencies]
 cc = "1"
