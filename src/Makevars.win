@@ -12,10 +12,10 @@ CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
 all: C_clean $(HEADER_FILE)
 
-$(SHLIB): $(STATLIB)
-
 $(HEADER_FILE):
 	cbindgen --output $@ --config ./rust/cbindgen.toml ./rust/unextendr
+
+$(SHLIB): $(STATLIB)
 
 $(STATLIB):
 	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
