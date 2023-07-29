@@ -1,44 +1,37 @@
 use libR_sys::{
-    Rf_allocVector, Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, INTSXP, SET_INTEGER_ELT, SEXP, STRSXP,
+    Rf_allocVector, Rf_xlength, ALTREP, LGLSXP, LOGICAL, LOGICAL_ELT, SET_LOGICAL_ELT, SEXP,
 };
 
-use crate::{error::get_human_readable_type_name, protect, sexp::Sxp};
+use super::Sxp;
+use crate::{error::get_human_readable_type_name, protect};
 
-// This is based on the idea of cpp11's `writable`.
-//
-// `IntegerSxp` is a read-only wrapper for SEXPs provided from outside of Rust;
-// since it's the caller's responsibility to PROTECT it, we don't protect it on
-// Rust's side.
-//
-// `OwnedIntegerSxp` is a writable wrapper for SEXPs newly allocated on Rust's
-// side. Since it's us who produce it, we protect it and drop it.
-pub struct IntegerSxp(SEXP);
-pub struct OwnedIntegerSxp {
-    inner: IntegerSxp,
+pub struct LogicalSxp(SEXP);
+pub struct OwnedLogicalSxp {
+    inner: LogicalSxp,
     token: SEXP,
 }
 
-impl IntegerSxp {
+impl LogicalSxp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
-    pub(crate) fn elt(&self, i: usize) -> i32 {
-        unsafe { INTEGER_ELT(self.0, i as _) }
+    pub(crate) fn elt(&self, i: usize) -> bool {
+        unsafe { LOGICAL_ELT(self.0, i as _) == 1 }
     }
 
-    pub fn iter(&self) -> IntegerSxpIter {
+    pub fn iter(&self) -> LogicalSxpIter {
         // if the vector is an ALTREP, we cannot directly access the underlying
         // data.
         let raw = unsafe {
             if ALTREP(self.0) == 1 {
                 std::ptr::null()
             } else {
-                INTEGER(self.0)
+                LOGICAL(self.0)
             }
         };
 
-        IntegerSxpIter {
+        LogicalSxpIter {
             sexp: self,
             raw,
             i: 0,
@@ -51,16 +44,16 @@ impl IntegerSxp {
     }
 }
 
-impl OwnedIntegerSxp {
+impl OwnedLogicalSxp {
     pub fn len(&self) -> usize {
         self.inner.len()
     }
 
-    pub(crate) fn elt(&self, i: usize) -> i32 {
+    pub(crate) fn elt(&self, i: usize) -> bool {
         self.inner.elt(i)
     }
 
-    pub fn iter(&self) -> IntegerSxpIter {
+    pub fn iter(&self) -> LogicalSxpIter {
         self.inner.iter()
     }
 
@@ -68,35 +61,35 @@ impl OwnedIntegerSxp {
         self.inner.inner()
     }
 
-    pub fn set_elt(&mut self, i: usize, v: i32) {
+    pub fn set_elt(&mut self, i: usize, v: bool) {
         unsafe {
-            SET_INTEGER_ELT(self.inner(), i as _, v);
+            SET_LOGICAL_ELT(self.inner(), i as _, v as _);
         }
     }
 
     pub fn new(len: usize) -> Self {
-        let out = unsafe { Rf_allocVector(INTSXP, len as _) };
+        let out = unsafe { Rf_allocVector(LGLSXP, len as _) };
         let token = protect::insert_to_preserved_list(out);
         Self {
-            inner: IntegerSxp(out),
+            inner: LogicalSxp(out),
             token,
         }
     }
 }
 
-impl Drop for OwnedIntegerSxp {
+impl Drop for OwnedLogicalSxp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<SEXP> for IntegerSxp {
+impl TryFrom<SEXP> for LogicalSxp {
     type Error = crate::error::Error;
 
     fn try_from(value: SEXP) -> crate::error::Result<Self> {
-        if !Sxp(value).is_integer() {
+        if !Sxp(value).is_logical() {
             let type_name = get_human_readable_type_name(value);
-            let msg = format!("Cannot convert {type_name} to integer");
+            let msg = format!("Cannot convert {type_name} to logical");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value))
@@ -107,22 +100,22 @@ impl TryFrom<SEXP> for IntegerSxp {
 // view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
 // all the values yet.
 //
-//     impl Index<usize> for IntegerSxp {
+//     impl Index<usize> for LogicalSxp {
 //         type Output = i32;
 //         fn index(&self, index: usize) -> &Self::Output {
 //             &self.elt(index).clone()
 //         }
 //     }
 
-pub struct IntegerSxpIter<'a> {
-    pub sexp: &'a IntegerSxp,
+pub struct LogicalSxpIter<'a> {
+    pub sexp: &'a LogicalSxp,
     raw: *const i32,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for IntegerSxpIter<'a> {
-    type Item = i32;
+impl<'a> Iterator for LogicalSxpIter<'a> {
+    type Item = bool;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
@@ -137,7 +130,7 @@ impl<'a> Iterator for IntegerSxpIter<'a> {
             Some(self.sexp.elt(i))
         } else {
             // When non-ALTREP, access to the raw pointer
-            unsafe { Some(*(self.raw.add(i))) }
+            unsafe { Some(*(self.raw.add(i)) == 1) }
         }
     }
 }

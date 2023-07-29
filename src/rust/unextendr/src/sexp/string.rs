@@ -5,7 +5,9 @@ use libR_sys::{
     SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
 };
 
-use crate::{error::get_human_readable_type_name, na::NotAvailableValue, protect, sexp::Sxp};
+use super::na::NotAvailableValue;
+use super::Sxp;
+use crate::{error::get_human_readable_type_name, protect};
 
 pub struct StringSxp(SEXP);
 pub struct OwnedStringSxp {

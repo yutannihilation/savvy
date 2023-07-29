@@ -1,26 +1,23 @@
 mod error;
-mod integer;
-mod logical;
-mod na;
 mod protect;
-mod real;
 mod sexp;
-mod string;
 
 mod unwind_protect_wrapper;
 
-use integer::{IntegerSxp, OwnedIntegerSxp};
-use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
-use logical::{LogicalSxp, OwnedLogicalSxp};
-use na::NotAvailableValue;
+use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
+use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
+use sexp::na::NotAvailableValue;
+use sexp::real::{OwnedRealSxp, RealSxp};
+use sexp::string::{OwnedStringSxp, StringSxp};
+
 use protect::{
     insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
 };
-use real::{OwnedRealSxp, RealSxp};
-use std::ffi::CString;
-use string::{OwnedStringSxp, StringSxp};
-
 use unwind_protect_wrapper::unwind_protect;
+
+use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
+
+use std::ffi::CString;
 
 // TODO: make this r_println! macro
 fn r_print(msg: String) {
