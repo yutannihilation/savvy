@@ -2,7 +2,7 @@ mod error;
 mod protect;
 mod sexp;
 
-mod unwind_protect_wrapper;
+mod unwind_protect;
 
 use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
 use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
@@ -13,7 +13,7 @@ use sexp::string::{OwnedStringSxp, StringSxp};
 use protect::{
     insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
 };
-use unwind_protect_wrapper::unwind_protect;
+use unwind_protect::unwind_protect;
 
 use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf, SEXP};
 
