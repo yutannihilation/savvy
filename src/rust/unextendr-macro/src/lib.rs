@@ -8,9 +8,7 @@ struct UnextendrFn {
 
 #[proc_macro_attribute]
 pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut item_fn = parse_macro_input!(input as syn::ItemFn);
-
-    let mut item_fn_orig = item_fn.clone();
+    let item_fn = parse_macro_input!(input as syn::ItemFn);
 
     let item_fn_innner = make_inner_fn(&item_fn);
     let item_fn_outer = make_outer_fn(&item_fn);
@@ -24,7 +22,7 @@ pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
         _ => panic!("not supported"),
     });
 
-    let item_fn_orig_ts = item_fn_orig.into_token_stream();
+    let item_fn_orig_ts = item_fn.into_token_stream();
 
     quote! {
         #item_fn_innner
@@ -51,11 +49,11 @@ fn make_outer_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
         _ => panic!("not supported"),
     });
 
-    let new_stmt = parse_quote! {
-        wrapper(|| #fn_name(#(#args),*));
-    };
+    out.sig.output = parse_quote!(-> SEXP);
+
+    let expr: syn::Expr = parse_quote! { wrapper(|| #fn_name(#(#args),*)) };
     out.block.stmts.truncate(0);
-    out.block.stmts.push(new_stmt);
+    out.block.stmts.push(syn::Stmt::Expr(expr, None));
 
     out
 }
@@ -67,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_make_inner_fn() {
-        let mut item_fn: syn::ItemFn = parse_quote!(
+        let item_fn: syn::ItemFn = parse_quote!(
             #[unextendr]
             fn foo() {
                 bar()

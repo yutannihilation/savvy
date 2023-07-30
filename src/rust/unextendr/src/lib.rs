@@ -151,6 +151,7 @@ pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
 }
 
 #[unextendr]
-fn foo_foo_foooo(x: i32, y: bool) {
+fn foo_foo_foooo(x: i32, y: bool) -> crate::error::Result<SEXP> {
     let _ = 1 + 1;
+    Ok(unsafe { libR_sys::R_NilValue })
 }
