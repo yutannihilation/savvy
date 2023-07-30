@@ -21,7 +21,7 @@ unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         out.set_elt(i, e_upper.as_str());
     }
 
-    out.into()
+    Ok(out.into())
 }
 
 #[no_mangle]
@@ -41,7 +41,7 @@ unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         }
     }
 
-    out.into()
+    Ok(out.into())
 }
 
 #[no_mangle]
@@ -61,7 +61,7 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         }
     }
 
-    out.into()
+    Ok(out.into())
 }
 
 #[no_mangle]
@@ -77,7 +77,7 @@ unsafe fn flip_logical_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         out.set_elt(i, !e);
     }
 
-    out.into()
+    Ok(out.into())
 }
 
 #[no_mangle]

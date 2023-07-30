@@ -105,15 +105,15 @@ impl TryFrom<SEXP> for IntegerSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<IntegerSxp> for crate::error::Result<SEXP> {
+impl From<IntegerSxp> for SEXP {
     fn from(value: IntegerSxp) -> Self {
-        Ok(value.inner())
+        value.inner()
     }
 }
 
-impl From<OwnedIntegerSxp> for crate::error::Result<SEXP> {
+impl From<OwnedIntegerSxp> for SEXP {
     fn from(value: OwnedIntegerSxp) -> Self {
-        Ok(value.inner())
+        value.inner()
     }
 }
 
