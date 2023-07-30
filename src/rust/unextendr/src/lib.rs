@@ -151,6 +151,6 @@ pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
 }
 
 #[unextendr]
-fn foo_foo_foooo() {
+fn foo_foo_foooo(x: i32, y: bool) {
     let _ = 1 + 1;
 }

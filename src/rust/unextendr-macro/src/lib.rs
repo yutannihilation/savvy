@@ -1,6 +1,6 @@
-use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
-use syn::parse_macro_input;
+use proc_macro::{Ident, TokenStream};
+use quote::{format_ident, quote, ToTokens};
+use syn::{parse_macro_input, parse_quote};
 
 struct UnextendrFn {
     name: syn::Ident,
@@ -12,16 +12,52 @@ pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut item_fn_orig = item_fn.clone();
 
-    make_inner_fn(&mut item_fn);
+    let item_fn_innner = make_inner_fn(&item_fn);
+    let item_fn_outer = make_outer_fn(&item_fn);
 
-    item_fn.into_token_stream().into()
+    let args_orig = item_fn.sig.inputs.clone();
+    let args = item_fn.sig.inputs.iter().map(|i| match i {
+        syn::FnArg::Typed(syn::PatType { pat, .. }) => match pat.as_ref() {
+            syn::Pat::Ident(arg) => arg.ident.clone(),
+            _ => panic!("not supported"),
+        },
+        _ => panic!("not supported"),
+    });
+
+    let item_fn_orig_ts = item_fn_orig.into_token_stream();
+
+    quote! {
+        #item_fn_innner
+        #item_fn_outer
+    }
+    .into()
 }
 
-fn make_inner_fn(item_fn: &mut syn::ItemFn) {
-    item_fn.sig.ident = proc_macro2::Ident::new(
-        &format!("{}_inner", item_fn.sig.ident),
-        proc_macro2::Span::call_site(),
-    );
+fn make_inner_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
+    let mut out = item_fn.clone();
+    out.sig.ident = format_ident!("{}_inner", item_fn.sig.ident);
+    out
+}
+
+fn make_outer_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
+    let mut out = item_fn.clone();
+
+    let fn_name = format_ident!("{}_inner", item_fn.sig.ident);
+    let args = item_fn.sig.inputs.iter().map(|i| match i {
+        syn::FnArg::Typed(syn::PatType { pat, .. }) => match pat.as_ref() {
+            syn::Pat::Ident(arg) => arg.ident.clone(),
+            _ => panic!("not supported"),
+        },
+        _ => panic!("not supported"),
+    });
+
+    let new_stmt = parse_quote! {
+        wrapper(|| #fn_name(#(#args),*));
+    };
+    out.block.stmts.truncate(0);
+    out.block.stmts.push(new_stmt);
+
+    out
 }
 
 #[cfg(test)]
@@ -38,7 +74,7 @@ mod tests {
             }
         );
 
-        make_inner_fn(&mut item_fn);
+        make_inner_fn(&item_fn);
 
         assert_eq!(item_fn.sig.ident.to_string(), "foo_inner".to_string())
     }
