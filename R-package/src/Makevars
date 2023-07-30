@@ -7,7 +7,7 @@ PKG_LIBS = -L$(LIBDIR) -lunextendr
 all: C_clean $(HEADER_FILE)
 
 $(HEADER_FILE):
-	cbindgen --output $@ --config ./rust/cbindgen.toml ./rust/unextendr
+	cbindgen --output $@ --config ./rust/cbindgen.toml ./rust/
 
 $(SHLIB): $(STATLIB)
 
