@@ -42,6 +42,14 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Tweak
+        run: |
+          sed -i '/^unextendr/{s|".*"|"../unextendr"|}' ./R-package/src/rust/Cargo.toml
+          mv unextendr/ ./R-package/src/
+          mv unextendr-macros/ ./R-package/src/
+          mv Cargo.toml ./R-package/src/
+        shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
