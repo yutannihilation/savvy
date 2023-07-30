@@ -51,7 +51,7 @@ fn make_outer_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
 
     out.sig.output = parse_quote!(-> SEXP);
 
-    let expr: syn::Expr = parse_quote! { wrapper(|| #fn_name(#(#args),*)) };
+    let expr: syn::Expr = parse_quote! { unextendr::wrapper(|| #fn_name(#(#args),*)) };
     out.block.stmts.truncate(0);
     out.block.stmts.push(syn::Stmt::Expr(expr, None));
 

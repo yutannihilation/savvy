@@ -4,6 +4,7 @@ use unextendr::sexp::na::NotAvailableValue;
 use unextendr::sexp::real::{OwnedRealSxp, RealSxp};
 use unextendr::sexp::string::{OwnedStringSxp, StringSxp};
 
+use unextendr::unextendr;
 use unextendr::SEXP;
 
 unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
@@ -20,12 +21,12 @@ unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         out.set_elt(i, e_upper.as_str());
     }
 
-    Ok(out.inner())
+    out.into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
-    wrapper(|| to_upper_inner(x))
+    unextendr::wrapper(|| to_upper_inner(x))
 }
 
 unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
@@ -40,12 +41,12 @@ unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         }
     }
 
-    Ok(out.inner())
+    out.into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
-    wrapper(|| times_two_int_inner(x))
+    unextendr::wrapper(|| times_two_int_inner(x))
 }
 
 unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
@@ -60,12 +61,12 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         }
     }
 
-    Ok(out.inner())
+    out.into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
-    wrapper(|| times_two_numeric_inner(x))
+    unextendr::wrapper(|| times_two_numeric_inner(x))
 }
 
 unsafe fn flip_logical_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
@@ -76,16 +77,16 @@ unsafe fn flip_logical_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
         out.set_elt(i, !e);
     }
 
-    Ok(out.inner())
+    out.into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
-    wrapper(|| flip_logical_inner(x))
+    unextendr::wrapper(|| flip_logical_inner(x))
 }
 
 #[unextendr]
 fn foo_foo_foooo(x: i32, y: bool) -> unextendr::error::Result<SEXP> {
     let _ = 1 + 1;
-    Ok(unsafe { libR_sys::R_NilValue })
+    unextendr::sexp::null::NullSxp.into()
 }

@@ -3,6 +3,7 @@ use libR_sys::{Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, SEXP};
 pub mod integer;
 pub mod logical;
 pub mod na;
+pub mod null;
 pub mod real;
 pub mod string;
 

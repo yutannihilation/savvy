@@ -94,6 +94,19 @@ impl TryFrom<SEXP> for RealSxp {
     }
 }
 
+// Conversion into SEXP is infallible as it's just extract the inner one.
+impl From<RealSxp> for crate::error::Result<SEXP> {
+    fn from(value: RealSxp) -> Self {
+        Ok(value.inner())
+    }
+}
+
+impl From<OwnedRealSxp> for crate::error::Result<SEXP> {
+    fn from(value: OwnedRealSxp) -> Self {
+        Ok(value.inner())
+    }
+}
+
 // I learned implementing the Index trait is wrong; the Index is to provide a
 // view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
 // all the values yet.

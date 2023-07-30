@@ -2,9 +2,9 @@ TARGET = x86_64-pc-windows-gnu
 
 TARGET_DIR = ./rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/release
-STATLIB = $(LIBDIR)/libunextendr.a
+STATLIB = $(LIBDIR)/libsimple_unextendr.a
 HEADER_FILE = ./rust/api.h
-PKG_LIBS = -L$(LIBDIR) -lunextendr -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
+PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 
 # Rtools42 doesn't have the linker in the location that cargo expects, so we
 # need to overwrite it via configuration.

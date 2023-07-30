@@ -98,6 +98,19 @@ impl TryFrom<SEXP> for StringSxp {
     }
 }
 
+// Conversion into SEXP is infallible as it's just extract the inner one.
+impl From<StringSxp> for crate::error::Result<SEXP> {
+    fn from(value: StringSxp) -> Self {
+        Ok(value.inner())
+    }
+}
+
+impl From<OwnedStringSxp> for crate::error::Result<SEXP> {
+    fn from(value: OwnedStringSxp) -> Self {
+        Ok(value.inner())
+    }
+}
+
 pub struct StringSxpIter<'a> {
     pub sexp: &'a StringSxp,
     i: usize,
