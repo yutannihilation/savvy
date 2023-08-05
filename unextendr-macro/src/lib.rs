@@ -29,6 +29,8 @@ impl UnextendrFn {
     }
 
     fn new(orig: &syn::ItemFn) -> Self {
+        // TODO: check function signature and abort if any of it is unexpected one.
+
         let mut attrs = orig.attrs.clone();
         // Remove #[unextendr]
         attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
@@ -90,8 +92,10 @@ impl UnextendrFn {
         let args_new = &self.args_new;
         let stmts_additional = self.stmts_additional.clone();
         let stmts_orig = self.stmts_orig.clone();
+        let attrs = self.attrs.clone();
 
         let out: syn::ItemFn = parse_quote!(
+            #(#attrs)*
             unsafe fn #fn_name_inner(#args_new) -> unextendr::Result<unextendr::SEXP> {
                 #(#stmts_additional)*
                 #(#stmts_orig)*
