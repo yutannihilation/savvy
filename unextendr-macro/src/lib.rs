@@ -1,10 +1,6 @@
-use proc_macro::{Ident, TokenStream};
+use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, parse_quote, Token};
-
-struct UnextendrFn {
-    name: syn::Ident,
-}
+use syn::{parse_macro_input, parse_quote};
 
 #[proc_macro_attribute]
 pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
@@ -55,11 +51,8 @@ fn make_outer_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
 
     out.sig.output = parse_quote!(-> SEXP);
 
-    // let body: syn::Expr = parse_quote! { unextendr::wrapper(|| #fn_name(#(#args),*)) };
-    // out.block.stmts.truncate(0);
-    // out.block.stmts.push(syn::Stmt::Expr(body, None));
-
     let out: syn::ItemFn = parse_quote!(
+        #[allow(clippy::missing_safety_doc)]
         #[no_mangle]
         pub unsafe extern "C" fn #fn_name_outer(#args_orig) -> SEXP {
             unextendr::wrapper(|| #fn_name_inner(#(#args),*))
@@ -84,6 +77,28 @@ mod tests {
 
         let item_fn_inner = make_inner_fn(&item_fn);
 
-        assert_eq!(item_fn_inner.sig.ident.to_string(), "foo_inner".to_string())
+        assert_eq!(item_fn_inner.sig.ident.to_string(), "foo_inner".to_string());
+    }
+
+    #[test]
+    fn test_make_outer_fn() {
+        let item_fn: syn::ItemFn = parse_quote!(
+            #[unextendr]
+            fn foo() {
+                bar()
+            }
+        );
+
+        let item_fn_outer = make_outer_fn(&item_fn);
+
+        // check function name
+        assert_eq!(item_fn_outer.sig.ident.to_string(), "foo".to_string());
+
+        // check attributes
+        let expected_attr: Vec<syn::Attribute> = vec![
+            parse_quote!(#[allow(clippy::missing_safety_doc)]),
+            parse_quote!(#[no_mangle]),
+        ];
+        assert_eq!(item_fn_outer.attrs, expected_attr);
     }
 }

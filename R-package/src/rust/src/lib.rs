@@ -24,6 +24,7 @@ unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
     unextendr::wrapper(|| to_upper_inner(x))
@@ -44,6 +45,7 @@ unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
     unextendr::wrapper(|| times_two_int_inner(x))
@@ -64,6 +66,7 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
     unextendr::wrapper(|| times_two_numeric_inner(x))
