@@ -47,13 +47,14 @@ jobs:
 
       - name: Tweak
         run: |
-          # macOS's sed treats -i option differently...
+          # macOS's sed treats -i option differently, so we cannot use it here...
           sed '/^unextendr/s|".*"|"./dep/unextendr"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
 
           mkdir ./R-package/src/rust/dep/
           mv unextendr/ ./R-package/src/rust/dep/
           mv unextendr-macro/ ./R-package/src/rust/dep/
+          mv unextendr-bindgen/ ./R-package/src/rust/dep/
           mv Cargo.toml ./R-package/src/rust/dep/
         shell: bash
 
