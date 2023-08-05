@@ -3,6 +3,11 @@ pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
 
+pub use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
+pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
+pub use sexp::real::{OwnedRealSxp, RealSxp};
+pub use sexp::string::{OwnedStringSxp, StringSxp};
+
 // re-export
 pub use libR_sys::SEXP;
 pub use unextendr_macro::unextendr;
