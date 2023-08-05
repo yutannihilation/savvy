@@ -1,7 +1,7 @@
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
 
-pub(crate) struct UnextendrFn {
+pub struct UnextendrFn {
     /// Attributes except for `#[unextendr]`
     attrs: Vec<syn::Attribute>,
     /// Original function name
@@ -18,7 +18,7 @@ pub(crate) struct UnextendrFn {
     stmts_additional: Vec<syn::Stmt>,
 }
 
-pub(crate) fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
+pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
     let func = match item {
         syn::Item::Fn(func) => func,
         _ => {
@@ -39,15 +39,15 @@ pub(crate) fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
 }
 
 impl UnextendrFn {
-    fn fn_name_inner(&self) -> syn::Ident {
+    pub fn fn_name_inner(&self) -> syn::Ident {
         format_ident!("unextendr_{}_inner", self.fn_name)
     }
 
-    fn fn_name_outer(&self) -> syn::Ident {
+    pub fn fn_name_outer(&self) -> syn::Ident {
         format_ident!("unextendr_{}", self.fn_name)
     }
 
-    fn new(orig: &syn::ItemFn) -> Self {
+    pub fn new(orig: &syn::ItemFn) -> Self {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = orig.attrs.clone();
@@ -105,7 +105,7 @@ impl UnextendrFn {
         }
     }
 
-    fn make_inner_fn(&self) -> syn::ItemFn {
+    pub fn make_inner_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
 
         let args_new = &self.args_new;
@@ -123,7 +123,7 @@ impl UnextendrFn {
         out
     }
 
-    fn make_outer_fn(&self) -> syn::ItemFn {
+    pub fn make_outer_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
         let fn_name_outer = self.fn_name_outer();
 
