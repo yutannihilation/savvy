@@ -1,2 +1,2 @@
 [workspace]
-members = ["unextendr", "unextendr-macro"]
+members = ["unextendr", "unextendr-macro", "rbindgen"]

@@ -7,7 +7,8 @@ PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr
 all: C_clean $(HEADER_FILE)
 
 $(HEADER_FILE):
-	cbindgen --output $@ --config ./rust/cbindgen.toml ./rust/
+	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
+	  cargo run --manifest-path ../../../rbindgen/Cargo.toml ./rust/src/lib.rs > $@
 
 $(SHLIB): $(STATLIB)
 

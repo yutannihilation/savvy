@@ -10,7 +10,10 @@ PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr -lws2_32 -ladvapi32 -luserenv -lbcrypt
 # need to overwrite it via configuration.
 CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
-all: C_clean
+all: C_clean $(HEADER_FILE)
+
+$(HEADER_FILE):
+	cargo run --manifest-path ../../../rbindgen/Cargo.toml ./rust/src/lib.rs > $@
 
 $(SHLIB): $(STATLIB)
 
