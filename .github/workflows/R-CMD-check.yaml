@@ -45,12 +45,13 @@ jobs:
       - name: Tweak
         run: |
           # macOS's sed treats -i option differently...
-          sed '/^unextendr/{s|".*"|"../unextendr"|}' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          sed '/^unextendr/{s|".*"|"./dep/unextendr"|}' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
 
-          mv unextendr/ ./R-package/src/
-          mv unextendr-macro/ ./R-package/src/
-          mv Cargo.toml ./R-package/src/
+          mkdir ./R-package/src/rust/dep/
+          mv unextendr/ ./R-package/src/rust/dep/
+          mv unextendr-macro/ ./R-package/src/rust/dep/
+          mv Cargo.toml ./R-package/src/rust/dep/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2

@@ -5,7 +5,7 @@ pub struct NullSxp;
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<NullSxp> for crate::error::Result<SEXP> {
-    fn from(value: NullSxp) -> Self {
+    fn from(_value: NullSxp) -> Self {
         Ok(unsafe { libR_sys::R_NilValue })
     }
 }
