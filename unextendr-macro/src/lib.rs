@@ -29,7 +29,11 @@ pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
 
 fn make_inner_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
     let mut out = item_fn.clone();
+
+    out.attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
     out.sig.ident = format_ident!("{}_inner", item_fn.sig.ident);
+    out.sig.unsafety = parse_quote!(unsafe);
+
     out
 }
 
@@ -66,48 +70,49 @@ mod tests {
     use super::*;
     use syn::parse_quote;
 
+    fn assert_eq_inner(orig: syn::ItemFn, expected: syn::ItemFn) {
+        let result = make_inner_fn(&orig);
+        assert_eq!(result, expected);
+    }
+
+    fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
+        let result = make_outer_fn(&orig);
+        assert_eq!(result, expected);
+    }
+
     #[test]
     fn test_make_inner_fn() {
-        let item_fn: syn::ItemFn = parse_quote!(
-            #[unextendr]
-            fn foo() {
-                bar()
-            }
+        assert_eq_inner(
+            parse_quote!(
+                #[unextendr]
+                fn foo() {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                unsafe fn foo_inner() {
+                    bar()
+                }
+            ),
         );
-
-        let item_fn_inner = make_inner_fn(&item_fn);
-
-        assert_eq!(item_fn_inner.sig.ident.to_string(), "foo_inner".to_string());
     }
 
     #[test]
     fn test_make_outer_fn() {
-        let item_fn: syn::ItemFn = parse_quote!(
-            #[unextendr]
-            fn foo() {
-                bar()
-            }
-        );
-
-        let item_fn_outer = make_outer_fn(&item_fn);
-
-        // check function name
-        assert_eq!(item_fn_outer.sig.ident.to_string(), "foo".to_string());
-
-        // check attributes
-        let expected_attr: Vec<syn::Attribute> = vec![
-            parse_quote!(#[allow(clippy::missing_safety_doc)]),
-            parse_quote!(#[no_mangle]),
-        ];
-        assert_eq!(item_fn_outer.attrs, expected_attr);
-
-        // check body
-        let expected_body: syn::Expr = parse_quote! {
-            unextendr::wrapper(|| foo_inner())
-        };
-        assert_eq!(
-            item_fn_outer.block.stmts[0],
-            syn::Stmt::Expr(expected_body, None)
+        assert_eq_outer(
+            parse_quote!(
+                #[unextendr]
+                fn foo() {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn foo() -> SEXP {
+                    unextendr::wrapper(|| foo_inner())
+                }
+            ),
         );
     }
 }
