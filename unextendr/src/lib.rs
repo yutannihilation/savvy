@@ -3,6 +3,7 @@ pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
 
+pub use error::{Error, Result};
 pub use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
 pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
 pub use sexp::real::{OwnedRealSxp, RealSxp};

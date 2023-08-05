@@ -8,7 +8,7 @@ use unextendr::unextendr;
 use unextendr::SEXP;
 
 #[unextendr]
-unsafe fn to_upper(x: StringSxp) -> unextendr::error::Result<SEXP> {
+unsafe fn to_upper(x: StringSxp) -> unextendr::Result<SEXP> {
     let mut out = OwnedStringSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -25,7 +25,7 @@ unsafe fn to_upper(x: StringSxp) -> unextendr::error::Result<SEXP> {
 }
 
 #[unextendr]
-unsafe fn times_two_int(x: IntegerSxp) -> unextendr::error::Result<SEXP> {
+unsafe fn times_two_int(x: IntegerSxp) -> unextendr::Result<SEXP> {
     let mut out = OwnedIntegerSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -40,7 +40,7 @@ unsafe fn times_two_int(x: IntegerSxp) -> unextendr::error::Result<SEXP> {
 }
 
 #[unextendr]
-unsafe fn times_two_numeric(x: RealSxp) -> unextendr::error::Result<SEXP> {
+unsafe fn times_two_numeric(x: RealSxp) -> unextendr::Result<SEXP> {
     let mut out = OwnedRealSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -55,7 +55,7 @@ unsafe fn times_two_numeric(x: RealSxp) -> unextendr::error::Result<SEXP> {
 }
 
 #[unextendr]
-unsafe fn flip_logical(x: LogicalSxp) -> unextendr::error::Result<SEXP> {
+unsafe fn flip_logical(x: LogicalSxp) -> unextendr::Result<SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -66,7 +66,7 @@ unsafe fn flip_logical(x: LogicalSxp) -> unextendr::error::Result<SEXP> {
 }
 
 #[unextendr]
-fn foo_foo_foooo(x: i32, y: bool, z: RealSxp) -> unextendr::error::Result<SEXP> {
+fn foo_foo_foooo(x: i32, y: bool, z: RealSxp) -> unextendr::Result<SEXP> {
     let _ = 1 + 1;
     unextendr::sexp::null::NullSxp.into()
 }
