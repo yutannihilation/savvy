@@ -64,9 +64,3 @@ unsafe fn flip_logical(x: LogicalSxp) -> unextendr::Result<SEXP> {
 
     Ok(out.into())
 }
-
-#[unextendr]
-fn foo_foo_foooo(x: i32, y: bool, z: RealSxp) -> unextendr::Result<SEXP> {
-    let _ = 1 + 1;
-    unextendr::sexp::null::NullSxp.into()
-}
