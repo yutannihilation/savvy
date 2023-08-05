@@ -22,7 +22,7 @@ fn make_inner_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
     // Remove #[unextendr]
     out.attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
 
-    out.sig.ident = format_ident!("{}_inner", item_fn.sig.ident);
+    out.sig.ident = format_ident!("unextendr_{}_inner", item_fn.sig.ident);
     out.sig.unsafety = parse_quote!(unsafe);
 
     let mut new_stmts: Vec<Stmt> = Vec::new();
@@ -64,8 +64,8 @@ fn make_outer_fn(item_fn: &syn::ItemFn) -> syn::ItemFn {
     let mut out = item_fn.clone();
 
     // function names
-    let fn_name_outer = out.sig.ident.clone();
-    let fn_name_inner = format_ident!("{}_inner", out.sig.ident);
+    let fn_name_outer = format_ident!("unextendr_{}", out.sig.ident);
+    let fn_name_inner = format_ident!("unextendr_{}_inner", out.sig.ident);
 
     out.sig.unsafety = parse_quote!(unsafe);
     out.sig.output = parse_quote!(-> SEXP);
@@ -133,7 +133,7 @@ mod tests {
                 }
             ),
             parse_quote!(
-                unsafe fn foo_inner() {
+                unsafe fn unextendr_foo_inner() {
                     bar()
                 }
             ),
@@ -147,7 +147,7 @@ mod tests {
                 }
             ),
             parse_quote!(
-                unsafe fn foo_inner(x: unextendr::SEXP) {
+                unsafe fn unextendr_foo_inner(x: unextendr::SEXP) {
                     let x = unextendr::RealSxp::try_from(x)?;
                     bar()
                 }
@@ -167,8 +167,8 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn foo() -> SEXP {
-                    unextendr::wrapper(|| foo_inner())
+                pub unsafe extern "C" fn unextendr_foo() -> SEXP {
+                    unextendr::wrapper(|| unextendr_foo_inner())
                 }
             ),
         );
@@ -183,8 +183,8 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn foo(x: unextendr::SEXP) -> SEXP {
-                    unextendr::wrapper(|| foo_inner(x))
+                pub unsafe extern "C" fn unextendr_foo(x: unextendr::SEXP) -> SEXP {
+                    unextendr::wrapper(|| unextendr_foo_inner(x))
                 }
             ),
         );

@@ -7,8 +7,8 @@ use unextendr::sexp::string::{OwnedStringSxp, StringSxp};
 use unextendr::unextendr;
 use unextendr::SEXP;
 
-unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
-    let x = StringSxp::try_from(x)?;
+#[unextendr]
+unsafe fn to_upper(x: StringSxp) -> unextendr::error::Result<SEXP> {
     let mut out = OwnedStringSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -24,14 +24,8 @@ unsafe fn to_upper_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_to_upper(x: SEXP) -> SEXP {
-    unextendr::wrapper(|| to_upper_inner(x))
-}
-
-unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
-    let x = IntegerSxp::try_from(x)?;
+#[unextendr]
+unsafe fn times_two_int(x: IntegerSxp) -> unextendr::error::Result<SEXP> {
     let mut out = OwnedIntegerSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -45,14 +39,8 @@ unsafe fn times_two_int_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_times_two_int(x: SEXP) -> SEXP {
-    unextendr::wrapper(|| times_two_int_inner(x))
-}
-
-unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
-    let x = RealSxp::try_from(x)?;
+#[unextendr]
+unsafe fn times_two_numeric(x: RealSxp) -> unextendr::error::Result<SEXP> {
     let mut out = OwnedRealSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -66,14 +54,8 @@ unsafe fn times_two_numeric_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     Ok(out.into())
 }
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_times_two_numeric(x: SEXP) -> SEXP {
-    unextendr::wrapper(|| times_two_numeric_inner(x))
-}
-
-unsafe fn flip_logical_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
-    let x = LogicalSxp::try_from(x)?;
+#[unextendr]
+unsafe fn flip_logical(x: LogicalSxp) -> unextendr::error::Result<SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -81,11 +63,6 @@ unsafe fn flip_logical_inner(x: SEXP) -> unextendr::error::Result<SEXP> {
     }
 
     Ok(out.into())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_flip_logical(x: SEXP) -> SEXP {
-    unextendr::wrapper(|| flip_logical_inner(x))
 }
 
 #[unextendr]
