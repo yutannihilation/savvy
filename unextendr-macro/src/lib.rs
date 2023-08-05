@@ -100,5 +100,14 @@ mod tests {
             parse_quote!(#[no_mangle]),
         ];
         assert_eq!(item_fn_outer.attrs, expected_attr);
+
+        // check body
+        let expected_body: syn::Expr = parse_quote! {
+            unextendr::wrapper(|| foo_inner())
+        };
+        assert_eq!(
+            item_fn_outer.block.stmts[0],
+            syn::Stmt::Expr(expected_body, None)
+        );
     }
 }
