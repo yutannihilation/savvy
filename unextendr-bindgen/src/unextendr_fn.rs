@@ -1,5 +1,5 @@
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
+use quote::format_ident;
+use syn::{parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
 
 pub struct UnextendrFn {
     /// Attributes except for `#[unextendr]`
@@ -180,7 +180,7 @@ impl ToSourceCode for UnextendrFn {
             .collect::<Vec<String>>()
             .join(", ");
 
-        format!("SEXP unextendr_{fn_name}({args});")
+        format!("SEXP {fn_name}({args});")
     }
 
     fn to_c_function_for_init(&self) -> String {
