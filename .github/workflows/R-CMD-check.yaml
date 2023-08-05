@@ -45,7 +45,7 @@ jobs:
       - name: Tweak
         run: |
           # macOS's sed treats -i option differently...
-          sed '/^unextendr/{s|".*"|"./dep/unextendr"|}' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          sed '/^unextendr/{s|".*"|"./dep/unextendr"|g}' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
 
           mkdir ./R-package/src/rust/dep/
