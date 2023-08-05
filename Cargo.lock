@@ -196,14 +196,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rbindgen"
-version = "0.1.0"
-dependencies = [
- "clap",
- "syn",
-]
-
-[[package]]
 name = "rustix"
 version = "0.38.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -241,6 +233,16 @@ dependencies = [
  "libR-sys",
  "once_cell",
  "unextendr-macro",
+]
+
+[[package]]
+name = "unextendr-bindgen"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
