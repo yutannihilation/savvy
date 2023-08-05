@@ -12,6 +12,7 @@ CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
 all: C_clean $(HEADER_FILE)
 
+# TODO: release rbindgen to crates.io
 $(HEADER_FILE):
 	cargo run --manifest-path ../../rbindgen/Cargo.toml ./rust/src/lib.rs > $@
 
