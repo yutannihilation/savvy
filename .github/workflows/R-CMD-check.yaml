@@ -42,6 +42,9 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Run cagro test
+        run: cargo test --manifest-path=./unextendr-macro/Cargo.toml
+
       - name: Tweak
         run: |
           # macOS's sed treats -i option differently...
