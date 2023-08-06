@@ -42,11 +42,8 @@ fn r_eprint(msg: String) {
 // on the corresponding C function.
 //
 // cf. https://en.wikipedia.org/wiki/Tagged_pointer
-pub fn wrapper<F>(f: F) -> SEXP
-where
-    F: FnOnce() -> crate::error::Result<SEXP>,
-{
-    match f() {
+pub fn handle_result(result: crate::error::Result<SEXP>) -> SEXP {
+    match result {
         // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
         // error flag is off, but it's unnecessary because an SEXP should be an
         // aligned address, otherwise it should have failed before this point,

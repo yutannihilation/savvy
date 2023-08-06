@@ -223,7 +223,7 @@ impl UnextendrFn {
             #[allow(clippy::missing_safety_doc)]
             #[no_mangle]
             pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                unextendr::wrapper(|| #fn_name_inner(#(#args_pat),*))
+                unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
             }
         );
         out
