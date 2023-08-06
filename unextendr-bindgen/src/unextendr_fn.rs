@@ -161,9 +161,9 @@ impl UnextendrFn {
             .map(|arg| arg.ty.to_rust_type_outer())
             .collect();
 
-        let stmts_additional = self.stmts_additional.clone();
-        let stmts_orig = self.stmts_orig.clone();
-        let attrs = self.attrs.clone();
+        let stmts_additional = &self.stmts_additional;
+        let stmts_orig = &self.stmts_orig;
+        let attrs = &self.attrs;
 
         let out: syn::ItemFn = parse_quote!(
             #(#attrs)*
