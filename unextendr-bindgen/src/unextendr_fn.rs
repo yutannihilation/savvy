@@ -199,7 +199,8 @@ impl UnextendrFn {
 
 pub(crate) trait ToSourceCode {
     fn to_c_function_for_header(&self) -> String;
-    fn to_c_function_for_init(&self) -> String;
+    fn to_c_function_impl(&self) -> String;
+    fn to_c_function_call_entry(&self) -> String;
     fn to_r_function(&self) -> String;
 }
 
@@ -220,7 +221,11 @@ impl ToSourceCode for UnextendrFn {
         format!("SEXP {fn_name}({args});")
     }
 
-    fn to_c_function_for_init(&self) -> String {
+    fn to_c_function_impl(&self) -> String {
+        "".into()
+    }
+
+    fn to_c_function_call_entry(&self) -> String {
         "".into()
     }
 
@@ -229,19 +234,9 @@ impl ToSourceCode for UnextendrFn {
     }
 }
 
-impl ToSourceCode for Vec<UnextendrFn> {
-    fn to_c_function_for_header(&self) -> String {
-        self.iter()
-            .map(|x| x.to_c_function_for_header())
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
-
-    fn to_c_function_for_init(&self) -> String {
-        "".into()
-    }
-
-    fn to_r_function(&self) -> String {
-        "".into()
-    }
+pub fn make_c_header_file(x: &Vec<UnextendrFn>) -> String {
+    x.iter()
+        .map(|x| x.to_c_function_for_header())
+        .collect::<Vec<String>>()
+        .join("\n")
 }

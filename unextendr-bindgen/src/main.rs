@@ -7,7 +7,7 @@ use syn::{parse_quote, FnArg::Typed, PatType};
 
 mod unextendr_fn;
 
-use unextendr_fn::ToSourceCode;
+use unextendr_fn::make_c_header_file;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -48,5 +48,5 @@ fn main() {
         .filter_map(unextendr_fn::parse_unextendr_fn)
         .collect::<Vec<unextendr_fn::UnextendrFn>>();
 
-    println!("{}", unextendr_fns.to_c_function_for_header());
+    println!("{}", make_c_header_file(&unextendr_fns));
 }
