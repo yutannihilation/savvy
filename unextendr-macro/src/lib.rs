@@ -81,7 +81,7 @@ mod tests {
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn unextendr_foo() -> unextendr::SEXP {
-                    unextendr::wrapper(|| unextendr_foo_inner())
+                    unextendr::handle_result(unextendr_foo_inner())
                 }
             ),
         );
@@ -104,7 +104,7 @@ mod tests {
                     x: unextendr::SEXP,
                     y: unextendr::SEXP
                 ) -> unextendr::SEXP {
-                    unextendr::wrapper(|| unextendr_foo_inner(x, y))
+                    unextendr::handle_result(unextendr_foo_inner(x, y))
                 }
             ),
         );
