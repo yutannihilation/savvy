@@ -1,8 +1,5 @@
 use libR_sys::SEXP;
 
-// Since SEXP is not a Send, this needs to be implemented as a different type than thiserror.
-pub type UnwindProtectResult = std::result::Result<SEXP, SEXP>;
-
 extern "C" {
     fn unwind_protect_impl(
         fun: ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void) -> SEXP>,
@@ -10,7 +7,7 @@ extern "C" {
     ) -> SEXP;
 }
 
-pub unsafe fn unwind_protect<F>(f: F) -> UnwindProtectResult
+pub unsafe fn unwind_protect<F>(f: F) -> crate::error::Result<SEXP>
 where
     F: FnOnce() -> SEXP + Copy,
 {
@@ -29,7 +26,7 @@ where
     let res: SEXP = unwind_protect_impl(fun, data);
 
     if (res as usize & 1) == 1 {
-        return Err(res);
+        return Err(crate::Error::Aborted(res));
     }
 
     Ok(res)
