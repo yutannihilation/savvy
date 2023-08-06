@@ -3,3 +3,9 @@
 .Rdata
 .httr-oauth
 .DS_Store
+
+*.o
+*.so
+*.dll
+target
+.vscode

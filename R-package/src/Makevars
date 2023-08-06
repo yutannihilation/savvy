@@ -1,0 +1,26 @@
+TARGET_DIR = ./rust/target
+LIBDIR = $(TARGET_DIR)/release
+STATLIB = $(LIBDIR)/libsimple_unextendr.a
+HEADER_FILE = ./rust/api.h
+PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr
+
+all: C_clean $(HEADER_FILE)
+
+$(HEADER_FILE):
+	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
+	  cargo run --manifest-path ../../unextendr-bindgen/Cargo.toml ./rust/src/lib.rs > $@
+
+$(SHLIB): $(STATLIB)
+
+$(STATLIB):
+	# In some environments, ~/.cargo/bin might not be included in PATH, so we need
+	# to set it here to ensure cargo can be invoked. It is appended to PATH and
+	# therefore is only used if cargo is absent from the user's PATH.
+	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
+		cargo build --lib --release --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
+
+C_clean:
+	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS)
+
+clean:
+	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS) rust/target

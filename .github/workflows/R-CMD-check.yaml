@@ -42,11 +42,29 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Run cagro test
+        run: cargo test --manifest-path=./unextendr-macro/Cargo.toml
+
+      - name: Tweak
+        run: |
+          # macOS's sed treats -i option differently, so we cannot use it here...
+          sed '/^unextendr/s|".*"|"./dep/unextendr"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
+
+          mkdir ./R-package/src/rust/dep/
+          mv unextendr/ ./R-package/src/rust/dep/
+          mv unextendr-macro/ ./R-package/src/rust/dep/
+          mv unextendr-bindgen/ ./R-package/src/rust/dep/
+          mv Cargo.toml ./R-package/src/rust/dep/
+        shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          working-directory: R-package
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          working-directory: R-package

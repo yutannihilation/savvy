@@ -1,0 +1,10 @@
+[package]
+name = "unextendr-bindgen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+clap = { version = "4", features = ["derive"] }
+syn = { version = "2", features = ["full", "extra-traits"] }
