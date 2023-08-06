@@ -102,7 +102,7 @@ mod tests {
                 #[no_mangle]
                 pub unsafe extern "C" fn unextendr_foo(
                     x: unextendr::SEXP,
-                    y: unextendr::SEXP,
+                    y: unextendr::SEXP
                 ) -> unextendr::SEXP {
                     unextendr::wrapper(|| unextendr_foo_inner(x, y))
                 }

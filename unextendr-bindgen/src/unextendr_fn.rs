@@ -1,6 +1,66 @@
 use quote::format_ident;
 use syn::{parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
 
+pub enum UnextendrSupportedTypes {
+    IntegerSxp,
+    RealSxp,
+    LogicalSxp,
+    StringSxp,
+}
+
+impl UnextendrSupportedTypes {
+    fn from_type(ty: &syn::Type) -> Option<Self> {
+        // Use only the last part to support both the qualified type path (e.g.,
+        // `unextendr::IntegerSxp`), and single type (e.g., `IntegerSxp`)
+        let type_ident = match ty {
+            syn::Type::Path(type_path) => &type_path.path.segments.last().unwrap().ident,
+            _ => {
+                return None;
+            }
+        };
+
+        match type_ident.to_string().as_str() {
+            "IntegerSxp" => Some(Self::IntegerSxp),
+            "RealSxp" => Some(Self::RealSxp),
+            "LogicalSxp" => Some(Self::LogicalSxp),
+            "StringSxp" => Some(Self::StringSxp),
+            _ => None,
+        }
+    }
+
+    /// Return the corresponding type for internal function.
+    fn to_rust_type_inner(&self) -> syn::Type {
+        match &self {
+            Self::IntegerSxp => parse_quote!(unextendr::IntegerSxp),
+            Self::RealSxp => parse_quote!(unextendr::RealSxp),
+            Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
+            Self::StringSxp => parse_quote!(unextendr::StringSxp),
+        }
+    }
+
+    /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
+    fn to_rust_type_outer(&self) -> syn::Type {
+        match &self {
+            Self::IntegerSxp | Self::RealSxp | Self::LogicalSxp | Self::StringSxp => {
+                parse_quote!(unextendr::SEXP)
+            }
+        }
+    }
+
+    /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
+    fn to_c_type(&self) -> String {
+        match &self {
+            Self::IntegerSxp | Self::RealSxp | Self::LogicalSxp | Self::StringSxp => "SEXP",
+        }
+        .to_string()
+    }
+}
+
+pub struct UnextendrFnArg {
+    pat: syn::Ident,
+    ty: UnextendrSupportedTypes,
+}
+
 pub struct UnextendrFn {
     /// Attributes except for `#[unextendr]`
     attrs: Vec<syn::Attribute>,
@@ -9,7 +69,7 @@ pub struct UnextendrFn {
     /// Original arguments (e.g. `x: RealSxp, y: i32`)
     args_orig: syn::punctuated::Punctuated<syn::FnArg, syn::token::Comma>,
     /// Arguments for API functions (e.g. `x: SEXP, y: i32`)
-    args_new: syn::punctuated::Punctuated<syn::FnArg, syn::token::Comma>,
+    args_new: Vec<UnextendrFnArg>,
     /// Arguments to call the inner functions with (e.g. `x, y`)
     args_for_calling: Vec<syn::Ident>,
     /// Original body of the function
@@ -57,42 +117,38 @@ impl UnextendrFn {
         let fn_name = orig.sig.ident.clone();
 
         let args_orig = orig.sig.inputs.clone();
-        let mut args_new = args_orig.clone();
 
         let mut args_for_calling: Vec<syn::Ident> = Vec::new();
 
         let stmts_orig = orig.block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        for arg in args_new.iter_mut() {
-            if let Typed(PatType { pat, ty, .. }) = arg {
-                let pat_ident = match pat.as_ref() {
-                    Ident(arg) => &arg.ident,
-                    _ => panic!("not supported"),
-                };
+        let args_new: Vec<UnextendrFnArg> = args_orig
+            .iter()
+            .map(|arg| {
+                if let Typed(PatType { pat, ty, .. }) = arg {
+                    let pat = match pat.as_ref() {
+                        Ident(arg) => arg.ident.clone(),
+                        _ => panic!("not supported"),
+                    };
 
-                args_for_calling.push(pat_ident.clone());
+                    args_for_calling.push(pat.clone());
 
-                let type_ident = match ty.as_ref() {
-                    // Use only the last part to support both the qualified type
-                    // path (e.g., `unextendr::IntegerSxp`), and single type
-                    // (e.g., `IntegerSxp`)
-                    syn::Type::Path(type_path) => &type_path.path.segments.last().unwrap().ident,
-                    _ => continue,
-                };
+                    let ty =
+                        UnextendrSupportedTypes::from_type(ty.as_ref()).expect("not supported");
 
-                match type_ident.to_string().as_str() {
-                    "IntegerSxp" | "RealSxp" | "LogicalSxp" | "StringSxp" => {
-                        stmts_additional.push(parse_quote! {
-                            let #pat_ident = unextendr::#type_ident::try_from(#pat_ident)?;
-                        });
+                    let ty_ident = ty.to_rust_type_inner();
 
-                        *ty.as_mut() = parse_quote!(unextendr::SEXP);
-                    }
-                    _ => {}
+                    stmts_additional.push(parse_quote! {
+                        let #pat = #ty_ident::try_from(#pat)?;
+                    });
+
+                    UnextendrFnArg { pat, ty }
+                } else {
+                    panic!("not supported");
                 }
-            }
-        }
+            })
+            .collect();
 
         Self {
             attrs,
@@ -108,14 +164,20 @@ impl UnextendrFn {
     pub fn make_inner_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
 
-        let args_new = &self.args_new;
+        let args_pat: Vec<syn::Ident> = self.args_new.iter().map(|arg| arg.pat.clone()).collect();
+        let args_ty: Vec<syn::Type> = self
+            .args_new
+            .iter()
+            .map(|arg| arg.ty.to_rust_type_outer())
+            .collect();
+
         let stmts_additional = self.stmts_additional.clone();
         let stmts_orig = self.stmts_orig.clone();
         let attrs = self.attrs.clone();
 
         let out: syn::ItemFn = parse_quote!(
             #(#attrs)*
-            unsafe fn #fn_name_inner(#args_new) -> unextendr::Result<unextendr::SEXP> {
+            unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                 #(#stmts_additional)*
                 #(#stmts_orig)*
             }
@@ -127,14 +189,18 @@ impl UnextendrFn {
         let fn_name_inner = self.fn_name_inner();
         let fn_name_outer = self.fn_name_outer();
 
-        let args_new = &self.args_new;
-        let args_for_calling = &self.args_for_calling;
+        let args_pat: Vec<syn::Ident> = self.args_new.iter().map(|arg| arg.pat.clone()).collect();
+        let args_ty: Vec<syn::Type> = self
+            .args_new
+            .iter()
+            .map(|arg| arg.ty.to_rust_type_outer())
+            .collect();
 
         let out: syn::ItemFn = parse_quote!(
             #[allow(clippy::missing_safety_doc)]
             #[no_mangle]
-            pub unsafe extern "C" fn #fn_name_outer(#args_new) -> unextendr::SEXP {
-                unextendr::wrapper(|| #fn_name_inner(#(#args_for_calling),*))
+            pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
+                unextendr::wrapper(|| #fn_name_inner(#(#args_pat),*))
             }
         );
         out
@@ -154,28 +220,9 @@ impl ToSourceCode for UnextendrFn {
             .args_new
             .iter()
             .map(|arg| {
-                if let Typed(PatType { pat, ty, .. }) = arg {
-                    let pat_ident = match pat.as_ref() {
-                        syn::Pat::Ident(pat_ident) => &pat_ident.ident,
-                        _ => panic!("Unsupported signature"),
-                    };
-
-                    // TODO: Currently, only SEXP can be accepted
-                    let ty_ident = match ty.as_ref() {
-                        syn::Type::Path(path) => {
-                            let last_ty = &path.path.segments.last().unwrap().ident;
-                            match last_ty.to_string().as_str() {
-                                "SEXP" => "SEXP",
-                                _ => panic!("Unsupported signature"),
-                            }
-                        }
-                        _ => panic!("Unsupported signature"),
-                    };
-
-                    format!("{ty_ident} {pat_ident}")
-                } else {
-                    panic!("Unsupported signature")
-                }
+                let pat = &arg.pat;
+                let ty = arg.ty.to_c_type();
+                format!("{ty} {pat}")
             })
             .collect::<Vec<String>>()
             .join(", ");
