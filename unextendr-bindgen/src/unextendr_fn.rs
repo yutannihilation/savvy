@@ -195,16 +195,8 @@ impl UnextendrFn {
         );
         out
     }
-}
 
-pub(crate) trait ToSourceCode {
-    fn to_c_function_for_header(&self) -> String;
-    fn to_c_function_impl(&self) -> String;
-    fn to_c_function_call_entry(&self) -> String;
-    fn to_r_function(&self) -> String;
-}
-
-impl ToSourceCode for UnextendrFn {
+    /// Generate C function signature
     fn to_c_function_for_header(&self) -> String {
         let fn_name = self.fn_name_outer();
         let args = self
@@ -221,12 +213,23 @@ impl ToSourceCode for UnextendrFn {
         format!("SEXP {fn_name}({args});")
     }
 
+    /// Generate C function implementation
     fn to_c_function_impl(&self) -> String {
-        "".into()
+        let fn_name = self.fn_name_outer();
+        format!(
+            "
+SEXP {fn_name}_wrapper(SEXP x) {{
+    SEXP res = {fn_name}(x);
+    return handle_result(res);
+}}"
+        )
     }
 
+    /// Generate C function call entry
     fn to_c_function_call_entry(&self) -> String {
-        "".into()
+        let fn_name = self.fn_name_outer();
+        let n_args = self.args.len();
+        format!(r#"    {{"{fn_name}", (DL_FUNC) &{fn_name}_wrapper, {n_args}}},"#)
     }
 
     fn to_r_function(&self) -> String {
@@ -234,9 +237,74 @@ impl ToSourceCode for UnextendrFn {
     }
 }
 
-pub fn make_c_header_file(x: &Vec<UnextendrFn>) -> String {
-    x.iter()
+pub fn make_c_header_file(fns: &[UnextendrFn]) -> String {
+    fns.iter()
         .map(|x| x.to_c_function_for_header())
         .collect::<Vec<String>>()
         .join("\n")
+}
+
+pub fn make_c_impl_file(fns: &[UnextendrFn]) -> String {
+    let common_part = r#"
+#include <stdint.h>
+#include <Rinternals.h>
+#include "rust/api.h"
+
+static uintptr_t TAGGED_POINTER_MASK = (uintptr_t)1;
+
+SEXP handle_result(SEXP res_) {
+    uintptr_t res = (uintptr_t)res_;
+
+    // An error is indicated by tag.
+    if ((res & TAGGED_POINTER_MASK) == 1) {
+        // Remove tag
+        SEXP res_aligned = (SEXP)(res & ~TAGGED_POINTER_MASK);
+
+        // Currently, there are two types of error cases:
+        //
+        //   1. Error from Rust code
+        //   2. Error from R's C API, which is caught by R_UnwindProtect()
+        //
+        if (TYPEOF(res_aligned) == CHARSXP) {
+            // In case 1, the result is an error message that can be passed to
+            // Rf_error() directly.
+            Rf_error("%s", CHAR(res_aligned));
+        } else {
+            // In case 2, the result is the token to restart the
+            // cleanup process on R's side.
+            R_ContinueUnwind(res_aligned);
+        }
+    }
+
+    return (SEXP)res;
+}
+"#;
+
+    let c_fns = fns
+        .iter()
+        .map(|x| x.to_c_function_impl())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let call_entries = fns
+        .iter()
+        .map(|x| x.to_c_function_call_entry())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!(
+        "{common_part}
+{c_fns}
+
+static const R_CallMethodDef CallEntries[] = {{
+{call_entries}
+    {{NULL, NULL, 0}}
+}};
+
+void R_init_unextendr(DllInfo *dll) {{
+  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+}}
+"
+    )
 }
