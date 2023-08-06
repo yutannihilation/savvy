@@ -66,10 +66,8 @@ pub struct UnextendrFn {
     attrs: Vec<syn::Attribute>,
     /// Original function name
     fn_name: syn::Ident,
-    /// Original arguments (e.g. `x: RealSxp, y: i32`)
-    args_orig: syn::punctuated::Punctuated<syn::FnArg, syn::token::Comma>,
-    /// Arguments for API functions (e.g. `x: SEXP, y: i32`)
-    args_new: Vec<UnextendrFnArg>,
+    /// Function arguments
+    args: Vec<UnextendrFnArg>,
     /// Arguments to call the inner functions with (e.g. `x, y`)
     args_for_calling: Vec<syn::Ident>,
     /// Original body of the function
@@ -153,8 +151,7 @@ impl UnextendrFn {
         Self {
             attrs,
             fn_name,
-            args_orig,
-            args_new,
+            args: args_new,
             args_for_calling,
             stmts_orig,
             stmts_additional,
@@ -164,9 +161,9 @@ impl UnextendrFn {
     pub fn make_inner_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
 
-        let args_pat: Vec<syn::Ident> = self.args_new.iter().map(|arg| arg.pat.clone()).collect();
+        let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat.clone()).collect();
         let args_ty: Vec<syn::Type> = self
-            .args_new
+            .args
             .iter()
             .map(|arg| arg.ty.to_rust_type_outer())
             .collect();
@@ -189,9 +186,9 @@ impl UnextendrFn {
         let fn_name_inner = self.fn_name_inner();
         let fn_name_outer = self.fn_name_outer();
 
-        let args_pat: Vec<syn::Ident> = self.args_new.iter().map(|arg| arg.pat.clone()).collect();
+        let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat.clone()).collect();
         let args_ty: Vec<syn::Type> = self
-            .args_new
+            .args
             .iter()
             .map(|arg| arg.ty.to_rust_type_outer())
             .collect();
@@ -217,7 +214,7 @@ impl ToSourceCode for UnextendrFn {
     fn to_c_function_for_header(&self) -> String {
         let fn_name = self.fn_name_outer();
         let args = self
-            .args_new
+            .args
             .iter()
             .map(|arg| {
                 let pat = &arg.pat;
