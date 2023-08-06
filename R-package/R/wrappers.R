@@ -8,10 +8,6 @@ to_upper <- function(x) {
   .Call(unextendr_to_upper, x)
 }
 
-# #' @rdname wrappers
-# #' @export
-# preserve_list <- function() .Call(unextendr_preserve_list)
-
 #' @rdname wrappers
 #' @param x An integer vector.
 #' @returns An integer vector with values multiplied by 2.
