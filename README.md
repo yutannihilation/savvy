@@ -59,7 +59,24 @@ concurrency. Every time we encountered such a failure, we place
 inside an R package? If extendr gives up supporting embedded usages, can
 our life be simpler a bit?
 
-## Functions
+### Generatinb bindings by CLI
+
+Extendr embeds the functionality to generate the R bindings and call
+entries. But, might it be easier to generate them by using an external
+CLI? I actually need this because I need to generate C code to handle
+the errors on C’s side.
+
+## Crates
+
+- `unextendr`: a simple wrapper around R’s C API
+- `unextendr-bindgen`: a crate for generating C and R bindings from Rust
+  code
+- `unextendr-macro`: a crate for `#[unextendr]` macro, which is powered
+  by `unextendr-bindgen`
+
+## Example functions
+
+A toy example R package can be found in `R-package/` directory.
 
 ``` r
 library(unextendr)
@@ -79,8 +96,8 @@ flip_logical(c(TRUE, FALSE, NA))
 - [ ] Support Attribute and names
 - [ ] Support list
 - [ ] Support ALTREP
-- [ ] Use proc-macro
-- [ ] `R_UnwindProtect()`
+- [x] Use proc-macro
+- [x] `R_UnwindProtect()`
 
 ## References
 
