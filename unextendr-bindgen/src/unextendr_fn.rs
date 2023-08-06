@@ -68,8 +68,6 @@ pub struct UnextendrFn {
     fn_name: syn::Ident,
     /// Function arguments
     args: Vec<UnextendrFnArg>,
-    /// Arguments to call the inner functions with (e.g. `x, y`)
-    args_for_calling: Vec<syn::Ident>,
     /// Original body of the function
     stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
@@ -114,14 +112,12 @@ impl UnextendrFn {
 
         let fn_name = orig.sig.ident.clone();
 
-        let args_orig = orig.sig.inputs.clone();
-
-        let mut args_for_calling: Vec<syn::Ident> = Vec::new();
-
         let stmts_orig = orig.block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        let args_new: Vec<UnextendrFnArg> = args_orig
+        let args_new: Vec<UnextendrFnArg> = orig
+            .sig
+            .inputs
             .iter()
             .map(|arg| {
                 if let Typed(PatType { pat, ty, .. }) = arg {
@@ -129,8 +125,6 @@ impl UnextendrFn {
                         Ident(arg) => arg.ident.clone(),
                         _ => panic!("not supported"),
                     };
-
-                    args_for_calling.push(pat.clone());
 
                     let ty =
                         UnextendrSupportedTypes::from_type(ty.as_ref()).expect("not supported");
@@ -152,7 +146,6 @@ impl UnextendrFn {
             attrs,
             fn_name,
             args: args_new,
-            args_for_calling,
             stmts_orig,
             stmts_additional,
         }
