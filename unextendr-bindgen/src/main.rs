@@ -9,6 +9,7 @@ mod unextendr_fn;
 
 use unextendr_fn::make_c_header_file;
 use unextendr_fn::make_c_impl_file;
+use unextendr_fn::make_r_impl_file;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -80,6 +81,9 @@ fn main() {
             let unextendr_fns = parse_file(&file);
             println!("{}", make_c_impl_file(&unextendr_fns));
         }
-        Commands::RImpl { file } => {}
+        Commands::RImpl { file } => {
+            let unextendr_fns = parse_file(&file);
+            println!("{}", make_r_impl_file(&unextendr_fns));
+        }
     }
 }

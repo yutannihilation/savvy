@@ -62,6 +62,8 @@ pub struct UnextendrFnArg {
 }
 
 pub struct UnextendrFn {
+    /// Doc comments
+    docs: Vec<String>,
     /// Attributes except for `#[unextendr]`
     attrs: Vec<syn::Attribute>,
     /// Original function name
@@ -95,6 +97,10 @@ pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
 }
 
 impl UnextendrFn {
+    pub fn fn_name_orig(&self) -> syn::Ident {
+        self.fn_name.clone()
+    }
+
     pub fn fn_name_inner(&self) -> syn::Ident {
         format_ident!("unextendr_{}_inner", self.fn_name)
     }
@@ -109,6 +115,32 @@ impl UnextendrFn {
         let mut attrs = orig.attrs.clone();
         // Remove #[unextendr]
         attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
+
+        // Extract doc comments
+        let docs = attrs
+            .iter()
+            .filter_map(|attr| {
+                match &attr.meta {
+                    syn::Meta::NameValue(nv) => {
+                        // Doc omments are transformed into the form of `#[doc =
+                        // r"comment"]` before macros are expanded.
+                        // cf., https://docs.rs/syn/latest/syn/struct.Attribute.html#doc-comments
+                        if nv.path.is_ident("doc") {
+                            match &nv.value {
+                                syn::Expr::Lit(syn::ExprLit {
+                                    lit: syn::Lit::Str(doc),
+                                    ..
+                                }) => Some(doc.value()),
+                                _ => None,
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                    _ => None,
+                }
+            })
+            .collect();
 
         let fn_name = orig.sig.ident.clone();
 
@@ -143,6 +175,7 @@ impl UnextendrFn {
             .collect();
 
         Self {
+            docs,
             attrs,
             fn_name,
             args: args_new,
@@ -233,7 +266,30 @@ SEXP {fn_name}_wrapper(SEXP x) {{
     }
 
     fn to_r_function(&self) -> String {
-        "".into()
+        let fn_name = self.fn_name_orig();
+        let fn_name_c = self.fn_name_outer();
+
+        let doc_comments = self
+            .docs
+            .iter()
+            .map(|doc| format!("#'{doc}"))
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        let args = self
+            .args
+            .iter()
+            .map(|arg| arg.pat.clone().to_string())
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        format!(
+            "{doc_comments}
+{fn_name} <- function({args}) {{
+  .Call({fn_name_c}, {args})
+}}
+"
+        )
     }
 }
 
@@ -306,5 +362,21 @@ void R_init_unextendr(DllInfo *dll) {{
   R_useDynamicSymbols(dll, FALSE);
 }}
 "
+    )
+}
+
+pub fn make_r_impl_file(fns: &[UnextendrFn]) -> String {
+    let r_fns = fns
+        .iter()
+        .map(|x| x.to_r_function())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!(
+        r#"#' @useDynLib unextendr, .registration = TRUE
+#' @keywords internal
+"_PACKAGE"
+
+{r_fns}"#
     )
 }
