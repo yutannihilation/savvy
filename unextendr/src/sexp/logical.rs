@@ -42,6 +42,10 @@ impl LogicalSxp {
     fn inner(&self) -> SEXP {
         self.0
     }
+
+    pub(crate) unsafe fn from_raw(x: SEXP) -> Self {
+        Self(x)
+    }
 }
 
 impl OwnedLogicalSxp {
