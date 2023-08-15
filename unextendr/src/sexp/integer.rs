@@ -47,7 +47,7 @@ impl IntegerSxp {
         }
     }
 
-    fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.0
     }
 }
@@ -65,7 +65,7 @@ impl OwnedIntegerSxp {
         self.inner.iter()
     }
 
-    pub(crate) fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
 

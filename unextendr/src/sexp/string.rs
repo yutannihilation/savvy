@@ -32,7 +32,7 @@ impl StringSxp {
         }
     }
 
-    fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.0
     }
 }
@@ -50,7 +50,7 @@ impl OwnedStringSxp {
         self.inner.iter()
     }
 
-    pub(crate) fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
 

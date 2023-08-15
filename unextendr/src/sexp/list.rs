@@ -1,8 +1,13 @@
+use std::ffi::CStr;
+
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_xlength, ALTREP, SEXP, TYPEOF, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_translateCharUTF8, Rf_xlength, ALTREP, SEXP,
+    TYPEOF, VECTOR_ELT,
 };
 
 use crate::{IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
+
+use super::na::NotAvailableValue;
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -60,7 +65,7 @@ impl ListSxp {
         }
     }
 
-    fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.0
     }
 }
@@ -73,7 +78,7 @@ pub struct ListSxpIter<'a> {
 }
 
 impl<'a> Iterator for ListSxpIter<'a> {
-    type Item = (StringSxp, ListElement);
+    type Item = (&'a str, ListElement);
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
@@ -83,6 +88,17 @@ impl<'a> Iterator for ListSxpIter<'a> {
             return None;
         }
 
-        Some(self.sexp.elt(i))
+        let key = if let Some(StringSxp(k)) = self.keys {
+            if k == unsafe { libR_sys::R_NaString } {
+                <&str>::na()
+            } else {
+                unsafe { CStr::from_ptr(Rf_translateCharUTF8(k)).to_str().unwrap() }
+            }
+        } else {
+            <&str>::na()
+        };
+        let value = self.values.elt(i);
+
+        Some((key, value))
     }
 }
