@@ -65,14 +65,16 @@ impl ListSxp {
         }
     }
 
-    pub fn keys(&self) -> Option<ListSxpKyeIter> {
+    pub fn keys(&self) -> std::vec::IntoIter<&'static str> {
         let names = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
 
-        if names == unsafe { R_NilValue } {
-            None
+        let keys: Vec<&'static str> = if names == unsafe { R_NilValue } {
+            std::iter::repeat("").take(self.len()).collect()
         } else {
-            Some(StringSxp(names).iter())
-        }
+            StringSxp(names).iter().collect()
+        };
+
+        keys.into_iter()
     }
 
     pub fn iter(&self) -> ListSxpIter {
@@ -99,10 +101,13 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
         self.i += 1;
-        self.sexp.get(i)
+
+        if i >= self.len {
+            return None;
+        }
+
+        Some(self.sexp.get_unchecked(i))
     }
 }
 
-type ListSxpKyeIter<'a> = StringSxpIter<'a>;
-
-type ListSxpIter<'a> = std::iter::Zip<IntoIter<StringSxpIter<'a>>, ListSxpValueIter<'a>>;
+type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;
