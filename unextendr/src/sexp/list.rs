@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::{ffi::CStr, option::IntoIter};
 
 use libR_sys::{
     R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_translateCharUTF8, Rf_xlength, ALTREP, SEXP,
@@ -7,7 +7,7 @@ use libR_sys::{
 
 use crate::{IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
 
-use super::na::NotAvailableValue;
+use super::{na::NotAvailableValue, string::StringSxpIter};
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -34,7 +34,15 @@ impl ListSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
-    pub(crate) fn elt(&self, i: usize) -> ListElement {
+    pub fn get(&self, i: usize) -> Option<ListElement> {
+        if i >= self.len() {
+            return None;
+        }
+
+        Some(self.get_unchecked(i))
+    }
+
+    pub fn get_unchecked(&self, i: usize) -> ListElement {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
             match TYPEOF(e) as u32 {
@@ -49,20 +57,29 @@ impl ListSxp {
         }
     }
 
-    pub fn iter(&self) -> ListSxpIter {
-        let names = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
-        let keys = if names == unsafe { R_NilValue } {
-            None
-        } else {
-            Some(StringSxp(names))
-        };
-
-        ListSxpIter {
-            values: self,
-            keys,
+    pub fn values(&self) -> ListSxpValueIter {
+        ListSxpValueIter {
+            sexp: self,
             i: 0,
             len: self.len(),
         }
+    }
+
+    pub fn keys(&self) -> Option<ListSxpKyeIter> {
+        let names = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
+
+        if names == unsafe { R_NilValue } {
+            None
+        } else {
+            Some(StringSxp(names).iter())
+        }
+    }
+
+    pub fn iter(&self) -> ListSxpIter {
+        let keys = self.keys();
+        let values = self.values();
+
+        std::iter::zip(keys, values)
     }
 
     pub fn inner(&self) -> SEXP {
@@ -70,35 +87,22 @@ impl ListSxp {
     }
 }
 
-pub struct ListSxpIter<'a> {
-    values: &'a ListSxp,
-    keys: Option<StringSxp>,
+pub struct ListSxpValueIter<'a> {
+    pub sexp: &'a ListSxp,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for ListSxpIter<'a> {
-    type Item = (&'a str, ListElement);
+impl<'a> Iterator for ListSxpValueIter<'a> {
+    type Item = ListElement;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
         self.i += 1;
-
-        if i >= self.len {
-            return None;
-        }
-
-        let key = if let Some(StringSxp(k)) = self.keys {
-            if k == unsafe { libR_sys::R_NaString } {
-                <&str>::na()
-            } else {
-                unsafe { CStr::from_ptr(Rf_translateCharUTF8(k)).to_str().unwrap() }
-            }
-        } else {
-            <&str>::na()
-        };
-        let value = self.values.elt(i);
-
-        Some((key, value))
+        self.sexp.get(i)
     }
 }
+
+type ListSxpKyeIter<'a> = StringSxpIter<'a>;
+
+type ListSxpIter<'a> = std::iter::Zip<IntoIter<StringSxpIter<'a>>, ListSxpValueIter<'a>>;
