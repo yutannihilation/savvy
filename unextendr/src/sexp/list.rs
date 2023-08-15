@@ -1,4 +1,6 @@
-use libR_sys::{Rf_xlength, ALTREP, SEXP, TYPEOF, VECTOR_ELT};
+use libR_sys::{
+    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_xlength, ALTREP, SEXP, TYPEOF, VECTOR_ELT,
+};
 
 use crate::{IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
 
@@ -9,7 +11,7 @@ pub struct OwnedListSxp {
 }
 
 // TODO: This is a dummy stuct just to make the functions like elt() always
-// succeed.
+// succeed. Maybe replace this with Sxp?
 pub struct UnsupportedSxp(SEXP);
 
 pub enum ListElement {
@@ -43,8 +45,16 @@ impl ListSxp {
     }
 
     pub fn iter(&self) -> ListSxpIter {
+        let names = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
+        let keys = if names == unsafe { R_NilValue } {
+            None
+        } else {
+            Some(StringSxp(names))
+        };
+
         ListSxpIter {
-            sexp: self,
+            values: self,
+            keys,
             i: 0,
             len: self.len(),
         }
@@ -56,13 +66,14 @@ impl ListSxp {
 }
 
 pub struct ListSxpIter<'a> {
-    pub sexp: &'a ListSxp,
+    values: &'a ListSxp,
+    keys: Option<StringSxp>,
     i: usize,
     len: usize,
 }
 
 impl<'a> Iterator for ListSxpIter<'a> {
-    type Item = ListElement;
+    type Item = (StringSxp, ListElement);
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
