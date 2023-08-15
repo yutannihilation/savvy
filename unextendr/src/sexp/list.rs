@@ -1,11 +1,11 @@
 use std::{ffi::CStr, option::IntoIter};
 
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_translateCharUTF8, Rf_xlength,
-    ALTREP, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_protect, Rf_setAttrib,
+    Rf_translateCharUTF8, Rf_xlength, ALTREP, SEXP, STRSXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
-use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
+use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp, RealSxp, StringSxp};
 
 use super::{na::NotAvailableValue, string::StringSxpIter};
 
@@ -34,15 +34,20 @@ impl ListSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
-    pub fn get(&self, i: usize) -> Option<ListElement> {
+    pub fn get(&self, k: &str) -> Option<ListElement> {
+        let index = self.keys().position(|e| e == k);
+        Some(self.get_by_index_unchecked(index?))
+    }
+
+    pub fn get_by_index(&self, i: usize) -> Option<ListElement> {
         if i >= self.len() {
             return None;
         }
 
-        Some(self.get_unchecked(i))
+        Some(self.get_by_index_unchecked(i))
     }
 
-    pub fn get_unchecked(&self, i: usize) -> ListElement {
+    pub fn get_by_index_unchecked(&self, i: usize) -> ListElement {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
             match TYPEOF(e) as u32 {
@@ -94,12 +99,16 @@ impl OwnedListSxp {
         self.inner.len()
     }
 
-    pub fn get(&self, i: usize) -> Option<ListElement> {
-        self.inner.get(i)
+    pub fn get(&self, k: &str) -> Option<ListElement> {
+        self.inner.get(k)
     }
 
-    pub fn get_unchecked(&self, i: usize) -> ListElement {
-        self.inner.get_unchecked(i)
+    pub fn get_by_index(&self, i: usize) -> Option<ListElement> {
+        self.inner.get_by_index(i)
+    }
+
+    pub fn get_by_index_unchecked(&self, i: usize) -> ListElement {
+        self.inner.get_by_index_unchecked(i)
     }
 
     pub fn values(&self) -> ListSxpValueIter {
@@ -114,9 +123,31 @@ impl OwnedListSxp {
         self.inner.iter()
     }
 
+    // TODO: このコードだと、else で names を OwnedStringSxp にするしかない
+    // 一度 Rf_setAttrib で渡した後は触りたくないので、new()の時にやるようにする
+    pub fn set(&mut self, i: usize, k: Option<&str>, v: &str) {
+        if let Some(k) = k {
+            let names = unsafe { Rf_getAttrib(self.inner.0, R_NamesSymbol) };
+            let names = if names == unsafe { R_NilValue } {
+                let new_names = OwnedStringSxp::new(self.len());
+                new_names.set_elt(i, k);
+                for j in 0..self.len() {
+                    if j != i {
+                        new_names.set_elt(j, "");
+                    }
+                }
+                unsafe { Rf_setAttrib(self.inner.0, R_NamesSymbol, new_names.inner()) };
+            } else {
+                // TODO
+                names
+            };
+        }
+    }
+
     pub fn new(len: usize) -> Self {
         let out = unsafe { Rf_allocVector(VECSXP, len as _) };
         let token = protect::insert_to_preserved_list(out);
+
         Self {
             inner: ListSxp(out),
             token,
@@ -141,7 +172,7 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
             return None;
         }
 
-        Some(self.sexp.get_unchecked(i))
+        Some(self.sexp.get_by_index_unchecked(i))
     }
 }
 
