@@ -2,7 +2,7 @@ use libR_sys::{Rf_xlength, ALTREP, SEXP, TYPEOF, VECTOR_ELT};
 
 use crate::{IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
 
-pub struct ListSxp(SEXP);
+pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
     inner: ListSxp,
     token: SEXP,
@@ -31,10 +31,10 @@ impl ListSxp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
             match TYPEOF(e) as u32 {
-                libR_sys::INTSXP => ListElement::Integer(IntegerSxp::from_raw(e)),
-                libR_sys::REALSXP => ListElement::Real(RealSxp::from_raw(e)),
-                libR_sys::STRSXP => ListElement::String(StringSxp::from_raw(e)),
-                libR_sys::LGLSXP => ListElement::Logical(LogicalSxp::from_raw(e)),
+                libR_sys::INTSXP => ListElement::Integer(IntegerSxp(e)),
+                libR_sys::REALSXP => ListElement::Real(RealSxp(e)),
+                libR_sys::STRSXP => ListElement::String(StringSxp(e)),
+                libR_sys::LGLSXP => ListElement::Logical(LogicalSxp(e)),
                 libR_sys::VECSXP => ListElement::List(ListSxp(e)),
                 libR_sys::NILSXP => ListElement::Null(NullSxp),
                 _ => ListElement::Unsupported(UnsupportedSxp(e)),

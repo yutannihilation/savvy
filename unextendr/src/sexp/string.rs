@@ -9,7 +9,7 @@ use super::na::NotAvailableValue;
 use super::Sxp;
 use crate::{error::get_human_readable_type_name, protect};
 
-pub struct StringSxp(SEXP);
+pub struct StringSxp(pub SEXP);
 pub struct OwnedStringSxp {
     inner: StringSxp,
     token: SEXP,
@@ -34,10 +34,6 @@ impl StringSxp {
 
     fn inner(&self) -> SEXP {
         self.0
-    }
-
-    pub(crate) unsafe fn from_raw(x: SEXP) -> Self {
-        Self(x)
     }
 }
 

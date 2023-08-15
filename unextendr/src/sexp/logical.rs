@@ -5,7 +5,7 @@ use libR_sys::{
 use super::Sxp;
 use crate::{error::get_human_readable_type_name, protect};
 
-pub struct LogicalSxp(SEXP);
+pub struct LogicalSxp(pub SEXP);
 pub struct OwnedLogicalSxp {
     inner: LogicalSxp,
     token: SEXP,
@@ -41,10 +41,6 @@ impl LogicalSxp {
 
     fn inner(&self) -> SEXP {
         self.0
-    }
-
-    pub(crate) unsafe fn from_raw(x: SEXP) -> Self {
-        Self(x)
     }
 }
 
