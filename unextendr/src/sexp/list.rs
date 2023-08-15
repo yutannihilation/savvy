@@ -1,11 +1,11 @@
 use std::{ffi::CStr, option::IntoIter};
 
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_translateCharUTF8, Rf_xlength, ALTREP, SEXP,
-    TYPEOF, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_translateCharUTF8, Rf_xlength,
+    ALTREP, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
-use crate::{IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
+use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, RealSxp, StringSxp};
 
 use super::{na::NotAvailableValue, string::StringSxpIter};
 
@@ -86,6 +86,41 @@ impl ListSxp {
 
     pub fn inner(&self) -> SEXP {
         self.0
+    }
+}
+
+impl OwnedListSxp {
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub fn get(&self, i: usize) -> Option<ListElement> {
+        self.inner.get(i)
+    }
+
+    pub fn get_unchecked(&self, i: usize) -> ListElement {
+        self.inner.get_unchecked(i)
+    }
+
+    pub fn values(&self) -> ListSxpValueIter {
+        self.inner.values()
+    }
+
+    pub fn keys(&self) -> std::vec::IntoIter<&'static str> {
+        self.inner.keys()
+    }
+
+    pub fn iter(&self) -> ListSxpIter {
+        self.inner.iter()
+    }
+
+    pub fn new(len: usize) -> Self {
+        let out = unsafe { Rf_allocVector(VECSXP, len as _) };
+        let token = protect::insert_to_preserved_list(out);
+        Self {
+            inner: ListSxp(out),
+            token,
+        }
     }
 }
 
