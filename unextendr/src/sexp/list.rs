@@ -3,7 +3,12 @@ use libR_sys::{
     SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
-use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp, RealSxp, StringSxp};
+use crate::{
+    error::get_human_readable_type_name, protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp,
+    RealSxp, StringSxp,
+};
+
+use super::Sxp;
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -116,6 +121,10 @@ impl OwnedListSxp {
         self.values.keys()
     }
 
+    pub fn inner(&self) -> SEXP {
+        self.values.inner()
+    }
+
     pub fn iter(&self) -> ListSxpIter {
         self.values.iter()
     }
@@ -162,6 +171,38 @@ impl OwnedListSxp {
     }
 }
 
+impl Drop for OwnedListSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
+    }
+}
+
+impl TryFrom<SEXP> for ListSxp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: SEXP) -> crate::error::Result<Self> {
+        if !Sxp(value).is_list() {
+            let type_name = get_human_readable_type_name(value);
+            let msg = format!("Cannot convert {type_name} to string");
+            return Err(crate::error::Error::UnexpectedType(msg));
+        }
+        Ok(Self(value))
+    }
+}
+
+// Conversion into SEXP is infallible as it's just extract the inner one.
+impl From<ListSxp> for SEXP {
+    fn from(value: ListSxp) -> Self {
+        value.inner()
+    }
+}
+
+impl From<OwnedListSxp> for SEXP {
+    fn from(value: OwnedListSxp) -> Self {
+        value.inner()
+    }
+}
+
 pub struct ListSxpValueIter<'a> {
     pub sexp: &'a ListSxp,
     i: usize,
@@ -184,9 +225,3 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
 }
 
 type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;
-
-impl Drop for OwnedListSxp {
-    fn drop(&mut self) {
-        protect::release_from_preserved_list(self.token);
-    }
-}

@@ -1,4 +1,4 @@
-use libR_sys::{Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, SEXP};
+use libR_sys::{Rf_isInteger, Rf_isList, Rf_isLogical, Rf_isReal, Rf_isString, SEXP};
 
 pub mod integer;
 pub mod list;
@@ -29,5 +29,9 @@ impl Sxp {
 
     pub fn is_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.0) == 1 }
+    }
+
+    pub fn is_list(&self) -> bool {
+        unsafe { Rf_isList(self.0) == 1 }
     }
 }
