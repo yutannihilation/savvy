@@ -1,14 +1,9 @@
-use std::{ffi::CStr, option::IntoIter};
-
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_protect, Rf_setAttrib,
-    Rf_translateCharUTF8, Rf_xlength, ALTREP, SET_VECTOR_ELT, SEXP, STRSXP, TYPEOF, VECSXP,
-    VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_setAttrib, Rf_xlength,
+    SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
 use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp, RealSxp, StringSxp};
-
-use super::{na::NotAvailableValue, string::StringSxpIter};
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -189,3 +184,9 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
 }
 
 type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;
+
+impl Drop for OwnedListSxp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
+    }
+}
