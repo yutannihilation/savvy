@@ -12,7 +12,7 @@ use unextendr::unextendr;
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[unextendr]
-unsafe fn to_upper(x: StringSxp) -> unextendr::Result<unextendr::SEXP> {
+fn to_upper(x: StringSxp) -> unextendr::Result<unextendr::SEXP> {
     let mut out = OwnedStringSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -34,7 +34,7 @@ unsafe fn to_upper(x: StringSxp) -> unextendr::Result<unextendr::SEXP> {
 /// @returns An integer vector with values multiplied by 2.
 /// @export
 #[unextendr]
-unsafe fn times_two_int(x: IntegerSxp) -> unextendr::Result<unextendr::SEXP> {
+fn times_two_int(x: IntegerSxp) -> unextendr::Result<unextendr::SEXP> {
     let mut out = OwnedIntegerSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -54,7 +54,7 @@ unsafe fn times_two_int(x: IntegerSxp) -> unextendr::Result<unextendr::SEXP> {
 /// @returns A numeric vector with values multiplied by 2.
 /// @export
 #[unextendr]
-unsafe fn times_two_numeric(x: RealSxp) -> unextendr::Result<unextendr::SEXP> {
+fn times_two_numeric(x: RealSxp) -> unextendr::Result<unextendr::SEXP> {
     let mut out = OwnedRealSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
@@ -74,7 +74,7 @@ unsafe fn times_two_numeric(x: RealSxp) -> unextendr::Result<unextendr::SEXP> {
 /// @returns An logical vector with filled values (`NA` is converted to `TRUE`).
 /// @export
 #[unextendr]
-unsafe fn flip_logical(x: LogicalSxp) -> unextendr::Result<unextendr::SEXP> {
+fn flip_logical(x: LogicalSxp) -> unextendr::Result<unextendr::SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
