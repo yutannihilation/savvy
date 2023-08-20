@@ -59,12 +59,35 @@ concurrency. Every time we encountered such a failure, we place
 inside an R package? If extendr gives up supporting embedded usages, can
 our life be simpler a bit?
 
-### Generatinb bindings by CLI
+### Generate bindings by CLI
 
 Extendr embeds the functionality to generate the R bindings and call
 entries. But, might it be easier to generate them by using an external
 CLI? I actually need this because I need to generate C code to handle
 the errors on C’s side.
+
+#### Usage
+
+``` console
+Generate C bindings and R bindings for a Rust library
+
+Usage: unextendr-bindgen.exe [COMMAND]
+
+Commands:
+  c-header  Generate C header file
+  c-impl    Generate C implementation for init.c
+  r-impl    Generate R wrapper functions
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help
+```
+
+``` sh
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
+```
 
 ## Crates
 
@@ -83,12 +106,16 @@ library(unextendr)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
 #> [1] "A"          NA           "A"          "座布団一枚"
+
 times_two_int(c(1L, NA, 100L, 0L, -1L))
 #> [1]   2  NA 200   0  -2
+
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 #> [1]  2.2   NA  0.0  Inf -Inf
+
 flip_logical(c(TRUE, FALSE, NA))
 #> [1] FALSE  TRUE  TRUE
+
 print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
 #> (no name): integer [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 #> a: character [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z]

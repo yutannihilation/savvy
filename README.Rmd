@@ -62,11 +62,35 @@ Every time we encountered such a failure, we place `single_threaded()` here and
 there. But, could all of them really happen inside an R package? If extendr gives
 up supporting embedded usages, can our life be simpler a bit?
 
-### Generatinb bindings by CLI
+### Generate bindings by CLI
 
 Extendr embeds the functionality to generate the R bindings and call entries.
 But, might it be easier to generate them by using an external CLI? I actually
 need this because I need to generate C code to handle the errors on C's side.
+
+#### Usage
+
+``` console
+Generate C bindings and R bindings for a Rust library
+
+Usage: unextendr-bindgen.exe [COMMAND]
+
+Commands:
+  c-header  Generate C header file
+  c-impl    Generate C implementation for init.c
+  r-impl    Generate R wrapper functions
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help
+
+```
+
+```sh
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
+cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
+```
 
 
 ## Crates
@@ -83,9 +107,13 @@ A toy example R package can be found in `R-package/` directory.
 library(unextendr)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
+
 times_two_int(c(1L, NA, 100L, 0L, -1L))
+
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
+
 flip_logical(c(TRUE, FALSE, NA))
+
 print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
 ```
 
