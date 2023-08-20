@@ -3,7 +3,7 @@ use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SET_
 use super::Sxp;
 use crate::{error::get_human_readable_type_name, protect};
 
-pub struct RealSxp(SEXP);
+pub struct RealSxp(pub SEXP);
 pub struct OwnedRealSxp {
     inner: RealSxp,
     token: SEXP,
@@ -37,7 +37,7 @@ impl RealSxp {
         }
     }
 
-    fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.0
     }
 }
@@ -55,7 +55,7 @@ impl OwnedRealSxp {
         self.inner.iter()
     }
 
-    pub(crate) fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
 

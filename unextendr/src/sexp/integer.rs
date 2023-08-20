@@ -13,9 +13,9 @@ use crate::{error::get_human_readable_type_name, protect};
 //
 // `OwnedIntegerSxp` is a writable wrapper for SEXPs newly allocated on Rust's
 // side. Since it's us who produce it, we protect it and drop it.
-pub struct IntegerSxp(SEXP);
+pub struct IntegerSxp(pub SEXP);
 pub struct OwnedIntegerSxp {
-    inner: IntegerSxp,
+    pub inner: IntegerSxp,
     token: SEXP,
 }
 
@@ -47,7 +47,7 @@ impl IntegerSxp {
         }
     }
 
-    fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.0
     }
 }
@@ -65,7 +65,7 @@ impl OwnedIntegerSxp {
         self.inner.iter()
     }
 
-    pub(crate) fn inner(&self) -> SEXP {
+    pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
 

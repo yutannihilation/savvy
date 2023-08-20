@@ -1,6 +1,9 @@
-use libR_sys::{Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, SEXP};
+use libR_sys::{
+    Rf_isInteger, Rf_isList, Rf_isLogical, Rf_isReal, Rf_isString, SEXP, TYPEOF, VECSXP,
+};
 
 pub mod integer;
+pub mod list;
 pub mod logical;
 pub mod na;
 pub mod null;
@@ -28,5 +31,10 @@ impl Sxp {
 
     pub fn is_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.0) == 1 }
+    }
+
+    // VECSXP has not test function. Rf_isList() is for pairlist
+    pub fn is_list(&self) -> bool {
+        unsafe { TYPEOF(self.0) as u32 == VECSXP }
     }
 }

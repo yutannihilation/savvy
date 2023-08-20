@@ -86,6 +86,7 @@ to_upper(c("a", NA, "A", "座布団一枚"))
 times_two_int(c(1L, NA, 100L, 0L, -1L))
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 flip_logical(c(TRUE, FALSE, NA))
+print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
 ```
 
 ## TODOs

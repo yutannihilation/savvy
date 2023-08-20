@@ -7,10 +7,10 @@
 flip_logical(x)
 }
 \arguments{
-\item{x}{An logical vector.}
+\item{x}{A logical vector.}
 }
 \value{
-An logical vector with filled values (\code{NA} is converted to \code{TRUE}).
+A logical vector with filled values (\code{NA} is converted to \code{TRUE}).
 }
 \description{
 Flip Input
