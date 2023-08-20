@@ -119,9 +119,11 @@ print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D =
 
 ## TODOs
 
-- [ ] Support Attribute and names
-- [ ] Support list
-- [ ] Support ALTREP
+- [x] Support attributes and names (Note: I decided not to support attributes except for list cases. Users can pass the name and the vector content as separate arguments).
+- [x] Support list
+- [x] Support reading ALTREP (Note: I decided not to support creating an ALTREP for simplicity)
+- [ ] Support external pointer
+- [ ] Support function and environment
 - [x] Use proc-macro
 - [x] `R_UnwindProtect()`
 
