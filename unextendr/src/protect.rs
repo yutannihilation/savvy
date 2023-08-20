@@ -49,6 +49,7 @@ pub(crate) static PRESERVED_LIST: Lazy<PreservedList> = Lazy::new(|| unsafe {
     PreservedList(r)
 });
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
     unsafe {
         if obj == R_NilValue {
@@ -74,6 +75,7 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn release_from_preserved_list(token: SEXP) {
     unsafe {
         if token == R_NilValue {

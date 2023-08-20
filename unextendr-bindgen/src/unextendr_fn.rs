@@ -10,6 +10,7 @@ pub enum UnextendrSupportedTypes {
     ListSxp,
 }
 
+#[allow(dead_code)]
 impl UnextendrSupportedTypes {
     fn from_type(ty: &syn::Type) -> Option<Self> {
         // Use only the last part to support both the qualified type path (e.g.,
@@ -110,6 +111,7 @@ pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
     }
 }
 
+#[allow(dead_code)]
 impl UnextendrFn {
     pub fn fn_name_orig(&self) -> syn::Ident {
         self.fn_name.clone()

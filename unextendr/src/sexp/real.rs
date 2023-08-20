@@ -55,7 +55,7 @@ impl OwnedRealSxp {
         self.inner.is_empty()
     }
 
-    pub(crate) fn elt(&self, i: usize) -> f64 {
+    pub fn elt(&self, i: usize) -> f64 {
         self.inner.elt(i)
     }
 

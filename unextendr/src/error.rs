@@ -25,6 +25,7 @@ impl std::error::Error for Error {
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn get_human_readable_type_name(x: SEXP) -> &'static str {
     match unsafe { TYPEOF(x) as u32 } {
         libR_sys::INTSXP => "integer",

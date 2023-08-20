@@ -28,6 +28,8 @@ impl IntegerSxp {
         self.len() == 0
     }
 
+    // Do not expose elt() of an external SEXP. Users can access the values only
+    // via iter().
     pub(crate) fn elt(&self, i: usize) -> i32 {
         unsafe { INTEGER_ELT(self.0, i as _) }
     }
@@ -65,7 +67,8 @@ impl OwnedIntegerSxp {
         self.inner.is_empty()
     }
 
-    pub(crate) fn elt(&self, i: usize) -> i32 {
+    // It's probably fine to expose elt() for an owned SEXP
+    pub fn elt(&self, i: usize) -> i32 {
         self.inner.elt(i)
     }
 

@@ -57,7 +57,7 @@ impl OwnedLogicalSxp {
         self.inner.is_empty()
     }
 
-    pub(crate) fn elt(&self, i: usize) -> bool {
+    pub fn elt(&self, i: usize) -> bool {
         self.inner.elt(i)
     }
 

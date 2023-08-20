@@ -50,7 +50,7 @@ impl OwnedStringSxp {
         self.inner.is_empty()
     }
 
-    pub(crate) fn elt(&self, i: usize) -> SEXP {
+    pub fn elt(&self, i: usize) -> SEXP {
         self.inner.elt(i)
     }
 
