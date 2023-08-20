@@ -5,18 +5,11 @@ LIBDIR = $(TARGET_DIR)/$(TARGET)/release
 STATLIB = $(LIBDIR)/libsimple_unextendr.a
 PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 
-HEADER_FILE = ./rust/api.h
-
-
 # Rtools42 doesn't have the linker in the location that cargo expects, so we
 # need to overwrite it via configuration.
 CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
-all: C_clean $(HEADER_FILE)
-
-# TODO: release unextendr-bindgen to crates.io
-$(HEADER_FILE):
-	cargo run --manifest-path ../../unextendr-bindgen/Cargo.toml -- c-header ./rust/src/lib.rs > $@
+all: C_clean
 
 $(SHLIB): $(STATLIB)
 

@@ -1,14 +1,9 @@
 TARGET_DIR = ./rust/target
 LIBDIR = $(TARGET_DIR)/release
 STATLIB = $(LIBDIR)/libsimple_unextendr.a
-HEADER_FILE = ./rust/api.h
 PKG_LIBS = -L$(LIBDIR) -lsimple_unextendr
 
-all: C_clean $(HEADER_FILE)
-
-$(HEADER_FILE):
-	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
-	  cargo run --manifest-path ../../unextendr-bindgen/Cargo.toml ./rust/src/lib.rs > $@
+all: C_clean
 
 $(SHLIB): $(STATLIB)
 
