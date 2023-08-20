@@ -14,6 +14,10 @@ impl RealSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub(crate) fn elt(&self, i: usize) -> f64 {
         unsafe { REAL_ELT(self.0, i as _) }
     }
@@ -45,6 +49,10 @@ impl RealSxp {
 impl OwnedRealSxp {
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
     }
 
     pub(crate) fn elt(&self, i: usize) -> f64 {

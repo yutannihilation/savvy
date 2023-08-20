@@ -1,6 +1,4 @@
-use libR_sys::{
-    Rf_isInteger, Rf_isList, Rf_isLogical, Rf_isReal, Rf_isString, SEXP, TYPEOF, VECSXP,
-};
+use libR_sys::{Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, SEXP, TYPEOF, VECSXP};
 
 pub mod integer;
 pub mod list;

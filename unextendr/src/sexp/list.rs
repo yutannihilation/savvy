@@ -36,6 +36,10 @@ impl ListSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn get(&self, k: &str) -> Option<ListElement> {
         let index = self.keys().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
@@ -99,6 +103,10 @@ impl ListSxp {
 impl OwnedListSxp {
     pub fn len(&self) -> usize {
         self.values.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
     }
 
     pub fn get(&self, k: &str) -> Option<ListElement> {

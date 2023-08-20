@@ -16,6 +16,10 @@ impl LogicalSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub(crate) fn elt(&self, i: usize) -> bool {
         unsafe { LOGICAL_ELT(self.0, i as _) == 1 }
     }
@@ -47,6 +51,10 @@ impl LogicalSxp {
 impl OwnedLogicalSxp {
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
     }
 
     pub(crate) fn elt(&self, i: usize) -> bool {

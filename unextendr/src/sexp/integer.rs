@@ -24,6 +24,10 @@ impl IntegerSxp {
         unsafe { Rf_xlength(self.0) as _ }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub(crate) fn elt(&self, i: usize) -> i32 {
         unsafe { INTEGER_ELT(self.0, i as _) }
     }
@@ -55,6 +59,10 @@ impl IntegerSxp {
 impl OwnedIntegerSxp {
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
     }
 
     pub(crate) fn elt(&self, i: usize) -> i32 {

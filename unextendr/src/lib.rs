@@ -15,11 +15,6 @@ pub use sexp::string::{OwnedStringSxp, StringSxp};
 pub use libR_sys::SEXP;
 pub use unextendr_macro::unextendr;
 
-use protect::{
-    insert_to_preserved_list, release_from_preserved_list, PreservedList, PRESERVED_LIST,
-};
-use unwind_protect::unwind_protect;
-
 use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf};
 
 use std::ffi::CString;

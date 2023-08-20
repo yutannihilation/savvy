@@ -7,6 +7,10 @@ extern "C" {
     ) -> SEXP;
 }
 
+/// # Safety
+///
+/// This function wraps around `R_UnwindProtect()` API, which is very unsafe in
+/// its nature. So, please use this with care.
 pub unsafe fn unwind_protect<F>(f: F) -> crate::error::Result<SEXP>
 where
     F: FnOnce() -> SEXP + Copy,

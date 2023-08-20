@@ -3,8 +3,6 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-use syn::{parse_quote, FnArg::Typed, PatType};
-
 mod unextendr_fn;
 
 use unextendr_fn::make_c_header_file;

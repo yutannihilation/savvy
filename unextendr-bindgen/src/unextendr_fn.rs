@@ -75,19 +75,19 @@ pub struct UnextendrFnArg {
 
 pub struct UnextendrFn {
     /// Doc comments
-    docs: Vec<String>,
+    pub docs: Vec<String>,
     /// Attributes except for `#[unextendr]`
-    attrs: Vec<syn::Attribute>,
+    pub attrs: Vec<syn::Attribute>,
     /// Original function name
-    fn_name: syn::Ident,
+    pub fn_name: syn::Ident,
     /// Function arguments
-    args: Vec<UnextendrFnArg>,
+    pub args: Vec<UnextendrFnArg>,
     /// Whether the function has return value
-    has_result: bool,
+    pub has_result: bool,
     /// Original body of the function
-    stmts_orig: Vec<syn::Stmt>,
+    pub stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
-    stmts_additional: Vec<syn::Stmt>,
+    pub stmts_additional: Vec<syn::Stmt>,
 }
 
 pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
