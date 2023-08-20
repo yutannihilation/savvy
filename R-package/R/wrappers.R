@@ -44,6 +44,6 @@ flip_logical <- function(x) {
 #' @returns `NULL`
 #' @export
 print_list <- function(x) {
-  .Call(unextendr_print_list, x)
+  invisible(.Call(unextendr_print_list, x))
 }
 

@@ -91,9 +91,9 @@ fn flip_logical(x: LogicalSxp) -> unextendr::Result<unextendr::SEXP> {
 /// @returns `NULL`
 /// @export
 #[unextendr]
-fn print_list(x: ListSxp) -> unextendr::Result<unextendr::SEXP> {
+fn print_list(x: ListSxp) {
     for (k, v) in x.iter() {
-        let msg = match v {
+        let content = match v {
             unextendr::sexp::list::ListElement::Integer(x) => {
                 format!(
                     "integer [{}]",
@@ -129,8 +129,8 @@ fn print_list(x: ListSxp) -> unextendr::Result<unextendr::SEXP> {
             unextendr::sexp::list::ListElement::Unsupported(_) => "Unsupported".to_string(),
         };
 
-        unextendr::r_print(msg);
+        let name = if k.is_empty() { "(no name)" } else { k };
+
+        unextendr::r_print(format!("{name}: {content}\n"));
     }
-    // If the function doesn't have the actual return value, use NullSxp
-    NullSxp.into()
 }

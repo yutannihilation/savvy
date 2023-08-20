@@ -89,6 +89,12 @@ times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 #> [1]  2.2   NA  0.0  Inf -Inf
 flip_logical(c(TRUE, FALSE, NA))
 #> [1] FALSE  TRUE  TRUE
+print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
+#> (no name): integer [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#> a: character [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z]
+#> b: logical [TRUE, FALSE]
+#> たかし: list
+#> D: NULL
 ```
 
 ## TODOs

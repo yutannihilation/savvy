@@ -1,6 +1,7 @@
 use quote::format_ident;
 use syn::{parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
 
+#[allow(clippy::enum_variant_names)]
 pub enum UnextendrSupportedTypes {
     IntegerSxp,
     RealSxp,
@@ -81,6 +82,8 @@ pub struct UnextendrFn {
     fn_name: syn::Ident,
     /// Function arguments
     args: Vec<UnextendrFnArg>,
+    /// Whether the function has return value
+    has_result: bool,
     /// Original body of the function
     stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
@@ -185,11 +188,17 @@ impl UnextendrFn {
             })
             .collect();
 
+        let has_result = match orig.sig.output {
+            syn::ReturnType::Default => false,
+            syn::ReturnType::Type(_, _) => true,
+        };
+
         Self {
             docs,
             attrs,
             fn_name,
             args: args_new,
+            has_result,
             stmts_orig,
             stmts_additional,
         }
@@ -209,13 +218,26 @@ impl UnextendrFn {
         let stmts_orig = &self.stmts_orig;
         let attrs = &self.attrs;
 
-        let out: syn::ItemFn = parse_quote!(
-            #(#attrs)*
-            unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
-                #(#stmts_additional)*
-                #(#stmts_orig)*
-            }
-        );
+        let out: syn::ItemFn = if self.has_result {
+            parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    #(#stmts_additional)*
+                    #(#stmts_orig)*
+                }
+            )
+        } else {
+            parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    #(#stmts_additional)*
+                    #(#stmts_orig)*
+
+                    // Dummy return value
+                    Ok(unextendr::NullSxp.into())
+                }
+            )
+        };
         out
     }
 
@@ -294,10 +316,17 @@ SEXP {fn_name}_wrapper(SEXP x) {{
             .collect::<Vec<String>>()
             .join(", ");
 
+        let body = if self.has_result {
+            format!(".Call({fn_name_c}, {args})")
+        } else {
+            // If the result is NULL, wrap it with invisible
+            format!("invisible(.Call({fn_name_c}, {args}))")
+        };
+
         format!(
             "{doc_comments}
 {fn_name} <- function({args}) {{
-  .Call({fn_name_c}, {args})
+  {body}
 }}
 "
         )
