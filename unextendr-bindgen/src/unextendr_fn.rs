@@ -6,6 +6,7 @@ pub enum UnextendrSupportedTypes {
     RealSxp,
     LogicalSxp,
     StringSxp,
+    ListSxp,
 }
 
 impl UnextendrSupportedTypes {
@@ -24,6 +25,7 @@ impl UnextendrSupportedTypes {
             "RealSxp" => Some(Self::RealSxp),
             "LogicalSxp" => Some(Self::LogicalSxp),
             "StringSxp" => Some(Self::StringSxp),
+            "ListSxp" => Some(Self::ListSxp),
             _ => None,
         }
     }
@@ -35,13 +37,18 @@ impl UnextendrSupportedTypes {
             Self::RealSxp => parse_quote!(unextendr::RealSxp),
             Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
             Self::StringSxp => parse_quote!(unextendr::StringSxp),
+            Self::ListSxp => parse_quote!(unextendr::ListSxp),
         }
     }
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
     fn to_rust_type_outer(&self) -> syn::Type {
         match &self {
-            Self::IntegerSxp | Self::RealSxp | Self::LogicalSxp | Self::StringSxp => {
+            Self::IntegerSxp
+            | Self::RealSxp
+            | Self::LogicalSxp
+            | Self::StringSxp
+            | Self::ListSxp => {
                 parse_quote!(unextendr::SEXP)
             }
         }
@@ -50,7 +57,11 @@ impl UnextendrSupportedTypes {
     /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
     fn to_c_type(&self) -> String {
         match &self {
-            Self::IntegerSxp | Self::RealSxp | Self::LogicalSxp | Self::StringSxp => "SEXP",
+            Self::IntegerSxp
+            | Self::RealSxp
+            | Self::LogicalSxp
+            | Self::StringSxp
+            | Self::ListSxp => "SEXP",
         }
         .to_string()
     }

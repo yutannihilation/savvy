@@ -31,10 +31,19 @@ times_two_numeric <- function(x) {
 
 #' Flip Input
 #'
-#' @param x An logical vector.
-#' @returns An logical vector with filled values (`NA` is converted to `TRUE`).
+#' @param x A logical vector.
+#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
 flip_logical <- function(x) {
   .Call(unextendr_flip_logical, x)
+}
+
+#' Print the content of list
+#'
+#' @param x A list vector.
+#' @returns `NULL`
+#' @export
+print_list <- function(x) {
+  .Call(unextendr_print_list, x)
 }
 

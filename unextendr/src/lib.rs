@@ -5,6 +5,7 @@ pub mod unwind_protect;
 
 pub use error::{Error, Result};
 pub use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
+pub use sexp::list::{ListSxp, OwnedListSxp};
 pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
 pub use sexp::null::NullSxp;
 pub use sexp::real::{OwnedRealSxp, RealSxp};
@@ -24,14 +25,14 @@ use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf};
 use std::ffi::CString;
 
 // TODO: make this r_println! macro
-fn r_print(msg: String) {
+pub fn r_print(msg: String) {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         Rprintf(msg_c_string.as_ptr());
     }
 }
 
-fn r_eprint(msg: String) {
+pub fn r_eprint(msg: String) {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         REprintf(msg_c_string.as_ptr());

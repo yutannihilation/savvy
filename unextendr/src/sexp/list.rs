@@ -183,7 +183,7 @@ impl TryFrom<SEXP> for ListSxp {
     fn try_from(value: SEXP) -> crate::error::Result<Self> {
         if !Sxp(value).is_list() {
             let type_name = get_human_readable_type_name(value);
-            let msg = format!("Cannot convert {type_name} to string");
+            let msg = format!("Cannot convert {type_name} to list");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value))

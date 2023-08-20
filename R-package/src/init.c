@@ -53,11 +53,17 @@ SEXP unextendr_flip_logical_wrapper(SEXP x) {
     return handle_result(res);
 }
 
+SEXP unextendr_print_list_wrapper(SEXP x) {
+    SEXP res = unextendr_print_list(x);
+    return handle_result(res);
+}
+
 static const R_CallMethodDef CallEntries[] = {
     {"unextendr_to_upper", (DL_FUNC) &unextendr_to_upper_wrapper, 1},
     {"unextendr_times_two_int", (DL_FUNC) &unextendr_times_two_int_wrapper, 1},
     {"unextendr_times_two_numeric", (DL_FUNC) &unextendr_times_two_numeric_wrapper, 1},
     {"unextendr_flip_logical", (DL_FUNC) &unextendr_flip_logical_wrapper, 1},
+    {"unextendr_print_list", (DL_FUNC) &unextendr_print_list_wrapper, 1},
     {NULL, NULL, 0}
 };
 
