@@ -1,5 +1,8 @@
-use libR_sys::{Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, SEXP, TYPEOF, VECSXP};
+use libR_sys::{
+    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, EXTPTRSXP, SEXP, TYPEOF, VECSXP,
+};
 
+pub mod external_pointer;
 pub mod integer;
 pub mod list;
 pub mod logical;
@@ -31,8 +34,12 @@ impl Sxp {
         unsafe { Rf_isLogical(self.0) == 1 }
     }
 
-    // VECSXP has not test function. Rf_isList() is for pairlist
+    // There's no test function for VECSXP. Rf_isList() is for pairlist
     pub fn is_list(&self) -> bool {
         unsafe { TYPEOF(self.0) as u32 == VECSXP }
+    }
+
+    pub fn is_external_pointer(&self) -> bool {
+        unsafe { TYPEOF(self.0) as u32 == EXTPTRSXP }
     }
 }
