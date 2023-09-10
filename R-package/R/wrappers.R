@@ -58,7 +58,7 @@ set_name <- function(self__, ...) {
 }
 
 #' @export
-set_name.Person <- function(self__, name) {
+set_name.Person <- function(self__, name, ...) {
   invisible(.Call(unextendr_Person_set_name, self__, name))
 }
 
@@ -68,6 +68,6 @@ name <- function(self__, ...) {
 }
 
 #' @export
-name.Person <- function(self__) {
+name.Person <- function(self__, ...) {
   .Call(unextendr_Person_name, self__)
 }
