@@ -47,3 +47,27 @@ print_list <- function(x) {
   invisible(.Call(unextendr_print_list, x))
 }
 
+#' @export
+Person <- function() {
+  `class<-`(.Call(unextendr_Person_new), "Person")
+}
+
+#' @export
+set_name <- function(self__, ...) {
+  UseMethod("set_name", self__)
+}
+
+#' @export
+set_name.Person <- function(self__, name) {
+  invisible(.Call(unextendr_Person_set_name, self__, name))
+}
+
+#' @export
+name <- function(self__, ...) {
+  UseMethod("name", self__)
+}
+
+#' @export
+name.Person <- function(self__) {
+  .Call(unextendr_Person_name, self__)
+}

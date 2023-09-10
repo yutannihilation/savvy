@@ -1,11 +1,14 @@
-use unextendr::sexp::integer::{IntegerSxp, OwnedIntegerSxp};
-use unextendr::sexp::list::ListSxp;
-use unextendr::sexp::logical::{LogicalSxp, OwnedLogicalSxp};
-use unextendr::sexp::na::NotAvailableValue;
-use unextendr::sexp::real::{OwnedRealSxp, RealSxp};
-use unextendr::sexp::string::{OwnedStringSxp, StringSxp};
+use std::ops::{Deref, DerefMut};
 
-use unextendr::{unextendr, NullSxp};
+use unextendr::unextendr;
+
+use unextendr::{
+    IntegerSxp, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
+    OwnedStringSxp, RealSxp, StringSxp,
+};
+
+use unextendr::sexp::na::NotAvailableValue;
+use unextendr::IntoExtPtrSxp;
 
 /// Convert Input To Upper-Case
 ///
@@ -133,4 +136,74 @@ fn print_list(x: ListSxp) {
 
         unextendr::r_print(format!("{name}: {content}\n"));
     }
+}
+
+struct Person {
+    pub name: String,
+}
+
+impl Person {
+    fn new() -> Self {
+        Self {
+            name: "".to_string(),
+        }
+    }
+
+    fn set_name(&mut self, name: StringSxp) {
+        self.name = name.iter().next().unwrap().to_string();
+    }
+
+    fn name(&self) -> unextendr::Result<unextendr::SEXP> {
+        let mut out = OwnedStringSxp::new(1);
+        out.set_elt(0, self.name.as_str());
+        Ok(out.into())
+    }
+}
+
+impl IntoExtPtrSxp for Person {}
+
+#[allow(clippy::missing_safety_doc)]
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_Person_new() -> unextendr::SEXP {
+    unextendr::handle_result(unextendr_Person_new_inner())
+}
+
+unsafe fn unextendr_Person_new_inner() -> unextendr::Result<unextendr::SEXP> {
+    let x = Person::new();
+    Ok(x.into_external_pointer())
+}
+
+#[allow(clippy::missing_safety_doc)]
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_Person_set_name(
+    self__: unextendr::SEXP,
+    name: unextendr::SEXP,
+) -> unextendr::SEXP {
+    unextendr::handle_result(unextendr_Person_set_name_inner(self__, name))
+}
+
+unsafe fn unextendr_Person_set_name_inner(
+    self__: unextendr::SEXP,
+    name: unextendr::SEXP,
+) -> unextendr::Result<unextendr::SEXP> {
+    let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
+    let name = unextendr::StringSxp::try_from(name)?;
+
+    (*self__).set_name(name);
+
+    Ok(NullSxp.into())
+}
+
+#[allow(clippy::missing_safety_doc)]
+#[no_mangle]
+pub unsafe extern "C" fn unextendr_Person_name(self__: unextendr::SEXP) -> unextendr::SEXP {
+    unextendr::handle_result(unextendr_Person_name_inner(self__))
+}
+
+unsafe fn unextendr_Person_name_inner(
+    self__: unextendr::SEXP,
+) -> unextendr::Result<unextendr::SEXP> {
+    let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
+
+    (*self__).name()
 }

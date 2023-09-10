@@ -66,3 +66,7 @@ pub trait IntoExtPtrSxp: Sized {
         }
     }
 }
+
+pub unsafe fn get_external_pointer_addr(x: SEXP) -> *mut std::os::raw::c_void {
+    R_ExternalPtrAddr(x)
+}
