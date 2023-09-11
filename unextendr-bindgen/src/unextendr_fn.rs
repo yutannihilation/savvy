@@ -1,5 +1,9 @@
 use quote::format_ident;
-use syn::{parse_quote, FnArg::Typed, Item, Pat::Ident, PatType, Stmt};
+use syn::{
+    parse_quote, Attribute, Block, FnArg::Typed, Item, Pat::Ident, PatType, Signature, Stmt,
+};
+
+use crate::extract_docs;
 
 #[allow(clippy::enum_variant_names)]
 pub enum UnextendrSupportedTypes {
@@ -105,7 +109,7 @@ pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
         .iter()
         .any(|attr| attr == &parse_quote!(#[unextendr]))
     {
-        Some(UnextendrFn::new(func))
+        Some(UnextendrFn::from_fn(func))
     } else {
         None
     }
@@ -125,46 +129,30 @@ impl UnextendrFn {
         format_ident!("unextendr_{}", self.fn_name)
     }
 
-    pub fn new(orig: &syn::ItemFn) -> Self {
+    pub fn from_fn(orig: &syn::ItemFn) -> Self {
+        Self::new(&orig.attrs, &orig.sig, orig.block.as_ref())
+    }
+
+    pub fn from_impl_fn(orig: &syn::ImplItemFn) -> Self {
+        Self::new(&orig.attrs, &orig.sig, &orig.block)
+    }
+
+    pub fn new(attrs: &[Attribute], sig: &Signature, block: &Block) -> Self {
         // TODO: check function signature and abort if any of it is unexpected one.
 
-        let mut attrs = orig.attrs.clone();
+        let mut attrs = attrs.to_vec();
         // Remove #[unextendr]
         attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
 
         // Extract doc comments
-        let docs = attrs
-            .iter()
-            .filter_map(|attr| {
-                match &attr.meta {
-                    syn::Meta::NameValue(nv) => {
-                        // Doc omments are transformed into the form of `#[doc =
-                        // r"comment"]` before macros are expanded.
-                        // cf., https://docs.rs/syn/latest/syn/struct.Attribute.html#doc-comments
-                        if nv.path.is_ident("doc") {
-                            match &nv.value {
-                                syn::Expr::Lit(syn::ExprLit {
-                                    lit: syn::Lit::Str(doc),
-                                    ..
-                                }) => Some(doc.value()),
-                                _ => None,
-                            }
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                }
-            })
-            .collect();
+        let docs = extract_docs(attrs.as_slice());
 
-        let fn_name = orig.sig.ident.clone();
+        let fn_name = sig.ident.clone();
 
-        let stmts_orig = orig.block.stmts.clone();
+        let stmts_orig = block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        let args_new: Vec<UnextendrFnArg> = orig
-            .sig
+        let args_new: Vec<UnextendrFnArg> = sig
             .inputs
             .iter()
             .map(|arg| {
@@ -190,7 +178,7 @@ impl UnextendrFn {
             })
             .collect();
 
-        let has_result = match orig.sig.output {
+        let has_result = match sig.output {
             syn::ReturnType::Default => false,
             syn::ReturnType::Type(_, _) => true,
         };

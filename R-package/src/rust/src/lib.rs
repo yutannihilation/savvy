@@ -145,6 +145,7 @@ struct Person {
 /// A person with a name
 ///
 /// @export
+#[unextendr]
 impl Person {
     fn new() -> Self {
         Self {
@@ -163,7 +164,7 @@ impl Person {
     }
 }
 
-impl IntoExtPtrSxp for Person {}
+// impl IntoExtPtrSxp for Person {}
 
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
