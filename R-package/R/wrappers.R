@@ -49,25 +49,25 @@ print_list <- function(x) {
 
 #' @export
 Person <- function() {
-  `class<-`(.Call(unextendr_Person_new), "Person")
+  e <- new.env(parent = emptyenv())
+
+  self <- .Call(unextendr_Person_new)
+
+  e$set_name <- Person_set_name(self)
+  e$name <- Person_name(self)
+
+  class(e) <- "Person"
+  e
 }
 
-#' @export
-person_set_name <- function(self__) {
-  UseMethod("person_set_name", self__)
+Person_set_name <- function(self) {
+  function(name) {
+    invisible(.Call(unextendr_Person_set_name, self, name))
+  }
 }
 
-#' @export
-person_set_name.Person <- function(self__, name) {
-  invisible(.Call(unextendr_Person_set_name, self__, name))
-}
-
-#' @export
-person_name <- function(self__) {
-  UseMethod("person_name", self__)
-}
-
-#' @export
-person_name.Person <- function(self__) {
-  .Call(unextendr_Person_name, self__)
+Person_name <- function(self) {
+  function() {
+    .Call(unextendr_Person_name, self)
+  }
 }
