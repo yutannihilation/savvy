@@ -53,21 +53,21 @@ Person <- function() {
 }
 
 #' @export
-set_name <- function(self__, ...) {
-  UseMethod("set_name", self__)
+person_set_name <- function(self__) {
+  UseMethod("person_set_name", self__)
 }
 
 #' @export
-set_name.Person <- function(self__, name, ...) {
+person_set_name.Person <- function(self__, name) {
   invisible(.Call(unextendr_Person_set_name, self__, name))
 }
 
 #' @export
-name <- function(self__, ...) {
-  UseMethod("name", self__)
+person_name <- function(self__) {
+  UseMethod("person_name", self__)
 }
 
 #' @export
-name.Person <- function(self__, ...) {
+person_name.Person <- function(self__) {
   .Call(unextendr_Person_name, self__)
 }
