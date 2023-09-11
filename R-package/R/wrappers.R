@@ -47,6 +47,8 @@ print_list <- function(x) {
   invisible(.Call(unextendr_print_list, x))
 }
 
+#' A person with a name
+#'
 #' @export
 Person <- function() {
   e <- new.env(parent = emptyenv())

@@ -142,6 +142,9 @@ struct Person {
     pub name: String,
 }
 
+/// A person with a name
+///
+/// @export
 impl Person {
     fn new() -> Self {
         Self {
