@@ -38,7 +38,7 @@ impl UnextendrSupportedTypes {
     }
 
     /// Return the corresponding type for internal function.
-    fn to_rust_type_inner(&self) -> syn::Type {
+    fn to_rust_type_outer(&self) -> syn::Type {
         match &self {
             Self::IntegerSxp => parse_quote!(unextendr::IntegerSxp),
             Self::RealSxp => parse_quote!(unextendr::RealSxp),
@@ -50,17 +50,8 @@ impl UnextendrSupportedTypes {
     }
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
-    fn to_rust_type_outer(&self) -> syn::Type {
-        match &self {
-            Self::IntegerSxp
-            | Self::RealSxp
-            | Self::LogicalSxp
-            | Self::StringSxp
-            | Self::ListSxp
-            | Self::ExternalPointerSxp(_) => {
-                parse_quote!(unextendr::SEXP)
-            }
-        }
+    fn to_rust_type_inner(&self) -> syn::Type {
+        parse_quote!(unextendr::SEXP)
     }
 
     /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
@@ -78,8 +69,6 @@ impl UnextendrSupportedTypes {
 }
 
 pub struct UnextendrFnArg {
-    is_ref: bool,
-    is_mut: bool,
     pat: syn::Ident,
     ty: UnextendrSupportedTypes,
 }
@@ -168,7 +157,7 @@ impl UnextendrFn {
         let args_new: Vec<UnextendrFnArg> = sig
             .inputs
             .iter()
-            .map(|arg| match arg {
+            .filter_map(|arg| match arg {
                 Typed(PatType { pat, ty, .. }) => {
                     let pat = match pat.as_ref() {
                         Ident(arg) => arg.ident.clone(),
@@ -178,26 +167,16 @@ impl UnextendrFn {
                     let ty = UnextendrSupportedTypes::from_type(ty.as_ref())
                         .expect("the type is not supported");
 
-                    let ty_ident = ty.to_rust_type_inner();
+                    let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
                         let #pat = #ty_ident::try_from(#pat)?;
                     });
 
-                    UnextendrFnArg {
-                        // usual arguments should always be "SEXP" without & or mut
-                        is_ref: false,
-                        is_mut: false,
-
-                        pat,
-                        ty,
-                    }
+                    Some(UnextendrFnArg { pat, ty })
                 }
-                syn::FnArg::Receiver(syn::Receiver {
-                    reference,
-                    mutability,
-                    ..
-                }) => {
+                // Skip `self`
+                syn::FnArg::Receiver(syn::Receiver { reference, .. }) => {
                     if reference.is_none() {
                         // TODO: raise compile error if no reference.
                         // The function should not consume the object
@@ -205,16 +184,7 @@ impl UnextendrFn {
                         // the function returns.
                     }
 
-                    stmts_additional.push(parse_quote! {
-                        let self__ = unextendr::get_external_pointer_addr(self__) as *mut #self_ty;
-                    });
-
-                    UnextendrFnArg {
-                        is_ref: true,
-                        is_mut: mutability.is_some(),
-                        pat: format_ident!("self__"),
-                        ty: UnextendrSupportedTypes::ExternalPointerSxp(self_ty.clone().unwrap()),
-                    }
+                    None
                 }
             })
             .collect();
@@ -237,48 +207,31 @@ impl UnextendrFn {
     }
 
     pub fn make_inner_fn(&self) -> syn::ItemFn {
+        let fn_name_orig = &self.fn_name;
         let fn_name_inner = self.fn_name_inner();
-
-        let args: Vec<syn::FnArg> = self
-            .args
-            .iter()
-            .map(|arg| {
-                let UnextendrFnArg {
-                    is_ref,
-                    is_mut,
-                    pat,
-                    ty,
-                } = arg;
-                let reference: Option<syn::token::And> =
-                    if *is_ref { parse_quote!(&) } else { None };
-                let mutability: Option<syn::token::Mut> =
-                    if *is_mut { parse_quote!(mut) } else { None };
-                let ty = ty.to_rust_type_inner();
-                parse_quote!(#reference #mutability #pat: #ty)
-            })
-            .collect();
 
         let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat.clone()).collect();
         let args_ty: Vec<syn::Type> = self
             .args
             .iter()
-            .map(|arg| arg.ty.to_rust_type_outer())
+            .map(|arg| arg.ty.to_rust_type_inner())
             .collect();
 
         let stmts_additional = &self.stmts_additional;
         let stmts_orig = &self.stmts_orig;
         let attrs = &self.attrs;
 
-        let out: syn::ItemFn = if self.has_result {
-            parse_quote!(
+        let out: syn::ItemFn = match (&self.self_ty, self.has_result) {
+            // A bare function with result
+            (None, true) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
                     #(#stmts_orig)*
                 }
-            )
-        } else {
-            parse_quote!(
+            ),
+            // A bare function without result; return a dummy value
+            (None, false) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
@@ -287,7 +240,30 @@ impl UnextendrFn {
                     // Dummy return value
                     Ok(unextendr::NullSxp.into())
                 }
-            )
+            ),
+            // A method or associated function with result
+            (Some(ty), true) => parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
+                    #(#stmts_additional)*
+
+                    (*self__).#fn_name_orig(#(#args_pat),*)
+                }
+            ),
+            // A method or associated function without result; return a dummy value
+            (Some(ty), false) => parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
+                    #(#stmts_additional)*
+
+                    (*self__).#fn_name_orig(#(#args_pat),*);
+
+                    // Dummy return value
+                    Ok(unextendr::NullSxp.into())
+                }
+            ),
         };
         out
     }
@@ -300,16 +276,26 @@ impl UnextendrFn {
         let args_ty: Vec<syn::Type> = self
             .args
             .iter()
-            .map(|arg| arg.ty.to_rust_type_outer())
+            .map(|arg| arg.ty.to_rust_type_inner())
             .collect();
 
-        let out: syn::ItemFn = parse_quote!(
-            #[allow(clippy::missing_safety_doc)]
-            #[no_mangle]
-            pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
-            }
-        );
+        let out: syn::ItemFn = match &self.self_ty {
+            None => parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
+                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
+                }
+            ),
+            // if the function is a method or an associated function, add `self__` to the first argument
+            Some(_) => parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn #fn_name_outer(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
+                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
+                }
+            ),
+        };
         out
     }
 
