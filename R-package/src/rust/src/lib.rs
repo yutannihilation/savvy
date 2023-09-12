@@ -193,7 +193,7 @@ unsafe fn unextendr_Person_set_name_inner(
     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
     let name = unextendr::StringSxp::try_from(name)?;
 
-    (*self__).set_name(name);
+    Person::set_name(&mut (*self__), name);
 
     Ok(NullSxp.into())
 }
@@ -209,5 +209,5 @@ unsafe fn unextendr_Person_name_inner(
 ) -> unextendr::Result<unextendr::SEXP> {
     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
 
-    (*self__).name()
+    Person::name(&(*self__))
 }
