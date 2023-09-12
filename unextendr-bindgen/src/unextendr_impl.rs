@@ -36,9 +36,12 @@ impl UnextendrImpl {
 
         let fns: Vec<UnextendrFn> = orig
             .items
-            .iter()
+            .clone()
+            .iter_mut()
             .filter_map(|f| match f {
-                syn::ImplItem::Fn(impl_item_fn) => Some(UnextendrFn::from_impl_fn(impl_item_fn)),
+                syn::ImplItem::Fn(impl_item_fn) => {
+                    Some(UnextendrFn::from_impl_fn(impl_item_fn, &orig.self_ty))
+                }
                 _ => None,
             })
             .collect();

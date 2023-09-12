@@ -12,6 +12,7 @@ pub enum UnextendrSupportedTypes {
     LogicalSxp,
     StringSxp,
     ListSxp,
+    ExternalPointerSxp(syn::Type),
 }
 
 #[allow(dead_code)]
@@ -44,6 +45,7 @@ impl UnextendrSupportedTypes {
             Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
             Self::StringSxp => parse_quote!(unextendr::StringSxp),
             Self::ListSxp => parse_quote!(unextendr::ListSxp),
+            Self::ExternalPointerSxp(ty) => ty.clone(),
         }
     }
 
@@ -54,7 +56,8 @@ impl UnextendrSupportedTypes {
             | Self::RealSxp
             | Self::LogicalSxp
             | Self::StringSxp
-            | Self::ListSxp => {
+            | Self::ListSxp
+            | Self::ExternalPointerSxp(_) => {
                 parse_quote!(unextendr::SEXP)
             }
         }
@@ -67,13 +70,16 @@ impl UnextendrSupportedTypes {
             | Self::RealSxp
             | Self::LogicalSxp
             | Self::StringSxp
-            | Self::ListSxp => "SEXP",
+            | Self::ListSxp
+            | Self::ExternalPointerSxp(_) => "SEXP",
         }
         .to_string()
     }
 }
 
 pub struct UnextendrFnArg {
+    is_ref: bool,
+    is_mut: bool,
     pat: syn::Ident,
     ty: UnextendrSupportedTypes,
 }
@@ -85,6 +91,8 @@ pub struct UnextendrFn {
     pub attrs: Vec<syn::Attribute>,
     /// Original function name
     pub fn_name: syn::Ident,
+    /// type path of `self` in the case of impl function
+    pub self_ty: Option<syn::Type>,
     /// Function arguments
     pub args: Vec<UnextendrFnArg>,
     /// Whether the function has return value
@@ -130,14 +138,19 @@ impl UnextendrFn {
     }
 
     pub fn from_fn(orig: &syn::ItemFn) -> Self {
-        Self::new(&orig.attrs, &orig.sig, orig.block.as_ref())
+        Self::new(&orig.attrs, &orig.sig, orig.block.as_ref(), None)
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn) -> Self {
-        Self::new(&orig.attrs, &orig.sig, &orig.block)
+    pub fn from_impl_fn(orig: &syn::ImplItemFn, self_ty: &syn::Type) -> Self {
+        Self::new(&orig.attrs, &orig.sig, &orig.block, Some(self_ty.clone()))
     }
 
-    pub fn new(attrs: &[Attribute], sig: &Signature, block: &Block) -> Self {
+    pub fn new(
+        attrs: &[Attribute],
+        sig: &Signature,
+        block: &Block,
+        self_ty: Option<syn::Type>,
+    ) -> Self {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = attrs.to_vec();
@@ -155,15 +168,15 @@ impl UnextendrFn {
         let args_new: Vec<UnextendrFnArg> = sig
             .inputs
             .iter()
-            .map(|arg| {
-                if let Typed(PatType { pat, ty, .. }) = arg {
+            .map(|arg| match arg {
+                Typed(PatType { pat, ty, .. }) => {
                     let pat = match pat.as_ref() {
                         Ident(arg) => arg.ident.clone(),
-                        _ => panic!("not supported"),
+                        _ => panic!("non-ident is not supported"),
                     };
 
-                    let ty =
-                        UnextendrSupportedTypes::from_type(ty.as_ref()).expect("not supported");
+                    let ty = UnextendrSupportedTypes::from_type(ty.as_ref())
+                        .expect("the type is not supported");
 
                     let ty_ident = ty.to_rust_type_inner();
 
@@ -171,9 +184,37 @@ impl UnextendrFn {
                         let #pat = #ty_ident::try_from(#pat)?;
                     });
 
-                    UnextendrFnArg { pat, ty }
-                } else {
-                    panic!("not supported");
+                    UnextendrFnArg {
+                        // usual arguments should always be "SEXP" without & or mut
+                        is_ref: false,
+                        is_mut: false,
+
+                        pat,
+                        ty,
+                    }
+                }
+                syn::FnArg::Receiver(syn::Receiver {
+                    reference,
+                    mutability,
+                    ..
+                }) => {
+                    if reference.is_none() {
+                        // TODO: raise compile error if no reference.
+                        // The function should not consume the object
+                        // because the EXTPTRSXP still live even after
+                        // the function returns.
+                    }
+
+                    stmts_additional.push(parse_quote! {
+                        let self__ = unextendr::get_external_pointer_addr(self__) as *mut #self_ty;
+                    });
+
+                    UnextendrFnArg {
+                        is_ref: true,
+                        is_mut: mutability.is_some(),
+                        pat: format_ident!("self__"),
+                        ty: UnextendrSupportedTypes::ExternalPointerSxp(self_ty.clone().unwrap()),
+                    }
                 }
             })
             .collect();
@@ -187,6 +228,7 @@ impl UnextendrFn {
             docs,
             attrs,
             fn_name,
+            self_ty,
             args: args_new,
             has_result,
             stmts_orig,
@@ -196,6 +238,25 @@ impl UnextendrFn {
 
     pub fn make_inner_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
+
+        let args: Vec<syn::FnArg> = self
+            .args
+            .iter()
+            .map(|arg| {
+                let UnextendrFnArg {
+                    is_ref,
+                    is_mut,
+                    pat,
+                    ty,
+                } = arg;
+                let reference: Option<syn::token::And> =
+                    if *is_ref { parse_quote!(&) } else { None };
+                let mutability: Option<syn::token::Mut> =
+                    if *is_mut { parse_quote!(mut) } else { None };
+                let ty = ty.to_rust_type_inner();
+                parse_quote!(#reference #mutability #pat: #ty)
+            })
+            .collect();
 
         let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat.clone()).collect();
         let args_ty: Vec<syn::Type> = self
