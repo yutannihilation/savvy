@@ -9,9 +9,9 @@ pub struct UnextendrImpl {
     pub docs: Vec<String>,
     /// Attributes except for `#[unextendr]`
     pub attrs: Vec<syn::Attribute>,
-    /// Original function name
+    /// Original type name
     pub ty: syn::Ident,
-    /// Function arguments
+    /// Methods and accociated functions
     pub fns: Vec<UnextendrFn>,
     /// Original body of the impl
     pub orig: syn::ItemImpl,
@@ -53,5 +53,13 @@ impl UnextendrImpl {
             fns,
             orig: orig.clone(),
         }
+    }
+
+    pub fn make_inner_fns(&self) -> Vec<syn::ItemFn> {
+        self.fns.iter().map(|f| f.make_inner_fn()).collect()
+    }
+
+    pub fn make_outer_fns(&self) -> Vec<syn::ItemFn> {
+        self.fns.iter().map(|f| f.make_outer_fn()).collect()
     }
 }

@@ -114,16 +114,29 @@ pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
 
 #[allow(dead_code)]
 impl UnextendrFn {
+    fn get_self_ty_ident(&self) -> Option<syn::Ident> {
+        match &self.self_ty {
+            Some(syn::Type::Path(ty)) => ty.path.get_ident().cloned(),
+            _ => None,
+        }
+    }
+
     pub fn fn_name_orig(&self) -> syn::Ident {
         self.fn_name.clone()
     }
 
     pub fn fn_name_inner(&self) -> syn::Ident {
-        format_ident!("unextendr_{}_inner", self.fn_name)
+        match self.get_self_ty_ident() {
+            Some(ty) => format_ident!("unextendr_{}_{}_inner", ty, self.fn_name),
+            None => format_ident!("unextendr_{}_inner", self.fn_name),
+        }
     }
 
     pub fn fn_name_outer(&self) -> syn::Ident {
-        format_ident!("unextendr_{}", self.fn_name)
+        match self.get_self_ty_ident() {
+            Some(ty) => format_ident!("unextendr_{}_{}", ty, self.fn_name),
+            None => format_ident!("unextendr_{}", self.fn_name),
+        }
     }
 
     pub fn from_fn(orig: &syn::ItemFn) -> Self {
@@ -244,7 +257,7 @@ impl UnextendrFn {
             // A method or associated function with result
             (Some(ty), true) => parse_quote!(
                 #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
@@ -254,7 +267,7 @@ impl UnextendrFn {
             // A method or associated function without result; return a dummy value
             (Some(ty), false) => parse_quote!(
                 #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
@@ -292,7 +305,7 @@ impl UnextendrFn {
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn #fn_name_outer(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
+                    unextendr::handle_result(#fn_name_inner(self__, #(#args_pat),*))
                 }
             ),
         };

@@ -26,11 +26,11 @@ pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
 fn unextendr_fn(item_fn: &syn::ItemFn) -> TokenStream {
     let unextendr_fn = UnextendrFn::from_fn(item_fn);
 
-    let item_fn_innner = unextendr_fn.make_inner_fn();
+    let item_fn_inner = unextendr_fn.make_inner_fn();
     let item_fn_outer = unextendr_fn.make_outer_fn();
 
     quote! {
-        #item_fn_innner
+        #item_fn_inner
         #item_fn_outer
     }
     .into()
@@ -38,14 +38,19 @@ fn unextendr_fn(item_fn: &syn::ItemFn) -> TokenStream {
 
 fn unextendr_impl(item_impl: &syn::ItemImpl) -> TokenStream {
     let unextendr_impl = UnextendrImpl::new(item_impl);
-    let orig = unextendr_impl.orig;
-    let ty = unextendr_impl.ty;
+    let orig = unextendr_impl.orig.clone();
+    let ty = unextendr_impl.ty.clone();
+
+    let list_fn_inner = unextendr_impl.make_inner_fns();
+    let list_fn_outer = unextendr_impl.make_outer_fns();
 
     quote! {
         #orig
 
         impl unextendr::IntoExtPtrSxp for #ty {}
 
+        #(#list_fn_inner)*
+        #(#list_fn_outer)*
     }
     .into()
 }
