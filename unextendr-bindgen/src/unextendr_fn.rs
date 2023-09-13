@@ -89,26 +89,6 @@ pub struct UnextendrFn {
     pub stmts_additional: Vec<syn::Stmt>,
 }
 
-pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
-    let func = match item {
-        syn::Item::Fn(func) => func,
-        _ => {
-            return None;
-        }
-    };
-
-    // Generate bindings only when the function is marked by #[unextendr]
-    if func
-        .attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[unextendr]))
-    {
-        Some(UnextendrFn::from_fn(func))
-    } else {
-        None
-    }
-}
-
 #[allow(dead_code)]
 impl UnextendrFn {
     fn get_self_ty_ident(&self) -> Option<syn::Ident> {
@@ -365,7 +345,7 @@ impl UnextendrFn {
     /// Generate C function signature
     fn to_c_function_for_header(&self) -> String {
         let fn_name = self.fn_name_outer();
-        let args = self
+        let mut args = self
             .args
             .iter()
             .map(|arg| {
@@ -373,10 +353,15 @@ impl UnextendrFn {
                 let ty = arg.ty.to_c_type();
                 format!("{ty} {pat}")
             })
-            .collect::<Vec<String>>()
-            .join(", ");
+            .collect::<Vec<String>>();
 
-        format!("SEXP {fn_name}({args});")
+        if let UnextendrFnType::Method(_) = &self.fn_type {
+            args.insert(0, "SEXP self__".to_string())
+        }
+
+        let args_joined = args.join(", ");
+
+        format!("SEXP {fn_name}({args_joined});")
     }
 
     /// Generate C function implementation
