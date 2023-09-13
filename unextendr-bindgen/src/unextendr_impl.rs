@@ -89,8 +89,10 @@ fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
             syn::Type::Path(type_path) => {
                 type_path
                     .path
-                    .get_ident()
-                    .expect("Unexpected type path in impl")
+                    .segments
+                    .last()
+                    .expect("Unexpected path")
+                    .ident
                     .to_string()
                     .as_str()
                     == "Self"

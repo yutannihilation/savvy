@@ -166,48 +166,48 @@ impl Person {
 
 // impl IntoExtPtrSxp for Person {}
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_Person_new() -> unextendr::SEXP {
-    unextendr::handle_result(unextendr_Person_new_inner())
-}
+// #[allow(clippy::missing_safety_doc)]
+// #[no_mangle]
+// pub unsafe extern "C" fn unextendr_Person_new() -> unextendr::SEXP {
+//     unextendr::handle_result(unextendr_Person_new_inner())
+// }
 
-unsafe fn unextendr_Person_new_inner() -> unextendr::Result<unextendr::SEXP> {
-    let x = Person::new();
-    Ok(x.into_external_pointer())
-}
+// unsafe fn unextendr_Person_new_inner() -> unextendr::Result<unextendr::SEXP> {
+//     let x = Person::new();
+//     Ok(x.into_external_pointer())
+// }
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_Person_set_name(
-    self__: unextendr::SEXP,
-    name: unextendr::SEXP,
-) -> unextendr::SEXP {
-    unextendr::handle_result(unextendr_Person_set_name_inner(self__, name))
-}
+// #[allow(clippy::missing_safety_doc)]
+// #[no_mangle]
+// pub unsafe extern "C" fn unextendr_Person_set_name(
+//     self__: unextendr::SEXP,
+//     name: unextendr::SEXP,
+// ) -> unextendr::SEXP {
+//     unextendr::handle_result(unextendr_Person_set_name_inner(self__, name))
+// }
 
-unsafe fn unextendr_Person_set_name_inner(
-    self__: unextendr::SEXP,
-    name: unextendr::SEXP,
-) -> unextendr::Result<unextendr::SEXP> {
-    let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
-    let name = unextendr::StringSxp::try_from(name)?;
+// unsafe fn unextendr_Person_set_name_inner(
+//     self__: unextendr::SEXP,
+//     name: unextendr::SEXP,
+// ) -> unextendr::Result<unextendr::SEXP> {
+//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
+//     let name = unextendr::StringSxp::try_from(name)?;
 
-    (*self__).set_name(name);
+//     (*self__).set_name(name);
 
-    Ok(NullSxp.into())
-}
+//     Ok(NullSxp.into())
+// }
 
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-pub unsafe extern "C" fn unextendr_Person_name(self__: unextendr::SEXP) -> unextendr::SEXP {
-    unextendr::handle_result(unextendr_Person_name_inner(self__))
-}
+// #[allow(clippy::missing_safety_doc)]
+// #[no_mangle]
+// pub unsafe extern "C" fn unextendr_Person_name(self__: unextendr::SEXP) -> unextendr::SEXP {
+//     unextendr::handle_result(unextendr_Person_name_inner(self__))
+// }
 
-unsafe fn unextendr_Person_name_inner(
-    self__: unextendr::SEXP,
-) -> unextendr::Result<unextendr::SEXP> {
-    let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
+// unsafe fn unextendr_Person_name_inner(
+//     self__: unextendr::SEXP,
+// ) -> unextendr::Result<unextendr::SEXP> {
+//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
 
-    (*self__).name()
-}
+//     (*self__).name()
+// }
