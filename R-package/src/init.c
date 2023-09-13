@@ -75,6 +75,11 @@ SEXP unextendr_Person_name_wrapper(SEXP self__) {
     return handle_result(res);
 }
 
+SEXP unextendr_Person_associated_function_wrapper() {
+    SEXP res = unextendr_Person_associated_function();
+    return handle_result(res);
+}
+
 static const R_CallMethodDef CallEntries[] = {
     {"unextendr_to_upper", (DL_FUNC) &unextendr_to_upper_wrapper, 1},
     {"unextendr_times_two_int", (DL_FUNC) &unextendr_times_two_int_wrapper, 1},
@@ -86,6 +91,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"unextendr_Person_new", (DL_FUNC) &unextendr_Person_new_wrapper, 0},
     {"unextendr_Person_set_name", (DL_FUNC) &unextendr_Person_set_name_wrapper, 2},
     {"unextendr_Person_name", (DL_FUNC) &unextendr_Person_name_wrapper, 1},
+    {"unextendr_Person_associated_function", (DL_FUNC) &unextendr_Person_associated_function_wrapper, 0},
     {NULL, NULL, 0}
 };
 

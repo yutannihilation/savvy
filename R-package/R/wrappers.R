@@ -56,6 +56,7 @@ Person <- function() {
 
   e$set_name <- Person_set_name(self)
   e$name <- Person_name(self)
+  e$associated_function <- Person_associated_function(self)
 
   class(e) <- "Person"
   e
@@ -71,6 +72,12 @@ Person_set_name <- function(self) {
 Person_name <- function(self) {
   function() {
     .Call(unextendr_Person_name, self)
+  }
+}
+
+Person_associated_function <- function(self) {
+  function() {
+    .Call(unextendr_Person_associated_function)
   }
 }
 

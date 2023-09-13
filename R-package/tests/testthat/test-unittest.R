@@ -18,3 +18,15 @@ test_that("functions work", {
     c(FALSE, TRUE, TRUE)
   )
 })
+
+test_that("structs work", {
+  x <- Person()
+  expect_s3_class(x, "Person")
+
+  expect_equal(x$name(), "")
+
+  x$set_name("foo")
+  expect_equal(x$name(), "foo")
+
+  expect_equal(x$associated_function(), "associated_function")
+})

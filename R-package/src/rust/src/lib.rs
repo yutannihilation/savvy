@@ -162,52 +162,10 @@ impl Person {
         out.set_elt(0, self.name.as_str());
         Ok(out.into())
     }
+
+    fn associated_function() -> unextendr::Result<unextendr::SEXP> {
+        let mut out = OwnedStringSxp::new(1);
+        out.set_elt(0, "associated_function");
+        Ok(out.into())
+    }
 }
-
-// impl IntoExtPtrSxp for Person {}
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_new() -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_new_inner())
-// }
-
-// unsafe fn unextendr_Person_new_inner() -> unextendr::Result<unextendr::SEXP> {
-//     let x = Person::new();
-//     Ok(x.into_external_pointer())
-// }
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_set_name(
-//     self__: unextendr::SEXP,
-//     name: unextendr::SEXP,
-// ) -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_set_name_inner(self__, name))
-// }
-
-// unsafe fn unextendr_Person_set_name_inner(
-//     self__: unextendr::SEXP,
-//     name: unextendr::SEXP,
-// ) -> unextendr::Result<unextendr::SEXP> {
-//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
-//     let name = unextendr::StringSxp::try_from(name)?;
-
-//     (*self__).set_name(name);
-
-//     Ok(NullSxp.into())
-// }
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_name(self__: unextendr::SEXP) -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_name_inner(self__))
-// }
-
-// unsafe fn unextendr_Person_name_inner(
-//     self__: unextendr::SEXP,
-// ) -> unextendr::Result<unextendr::SEXP> {
-//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
-
-//     (*self__).name()
-// }
