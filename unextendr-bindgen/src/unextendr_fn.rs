@@ -437,12 +437,7 @@ SEXP {fn_name}_wrapper({args_sig}) {{
         let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_outer();
 
-        let doc_comments = self
-            .docs
-            .iter()
-            .map(|doc| format!("#'{doc}"))
-            .collect::<Vec<String>>()
-            .join("\n");
+        let doc_comments = get_r_doc_comment(self.docs.as_slice());
 
         let args = self
             .get_c_args()
@@ -466,6 +461,13 @@ SEXP {fn_name}_wrapper({args_sig}) {{
 "
         )
     }
+}
+
+fn get_r_doc_comment(docs: &[String]) -> String {
+    docs.iter()
+        .map(|doc| format!("#'{doc}"))
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
@@ -683,12 +685,7 @@ fn make_r_impl_for_impl(unextendr_impl: &UnextendrImpl) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    let doc_comments = unextendr_impl
-        .docs
-        .iter()
-        .map(|doc| format!("#'{doc}"))
-        .collect::<Vec<String>>()
-        .join("\n");
+    let doc_comments = get_r_doc_comment(unextendr_impl.docs.as_slice());
 
     format!(
         "{doc_comments}
