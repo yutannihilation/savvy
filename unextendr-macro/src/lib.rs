@@ -1,21 +1,56 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::parse_macro_input;
 
-use unextendr_bindgen::UnextendrFn;
+use unextendr_bindgen::{UnextendrFn, UnextendrImpl};
 
 #[proc_macro_attribute]
 pub fn unextendr(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let item_fn = parse_macro_input!(input as syn::ItemFn);
+    if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
+        return unextendr_fn(&item_fn);
+    }
 
-    let unextendr_fn = UnextendrFn::new(&item_fn);
+    let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
+    if let Ok(item_impl) = parse_result {
+        return unextendr_impl(&item_impl);
+    }
 
-    let item_fn_innner = unextendr_fn.make_inner_fn();
+    proc_macro::TokenStream::from(
+        syn::Error::new(
+            parse_result.unwrap_err().span(),
+            "#[unextendr] macro only accepts `Fn` or `Impl`",
+        )
+        .into_compile_error(),
+    )
+}
+
+fn unextendr_fn(item_fn: &syn::ItemFn) -> TokenStream {
+    let unextendr_fn = UnextendrFn::from_fn(item_fn);
+
+    let item_fn_inner = unextendr_fn.make_inner_fn();
     let item_fn_outer = unextendr_fn.make_outer_fn();
 
     quote! {
-        #item_fn_innner
+        #item_fn_inner
         #item_fn_outer
+    }
+    .into()
+}
+
+fn unextendr_impl(item_impl: &syn::ItemImpl) -> TokenStream {
+    let unextendr_impl = UnextendrImpl::new(item_impl);
+    let orig = unextendr_impl.orig.clone();
+    let ty = unextendr_impl.ty.clone();
+
+    let list_fn_inner = unextendr_impl.make_inner_fns();
+    let list_fn_outer = unextendr_impl.make_outer_fns();
+
+    quote! {
+        #orig
+
+        impl unextendr::IntoExtPtrSxp for #ty {}
+
+        #(#list_fn_inner)*
+        #(#list_fn_outer)*
     }
     .into()
 }
@@ -26,12 +61,12 @@ mod tests {
     use syn::parse_quote;
 
     fn assert_eq_inner(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = UnextendrFn::new(&orig).make_inner_fn();
+        let result = UnextendrFn::from_fn(&orig).make_inner_fn();
         assert_eq!(result, expected);
     }
 
     fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = UnextendrFn::new(&orig).make_outer_fn();
+        let result = UnextendrFn::from_fn(&orig).make_outer_fn();
         assert_eq!(result, expected);
     }
 

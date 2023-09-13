@@ -2,12 +2,18 @@ use clap::{Parser, Subcommand};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use syn::parse_quote;
+use unextendr_fn::ParsedResult;
 
 mod unextendr_fn;
+mod unextendr_impl;
+mod utils;
 
 use unextendr_fn::make_c_header_file;
 use unextendr_fn::make_c_impl_file;
 use unextendr_fn::make_r_impl_file;
+use unextendr_fn::UnextendrFn;
+use unextendr_impl::UnextendrImpl;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -38,7 +44,51 @@ enum Commands {
     },
 }
 
-fn parse_file(path: &PathBuf) -> Vec<unextendr_fn::UnextendrFn> {
+pub fn parse_unextendr_fn(item: &syn::Item) -> Option<UnextendrFn> {
+    let func = match item {
+        syn::Item::Fn(func) => func,
+        _ => {
+            return None;
+        }
+    };
+
+    // Generate bindings only when the function is marked by #[unextendr]
+    if func
+        .attrs
+        .iter()
+        .any(|attr| attr == &parse_quote!(#[unextendr]))
+    {
+        Some(UnextendrFn::from_fn(func))
+    } else {
+        None
+    }
+}
+
+pub fn parse_unextendr_impl(item: &syn::Item) -> Vec<UnextendrFn> {
+    let item_impl = match item {
+        syn::Item::Impl(item_impl) => item_impl,
+        _ => {
+            return Vec::new();
+        }
+    };
+
+    // Generate bindings only when the function is marked by #[unextendr]
+    if item_impl
+        .attrs
+        .iter()
+        .any(|attr| attr == &parse_quote!(#[unextendr]))
+    {
+        UnextendrImpl::new(item_impl).fns
+    } else {
+        Vec::new()
+    }
+}
+
+fn is_marked(attrs: &[syn::Attribute]) -> bool {
+    attrs.iter().any(|attr| attr == &parse_quote!(#[unextendr]))
+}
+
+fn parse_file(path: &PathBuf) -> ParsedResult {
     let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => {
@@ -61,10 +111,29 @@ fn parse_file(path: &PathBuf) -> Vec<unextendr_fn::UnextendrFn> {
         }
     };
 
-    ast.items
-        .iter()
-        .filter_map(unextendr_fn::parse_unextendr_fn)
-        .collect()
+    let mut result = ParsedResult {
+        bare_fns: Vec::new(),
+        impls: Vec::new(),
+    };
+
+    for item in ast.items {
+        match item {
+            syn::Item::Fn(item_fn) => {
+                if is_marked(item_fn.attrs.as_slice()) {
+                    result.bare_fns.push(UnextendrFn::from_fn(&item_fn))
+                }
+            }
+
+            syn::Item::Impl(item_impl) => {
+                if is_marked(item_impl.attrs.as_slice()) {
+                    result.impls.push(UnextendrImpl::new(&item_impl))
+                }
+            }
+            _ => continue,
+        };
+    }
+
+    result
 }
 
 fn main() {
@@ -72,16 +141,16 @@ fn main() {
 
     match cli.command.unwrap() {
         Commands::CHeader { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_c_header_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_c_header_file(&parsed_result));
         }
         Commands::CImpl { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_c_impl_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_c_impl_file(&parsed_result));
         }
         Commands::RImpl { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_r_impl_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_r_impl_file(&parsed_result));
         }
     }
 }

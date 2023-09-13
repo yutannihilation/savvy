@@ -43,7 +43,9 @@ jobs:
           use-public-rspm: true
 
       - name: Run cagro test
-        run: cargo test --manifest-path=./unextendr-macro/Cargo.toml
+        run: |
+          cargo test --manifest-path=./unextendr-macro/Cargo.toml
+          cargo test --manifest-path=./unextendr-bindgen/Cargo.toml
 
       - name: Tweak
         run: |

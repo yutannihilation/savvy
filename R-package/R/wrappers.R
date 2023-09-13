@@ -47,3 +47,32 @@ print_list <- function(x) {
   invisible(.Call(unextendr_print_list, x))
 }
 
+#' A person with a name
+#'
+#' @export
+Person <- function() {
+  e <- new.env(parent = emptyenv())
+  self <- .Call(unextendr_Person_new)
+
+  e$set_name <- Person_set_name(self)
+  e$name <- Person_name(self)
+
+  class(e) <- "Person"
+  e
+}
+
+
+Person_set_name <- function(self) {
+  function(name) {
+    invisible(.Call(unextendr_Person_set_name, self, name))
+  }
+}
+
+Person_name <- function(self) {
+  function() {
+    .Call(unextendr_Person_name, self)
+  }
+}
+
+
+

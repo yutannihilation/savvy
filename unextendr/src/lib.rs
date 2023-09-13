@@ -11,6 +11,8 @@ pub use sexp::null::NullSxp;
 pub use sexp::real::{OwnedRealSxp, RealSxp};
 pub use sexp::string::{OwnedStringSxp, StringSxp};
 
+pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
+
 // re-export
 pub use libR_sys::SEXP;
 pub use unextendr_macro::unextendr;
