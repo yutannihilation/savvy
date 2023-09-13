@@ -324,7 +324,14 @@ impl UnextendrFn {
                     Ok(unextendr::NullSxp.into())
                 }
             ),
-            (UnextendrFnType::Constructor(ty), _) => todo!(),
+            (UnextendrFnType::Constructor(ty), _) => parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    #(#stmts_additional)*
+                    let x = #ty::#fn_name_orig(#(#args_pat),*);
+                    Ok(x.into_external_pointer())
+                }
+            ),
         };
         out
     }
