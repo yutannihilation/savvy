@@ -3,7 +3,7 @@ use syn::{
     parse_quote, Attribute, Block, FnArg::Typed, Item, Pat::Ident, PatType, Signature, Stmt,
 };
 
-use crate::extract_docs;
+use crate::utils::extract_docs;
 
 #[allow(clippy::enum_variant_names)]
 pub enum UnextendrSupportedTypes {

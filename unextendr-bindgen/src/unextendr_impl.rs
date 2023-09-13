@@ -1,9 +1,8 @@
 use quote::format_ident;
 use syn::parse_quote;
 
-use crate::extract_docs;
-use crate::UnextendrFn;
-use crate::UnextendrFnType;
+use crate::unextendr_fn::{UnextendrFn, UnextendrFnType};
+use crate::utils::extract_docs;
 
 pub struct UnextendrImpl {
     /// Doc comments
@@ -100,5 +99,55 @@ fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
             _ => false,
         },
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::UnextendrFnType::*;
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_impl() {
+        let item_impl: syn::ItemImpl = parse_quote!(
+            #[unextendr]
+            impl Person {
+                fn new() -> Self {
+                    Self {
+                        name: "".to_string(),
+                    }
+                }
+
+                fn set_name(&mut self, name: StringSxp) {
+                    self.name = name.iter().next().unwrap().to_string();
+                }
+
+                fn name(&self) -> unextendr::Result<unextendr::SEXP> {
+                    let mut out = OwnedStringSxp::new(1);
+                    out.set_elt(0, self.name.as_str());
+                    Ok(out.into())
+                }
+
+                fn do_nothing() {}
+            }
+        );
+
+        let parsed = UnextendrImpl::new(&item_impl);
+        assert_eq!(parsed.ty.to_string().as_str(), "Person");
+
+        assert_eq!(parsed.fns.len(), 4);
+
+        assert_eq!(parsed.fns[0].fn_name.to_string().as_str(), "new");
+        assert!(matches!(parsed.fns[0].fn_type, Constructor(_)));
+
+        assert_eq!(parsed.fns[1].fn_name.to_string().as_str(), "set_name");
+        assert!(matches!(parsed.fns[1].fn_type, Method(_)));
+
+        assert_eq!(parsed.fns[2].fn_name.to_string().as_str(), "name");
+        assert!(matches!(parsed.fns[2].fn_type, Method(_)));
+
+        assert_eq!(parsed.fns[3].fn_name.to_string().as_str(), "do_nothing");
+        assert!(matches!(parsed.fns[3].fn_type, AssociatedFunction(_)));
     }
 }

@@ -4,6 +4,8 @@ use std::io::Read;
 use std::path::PathBuf;
 
 mod unextendr_fn;
+mod unextendr_impl;
+mod utils;
 
 use unextendr_fn::make_c_header_file;
 use unextendr_fn::make_c_impl_file;
