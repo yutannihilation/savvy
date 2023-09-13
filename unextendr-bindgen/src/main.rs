@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use syn::parse_quote;
+use unextendr_fn::ParsedResult;
 
 mod unextendr_fn;
 mod unextendr_impl;
@@ -67,7 +68,7 @@ pub fn parse_unextendr_impl(item: &syn::Item) -> Vec<UnextendrFn> {
     let item_impl = match item {
         syn::Item::Impl(item_impl) => item_impl,
         _ => {
-            return vec![];
+            return Vec::new();
         }
     };
 
@@ -79,11 +80,15 @@ pub fn parse_unextendr_impl(item: &syn::Item) -> Vec<UnextendrFn> {
     {
         UnextendrImpl::new(item_impl).fns
     } else {
-        vec![]
+        Vec::new()
     }
 }
 
-fn parse_file(path: &PathBuf) -> Vec<unextendr_fn::UnextendrFn> {
+fn is_marked(attrs: &[syn::Attribute]) -> bool {
+    attrs.iter().any(|attr| attr == &parse_quote!(#[unextendr]))
+}
+
+fn parse_file(path: &PathBuf) -> ParsedResult {
     let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => {
@@ -106,10 +111,29 @@ fn parse_file(path: &PathBuf) -> Vec<unextendr_fn::UnextendrFn> {
         }
     };
 
-    let mut fns: Vec<UnextendrFn> = ast.items.iter().filter_map(parse_unextendr_fn).collect();
-    let mut impl_fns: Vec<UnextendrFn> = ast.items.iter().flat_map(parse_unextendr_impl).collect();
-    fns.append(&mut impl_fns);
-    fns
+    let mut result = ParsedResult {
+        bare_fns: Vec::new(),
+        impls: Vec::new(),
+    };
+
+    for item in ast.items {
+        match item {
+            syn::Item::Fn(item_fn) => {
+                if is_marked(item_fn.attrs.as_slice()) {
+                    result.bare_fns.push(UnextendrFn::from_fn(&item_fn))
+                }
+            }
+
+            syn::Item::Impl(item_impl) => {
+                if is_marked(item_impl.attrs.as_slice()) {
+                    result.impls.push(UnextendrImpl::new(&item_impl))
+                }
+            }
+            _ => continue,
+        };
+    }
+
+    result
 }
 
 fn main() {
@@ -117,16 +141,16 @@ fn main() {
 
     match cli.command.unwrap() {
         Commands::CHeader { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_c_header_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_c_header_file(&parsed_result));
         }
         Commands::CImpl { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_c_impl_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_c_impl_file(&parsed_result));
         }
         Commands::RImpl { file } => {
-            let unextendr_fns = parse_file(&file);
-            println!("{}", make_r_impl_file(&unextendr_fns));
+            let parsed_result = parse_file(&file);
+            println!("{}", make_r_impl_file(&parsed_result));
         }
     }
 }

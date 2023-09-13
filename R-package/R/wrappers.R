@@ -52,7 +52,6 @@ print_list <- function(x) {
 #' @export
 Person <- function() {
   e <- new.env(parent = emptyenv())
-
   self <- .Call(unextendr_Person_new)
 
   e$set_name <- Person_set_name(self)
@@ -61,6 +60,7 @@ Person <- function() {
   class(e) <- "Person"
   e
 }
+
 
 Person_set_name <- function(self) {
   function(name) {
@@ -73,3 +73,6 @@ Person_name <- function(self) {
     .Call(unextendr_Person_name, self)
   }
 }
+
+
+

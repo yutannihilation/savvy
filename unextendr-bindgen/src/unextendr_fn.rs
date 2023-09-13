@@ -1,9 +1,13 @@
 use quote::format_ident;
-use syn::{
-    parse_quote, Attribute, Block, FnArg::Typed, Item, Pat::Ident, PatType, Signature, Stmt,
-};
+use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
-use crate::utils::extract_docs;
+use crate::{unextendr_impl::UnextendrImpl, utils::extract_docs};
+
+// For main.rs
+pub struct ParsedResult {
+    pub bare_fns: Vec<UnextendrFn>,
+    pub impls: Vec<UnextendrImpl>,
+}
 
 #[allow(clippy::enum_variant_names)]
 pub enum UnextendrSupportedTypes {
@@ -112,10 +116,6 @@ impl UnextendrFn {
         }
     }
 
-    pub fn fn_name_orig(&self) -> syn::Ident {
-        self.fn_name.clone()
-    }
-
     pub fn fn_name_inner(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
             Some(ty) => format_ident!("unextendr_{}_{}_inner", ty, self.fn_name),
@@ -127,6 +127,21 @@ impl UnextendrFn {
         match self.get_self_ty_ident() {
             Some(ty) => format_ident!("unextendr_{}_{}", ty, self.fn_name),
             None => format_ident!("unextendr_{}", self.fn_name),
+        }
+    }
+
+    pub fn fn_name_r(&self) -> syn::Ident {
+        match self.get_self_ty_ident() {
+            Some(ty) => {
+                // Special convention. If the method name is "new", use type
+                // itself.
+                if self.fn_name.to_string().as_str() == "new" {
+                    ty
+                } else {
+                    format_ident!("{}_{}", ty, self.fn_name)
+                }
+            }
+            None => self.fn_name.clone(),
         }
     }
 
@@ -342,35 +357,70 @@ impl UnextendrFn {
         out
     }
 
-    /// Generate C function signature
-    fn to_c_function_for_header(&self) -> String {
-        let fn_name = self.fn_name_outer();
-        let mut args = self
+    fn get_c_args(&self) -> Vec<(String, String)> {
+        let mut out: Vec<_> = self
             .args
             .iter()
             .map(|arg| {
-                let pat = &arg.pat;
+                let pat = arg.pat.to_string();
                 let ty = arg.ty.to_c_type();
-                format!("{ty} {pat}")
+                (pat, ty)
             })
-            .collect::<Vec<String>>();
+            .collect();
 
+        // if it's a method, add `self__` arg
         if let UnextendrFnType::Method(_) = &self.fn_type {
-            args.insert(0, "SEXP self__".to_string())
+            out.insert(0, ("self__".to_string(), "SEXP".to_string()))
         }
 
-        let args_joined = args.join(", ");
+        out
+    }
 
-        format!("SEXP {fn_name}({args_joined});")
+    fn get_r_args(&self) -> Vec<String> {
+        let mut out: Vec<_> = self.args.iter().map(|arg| arg.pat.to_string()).collect();
+
+        // if it's a method, add `self__` arg
+        if let UnextendrFnType::Method(_) = &self.fn_type {
+            out.insert(0, "self".to_string())
+        }
+
+        out
+    }
+
+    /// Generate C function signature
+    fn to_c_function_for_header(&self) -> String {
+        let fn_name = self.fn_name_outer();
+        let args = self
+            .get_c_args()
+            .iter()
+            .map(|(pat, ty)| format!("{ty} {pat}"))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        format!("SEXP {fn_name}({args});")
     }
 
     /// Generate C function implementation
     fn to_c_function_impl(&self) -> String {
         let fn_name = self.fn_name_outer();
+        let args = self.get_c_args();
+
+        let args_sig = args
+            .iter()
+            .map(|(pat, ty)| format!("{ty} {pat}"))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        let args_call = args
+            .iter()
+            .map(|(pat, _)| pat.as_str())
+            .collect::<Vec<&str>>()
+            .join(", ");
+
         format!(
             "
-SEXP {fn_name}_wrapper(SEXP x) {{
-    SEXP res = {fn_name}(x);
+SEXP {fn_name}_wrapper({args_sig}) {{
+    SEXP res = {fn_name}({args_call});
     return handle_result(res);
 }}"
         )
@@ -379,12 +429,12 @@ SEXP {fn_name}_wrapper(SEXP x) {{
     /// Generate C function call entry
     fn to_c_function_call_entry(&self) -> String {
         let fn_name = self.fn_name_outer();
-        let n_args = self.args.len();
+        let n_args = self.get_c_args().len();
         format!(r#"    {{"{fn_name}", (DL_FUNC) &{fn_name}_wrapper, {n_args}}},"#)
     }
 
     fn to_r_function(&self) -> String {
-        let fn_name = self.fn_name_orig();
+        let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_outer();
 
         let doc_comments = self
@@ -395,10 +445,10 @@ SEXP {fn_name}_wrapper(SEXP x) {{
             .join("\n");
 
         let args = self
-            .args
+            .get_c_args()
             .iter()
-            .map(|arg| arg.pat.clone().to_string())
-            .collect::<Vec<String>>()
+            .map(|(pat, _)| pat.as_str())
+            .collect::<Vec<&str>>()
             .join(", ");
 
         let body = if self.has_result {
@@ -418,14 +468,51 @@ SEXP {fn_name}_wrapper(SEXP x) {{
     }
 }
 
-pub fn make_c_header_file(fns: &[UnextendrFn]) -> String {
-    fns.iter()
+pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
+    let bare_fns = parsed_result
+        .bare_fns
+        .iter()
         .map(|x| x.to_c_function_for_header())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let impls = parsed_result
+        .impls
+        .iter()
+        .map(|x| {
+            let fns = x
+                .fns
+                .iter()
+                .map(|x| x.to_c_function_for_header())
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            format!(
+                "\n// methods and associated functions for {}\n{}",
+                x.ty, fns
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!("{bare_fns}\n{impls}")
+}
+
+fn make_c_function_impl(fns: &[UnextendrFn]) -> String {
+    fns.iter()
+        .map(|x| x.to_c_function_impl())
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-pub fn make_c_impl_file(fns: &[UnextendrFn]) -> String {
+fn make_c_function_call_entry(fns: &[UnextendrFn]) -> String {
+    fns.iter()
+        .map(|x| x.to_c_function_call_entry())
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+pub fn make_c_impl_file(parsed_result: &ParsedResult) -> String {
     let common_part = r#"
 #include <stdint.h>
 #include <Rinternals.h>
@@ -461,24 +548,44 @@ SEXP handle_result(SEXP res_) {
 }
 "#;
 
-    let c_fns = fns
+    let c_fns_bare = make_c_function_impl(parsed_result.bare_fns.as_slice());
+
+    let c_fns_impl = parsed_result
+        .impls
         .iter()
-        .map(|x| x.to_c_function_impl())
+        .map(|x| {
+            format!(
+                "\n// methods and associated functions for {}\n{}",
+                x.ty,
+                make_c_function_impl(x.fns.as_slice())
+            )
+        })
         .collect::<Vec<String>>()
         .join("\n");
 
-    let call_entries = fns
+    let call_entries_bare = make_c_function_call_entry(parsed_result.bare_fns.as_slice());
+
+    let call_entries_impl = parsed_result
+        .impls
         .iter()
-        .map(|x| x.to_c_function_call_entry())
+        .map(|x| {
+            format!(
+                "\n// methods and associated functions for {}\n{}",
+                x.ty,
+                make_c_function_call_entry(x.fns.as_slice())
+            )
+        })
         .collect::<Vec<String>>()
         .join("\n");
 
     format!(
         "{common_part}
-{c_fns}
+{c_fns_bare}
+{c_fns_impl}
 
 static const R_CallMethodDef CallEntries[] = {{
-{call_entries}
+{call_entries_bare}
+{call_entries_impl}
     {{NULL, NULL, 0}}
 }};
 
@@ -490,10 +597,120 @@ void R_init_unextendr(DllInfo *dll) {{
     )
 }
 
-pub fn make_r_impl_file(fns: &[UnextendrFn]) -> String {
-    let r_fns = fns
+fn make_r_impl_for_impl(unextendr_impl: &UnextendrImpl) -> String {
+    let mut ctors: Vec<&UnextendrFn> = Vec::new();
+    let mut others: Vec<&UnextendrFn> = Vec::new();
+    let class_r = unextendr_impl.ty.clone();
+
+    for unextendr_fn in &unextendr_impl.fns {
+        match unextendr_fn.fn_type {
+            UnextendrFnType::Constructor(_) => ctors.push(unextendr_fn),
+            _ => others.push(unextendr_fn),
+        }
+    }
+
+    // TODO: error if no ctor
+
+    let closures = others
+        .iter()
+        .map(|x| {
+            let fn_name = x.fn_name_r();
+            let fn_name_c = x.fn_name_outer();
+
+            let mut args = x.get_r_args();
+            // Remove self from arguments for R
+            let args_r = args
+                .clone()
+                .into_iter()
+                .filter(|e| *e != "self")
+                .collect::<Vec<String>>()
+                .join(", ");
+
+            args.insert(0, fn_name_c.to_string());
+            let args_call = args.join(", ");
+
+            let body = if x.has_result {
+                format!(".Call({args_call})")
+            } else {
+                // If the result is NULL, wrap it with invisible
+                format!("invisible(.Call({args_call}))")
+            };
+
+            format!(
+                "{fn_name} <- function(self) {{
+  function({args_r}) {{
+    {body}
+  }}
+}}
+"
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let builders = ctors
+        .iter()
+        .map(|x| {
+            let fn_name = x.fn_name_r();
+            let fn_name_c = x.fn_name_outer();
+
+            let mut args = x.get_r_args();
+
+            let args_r = args.join(", ");
+
+            args.insert(0, fn_name_c.to_string());
+            let args_call = args.join(", ");
+
+            let methods = others
+                .iter()
+                .map(|o| format!("  e${} <- {}(self)", o.fn_name, o.fn_name_r()))
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            format!(
+                r#"{fn_name} <- function({args_r}) {{
+  e <- new.env(parent = emptyenv())
+  self <- .Call({args_call})
+
+{methods}
+
+  class(e) <- "{class_r}"
+  e
+}}
+"#
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let doc_comments = unextendr_impl
+        .docs
+        .iter()
+        .map(|doc| format!("#'{doc}"))
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!(
+        "{doc_comments}
+{builders}
+
+{closures}
+"
+    )
+}
+
+pub fn make_r_impl_file(parsed_result: &ParsedResult) -> String {
+    let r_fns = parsed_result
+        .bare_fns
         .iter()
         .map(|x| x.to_r_function())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let r_impls = parsed_result
+        .impls
+        .iter()
+        .map(make_r_impl_for_impl)
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -502,6 +719,8 @@ pub fn make_r_impl_file(fns: &[UnextendrFn]) -> String {
 #' @keywords internal
 "_PACKAGE"
 
-{r_fns}"#
+{r_fns}
+{r_impls}
+"#
     )
 }
