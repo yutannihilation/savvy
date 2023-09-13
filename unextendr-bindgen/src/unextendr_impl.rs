@@ -46,7 +46,7 @@ impl UnextendrImpl {
                         (true, false) => UnextendrFnType::Method(ty),
                         (false, true) => UnextendrFnType::Constructor(ty),
                         (false, false) => UnextendrFnType::AssociatedFunction(ty),
-                        (true, true) => panic!("Should not happen"),
+                        (true, true) => panic!("`fn foo(self, ...) -> Self` is not allowed"),
                     };
 
                     Some(UnextendrFn::from_impl_fn(impl_item_fn, fn_type))

@@ -283,6 +283,7 @@ impl UnextendrFn {
             // A method with result
             (UnextendrFnType::Method(ty), true) => parse_quote!(
                 #(#attrs)*
+                #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
@@ -293,6 +294,7 @@ impl UnextendrFn {
             // A method without result; return a dummy value
             (UnextendrFnType::Method(ty), false) => parse_quote!(
                 #(#attrs)*
+                #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
@@ -306,6 +308,7 @@ impl UnextendrFn {
             // An associated function with a result
             (UnextendrFnType::AssociatedFunction(ty), true) => parse_quote!(
                 #(#attrs)*
+                #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
 
@@ -315,6 +318,7 @@ impl UnextendrFn {
             // An associated function without result; return a dummy value
             (UnextendrFnType::AssociatedFunction(ty), false) => parse_quote!(
                 #(#attrs)*
+                #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
 
@@ -326,6 +330,7 @@ impl UnextendrFn {
             ),
             (UnextendrFnType::Constructor(ty), _) => parse_quote!(
                 #(#attrs)*
+                #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
                     let x = #ty::#fn_name_orig(#(#args_pat),*);
