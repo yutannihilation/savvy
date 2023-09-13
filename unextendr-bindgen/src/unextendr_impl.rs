@@ -3,6 +3,7 @@ use syn::parse_quote;
 
 use crate::extract_docs;
 use crate::UnextendrFn;
+use crate::UnextendrFnType;
 
 pub struct UnextendrImpl {
     /// Doc comments
@@ -37,10 +38,19 @@ impl UnextendrImpl {
         let fns: Vec<UnextendrFn> = orig
             .items
             .clone()
-            .iter_mut()
+            .iter()
             .filter_map(|f| match f {
                 syn::ImplItem::Fn(impl_item_fn) => {
-                    Some(UnextendrFn::from_impl_fn(impl_item_fn, &orig.self_ty))
+                    let ty = orig.self_ty.as_ref().clone();
+
+                    let fn_type = match (is_method(impl_item_fn), is_ctor(impl_item_fn)) {
+                        (true, false) => UnextendrFnType::Method(ty),
+                        (false, true) => UnextendrFnType::Constructor(ty),
+                        (false, false) => UnextendrFnType::AssociatedFunction(ty),
+                        (true, true) => panic!("Should not happen"),
+                    };
+
+                    Some(UnextendrFn::from_impl_fn(impl_item_fn, fn_type))
                 }
                 _ => None,
             })
@@ -61,5 +71,32 @@ impl UnextendrImpl {
 
     pub fn make_outer_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.make_outer_fn()).collect()
+    }
+}
+
+// check if the first argument is `self`
+fn is_method(impl_item_fn: &syn::ImplItemFn) -> bool {
+    matches!(
+        impl_item_fn.sig.inputs.first(),
+        Some(syn::FnArg::Receiver(_))
+    )
+}
+
+// check if the return type is `Self`
+fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
+    match &impl_item_fn.sig.output {
+        syn::ReturnType::Type(_, ty) => match ty.as_ref() {
+            syn::Type::Path(type_path) => {
+                type_path
+                    .path
+                    .get_ident()
+                    .expect("Unexpected type path in impl")
+                    .to_string()
+                    .as_str()
+                    == "Self"
+            }
+            _ => false,
+        },
+        _ => false,
     }
 }

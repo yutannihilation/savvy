@@ -73,6 +73,13 @@ pub struct UnextendrFnArg {
     ty: UnextendrSupportedTypes,
 }
 
+pub enum UnextendrFnType {
+    BareFunction,
+    Constructor(syn::Type),
+    Method(syn::Type),
+    AssociatedFunction(syn::Type),
+}
+
 pub struct UnextendrFn {
     /// Doc comments
     pub docs: Vec<String>,
@@ -81,7 +88,7 @@ pub struct UnextendrFn {
     /// Original function name
     pub fn_name: syn::Ident,
     /// type path of `self` in the case of impl function
-    pub self_ty: Option<syn::Type>,
+    pub fn_type: UnextendrFnType,
     /// Function arguments
     pub args: Vec<UnextendrFnArg>,
     /// Whether the function has return value
@@ -115,9 +122,23 @@ pub fn parse_unextendr_fn(item: &Item) -> Option<UnextendrFn> {
 #[allow(dead_code)]
 impl UnextendrFn {
     fn get_self_ty_ident(&self) -> Option<syn::Ident> {
-        match &self.self_ty {
-            Some(syn::Type::Path(ty)) => ty.path.get_ident().cloned(),
-            _ => None,
+        let self_ty = match &self.fn_type {
+            UnextendrFnType::BareFunction => return None,
+            UnextendrFnType::Constructor(ty) => ty,
+            UnextendrFnType::Method(ty) => ty,
+            UnextendrFnType::AssociatedFunction(ty) => ty,
+        };
+        if let syn::Type::Path(type_path) = self_ty {
+            let ty = type_path
+                .path
+                .segments
+                .last()
+                .expect("Unexpected type path")
+                .ident
+                .clone();
+            Some(ty)
+        } else {
+            panic!("Unexpected self type!")
         }
     }
 
@@ -140,18 +161,23 @@ impl UnextendrFn {
     }
 
     pub fn from_fn(orig: &syn::ItemFn) -> Self {
-        Self::new(&orig.attrs, &orig.sig, orig.block.as_ref(), None)
+        Self::new(
+            &orig.attrs,
+            &orig.sig,
+            orig.block.as_ref(),
+            UnextendrFnType::BareFunction,
+        )
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn, self_ty: &syn::Type) -> Self {
-        Self::new(&orig.attrs, &orig.sig, &orig.block, Some(self_ty.clone()))
+    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: UnextendrFnType) -> Self {
+        Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type)
     }
 
     pub fn new(
         attrs: &[Attribute],
         sig: &Signature,
         block: &Block,
-        self_ty: Option<syn::Type>,
+        fn_type: UnextendrFnType,
     ) -> Self {
         // TODO: check function signature and abort if any of it is unexpected one.
 
@@ -211,7 +237,7 @@ impl UnextendrFn {
             docs,
             attrs,
             fn_name,
-            self_ty,
+            fn_type,
             args: args_new,
             has_result,
             stmts_orig,
@@ -234,9 +260,9 @@ impl UnextendrFn {
         let stmts_orig = &self.stmts_orig;
         let attrs = &self.attrs;
 
-        let out: syn::ItemFn = match (&self.self_ty, self.has_result) {
+        let out: syn::ItemFn = match (&self.fn_type, self.has_result) {
             // A bare function with result
-            (None, true) => parse_quote!(
+            (UnextendrFnType::BareFunction, true) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
@@ -244,7 +270,7 @@ impl UnextendrFn {
                 }
             ),
             // A bare function without result; return a dummy value
-            (None, false) => parse_quote!(
+            (UnextendrFnType::BareFunction, false) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     #(#stmts_additional)*
@@ -254,8 +280,8 @@ impl UnextendrFn {
                     Ok(unextendr::NullSxp.into())
                 }
             ),
-            // A method or associated function with result
-            (Some(ty), true) => parse_quote!(
+            // A method with result
+            (UnextendrFnType::Method(ty), true) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
@@ -264,8 +290,8 @@ impl UnextendrFn {
                     (*self__).#fn_name_orig(#(#args_pat),*)
                 }
             ),
-            // A method or associated function without result; return a dummy value
-            (Some(ty), false) => parse_quote!(
+            // A method without result; return a dummy value
+            (UnextendrFnType::Method(ty), false) => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
                     let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
@@ -277,6 +303,28 @@ impl UnextendrFn {
                     Ok(unextendr::NullSxp.into())
                 }
             ),
+            // An associated function with a result
+            (UnextendrFnType::AssociatedFunction(ty), true) => parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    #(#stmts_additional)*
+
+                    #ty::#fn_name_orig(#(#args_pat),*)
+                }
+            ),
+            // An associated function without result; return a dummy value
+            (UnextendrFnType::AssociatedFunction(ty), false) => parse_quote!(
+                #(#attrs)*
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                    #(#stmts_additional)*
+
+                    #ty::#fn_name_orig(#(#args_pat),*);
+
+                    // Dummy return value
+                    Ok(unextendr::NullSxp.into())
+                }
+            ),
+            (UnextendrFnType::Constructor(ty), _) => todo!(),
         };
         out
     }
@@ -292,20 +340,20 @@ impl UnextendrFn {
             .map(|arg| arg.ty.to_rust_type_inner())
             .collect();
 
-        let out: syn::ItemFn = match &self.self_ty {
-            None => parse_quote!(
-                #[allow(clippy::missing_safety_doc)]
-                #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
-                }
-            ),
-            // if the function is a method or an associated function, add `self__` to the first argument
-            Some(_) => parse_quote!(
+        let out: syn::ItemFn = match &self.fn_type {
+            // if the function is a method, add `self__` to the first argument
+            UnextendrFnType::Method(_) => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn #fn_name_outer(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
                     unextendr::handle_result(#fn_name_inner(self__, #(#args_pat),*))
+                }
+            ),
+            _ => parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
+                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
                 }
             ),
         };
