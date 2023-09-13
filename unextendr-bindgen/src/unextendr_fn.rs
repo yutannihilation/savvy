@@ -12,7 +12,6 @@ pub enum UnextendrSupportedTypes {
     LogicalSxp,
     StringSxp,
     ListSxp,
-    ExternalPointerSxp(syn::Type),
 }
 
 #[allow(dead_code)]
@@ -45,7 +44,6 @@ impl UnextendrSupportedTypes {
             Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
             Self::StringSxp => parse_quote!(unextendr::StringSxp),
             Self::ListSxp => parse_quote!(unextendr::ListSxp),
-            Self::ExternalPointerSxp(ty) => ty.clone(),
         }
     }
 
@@ -56,15 +54,7 @@ impl UnextendrSupportedTypes {
 
     /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
     fn to_c_type(&self) -> String {
-        match &self {
-            Self::IntegerSxp
-            | Self::RealSxp
-            | Self::LogicalSxp
-            | Self::StringSxp
-            | Self::ListSxp
-            | Self::ExternalPointerSxp(_) => "SEXP",
-        }
-        .to_string()
+        "SEXP".to_string()
     }
 }
 
