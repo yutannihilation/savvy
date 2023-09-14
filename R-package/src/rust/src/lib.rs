@@ -153,8 +153,8 @@ impl Person {
         }
     }
 
-    fn set_name(&mut self, name: StringSxp) {
-        self.name = name.iter().next().unwrap().to_string();
+    fn set_name(&mut self, name: &str) {
+        self.name = name.to_string();
     }
 
     fn name(&self) -> unextendr::Result<unextendr::SEXP> {
