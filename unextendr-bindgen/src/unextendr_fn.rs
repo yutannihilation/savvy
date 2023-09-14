@@ -194,7 +194,7 @@ impl UnextendrFn {
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
-                        let #pat = #ty_ident::try_from(#pat)?;
+                        let #pat = #ty_ident::try_from(unextendr::Sxp(#pat))?;
                     });
 
                     Some(UnextendrFnArg { pat, ty })

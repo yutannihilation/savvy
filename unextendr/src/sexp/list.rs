@@ -182,16 +182,16 @@ impl Drop for OwnedListSxp {
     }
 }
 
-impl TryFrom<SEXP> for ListSxp {
+impl TryFrom<Sxp> for ListSxp {
     type Error = crate::error::Error;
 
-    fn try_from(value: SEXP) -> crate::error::Result<Self> {
-        if !Sxp(value).is_list() {
-            let type_name = Sxp(value).get_human_readable_type_name();
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+        if !value.is_list() {
+            let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to list");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
-        Ok(Self(value))
+        Ok(Self(value.0))
     }
 }
 

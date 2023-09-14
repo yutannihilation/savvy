@@ -10,6 +10,7 @@ pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
 pub use sexp::null::NullSxp;
 pub use sexp::real::{OwnedRealSxp, RealSxp};
 pub use sexp::string::{OwnedStringSxp, StringSxp};
+pub use sexp::Sxp;
 
 pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
 
