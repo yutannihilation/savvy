@@ -1,5 +1,8 @@
 ---
 output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -16,57 +19,63 @@ knitr::opts_chunk$set(
 # unextendr
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 ## What's this?
 
-This is... nothing. I'm just re-inventing the wheel only to have slightly better
-understanding about what [extendr](https://extendr.github.io/) does.
+This is... nothing. I'm just re-inventing the wheel only to have
+slightly better understanding about what
+[extendr](https://extendr.github.io/) does.
 
 ## Random thoughts
 
 ### Error Handling
 
-This framework uses [tagged pointer](https://en.wikipedia.org/wiki/Tagged_pointer) to indicate the error.
-This requires some wrappers, but the advantage is that we don't need to pass additional data
-and these bit operations should be cheap.
+This framework uses [tagged
+pointer]( "https://en.wikipedia.org/wiki/Tagged_pointer") to indicate
+the error. This requires to create some wrappers on C's side to raise an
+error after checking the tag, but the advantage is that this doesn't
+need additional allocation and these bit operations should be cheap.
 
-See [extendr/extendr#278](https://github.com/extendr/extendr/issues/278) for more discussion.
-
-### Protection
-
-I implemented the doubly-linked list method, which [cpp11 uses](https://cpp11.r-lib.org/articles/internals.html#protection).
-Now I'm not sure if this fits extendr; probably its current implementation aims for
-parallel processing, so it needs a hashmap to prevent collisions. But, I think
-it's not a good idea to use R's C API concurrently anyway, so this should be probably
-enough.
+See [my blog
+post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/) for more
+details.
 
 ### Read-only and writable versions of wrappers
 
-cpp11 provides the read-only by default, and [the writable version](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics)
-as an option.It seems a good idea to distinguish the external SEXPs and the
-"owned" SEXPs because we have control, when to protect and unprotect, only over
-the latter one.
+To consider safety first, Rust should not modify the memory allocated by
+R, and vice versa. So, this framework distinguishes the read-only (or
+external) data and writable (or owned) data. While this costs some
+additional memory allocation, this is also good in that we can skip
+protecting the external data.
+
+This design comes from [cpp11's
+`writable`](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics).
 
 ### Do we really want embedded usages?
 
-Regarding the concurrency, I'm wondering if it would be simpler if extendr give
-up supporting embedded usages. Yes, extendr is not only about R packages. It also
-provides functionalities to embed R in Rust like [this one](https://github.com/yutannihilation/extendr-tide-api-server-example).
-This is great, but, on the other hand, this means we have to care a lot of things.
-But, how careful we try to be, concurrency is a tough job.
+I've been wondering if it would be simpler if extendr give up supporting
+embedded usages. Yes, extendr is not only about R packages. It also
+provides functionalities to embed R in Rust like [this
+one](https://github.com/yutannihilation/extendr-tide-api-server-example).
+This is great, but, on the other hand, this means we have to care a lot
+of things. But, how careful we try to be, concurrency is a tough job.
 
-A lot of tests have failed because of various problems related to concurrency.
-Every time we encountered such a failure, we place `single_threaded()` here and
-there. But, could all of them really happen inside an R package? If extendr gives
-up supporting embedded usages, can our life be simpler a bit?
+A lot of tests have failed because of various problems related to
+concurrency. Every time we encountered such a failure, we place
+`single_threaded()` here and there. But, could all of them really happen
+inside an R package? If extendr gives up supporting embedded usages, can
+our life be simpler a bit?
 
 ### Generate bindings by CLI
 
-Extendr embeds the functionality to generate the R bindings and call entries.
-But, might it be easier to generate them by using an external CLI? I actually
-need this because I need to generate C code to handle the errors on C's side.
+Extendr embeds the functionality to generate the R bindings and call
+entries. But, might it be easier to generate them by using an external
+CLI? I actually need this because I need to generate C code to handle
+the errors on C's side.
 
 #### Usage
 
@@ -83,21 +92,21 @@ Commands:
 
 Options:
   -h, --help  Print help
-
 ```
 
-```sh
+``` sh
 cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
 cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
 cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
 ```
 
-
 ## Crates
 
-* `unextendr`: a simple wrapper around R's C API
-* `unextendr-bindgen`: a crate for generating C and R bindings from Rust code
-* `unextendr-macro`: a crate for `#[unextendr]` macro, which is powered by `unextendr-bindgen`
+-   `unextendr`: a simple wrapper around R's C API
+-   `unextendr-bindgen`: a crate for generating C and R bindings from
+    Rust code
+-   `unextendr-macro`: a crate for `#[unextendr]` macro, which is
+    powered by `unextendr-bindgen`
 
 ## Example functions
 
@@ -114,19 +123,36 @@ times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 
 flip_logical(c(TRUE, FALSE, NA))
 
-print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
+x <- Person()
+
+x$set_name("たかし")
+x$name()
 ```
 
-## TODOs
+## Rust API
 
-- [x] Support attributes and names (Note: I decided not to support attributes except for list cases. Users can pass the name and the vector content as separate arguments).
-- [x] Support list
-- [x] Support reading ALTREP (Note: I decided not to support creating an ALTREP for simplicity)
-- [ ] Support external pointer
-- [ ] Support function and environment
-- [x] Use proc-macro
-- [x] `R_UnwindProtect()`
++-------------+-------------------+----------------------+-------------------------+
+| R type      | Read-only version | Writable version     | Note                    |
++=============+===================+======================+=========================+
+| `SEXP`      | `Sxp`             | \-                   |                         |
++-------------+-------------------+----------------------+-------------------------+
+| `INTSXP`    | `IntegerSxp`      | `OwnedIntegerSxp`    |                         |
++-------------+-------------------+----------------------+-------------------------+
+| `REALSXP`   | `RealSxp`         | `OwnedRealSxp`       |                         |
++-------------+-------------------+----------------------+-------------------------+
+| `LGLSXP`    | `LogicalSxp`      | `OwnedLogicalSxp`    | -   cannot handle `NA`  |
++-------------+-------------------+----------------------+-------------------------+
+| `STRSXP`    | `StringSxp`       | `OwnedStringSxp`     |                         |
++-------------+-------------------+----------------------+-------------------------+
+| `VECSXP`    | `ListSxp`         | `OwnedListSxp`       |                         |
++-------------+-------------------+----------------------+-------------------------+
+| `EXTPTRSXP` | \-[^1]            | `ExternalPointerSxp` |                         |
++-------------+-------------------+----------------------+-------------------------+
+
+[^1]: This framework handles only `EXTPTRSXPs` created by this
+    framework. While this is an "external" pointer to R, it's internal
+    from the viewpoint of Rust.
 
 ## References
 
-* https://notchained.hatenablog.com/entry/2023/01/29/163013 (日本語)
+-   <https://notchained.hatenablog.com/entry/2023/01/29/163013> (日本語)

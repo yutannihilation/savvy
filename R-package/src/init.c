@@ -38,8 +38,18 @@ SEXP unextendr_to_upper_wrapper(SEXP x) {
     return handle_result(res);
 }
 
+SEXP unextendr_add_suffix_wrapper(SEXP x, SEXP y) {
+    SEXP res = unextendr_add_suffix(x, y);
+    return handle_result(res);
+}
+
 SEXP unextendr_times_two_int_wrapper(SEXP x) {
     SEXP res = unextendr_times_two_int(x);
+    return handle_result(res);
+}
+
+SEXP unextendr_times_any_int_wrapper(SEXP x, SEXP y) {
+    SEXP res = unextendr_times_any_int(x, y);
     return handle_result(res);
 }
 
@@ -48,8 +58,18 @@ SEXP unextendr_times_two_numeric_wrapper(SEXP x) {
     return handle_result(res);
 }
 
+SEXP unextendr_times_any_numeric_wrapper(SEXP x, SEXP y) {
+    SEXP res = unextendr_times_any_numeric(x, y);
+    return handle_result(res);
+}
+
 SEXP unextendr_flip_logical_wrapper(SEXP x) {
     SEXP res = unextendr_flip_logical(x);
+    return handle_result(res);
+}
+
+SEXP unextendr_or_logical_wrapper(SEXP x, SEXP y) {
+    SEXP res = unextendr_or_logical(x, y);
     return handle_result(res);
 }
 
@@ -75,17 +95,27 @@ SEXP unextendr_Person_name_wrapper(SEXP self__) {
     return handle_result(res);
 }
 
+SEXP unextendr_Person_associated_function_wrapper() {
+    SEXP res = unextendr_Person_associated_function();
+    return handle_result(res);
+}
+
 static const R_CallMethodDef CallEntries[] = {
     {"unextendr_to_upper", (DL_FUNC) &unextendr_to_upper_wrapper, 1},
+    {"unextendr_add_suffix", (DL_FUNC) &unextendr_add_suffix_wrapper, 2},
     {"unextendr_times_two_int", (DL_FUNC) &unextendr_times_two_int_wrapper, 1},
+    {"unextendr_times_any_int", (DL_FUNC) &unextendr_times_any_int_wrapper, 2},
     {"unextendr_times_two_numeric", (DL_FUNC) &unextendr_times_two_numeric_wrapper, 1},
+    {"unextendr_times_any_numeric", (DL_FUNC) &unextendr_times_any_numeric_wrapper, 2},
     {"unextendr_flip_logical", (DL_FUNC) &unextendr_flip_logical_wrapper, 1},
+    {"unextendr_or_logical", (DL_FUNC) &unextendr_or_logical_wrapper, 2},
     {"unextendr_print_list", (DL_FUNC) &unextendr_print_list_wrapper, 1},
 
 // methods and associated functions for Person
     {"unextendr_Person_new", (DL_FUNC) &unextendr_Person_new_wrapper, 0},
     {"unextendr_Person_set_name", (DL_FUNC) &unextendr_Person_set_name_wrapper, 2},
     {"unextendr_Person_name", (DL_FUNC) &unextendr_Person_name_wrapper, 1},
+    {"unextendr_Person_associated_function", (DL_FUNC) &unextendr_Person_associated_function_wrapper, 0},
     {NULL, NULL, 0}
 };
 

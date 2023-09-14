@@ -32,6 +32,28 @@ fn to_upper(x: StringSxp) -> unextendr::Result<unextendr::SEXP> {
     Ok(out.into())
 }
 
+/// Add suffix
+///
+/// @param x A character vector.
+/// @param y A suffix.
+/// @returns A character vector with upper case version of the input.
+/// @export
+#[unextendr]
+fn add_suffix(x: StringSxp, y: &str) -> unextendr::Result<unextendr::SEXP> {
+    let mut out = OwnedStringSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_elt(i, <&str>::na());
+            continue;
+        }
+
+        out.set_elt(i, format!("{e}_{y}").as_str());
+    }
+
+    Ok(out.into())
+}
+
 /// Multiply Input By Two
 ///
 /// @param x An integer vector.
@@ -46,6 +68,27 @@ fn times_two_int(x: IntegerSxp) -> unextendr::Result<unextendr::SEXP> {
             out.set_elt(i, i32::na());
         } else {
             out.set_elt(i, e * 2);
+        }
+    }
+
+    Ok(out.into())
+}
+
+/// Multiply Input By Another Input
+///
+/// @param x An integer vector.
+/// @param y An integer to multiply.
+/// @returns An integer vector with values multiplied by `y`.
+/// @export
+#[unextendr]
+fn times_any_int(x: IntegerSxp, y: i32) -> unextendr::Result<unextendr::SEXP> {
+    let mut out = OwnedIntegerSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_elt(i, i32::na());
+        } else {
+            out.set_elt(i, e * y);
         }
     }
 
@@ -72,6 +115,27 @@ fn times_two_numeric(x: RealSxp) -> unextendr::Result<unextendr::SEXP> {
     Ok(out.into())
 }
 
+/// Multiply Input By Another Input
+///
+/// @param x A real vector.
+/// @param y A real to multiply.
+/// @returns A real vector with values multiplied by `y`.
+/// @export
+#[unextendr]
+fn times_any_numeric(x: RealSxp, y: f64) -> unextendr::Result<unextendr::SEXP> {
+    let mut out = OwnedRealSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_elt(i, f64::na());
+        } else {
+            out.set_elt(i, e * y);
+        }
+    }
+
+    Ok(out.into())
+}
+
 /// Flip Input
 ///
 /// @param x A logical vector.
@@ -83,6 +147,23 @@ fn flip_logical(x: LogicalSxp) -> unextendr::Result<unextendr::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, !e);
+    }
+
+    Ok(out.into())
+}
+
+/// Or operation
+///
+/// @param x A logical vector.
+/// @param y A logical value.
+/// @returns A logical vector with filled values (`NA` is converted to `TRUE`).
+/// @export
+#[unextendr]
+fn or_logical(x: LogicalSxp, y: bool) -> unextendr::Result<unextendr::SEXP> {
+    let mut out = OwnedLogicalSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        out.set_elt(i, e || y);
     }
 
     Ok(out.into())
@@ -153,8 +234,8 @@ impl Person {
         }
     }
 
-    fn set_name(&mut self, name: StringSxp) {
-        self.name = name.iter().next().unwrap().to_string();
+    fn set_name(&mut self, name: &str) {
+        self.name = name.to_string();
     }
 
     fn name(&self) -> unextendr::Result<unextendr::SEXP> {
@@ -162,52 +243,10 @@ impl Person {
         out.set_elt(0, self.name.as_str());
         Ok(out.into())
     }
+
+    fn associated_function() -> unextendr::Result<unextendr::SEXP> {
+        let mut out = OwnedStringSxp::new(1);
+        out.set_elt(0, "associated_function");
+        Ok(out.into())
+    }
 }
-
-// impl IntoExtPtrSxp for Person {}
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_new() -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_new_inner())
-// }
-
-// unsafe fn unextendr_Person_new_inner() -> unextendr::Result<unextendr::SEXP> {
-//     let x = Person::new();
-//     Ok(x.into_external_pointer())
-// }
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_set_name(
-//     self__: unextendr::SEXP,
-//     name: unextendr::SEXP,
-// ) -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_set_name_inner(self__, name))
-// }
-
-// unsafe fn unextendr_Person_set_name_inner(
-//     self__: unextendr::SEXP,
-//     name: unextendr::SEXP,
-// ) -> unextendr::Result<unextendr::SEXP> {
-//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
-//     let name = unextendr::StringSxp::try_from(name)?;
-
-//     (*self__).set_name(name);
-
-//     Ok(NullSxp.into())
-// }
-
-// #[allow(clippy::missing_safety_doc)]
-// #[no_mangle]
-// pub unsafe extern "C" fn unextendr_Person_name(self__: unextendr::SEXP) -> unextendr::SEXP {
-//     unextendr::handle_result(unextendr_Person_name_inner(self__))
-// }
-
-// unsafe fn unextendr_Person_name_inner(
-//     self__: unextendr::SEXP,
-// ) -> unextendr::Result<unextendr::SEXP> {
-//     let self__ = unextendr::get_external_pointer_addr(self__) as *mut Person;
-
-//     (*self__).name()
-// }

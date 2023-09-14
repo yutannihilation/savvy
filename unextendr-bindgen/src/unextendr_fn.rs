@@ -16,6 +16,11 @@ pub enum UnextendrSupportedTypes {
     LogicalSxp,
     StringSxp,
     ListSxp,
+    // scalar
+    BareI32,
+    BareF64,
+    BareStr,
+    BareBool,
 }
 
 #[allow(dead_code)]
@@ -23,19 +28,30 @@ impl UnextendrSupportedTypes {
     fn from_type(ty: &syn::Type) -> Option<Self> {
         // Use only the last part to support both the qualified type path (e.g.,
         // `unextendr::IntegerSxp`), and single type (e.g., `IntegerSxp`)
-        let type_ident = match ty {
-            syn::Type::Path(type_path) => &type_path.path.segments.last().unwrap().ident,
-            _ => {
-                return None;
+        match ty {
+            syn::Type::Path(type_path) => {
+                let type_ident = &type_path.path.segments.last().unwrap().ident;
+                match type_ident.to_string().as_str() {
+                    "IntegerSxp" => Some(Self::IntegerSxp),
+                    "RealSxp" => Some(Self::RealSxp),
+                    "LogicalSxp" => Some(Self::LogicalSxp),
+                    "StringSxp" => Some(Self::StringSxp),
+                    "ListSxp" => Some(Self::ListSxp),
+                    "i32" => Some(Self::BareI32),
+                    "f64" => Some(Self::BareF64),
+                    "bool" => Some(Self::BareBool),
+                    _ => None,
+                }
             }
-        };
-
-        match type_ident.to_string().as_str() {
-            "IntegerSxp" => Some(Self::IntegerSxp),
-            "RealSxp" => Some(Self::RealSxp),
-            "LogicalSxp" => Some(Self::LogicalSxp),
-            "StringSxp" => Some(Self::StringSxp),
-            "ListSxp" => Some(Self::ListSxp),
+            syn::Type::Reference(type_ref) => {
+                if let syn::Type::Path(type_path) = type_ref.elem.as_ref() {
+                    let type_ident = &type_path.path.segments.last().unwrap().ident;
+                    if type_ident.to_string().as_str() == "str" {
+                        return Some(Self::BareStr);
+                    }
+                }
+                None
+            }
             _ => None,
         }
     }
@@ -48,6 +64,10 @@ impl UnextendrSupportedTypes {
             Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
             Self::StringSxp => parse_quote!(unextendr::StringSxp),
             Self::ListSxp => parse_quote!(unextendr::ListSxp),
+            Self::BareI32 => parse_quote!(i32),
+            Self::BareF64 => parse_quote!(f64),
+            Self::BareStr => parse_quote!(&str),
+            Self::BareBool => parse_quote!(bool),
         }
     }
 
@@ -194,7 +214,7 @@ impl UnextendrFn {
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
-                        let #pat = #ty_ident::try_from(#pat)?;
+                        let #pat = <#ty_ident>::try_from(unextendr::Sxp(#pat))?;
                     });
 
                     Some(UnextendrFnArg { pat, ty })
@@ -437,12 +457,7 @@ SEXP {fn_name}_wrapper({args_sig}) {{
         let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_outer();
 
-        let doc_comments = self
-            .docs
-            .iter()
-            .map(|doc| format!("#'{doc}"))
-            .collect::<Vec<String>>()
-            .join("\n");
+        let doc_comments = get_r_doc_comment(self.docs.as_slice());
 
         let args = self
             .get_c_args()
@@ -466,6 +481,13 @@ SEXP {fn_name}_wrapper({args_sig}) {{
 "
         )
     }
+}
+
+fn get_r_doc_comment(docs: &[String]) -> String {
+    docs.iter()
+        .map(|doc| format!("#'{doc}"))
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
@@ -683,12 +705,7 @@ fn make_r_impl_for_impl(unextendr_impl: &UnextendrImpl) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    let doc_comments = unextendr_impl
-        .docs
-        .iter()
-        .map(|doc| format!("#'{doc}"))
-        .collect::<Vec<String>>()
-        .join("\n");
+    let doc_comments = get_r_doc_comment(unextendr_impl.docs.as_slice());
 
     format!(
         "{doc_comments}

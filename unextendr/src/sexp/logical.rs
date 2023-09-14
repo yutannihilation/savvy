@@ -3,7 +3,7 @@ use libR_sys::{
 };
 
 use super::Sxp;
-use crate::{error::get_human_readable_type_name, protect};
+use crate::protect;
 
 pub struct LogicalSxp(pub SEXP);
 pub struct OwnedLogicalSxp {
@@ -20,8 +20,8 @@ impl LogicalSxp {
         self.len() == 0
     }
 
-    pub(crate) fn elt(&self, i: usize) -> bool {
-        unsafe { LOGICAL_ELT(self.0, i as _) == 1 }
+    pub(crate) fn elt(&self, i: usize) -> i32 {
+        unsafe { LOGICAL_ELT(self.0, i as _) }
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
@@ -58,7 +58,7 @@ impl OwnedLogicalSxp {
     }
 
     pub fn elt(&self, i: usize) -> bool {
-        self.inner.elt(i)
+        self.inner.elt(i) == 1
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
@@ -91,16 +91,16 @@ impl Drop for OwnedLogicalSxp {
     }
 }
 
-impl TryFrom<SEXP> for LogicalSxp {
+impl TryFrom<Sxp> for LogicalSxp {
     type Error = crate::error::Error;
 
-    fn try_from(value: SEXP) -> crate::error::Result<Self> {
-        if !Sxp(value).is_logical() {
-            let type_name = get_human_readable_type_name(value);
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+        if !value.is_logical() {
+            let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to logical");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
-        Ok(Self(value))
+        Ok(Self(value.0))
     }
 }
 
@@ -148,7 +148,7 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt(i))
+            Some(self.sexp.elt(i) == 1)
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i)) == 1) }

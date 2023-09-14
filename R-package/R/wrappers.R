@@ -11,6 +11,16 @@ to_upper <- function(x) {
   .Call(unextendr_to_upper, x)
 }
 
+#' Add suffix
+#'
+#' @param x A character vector.
+#' @param y A suffix.
+#' @returns A character vector with upper case version of the input.
+#' @export
+add_suffix <- function(x, y) {
+  .Call(unextendr_add_suffix, x, y)
+}
+
 #' Multiply Input By Two
 #'
 #' @param x An integer vector.
@@ -18,6 +28,16 @@ to_upper <- function(x) {
 #' @export
 times_two_int <- function(x) {
   .Call(unextendr_times_two_int, x)
+}
+
+#' Multiply Input By Another Input
+#'
+#' @param x An integer vector.
+#' @param y An integer to multiply.
+#' @returns An integer vector with values multiplied by `y`.
+#' @export
+times_any_int <- function(x, y) {
+  .Call(unextendr_times_any_int, x, y)
 }
 
 #' Multiply Input By Two
@@ -29,6 +49,16 @@ times_two_numeric <- function(x) {
   .Call(unextendr_times_two_numeric, x)
 }
 
+#' Multiply Input By Another Input
+#'
+#' @param x A real vector.
+#' @param y A real to multiply.
+#' @returns A real vector with values multiplied by `y`.
+#' @export
+times_any_numeric <- function(x, y) {
+  .Call(unextendr_times_any_numeric, x, y)
+}
+
 #' Flip Input
 #'
 #' @param x A logical vector.
@@ -36,6 +66,16 @@ times_two_numeric <- function(x) {
 #' @export
 flip_logical <- function(x) {
   .Call(unextendr_flip_logical, x)
+}
+
+#' Or operation
+#'
+#' @param x A logical vector.
+#' @param y A logical value.
+#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
+#' @export
+or_logical <- function(x, y) {
+  .Call(unextendr_or_logical, x, y)
 }
 
 #' Print the content of list
@@ -56,6 +96,7 @@ Person <- function() {
 
   e$set_name <- Person_set_name(self)
   e$name <- Person_name(self)
+  e$associated_function <- Person_associated_function(self)
 
   class(e) <- "Person"
   e
@@ -71,6 +112,12 @@ Person_set_name <- function(self) {
 Person_name <- function(self) {
   function() {
     .Call(unextendr_Person_name, self)
+  }
+}
+
+Person_associated_function <- function(self) {
+  function() {
+    .Call(unextendr_Person_associated_function)
   }
 }
 

@@ -1,7 +1,7 @@
 use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SET_REAL_ELT, SEXP};
 
 use super::Sxp;
-use crate::{error::get_human_readable_type_name, protect};
+use crate::protect;
 
 pub struct RealSxp(pub SEXP);
 pub struct OwnedRealSxp {
@@ -89,16 +89,16 @@ impl Drop for OwnedRealSxp {
     }
 }
 
-impl TryFrom<SEXP> for RealSxp {
+impl TryFrom<Sxp> for RealSxp {
     type Error = crate::error::Error;
 
-    fn try_from(value: SEXP) -> crate::error::Result<Self> {
-        if !Sxp(value).is_real() {
-            let type_name = get_human_readable_type_name(value);
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+        if !value.is_real() {
+            let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to real");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
-        Ok(Self(value))
+        Ok(Self(value.0))
     }
 }
 
