@@ -96,7 +96,23 @@ mod tests {
             ),
             parse_quote!(
                 unsafe fn unextendr_foo_inner(x: unextendr::SEXP) -> unextendr::Result<unextendr::SEXP> {
-                    let x = unextendr::RealSxp::try_from(x)?;
+                    let x = <unextendr::RealSxp>::try_from(unextendr::Sxp(x))?;
+                    bar()
+                }
+            ),
+        );
+
+        #[rustfmt::skip]
+        assert_eq_inner(
+            parse_quote!(
+                #[unextendr]
+                fn foo(x: f64) -> unextendr::Result<unextendr::SEXP> {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                unsafe fn unextendr_foo_inner(x: unextendr::SEXP) -> unextendr::Result<unextendr::SEXP> {
+                    let x = <f64>::try_from(unextendr::Sxp(x))?;
                     bar()
                 }
             ),
