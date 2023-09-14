@@ -3,7 +3,7 @@ use libR_sys::{
 };
 
 use super::Sxp;
-use crate::{error::get_human_readable_type_name, protect};
+use crate::protect;
 
 pub struct LogicalSxp(pub SEXP);
 pub struct OwnedLogicalSxp {
@@ -96,7 +96,7 @@ impl TryFrom<SEXP> for LogicalSxp {
 
     fn try_from(value: SEXP) -> crate::error::Result<Self> {
         if !Sxp(value).is_logical() {
-            let type_name = get_human_readable_type_name(value);
+            let type_name = Sxp(value).get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to logical");
             return Err(crate::error::Error::UnexpectedType(msg));
         }

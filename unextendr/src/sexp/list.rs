@@ -3,10 +3,7 @@ use libR_sys::{
     SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
-use crate::{
-    error::get_human_readable_type_name, protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp,
-    RealSxp, StringSxp,
-};
+use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp, RealSxp, StringSxp};
 
 use super::Sxp;
 
@@ -190,7 +187,7 @@ impl TryFrom<SEXP> for ListSxp {
 
     fn try_from(value: SEXP) -> crate::error::Result<Self> {
         if !Sxp(value).is_list() {
-            let type_name = get_human_readable_type_name(value);
+            let type_name = Sxp(value).get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to list");
             return Err(crate::error::Error::UnexpectedType(msg));
         }

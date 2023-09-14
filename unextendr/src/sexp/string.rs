@@ -7,7 +7,7 @@ use libR_sys::{
 
 use super::na::NotAvailableValue;
 use super::Sxp;
-use crate::{error::get_human_readable_type_name, protect};
+use crate::protect;
 
 pub struct StringSxp(pub SEXP);
 pub struct OwnedStringSxp {
@@ -98,7 +98,7 @@ impl TryFrom<SEXP> for StringSxp {
 
     fn try_from(value: SEXP) -> crate::error::Result<Self> {
         if !Sxp(value).is_string() {
-            let type_name = get_human_readable_type_name(value);
+            let type_name = Sxp(value).get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to string");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
