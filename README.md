@@ -6,6 +6,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 ## What’s this?
@@ -19,36 +20,31 @@ does.
 ### Error Handling
 
 This framework uses [tagged
-pointer](https://en.wikipedia.org/wiki/Tagged_pointer) to indicate the
-error. This requires some wrappers, but the advantage is that we don’t
-need to pass additional data and these bit operations should be cheap.
+pointer](%22https://en.wikipedia.org/wiki/Tagged_pointer%22) to indicate
+the error. This requires to create some wrappers on C’s side to raise an
+error after checking the tag, but the advantage is that this doesn’t
+need additional allocation and these bit operations should be cheap.
 
-See [extendr/extendr#278](https://github.com/extendr/extendr/issues/278)
-for more discussion.
-
-### Protection
-
-I implemented the doubly-linked list method, which [cpp11
-uses](https://cpp11.r-lib.org/articles/internals.html#protection). Now
-I’m not sure if this fits extendr; probably its current implementation
-aims for parallel processing, so it needs a hashmap to prevent
-collisions. But, I think it’s not a good idea to use R’s C API
-concurrently anyway, so this should be probably enough.
+See [my blog
+post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/) for more
+details.
 
 ### Read-only and writable versions of wrappers
 
-cpp11 provides the read-only by default, and [the writable
-version](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics)
-as an option.It seems a good idea to distinguish the external SEXPs and
-the “owned” SEXPs because we have control, when to protect and
-unprotect, only over the latter one.
+To consider safety first, Rust should not modify the memory allocated by
+R, and vice versa. So, this framework distinguishes the read-only (or
+external) data and writable (or owned) data. While this costs some
+additional memory allocation, this is also good in that we can skip
+protecting the external data.
+
+This design comes from [cpp11’s
+`writable`](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics).
 
 ### Do we really want embedded usages?
 
-Regarding the concurrency, I’m wondering if it would be simpler if
-extendr give up supporting embedded usages. Yes, extendr is not only
-about R packages. It also provides functionalities to embed R in Rust
-like [this
+I’ve been wondering if it would be simpler if extendr give up supporting
+embedded usages. Yes, extendr is not only about R packages. It also
+provides functionalities to embed R in Rust like [this
 one](https://github.com/yutannihilation/extendr-tide-api-server-example).
 This is great, but, on the other hand, this means we have to care a lot
 of things. But, how careful we try to be, concurrency is a tough job.
@@ -116,26 +112,88 @@ times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
 flip_logical(c(TRUE, FALSE, NA))
 #> [1] FALSE  TRUE  TRUE
 
-print_list(list(1:10, a = letters, b = c(TRUE, FALSE), `たかし` = list(), D = NULL))
-#> (no name): integer [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-#> a: character [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z]
-#> b: logical [TRUE, FALSE]
-#> たかし: list
-#> D: NULL
+x <- Person()
+
+x$set_name("たかし")
+x$name()
+#> [1] "たかし"
 ```
 
-## TODOs
+## Rust API
 
-- [x] Support attributes and names (Note: I decided not to support
-  attributes except for list cases. Users can pass the name and the
-  vector content as separate arguments).
-- [x] Support list
-- [x] Support reading ALTREP (Note: I decided not to support creating an
-  ALTREP for simplicity)
-- [ ] Support external pointer
-- [ ] Support function and environment
-- [x] Use proc-macro
-- [x] `R_UnwindProtect()`
+<table style="width:98%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 27%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>R type</th>
+<th>Read-only version</th>
+<th>Writable version</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>SEXP</code></td>
+<td><code>Sxp</code></td>
+<td>-</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>INTSXP</code></td>
+<td><code>IntegerSxp</code></td>
+<td><code>OwnedIntegerSxp</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>REALSXP</code></td>
+<td><code>RealSxp</code></td>
+<td><code>OwnedRealSxp</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>LGLSXP</code></td>
+<td><code>LogicalSxp</code></td>
+<td><code>OwnedLogicalSxp</code></td>
+<td><ul>
+<li>cannot handle <code>NA</code></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td><code>STRSXP</code></td>
+<td><code>StringSxp</code></td>
+<td><code>OwnedStringSxp</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>VECSXP</code></td>
+<td><code>ListSxp</code></td>
+<td><code>OwnedListSxp</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>EXTPTRSXP</code></td>
+<td>-<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a></td>
+<td><code>ExternalPointerSxp</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>This framework handles only <code>EXTPTRSXPs</code>
+created by this framework. While this is an “external” pointer to R,
+it’s internal from the viewpoint of Rust.<a href="#fnref1"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 
 ## References
 
