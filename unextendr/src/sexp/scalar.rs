@@ -40,9 +40,11 @@ impl TryFrom<Sxp> for bool {
             return Err(crate::error::Error::NotScalar);
         }
 
-        // Note: use iter().next() instead of elt(), because StringSxp::elt() returns SEXP.
-        let result = value.iter().next().unwrap();
+        let result_int = value.elt(0);
+        if result_int.is_na() {
+            return Err(crate::error::Error::NotScalar);
+        }
 
-        Ok(result)
+        Ok(result_int == 1)
     }
 }

@@ -20,8 +20,8 @@ impl LogicalSxp {
         self.len() == 0
     }
 
-    pub(crate) fn elt(&self, i: usize) -> bool {
-        unsafe { LOGICAL_ELT(self.0, i as _) == 1 }
+    pub(crate) fn elt(&self, i: usize) -> i32 {
+        unsafe { LOGICAL_ELT(self.0, i as _) }
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
@@ -58,7 +58,7 @@ impl OwnedLogicalSxp {
     }
 
     pub fn elt(&self, i: usize) -> bool {
-        self.inner.elt(i)
+        self.inner.elt(i) == 1
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
@@ -148,7 +148,7 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt(i))
+            Some(self.sexp.elt(i) == 1)
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i)) == 1) }
