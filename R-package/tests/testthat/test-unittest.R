@@ -47,6 +47,13 @@ test_that("functions work", {
   )
 })
 
+test_that("NA scalars are rejected", {
+  expect_error(add_suffix("", NA_character_))
+  expect_error(times_any_int(0L, NA_integer_))
+  expect_error(times_any_numeric(0, NA_real_))
+  expect_error(or_logical(TRUE, NA))
+})
+
 test_that("structs work", {
   x <- Person()
   expect_s3_class(x, "Person")
