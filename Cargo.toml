@@ -1,3 +1,9 @@
 [workspace]
 members = ["savvy", "savvy-macro", "savvy-bindgen"]
 resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+homepage = "https://github.com/yutannihilation/savvy/"
+documentation = "https://github.com/yutannihilation/savvy/"

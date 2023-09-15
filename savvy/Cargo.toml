@@ -1,7 +1,10 @@
 [package]
 name = "savvy"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+documentation.workspace = true
+homepage.workspace = true
 
 [dependencies]
 libR-sys = { git = "https://github.com/extendr/libR-sys" }
