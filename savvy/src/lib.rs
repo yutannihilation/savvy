@@ -16,7 +16,7 @@ pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
 
 // re-export
 pub use libR_sys::SEXP;
-pub use unextendr_macro::unextendr;
+pub use savvy_macro::savvy;
 
 use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf};
 

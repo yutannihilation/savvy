@@ -44,19 +44,19 @@ jobs:
 
       - name: Run cagro test
         run: |
-          cargo test --manifest-path=./unextendr-macro/Cargo.toml
-          cargo test --manifest-path=./unextendr-bindgen/Cargo.toml
+          cargo test --manifest-path=./savvy-macro/Cargo.toml
+          cargo test --manifest-path=./savvy-bindgen/Cargo.toml
 
       - name: Tweak
         run: |
           # macOS's sed treats -i option differently, so we cannot use it here...
-          sed '/^unextendr/s|".*"|"./dep/unextendr"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          sed '/^savvy/s|".*"|"./dep/savvy"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
 
           mkdir ./R-package/src/rust/dep/
-          mv unextendr/ ./R-package/src/rust/dep/
-          mv unextendr-macro/ ./R-package/src/rust/dep/
-          mv unextendr-bindgen/ ./R-package/src/rust/dep/
+          mv savvy/ ./R-package/src/rust/dep/
+          mv savvy-macro/ ./R-package/src/rust/dep/
+          mv savvy-bindgen/ ./R-package/src/rust/dep/
           mv Cargo.toml ./R-package/src/rust/dep/
         shell: bash
 

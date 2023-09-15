@@ -1,16 +1,16 @@
 use quote::format_ident;
 use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
-use crate::{unextendr_impl::UnextendrImpl, utils::extract_docs};
+use crate::{savvy_impl::SavvyImpl, utils::extract_docs};
 
 // For main.rs
 pub struct ParsedResult {
-    pub bare_fns: Vec<UnextendrFn>,
-    pub impls: Vec<UnextendrImpl>,
+    pub bare_fns: Vec<SavvyFn>,
+    pub impls: Vec<SavvyImpl>,
 }
 
 #[allow(clippy::enum_variant_names)]
-pub enum UnextendrSupportedTypes {
+pub enum SavvySupportedTypes {
     IntegerSxp,
     RealSxp,
     LogicalSxp,
@@ -24,10 +24,10 @@ pub enum UnextendrSupportedTypes {
 }
 
 #[allow(dead_code)]
-impl UnextendrSupportedTypes {
+impl SavvySupportedTypes {
     fn from_type(ty: &syn::Type) -> Option<Self> {
         // Use only the last part to support both the qualified type path (e.g.,
-        // `unextendr::IntegerSxp`), and single type (e.g., `IntegerSxp`)
+        // `savvy::IntegerSxp`), and single type (e.g., `IntegerSxp`)
         match ty {
             syn::Type::Path(type_path) => {
                 let type_ident = &type_path.path.segments.last().unwrap().ident;
@@ -59,11 +59,11 @@ impl UnextendrSupportedTypes {
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
         match &self {
-            Self::IntegerSxp => parse_quote!(unextendr::IntegerSxp),
-            Self::RealSxp => parse_quote!(unextendr::RealSxp),
-            Self::LogicalSxp => parse_quote!(unextendr::LogicalSxp),
-            Self::StringSxp => parse_quote!(unextendr::StringSxp),
-            Self::ListSxp => parse_quote!(unextendr::ListSxp),
+            Self::IntegerSxp => parse_quote!(savvy::IntegerSxp),
+            Self::RealSxp => parse_quote!(savvy::RealSxp),
+            Self::LogicalSxp => parse_quote!(savvy::LogicalSxp),
+            Self::StringSxp => parse_quote!(savvy::StringSxp),
+            Self::ListSxp => parse_quote!(savvy::ListSxp),
             Self::BareI32 => parse_quote!(i32),
             Self::BareF64 => parse_quote!(f64),
             Self::BareStr => parse_quote!(&str),
@@ -73,7 +73,7 @@ impl UnextendrSupportedTypes {
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
     fn to_rust_type_inner(&self) -> syn::Type {
-        parse_quote!(unextendr::SEXP)
+        parse_quote!(savvy::SEXP)
     }
 
     /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
@@ -82,29 +82,29 @@ impl UnextendrSupportedTypes {
     }
 }
 
-pub struct UnextendrFnArg {
+pub struct SavvyFnArg {
     pat: syn::Ident,
-    ty: UnextendrSupportedTypes,
+    ty: SavvySupportedTypes,
 }
 
-pub enum UnextendrFnType {
+pub enum SavvyFnType {
     BareFunction,
     Constructor(syn::Type),
     Method(syn::Type),
     AssociatedFunction(syn::Type),
 }
 
-pub struct UnextendrFn {
+pub struct SavvyFn {
     /// Doc comments
     pub docs: Vec<String>,
-    /// Attributes except for `#[unextendr]`
+    /// Attributes except for `#[savvy]`
     pub attrs: Vec<syn::Attribute>,
     /// Original function name
     pub fn_name: syn::Ident,
     /// type path of `self` in the case of impl function
-    pub fn_type: UnextendrFnType,
+    pub fn_type: SavvyFnType,
     /// Function arguments
-    pub args: Vec<UnextendrFnArg>,
+    pub args: Vec<SavvyFnArg>,
     /// Whether the function has return value
     pub has_result: bool,
     /// Original body of the function
@@ -114,13 +114,13 @@ pub struct UnextendrFn {
 }
 
 #[allow(dead_code)]
-impl UnextendrFn {
+impl SavvyFn {
     fn get_self_ty_ident(&self) -> Option<syn::Ident> {
         let self_ty = match &self.fn_type {
-            UnextendrFnType::BareFunction => return None,
-            UnextendrFnType::Constructor(ty) => ty,
-            UnextendrFnType::Method(ty) => ty,
-            UnextendrFnType::AssociatedFunction(ty) => ty,
+            SavvyFnType::BareFunction => return None,
+            SavvyFnType::Constructor(ty) => ty,
+            SavvyFnType::Method(ty) => ty,
+            SavvyFnType::AssociatedFunction(ty) => ty,
         };
         if let syn::Type::Path(type_path) = self_ty {
             let ty = type_path
@@ -138,15 +138,15 @@ impl UnextendrFn {
 
     pub fn fn_name_inner(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
-            Some(ty) => format_ident!("unextendr_{}_{}_inner", ty, self.fn_name),
-            None => format_ident!("unextendr_{}_inner", self.fn_name),
+            Some(ty) => format_ident!("savvy_{}_{}_inner", ty, self.fn_name),
+            None => format_ident!("savvy_{}_inner", self.fn_name),
         }
     }
 
     pub fn fn_name_outer(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
-            Some(ty) => format_ident!("unextendr_{}_{}", ty, self.fn_name),
-            None => format_ident!("unextendr_{}", self.fn_name),
+            Some(ty) => format_ident!("savvy_{}_{}", ty, self.fn_name),
+            None => format_ident!("savvy_{}", self.fn_name),
         }
     }
 
@@ -170,25 +170,20 @@ impl UnextendrFn {
             &orig.attrs,
             &orig.sig,
             orig.block.as_ref(),
-            UnextendrFnType::BareFunction,
+            SavvyFnType::BareFunction,
         )
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: UnextendrFnType) -> Self {
+    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> Self {
         Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type)
     }
 
-    pub fn new(
-        attrs: &[Attribute],
-        sig: &Signature,
-        block: &Block,
-        fn_type: UnextendrFnType,
-    ) -> Self {
+    pub fn new(attrs: &[Attribute], sig: &Signature, block: &Block, fn_type: SavvyFnType) -> Self {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = attrs.to_vec();
-        // Remove #[unextendr]
-        attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
+        // Remove #[savvy]
+        attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
 
         // Extract doc comments
         let docs = extract_docs(attrs.as_slice());
@@ -198,7 +193,7 @@ impl UnextendrFn {
         let stmts_orig = block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        let args_new: Vec<UnextendrFnArg> = sig
+        let args_new: Vec<SavvyFnArg> = sig
             .inputs
             .iter()
             .filter_map(|arg| match arg {
@@ -208,16 +203,16 @@ impl UnextendrFn {
                         _ => panic!("non-ident is not supported"),
                     };
 
-                    let ty = UnextendrSupportedTypes::from_type(ty.as_ref())
+                    let ty = SavvySupportedTypes::from_type(ty.as_ref())
                         .expect("the type is not supported");
 
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
-                        let #pat = <#ty_ident>::try_from(unextendr::Sxp(#pat))?;
+                        let #pat = <#ty_ident>::try_from(savvy::Sxp(#pat))?;
                     });
 
-                    Some(UnextendrFnArg { pat, ty })
+                    Some(SavvyFnArg { pat, ty })
                 }
                 // Skip `self`
                 syn::FnArg::Receiver(syn::Receiver { reference, .. }) => {
@@ -267,76 +262,76 @@ impl UnextendrFn {
 
         let out: syn::ItemFn = match (&self.fn_type, self.has_result) {
             // A bare function with result
-            (UnextendrFnType::BareFunction, true) => parse_quote!(
+            (SavvyFnType::BareFunction, true) => parse_quote!(
                 #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
                     #(#stmts_additional)*
                     #(#stmts_orig)*
                 }
             ),
             // A bare function without result; return a dummy value
-            (UnextendrFnType::BareFunction, false) => parse_quote!(
+            (SavvyFnType::BareFunction, false) => parse_quote!(
                 #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
                     #(#stmts_additional)*
                     #(#stmts_orig)*
 
                     // Dummy return value
-                    Ok(unextendr::NullSxp.into())
+                    Ok(savvy::NullSxp.into())
                 }
             ),
             // A method with result
-            (UnextendrFnType::Method(ty), true) => parse_quote!(
+            (SavvyFnType::Method(ty), true) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
-                    let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
+                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                    let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
                     (*self__).#fn_name_orig(#(#args_pat),*)
                 }
             ),
             // A method without result; return a dummy value
-            (UnextendrFnType::Method(ty), false) => parse_quote!(
+            (SavvyFnType::Method(ty), false) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
-                    let self__ = unextendr::get_external_pointer_addr(self__) as *mut #ty;
+                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                    let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
                     (*self__).#fn_name_orig(#(#args_pat),*);
 
                     // Dummy return value
-                    Ok(unextendr::NullSxp.into())
+                    Ok(savvy::NullSxp.into())
                 }
             ),
             // An associated function with a result
-            (UnextendrFnType::AssociatedFunction(ty), true) => parse_quote!(
+            (SavvyFnType::AssociatedFunction(ty), true) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
                     #(#stmts_additional)*
 
                     #ty::#fn_name_orig(#(#args_pat),*)
                 }
             ),
             // An associated function without result; return a dummy value
-            (UnextendrFnType::AssociatedFunction(ty), false) => parse_quote!(
+            (SavvyFnType::AssociatedFunction(ty), false) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
                     #(#stmts_additional)*
 
                     #ty::#fn_name_orig(#(#args_pat),*);
 
                     // Dummy return value
-                    Ok(unextendr::NullSxp.into())
+                    Ok(savvy::NullSxp.into())
                 }
             ),
-            (UnextendrFnType::Constructor(ty), _) => parse_quote!(
+            (SavvyFnType::Constructor(ty), _) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> unextendr::Result<unextendr::SEXP> {
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
                     #(#stmts_additional)*
                     let x = #ty::#fn_name_orig(#(#args_pat),*);
                     Ok(x.into_external_pointer())
@@ -359,18 +354,18 @@ impl UnextendrFn {
 
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
-            UnextendrFnType::Method(_) => parse_quote!(
+            SavvyFnType::Method(_) => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer(self__: unextendr::SEXP, #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                    unextendr::handle_result(#fn_name_inner(self__, #(#args_pat),*))
+                pub unsafe extern "C" fn #fn_name_outer(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::SEXP {
+                    savvy::handle_result(#fn_name_inner(self__, #(#args_pat),*))
                 }
             ),
             _ => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> unextendr::SEXP {
-                    unextendr::handle_result(#fn_name_inner(#(#args_pat),*))
+                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> savvy::SEXP {
+                    savvy::handle_result(#fn_name_inner(#(#args_pat),*))
                 }
             ),
         };
@@ -389,7 +384,7 @@ impl UnextendrFn {
             .collect();
 
         // if it's a method, add `self__` arg
-        if let UnextendrFnType::Method(_) = &self.fn_type {
+        if let SavvyFnType::Method(_) = &self.fn_type {
             out.insert(0, ("self__".to_string(), "SEXP".to_string()))
         }
 
@@ -400,7 +395,7 @@ impl UnextendrFn {
         let mut out: Vec<_> = self.args.iter().map(|arg| arg.pat.to_string()).collect();
 
         // if it's a method, add `self__` arg
-        if let UnextendrFnType::Method(_) = &self.fn_type {
+        if let SavvyFnType::Method(_) = &self.fn_type {
             out.insert(0, "self".to_string())
         }
 
@@ -520,14 +515,14 @@ pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
     format!("{bare_fns}\n{impls}")
 }
 
-fn make_c_function_impl(fns: &[UnextendrFn]) -> String {
+fn make_c_function_impl(fns: &[SavvyFn]) -> String {
     fns.iter()
         .map(|x| x.to_c_function_impl())
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-fn make_c_function_call_entry(fns: &[UnextendrFn]) -> String {
+fn make_c_function_call_entry(fns: &[SavvyFn]) -> String {
     fns.iter()
         .map(|x| x.to_c_function_call_entry())
         .collect::<Vec<String>>()
@@ -611,7 +606,7 @@ static const R_CallMethodDef CallEntries[] = {{
     {{NULL, NULL, 0}}
 }};
 
-void R_init_unextendr(DllInfo *dll) {{
+void R_init_savvy(DllInfo *dll) {{
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
 }}
@@ -619,15 +614,15 @@ void R_init_unextendr(DllInfo *dll) {{
     )
 }
 
-fn make_r_impl_for_impl(unextendr_impl: &UnextendrImpl) -> String {
-    let mut ctors: Vec<&UnextendrFn> = Vec::new();
-    let mut others: Vec<&UnextendrFn> = Vec::new();
-    let class_r = unextendr_impl.ty.clone();
+fn make_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
+    let mut ctors: Vec<&SavvyFn> = Vec::new();
+    let mut others: Vec<&SavvyFn> = Vec::new();
+    let class_r = savvy_impl.ty.clone();
 
-    for unextendr_fn in &unextendr_impl.fns {
-        match unextendr_fn.fn_type {
-            UnextendrFnType::Constructor(_) => ctors.push(unextendr_fn),
-            _ => others.push(unextendr_fn),
+    for savvy_fn in &savvy_impl.fns {
+        match savvy_fn.fn_type {
+            SavvyFnType::Constructor(_) => ctors.push(savvy_fn),
+            _ => others.push(savvy_fn),
         }
     }
 
@@ -705,7 +700,7 @@ fn make_r_impl_for_impl(unextendr_impl: &UnextendrImpl) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    let doc_comments = get_r_doc_comment(unextendr_impl.docs.as_slice());
+    let doc_comments = get_r_doc_comment(savvy_impl.docs.as_slice());
 
     format!(
         "{doc_comments}
@@ -732,7 +727,7 @@ pub fn make_r_impl_file(parsed_result: &ParsedResult) -> String {
         .join("\n");
 
     format!(
-        r#"#' @useDynLib unextendr, .registration = TRUE
+        r#"#' @useDynLib savvy, .registration = TRUE
 #' @keywords internal
 "_PACKAGE"
 

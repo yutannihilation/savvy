@@ -1,4 +1,4 @@
-#' @useDynLib unextendr, .registration = TRUE
+#' @useDynLib savvy, .registration = TRUE
 #' @keywords internal
 "_PACKAGE"
 
@@ -8,7 +8,7 @@
 #' @returns A character vector with upper case version of the input.
 #' @export
 to_upper <- function(x) {
-  .Call(unextendr_to_upper, x)
+  .Call(savvy_to_upper, x)
 }
 
 #' Add suffix
@@ -18,7 +18,7 @@ to_upper <- function(x) {
 #' @returns A character vector with upper case version of the input.
 #' @export
 add_suffix <- function(x, y) {
-  .Call(unextendr_add_suffix, x, y)
+  .Call(savvy_add_suffix, x, y)
 }
 
 #' Multiply Input By Two
@@ -27,7 +27,7 @@ add_suffix <- function(x, y) {
 #' @returns An integer vector with values multiplied by 2.
 #' @export
 times_two_int <- function(x) {
-  .Call(unextendr_times_two_int, x)
+  .Call(savvy_times_two_int, x)
 }
 
 #' Multiply Input By Another Input
@@ -37,7 +37,7 @@ times_two_int <- function(x) {
 #' @returns An integer vector with values multiplied by `y`.
 #' @export
 times_any_int <- function(x, y) {
-  .Call(unextendr_times_any_int, x, y)
+  .Call(savvy_times_any_int, x, y)
 }
 
 #' Multiply Input By Two
@@ -46,7 +46,7 @@ times_any_int <- function(x, y) {
 #' @returns A numeric vector with values multiplied by 2.
 #' @export
 times_two_numeric <- function(x) {
-  .Call(unextendr_times_two_numeric, x)
+  .Call(savvy_times_two_numeric, x)
 }
 
 #' Multiply Input By Another Input
@@ -56,7 +56,7 @@ times_two_numeric <- function(x) {
 #' @returns A real vector with values multiplied by `y`.
 #' @export
 times_any_numeric <- function(x, y) {
-  .Call(unextendr_times_any_numeric, x, y)
+  .Call(savvy_times_any_numeric, x, y)
 }
 
 #' Flip Input
@@ -65,7 +65,7 @@ times_any_numeric <- function(x, y) {
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
 flip_logical <- function(x) {
-  .Call(unextendr_flip_logical, x)
+  .Call(savvy_flip_logical, x)
 }
 
 #' Or operation
@@ -75,7 +75,7 @@ flip_logical <- function(x) {
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
 or_logical <- function(x, y) {
-  .Call(unextendr_or_logical, x, y)
+  .Call(savvy_or_logical, x, y)
 }
 
 #' Print the content of list
@@ -84,7 +84,7 @@ or_logical <- function(x, y) {
 #' @returns `NULL`
 #' @export
 print_list <- function(x) {
-  invisible(.Call(unextendr_print_list, x))
+  invisible(.Call(savvy_print_list, x))
 }
 
 #' A person with a name
@@ -92,7 +92,7 @@ print_list <- function(x) {
 #' @export
 Person <- function() {
   e <- new.env(parent = emptyenv())
-  self <- .Call(unextendr_Person_new)
+  self <- .Call(savvy_Person_new)
 
   e$set_name <- Person_set_name(self)
   e$name <- Person_name(self)
@@ -105,19 +105,19 @@ Person <- function() {
 
 Person_set_name <- function(self) {
   function(name) {
-    invisible(.Call(unextendr_Person_set_name, self, name))
+    invisible(.Call(savvy_Person_set_name, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-    .Call(unextendr_Person_name, self)
+    .Call(savvy_Person_name, self)
   }
 }
 
 Person_associated_function <- function(self) {
   function() {
-    .Call(unextendr_Person_associated_function)
+    .Call(savvy_Person_associated_function)
   }
 }
 

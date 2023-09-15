@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(unextendr)
+library(savvy)
 
-test_check("unextendr")
+test_check("savvy")

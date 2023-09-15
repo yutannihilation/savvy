@@ -1,27 +1,27 @@
 use quote::format_ident;
 use syn::parse_quote;
 
-use crate::unextendr_fn::{UnextendrFn, UnextendrFnType};
+use crate::savvy_fn::{SavvyFn, SavvyFnType};
 use crate::utils::extract_docs;
 
-pub struct UnextendrImpl {
+pub struct SavvyImpl {
     /// Doc comments
     pub docs: Vec<String>,
-    /// Attributes except for `#[unextendr]`
+    /// Attributes except for `#[savvy]`
     pub attrs: Vec<syn::Attribute>,
     /// Original type name
     pub ty: syn::Ident,
     /// Methods and accociated functions
-    pub fns: Vec<UnextendrFn>,
+    pub fns: Vec<SavvyFn>,
     /// Original body of the impl
     pub orig: syn::ItemImpl,
 }
 
-impl UnextendrImpl {
+impl SavvyImpl {
     pub fn new(orig: &syn::ItemImpl) -> Self {
         let mut attrs = orig.attrs.clone();
-        // Remove #[unextendr]
-        attrs.retain(|attr| attr != &parse_quote!(#[unextendr]));
+        // Remove #[savvy]
+        attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
         // Extract doc comments
         let docs = extract_docs(attrs.as_slice());
 
@@ -34,7 +34,7 @@ impl UnextendrImpl {
             }
         };
 
-        let fns: Vec<UnextendrFn> = orig
+        let fns: Vec<SavvyFn> = orig
             .items
             .clone()
             .iter()
@@ -43,13 +43,13 @@ impl UnextendrImpl {
                     let ty = orig.self_ty.as_ref().clone();
 
                     let fn_type = match (is_method(impl_item_fn), is_ctor(impl_item_fn)) {
-                        (true, false) => UnextendrFnType::Method(ty),
-                        (false, true) => UnextendrFnType::Constructor(ty),
-                        (false, false) => UnextendrFnType::AssociatedFunction(ty),
+                        (true, false) => SavvyFnType::Method(ty),
+                        (false, true) => SavvyFnType::Constructor(ty),
+                        (false, false) => SavvyFnType::AssociatedFunction(ty),
                         (true, true) => panic!("`fn foo(self, ...) -> Self` is not allowed"),
                     };
 
-                    Some(UnextendrFn::from_impl_fn(impl_item_fn, fn_type))
+                    Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type))
                 }
                 _ => None,
             })
@@ -104,14 +104,14 @@ fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::UnextendrFnType::*;
+    use super::SavvyFnType::*;
     use super::*;
     use syn::parse_quote;
 
     #[test]
     fn test_impl() {
         let item_impl: syn::ItemImpl = parse_quote!(
-            #[unextendr]
+            #[savvy]
             impl Person {
                 fn new() -> Self {
                     Self {
@@ -123,7 +123,7 @@ mod tests {
                     self.name = name.iter().next().unwrap().to_string();
                 }
 
-                fn name(&self) -> unextendr::Result<unextendr::SEXP> {
+                fn name(&self) -> savvy::Result<savvy::SEXP> {
                     let mut out = OwnedStringSxp::new(1);
                     out.set_elt(0, self.name.as_str());
                     Ok(out.into())
@@ -133,7 +133,7 @@ mod tests {
             }
         );
 
-        let parsed = UnextendrImpl::new(&item_impl);
+        let parsed = SavvyImpl::new(&item_impl);
         assert_eq!(parsed.ty.to_string().as_str(), "Person");
 
         assert_eq!(parsed.fns.len(), 4);

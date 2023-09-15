@@ -1,19 +1,26 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# unextendr
+# Savvy - A safe, but unfriendly, extension interface using Rust.
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/unextendr/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
 
 ## What’s this?
 
-This is… nothing. I’m just re-inventing the wheel only to have slightly
-better understanding about what [extendr](https://extendr.github.io/)
-does.
+This is nothing but my personal challenge to re-invent the wheel in
+order to get better understanding about what
+[extendr](https://extendr.github.io/) does. While this is usable,
+ergonomics is not included.
+
+### Why savvy?
+
+In Japanese, “Rust” is pronounced as `sàbí`(錆). Since the sound is
+similar, and this framework is intended to be used by R-API-savvy
+people, I chose this name.
 
 ## Random thoughts
 
@@ -67,7 +74,7 @@ the errors on C’s side.
 ``` console
 Generate C bindings and R bindings for a Rust library
 
-Usage: unextendr-bindgen.exe [COMMAND]
+Usage: savvy-bindgen.exe [COMMAND]
 
 Commands:
   c-header  Generate C header file
@@ -80,25 +87,25 @@ Options:
 ```
 
 ``` sh
-cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
-cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
-cargo run --manifest-path ./unextendr-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
+cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
+cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
+cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
 ```
 
 ## Crates
 
-- `unextendr`: a simple wrapper around R’s C API
-- `unextendr-bindgen`: a crate for generating C and R bindings from Rust
+- `savvy`: a simple wrapper around R’s C API
+- `savvy-bindgen`: a crate for generating C and R bindings from Rust
   code
-- `unextendr-macro`: a crate for `#[unextendr]` macro, which is powered
-  by `unextendr-bindgen`
+- `savvy-macro`: a crate for `#[savvy]` macro, which is powered by
+  `savvy-bindgen`
 
 ## Example functions
 
 A toy example R package can be found in `R-package/` directory.
 
 ``` r
-library(unextendr)
+library(savvy)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
 #> [1] "A"          NA           "A"          "座布団一枚"

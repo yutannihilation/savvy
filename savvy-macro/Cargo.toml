@@ -1,5 +1,5 @@
 [package]
-name = "unextendr-macro"
+name = "savvy-macro"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,4 +11,4 @@ proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
 
-unextendr-bindgen = { path = "../unextendr-bindgen" }
+savvy-bindgen = { path = "../savvy-bindgen" }

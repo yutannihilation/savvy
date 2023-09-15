@@ -1,5 +1,5 @@
 [package]
-name = "unextendr"
+name = "savvy"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 libR-sys = { git = "https://github.com/extendr/libR-sys" }
 once_cell = "1"
 
-unextendr-macro = { path = "../unextendr-macro" }
+savvy-macro = { path = "../savvy-macro" }
 
 [build-dependencies]
 cc = "1"

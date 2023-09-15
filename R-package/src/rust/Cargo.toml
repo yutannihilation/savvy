@@ -1,5 +1,5 @@
 [package]
-name = "simple-unextendr"
+name = "simple-savvy"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,6 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-unextendr = { path = "../../../unextendr" }
+savvy = { path = "../../../savvy" }
 
 [workspace]

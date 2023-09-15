@@ -1,19 +1,19 @@
 use clap::{Parser, Subcommand};
+use savvy_fn::ParsedResult;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use syn::parse_quote;
-use unextendr_fn::ParsedResult;
 
-mod unextendr_fn;
-mod unextendr_impl;
+mod savvy_fn;
+mod savvy_impl;
 mod utils;
 
-use unextendr_fn::make_c_header_file;
-use unextendr_fn::make_c_impl_file;
-use unextendr_fn::make_r_impl_file;
-use unextendr_fn::UnextendrFn;
-use unextendr_impl::UnextendrImpl;
+use savvy_fn::make_c_header_file;
+use savvy_fn::make_c_impl_file;
+use savvy_fn::make_r_impl_file;
+use savvy_fn::SavvyFn;
+use savvy_impl::SavvyImpl;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -44,7 +44,7 @@ enum Commands {
     },
 }
 
-pub fn parse_unextendr_fn(item: &syn::Item) -> Option<UnextendrFn> {
+pub fn parse_savvy_fn(item: &syn::Item) -> Option<SavvyFn> {
     let func = match item {
         syn::Item::Fn(func) => func,
         _ => {
@@ -52,19 +52,19 @@ pub fn parse_unextendr_fn(item: &syn::Item) -> Option<UnextendrFn> {
         }
     };
 
-    // Generate bindings only when the function is marked by #[unextendr]
+    // Generate bindings only when the function is marked by #[savvy]
     if func
         .attrs
         .iter()
-        .any(|attr| attr == &parse_quote!(#[unextendr]))
+        .any(|attr| attr == &parse_quote!(#[savvy]))
     {
-        Some(UnextendrFn::from_fn(func))
+        Some(SavvyFn::from_fn(func))
     } else {
         None
     }
 }
 
-pub fn parse_unextendr_impl(item: &syn::Item) -> Vec<UnextendrFn> {
+pub fn parse_savvy_impl(item: &syn::Item) -> Vec<SavvyFn> {
     let item_impl = match item {
         syn::Item::Impl(item_impl) => item_impl,
         _ => {
@@ -72,20 +72,20 @@ pub fn parse_unextendr_impl(item: &syn::Item) -> Vec<UnextendrFn> {
         }
     };
 
-    // Generate bindings only when the function is marked by #[unextendr]
+    // Generate bindings only when the function is marked by #[savvy]
     if item_impl
         .attrs
         .iter()
-        .any(|attr| attr == &parse_quote!(#[unextendr]))
+        .any(|attr| attr == &parse_quote!(#[savvy]))
     {
-        UnextendrImpl::new(item_impl).fns
+        SavvyImpl::new(item_impl).fns
     } else {
         Vec::new()
     }
 }
 
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
-    attrs.iter().any(|attr| attr == &parse_quote!(#[unextendr]))
+    attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
 }
 
 fn parse_file(path: &PathBuf) -> ParsedResult {
@@ -120,13 +120,13 @@ fn parse_file(path: &PathBuf) -> ParsedResult {
         match item {
             syn::Item::Fn(item_fn) => {
                 if is_marked(item_fn.attrs.as_slice()) {
-                    result.bare_fns.push(UnextendrFn::from_fn(&item_fn))
+                    result.bare_fns.push(SavvyFn::from_fn(&item_fn))
                 }
             }
 
             syn::Item::Impl(item_impl) => {
                 if is_marked(item_impl.attrs.as_slice()) {
-                    result.impls.push(UnextendrImpl::new(&item_impl))
+                    result.impls.push(SavvyImpl::new(&item_impl))
                 }
             }
             _ => continue,
