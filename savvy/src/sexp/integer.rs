@@ -84,6 +84,10 @@ impl OwnedIntegerSxp {
         self.inner.to_vec()
     }
 
+    pub fn as_slice(&self) -> &[i32] {
+        unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
+    }
+
     pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }

@@ -71,6 +71,10 @@ impl OwnedRealSxp {
         self.inner.to_vec()
     }
 
+    pub fn as_slice(&self) -> &[f64] {
+        unsafe { std::slice::from_raw_parts(REAL(self.inner()) as _, self.len()) }
+    }
+
     pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
