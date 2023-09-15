@@ -51,7 +51,7 @@ jobs:
         run: |
           # macOS's sed treats -i option differently, so we cannot use it here...
           sed '/^savvy/s|".*"|"./savvy"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
-          cat > Cargo.toml_tmp <<EOF
+          cat - <<EOF >> Cargo.toml_tmp
           members = ["savvy", "savvy-macro", "savvy-bindgen"]
 
           [workspace.package]
