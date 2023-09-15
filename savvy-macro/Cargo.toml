@@ -6,9 +6,6 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[package.metadata.dist]
-dist = false
-
 [lib]
 proc-macro = true
 
