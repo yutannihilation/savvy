@@ -36,6 +36,10 @@ impl StringSxp {
         }
     }
 
+    pub fn to_vec(&self) -> Vec<&'static str> {
+        self.iter().collect()
+    }
+
     pub fn inner(&self) -> SEXP {
         self.0
     }
@@ -56,6 +60,10 @@ impl OwnedStringSxp {
 
     pub fn iter(&self) -> StringSxpIter {
         self.inner.iter()
+    }
+
+    pub fn to_vec(&self) -> Vec<&'static str> {
+        self.inner.to_vec()
     }
 
     pub fn inner(&self) -> SEXP {

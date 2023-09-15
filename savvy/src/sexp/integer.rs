@@ -53,6 +53,10 @@ impl IntegerSxp {
         }
     }
 
+    pub fn to_vec(&self) -> Vec<i32> {
+        self.iter().collect()
+    }
+
     pub fn inner(&self) -> SEXP {
         self.0
     }
@@ -74,6 +78,10 @@ impl OwnedIntegerSxp {
 
     pub fn iter(&self) -> IntegerSxpIter {
         self.inner.iter()
+    }
+
+    pub fn to_vec(&self) -> Vec<i32> {
+        self.inner.to_vec()
     }
 
     pub fn inner(&self) -> SEXP {

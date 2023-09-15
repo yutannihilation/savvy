@@ -41,6 +41,10 @@ impl RealSxp {
         }
     }
 
+    pub fn to_vec(&self) -> Vec<f64> {
+        self.iter().collect()
+    }
+
     pub fn inner(&self) -> SEXP {
         self.0
     }
@@ -61,6 +65,10 @@ impl OwnedRealSxp {
 
     pub fn iter(&self) -> RealSxpIter {
         self.inner.iter()
+    }
+
+    pub fn to_vec(&self) -> Vec<f64> {
+        self.inner.to_vec()
     }
 
     pub fn inner(&self) -> SEXP {

@@ -43,6 +43,10 @@ impl LogicalSxp {
         }
     }
 
+    pub fn to_vec(&self) -> Vec<bool> {
+        self.iter().collect()
+    }
+
     pub fn inner(&self) -> SEXP {
         self.0
     }
@@ -63,6 +67,10 @@ impl OwnedLogicalSxp {
 
     pub fn iter(&self) -> LogicalSxpIter {
         self.inner.iter()
+    }
+
+    pub fn to_vec(&self) -> Vec<bool> {
+        self.inner.to_vec()
     }
 
     pub fn inner(&self) -> SEXP {
