@@ -14,7 +14,7 @@
 This is nothing but my personal challenge to re-invent the wheel in
 order to get better understanding about what
 [extendr](https://extendr.github.io/) does. While this is usable,
-ergonomics is not included.
+ergonomics is not included. Please use extendr.
 
 ### Why savvy?
 
@@ -78,8 +78,9 @@ external) data and writable (or owned) data. While this costs some
 additional memory allocation, this is also good in that we can skip
 protecting the external data.
 
-This design comes from [cpp11’s
-`writable`](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics).
+This idea comes from [cpp11’s
+`writable`](https://cpp11.r-lib.org/articles/motivations.html#copy-on-write-semantics),
+but savvy’s design is less convenient for educational purposes.
 
 ### Do we really want embedded usages?
 
