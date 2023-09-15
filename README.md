@@ -22,6 +22,40 @@ In Japanese, “Rust” is pronounced as `sàbí`(錆). Since the sound is
 similar, and this framework is intended to be used by R-API-savvy
 people, I chose this name.
 
+## Basic usage
+
+As you can see, this framework is unfriendly in that this requires more
+explicit operations than extendr.
+
+- The function’s arguments must be savvy types (`...Sxp`). Scalar types
+  (`i32`, `f64`, `bool`, and `&str`) are also allowed, though.
+- The function’s return type must be either `savvy::Result<savvy::SEXP>`
+  or `()`.
+- Unlike extendr, savvy doesn’t take care of the output conversion. You
+  have to create a new SEXP object by `Owned...Sxp::new()` and set
+  values by `set_elt()` one by one (`.iter_mut()` might be provided for
+  int and real, but string is not the case because the internal
+  representation is not `[&str]`).
+
+``` rust
+#[savvy]
+fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedStringSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_elt(i, <&str>::na());
+            continue;
+        }
+
+        let e_upper = e.to_uppercase();
+        out.set_elt(i, e_upper.as_str());
+    }
+
+    Ok(out.into())
+}
+```
+
 ## Random thoughts
 
 ### Error Handling
@@ -145,24 +179,18 @@ x$name()
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>SEXP</code></td>
-<td><code>Sxp</code></td>
-<td>-</td>
-<td></td>
-</tr>
-<tr class="even">
 <td><code>INTSXP</code></td>
 <td><code>IntegerSxp</code></td>
 <td><code>OwnedIntegerSxp</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>REALSXP</code></td>
 <td><code>RealSxp</code></td>
 <td><code>OwnedRealSxp</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>LGLSXP</code></td>
 <td><code>LogicalSxp</code></td>
 <td><code>OwnedLogicalSxp</code></td>
@@ -170,19 +198,19 @@ x$name()
 <li>cannot handle <code>NA</code></li>
 </ul></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>STRSXP</code></td>
 <td><code>StringSxp</code></td>
 <td><code>OwnedStringSxp</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>VECSXP</code></td>
 <td><code>ListSxp</code></td>
 <td><code>OwnedListSxp</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>EXTPTRSXP</code></td>
 <td>-<a href="#fn1" class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a></td>
@@ -201,7 +229,3 @@ it’s internal from the viewpoint of Rust.<a href="#fnref1"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
-
-## References
-
-- <https://notchained.hatenablog.com/entry/2023/01/29/163013> (日本語)

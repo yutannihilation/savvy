@@ -35,6 +35,38 @@ this is usable, ergonomics is not included.
 In Japanese, "Rust" is pronounced as `sàbí`(錆). Since the sound is similar, and
 this framework is intended to be used by R-API-savvy people, I chose this name.
 
+## Basic usage
+
+As you can see, this framework is unfriendly in that this requires more explicit
+operations than extendr.
+
+* The function's arguments must be savvy types (`...Sxp`). Scalar types (`i32`,
+  `f64`, `bool`, and `&str`) are also allowed, though.
+* The function's return type must be either `savvy::Result<savvy::SEXP>` or `()`.
+* Unlike extendr, savvy doesn't take care of the output conversion. You have to
+  create a new SEXP object by `Owned...Sxp::new()` and set values by `set_elt()`
+  one by one (`.iter_mut()` might be provided for int and real, but string is
+  not the case because the internal representation is not `[&str]`).
+
+```rust
+#[savvy]
+fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedStringSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_elt(i, <&str>::na());
+            continue;
+        }
+
+        let e_upper = e.to_uppercase();
+        out.set_elt(i, e_upper.as_str());
+    }
+
+    Ok(out.into())
+}
+```
+
 ## Random thoughts
 
 ### Error Handling
@@ -139,8 +171,6 @@ x$name()
 +-------------+-------------------+----------------------+-------------------------+
 | R type      | Read-only version | Writable version     | Note                    |
 +=============+===================+======================+=========================+
-| `SEXP`      | `Sxp`             | \-                   |                         |
-+-------------+-------------------+----------------------+-------------------------+
 | `INTSXP`    | `IntegerSxp`      | `OwnedIntegerSxp`    |                         |
 +-------------+-------------------+----------------------+-------------------------+
 | `REALSXP`   | `RealSxp`         | `OwnedRealSxp`       |                         |
@@ -158,6 +188,3 @@ x$name()
     framework. While this is an "external" pointer to R, it's internal
     from the viewpoint of Rust.
 
-## References
-
--   <https://notchained.hatenablog.com/entry/2023/01/29/163013> (日本語)
