@@ -148,6 +148,7 @@ fn parse_file(path: &Path) -> ParsedResult {
     result
 }
 
+const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
@@ -164,16 +165,26 @@ fn update(path: &Path) {
         std::process::exit(1);
     }
 
-    if !path.join("DESCRIPTION").exists() {
+    if !path.join(PATH_DESCRIPTION).exists() {
         eprintln!("{} is not an R package root", path.to_string_lossy());
         std::process::exit(4);
     }
 
     let path_lib_rs = path.join(PATH_LIB_RS);
+    println!("Parsing {}", path_lib_rs.to_string_lossy());
     let parsed_result = parse_file(path_lib_rs.as_path());
-    std::fs::write(path.join(PATH_C_HEADER), make_c_header_file(&parsed_result)).unwrap();
-    std::fs::write(path.join(PATH_C_IMPL), make_c_impl_file(&parsed_result)).unwrap();
-    std::fs::write(path.join(PATH_R_IMPL), make_r_impl_file(&parsed_result)).unwrap();
+
+    let path_c_header = path.join(PATH_C_HEADER);
+    println!("Writing {}", path_c_header.to_string_lossy());
+    std::fs::write(path_c_header, make_c_header_file(&parsed_result)).unwrap();
+
+    let path_c_impl = path.join(PATH_C_IMPL);
+    println!("Writing {}", path_c_impl.to_string_lossy());
+    std::fs::write(path_c_impl, make_c_impl_file(&parsed_result)).unwrap();
+
+    let path_r_impl = path.join(PATH_R_IMPL);
+    println!("Writing {}", path_r_impl.to_string_lossy());
+    std::fs::write(path_r_impl, make_r_impl_file(&parsed_result)).unwrap();
 }
 
 fn main() {

@@ -2,6 +2,10 @@
 name = "simple-savvy"
 version = "0.1.0"
 edition = "2021"
+authors = ["Hiroaki Yutani"]
+license = "MIT"
+homepage = "https://github.com/yutannihilation/savvy/"
+documentation = "https://github.com/yutannihilation/savvy/"
 
 [lib]
 crate-type = ["staticlib"]

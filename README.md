@@ -109,12 +109,13 @@ the errors on C’s side.
 ``` console
 Generate C bindings and R bindings for a Rust library
 
-Usage: savvy-bindgen.exe [COMMAND]
+Usage: savvy-bindgen.exe <COMMAND>
 
 Commands:
   c-header  Generate C header file
   c-impl    Generate C implementation for init.c
   r-impl    Generate R wrapper functions
+  update    Update wrappers in an R package
   help      Print this message or the help of the given subcommand(s)
 
 Options:
@@ -122,9 +123,8 @@ Options:
 ```
 
 ``` sh
-cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- r-impl ./R-package/src/rust/src/lib.rs > ./R-package/R/wrappers.R
-cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- c-impl ./R-package/src/rust/src/lib.rs > ./R-package/src/init
-cargo run --manifest-path ./savvy-bindgen/Cargo.toml -- c-header ./R-package/src/rust/src/lib.rs > ./R-package/src/rust/api.h
+cargo install --path .\savvy-bindgen\
+savvy-bindgen update .\R-package\
 ```
 
 ## Crates
