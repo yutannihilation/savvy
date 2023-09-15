@@ -57,8 +57,8 @@ impl OwnedLogicalSxp {
         self.inner.is_empty()
     }
 
-    pub fn elt(&self, i: usize) -> bool {
-        self.inner.elt(i) == 1
+    pub fn elt(&self, i: usize) -> i32 {
+        self.inner.elt(i)
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
