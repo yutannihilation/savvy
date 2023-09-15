@@ -50,14 +50,24 @@ jobs:
       - name: Tweak
         run: |
           # macOS's sed treats -i option differently, so we cannot use it here...
-          sed '/^savvy/s|".*"|"./dep/savvy"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          sed '/^savvy/s|".*"|"./savvy"|' ./R-package/src/rust/Cargo.toml > Cargo.toml_tmp
+          cat > Cargo.toml_tmp <<EOF
+          members = ["savvy", "savvy-macro", "savvy-bindgen"]
+
+          [workspace.package]
+          version = "0.1.0"
+          edition = "2021"
+          authors = ["Hiroaki Yutani"]
+          license = "MIT"
+          homepage = "https://github.com/yutannihilation/savvy/"
+          documentation = "https://github.com/yutannihilation/savvy/"
+          EOF
+          
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
 
-          mkdir ./R-package/src/rust/dep/
-          mv savvy/ ./R-package/src/rust/dep/
-          mv savvy-macro/ ./R-package/src/rust/dep/
-          mv savvy-bindgen/ ./R-package/src/rust/dep/
-          mv Cargo.toml ./R-package/src/rust/dep/
+          mv savvy/ ./R-package/src/rust/
+          mv savvy-macro/ ./R-package/src/rust/
+          mv savvy-bindgen/ ./R-package/src/rust/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
