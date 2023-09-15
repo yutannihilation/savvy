@@ -122,4 +122,3 @@ Person_associated_function <- function(self) {
 }
 
 
-

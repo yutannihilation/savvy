@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 use savvy_fn::ParsedResult;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 use std::path::PathBuf;
 use syn::parse_quote;
 
@@ -20,7 +21,7 @@ use savvy_impl::SavvyImpl;
 #[command(about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 }
 
 #[derive(Subcommand, Debug)]
@@ -41,6 +42,12 @@ enum Commands {
     RImpl {
         /// Path to a Rust file
         file: PathBuf,
+    },
+
+    /// Update wrappers in an R package
+    Update {
+        /// Path to the root of an R package
+        r_pkg_dir: PathBuf,
     },
 }
 
@@ -88,12 +95,17 @@ fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
 }
 
-fn parse_file(path: &PathBuf) -> ParsedResult {
+fn parse_file(path: &Path) -> ParsedResult {
+    if !path.exists() {
+        eprintln!("{} does not exist", path.to_string_lossy());
+        std::process::exit(1);
+    }
+
     let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => {
             eprintln!("Failed to read the specified file");
-            std::process::exit(1);
+            std::process::exit(2);
         }
     };
 
@@ -136,21 +148,52 @@ fn parse_file(path: &PathBuf) -> ParsedResult {
     result
 }
 
+const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
+const PATH_C_HEADER: &str = "src/rust/api.h";
+const PATH_C_IMPL: &str = "src/init.c";
+const PATH_R_IMPL: &str = "R/wrappers.R";
+
+fn update(path: &Path) {
+    if !path.exists() {
+        eprintln!("{} does not exist", path.to_string_lossy());
+        std::process::exit(1);
+    }
+
+    if !path.is_dir() {
+        eprintln!("{} is not a directory", path.to_string_lossy());
+        std::process::exit(1);
+    }
+
+    if !path.join("DESCRIPTION").exists() {
+        eprintln!("{} is not an R package root", path.to_string_lossy());
+        std::process::exit(4);
+    }
+
+    let path_lib_rs = path.join(PATH_LIB_RS);
+    let parsed_result = parse_file(path_lib_rs.as_path());
+    std::fs::write(path.join(PATH_C_HEADER), make_c_header_file(&parsed_result)).unwrap();
+    std::fs::write(path.join(PATH_C_IMPL), make_c_impl_file(&parsed_result)).unwrap();
+    std::fs::write(path.join(PATH_R_IMPL), make_r_impl_file(&parsed_result)).unwrap();
+}
+
 fn main() {
     let cli = Cli::parse();
 
-    match cli.command.unwrap() {
+    match cli.command {
         Commands::CHeader { file } => {
-            let parsed_result = parse_file(&file);
+            let parsed_result = parse_file(file.as_path());
             println!("{}", make_c_header_file(&parsed_result));
         }
         Commands::CImpl { file } => {
-            let parsed_result = parse_file(&file);
+            let parsed_result = parse_file(file.as_path());
             println!("{}", make_c_impl_file(&parsed_result));
         }
         Commands::RImpl { file } => {
-            let parsed_result = parse_file(&file);
+            let parsed_result = parse_file(file.as_path());
             println!("{}", make_r_impl_file(&parsed_result));
+        }
+        Commands::Update { r_pkg_dir } => {
+            update(r_pkg_dir.as_path());
         }
     }
 }
