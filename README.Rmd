@@ -37,18 +37,6 @@ this framework is intended to be used by R-API-savvy people, I chose this name.
 
 ## Basic usage
 
-As you can see, this framework is unfriendly in that this requires more explicit
-operations than extendr.
-
-* All inputs are read-only. You always have to allocate a new SEXP for the return value.
-* The function's arguments must be savvy types (`...Sxp`). Scalar types (`i32`,
-  `f64`, `bool`, and `&str`) are also allowed, though.
-* The function's return type must be either `savvy::Result<savvy::SEXP>` or `()`.
-* Savvy doesn't take care of the output conversion. You have to create a new
-  SEXP object by `Owned...Sxp::new()` and set values by `set_elt()` one by one
-  (`.iter_mut()` might be provided for int and real, but string is not the case
-  because the internal representation is not `[&str]`).
-
 ```rust
 #[savvy]
 fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
@@ -67,6 +55,18 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
     Ok(out.into())
 }
 ```
+
+As you can see, this framework is unfriendly in that this requires more explicit
+operations than extendr.
+
+* All inputs are read-only. You always have to allocate a new SEXP for the return value.
+* The function's arguments must be savvy types (`...Sxp`). Scalar types (`i32`,
+  `f64`, `bool`, and `&str`) are also allowed, though.
+* The function's return type must be either `savvy::Result<savvy::SEXP>` or `()`.
+* Savvy doesn't take care of the output conversion. You have to create a new
+  SEXP object by `Owned...Sxp::new()` and set values by `set_elt()` one by one
+  (`.iter_mut()` might be provided for int and real, but string is not the case
+  because the internal representation is not `[&str]`).
 
 ## Random thoughts
 
@@ -115,6 +115,8 @@ Extendr embeds the functionality to generate the R bindings and call
 entries. But, might it be easier to generate them by using an external
 CLI? I actually need this because I need to generate C code to handle
 the errors on C's side.
+
+The binary can be found in the [Releases](https://github.com/yutannihilation/savvy/releases) section.
 
 #### Usage
 
