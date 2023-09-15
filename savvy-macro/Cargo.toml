@@ -3,6 +3,7 @@ name = "savvy-macro"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+license.workspace = true
 documentation.workspace = true
 homepage.workspace = true
 
