@@ -7,6 +7,7 @@ pub struct RealSxp(pub SEXP);
 pub struct OwnedRealSxp {
     inner: RealSxp,
     token: SEXP,
+    len: usize,
 }
 
 impl RealSxp {
@@ -52,7 +53,7 @@ impl RealSxp {
 
 impl OwnedRealSxp {
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.len
     }
 
     pub fn is_empty(&self) -> bool {
@@ -72,7 +73,7 @@ impl OwnedRealSxp {
     }
 
     pub fn as_slice(&self) -> &[f64] {
-        unsafe { std::slice::from_raw_parts(REAL(self.inner()) as _, self.len()) }
+        unsafe { std::slice::from_raw_parts(REAL(self.inner()) as _, self.len) }
     }
 
     pub fn inner(&self) -> SEXP {
@@ -91,6 +92,7 @@ impl OwnedRealSxp {
         Self {
             inner: RealSxp(out),
             token,
+            len,
         }
     }
 }

@@ -9,6 +9,7 @@ pub struct LogicalSxp(pub SEXP);
 pub struct OwnedLogicalSxp {
     inner: LogicalSxp,
     token: SEXP,
+    len: usize,
 }
 
 impl LogicalSxp {
@@ -54,7 +55,7 @@ impl LogicalSxp {
 
 impl OwnedLogicalSxp {
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.len
     }
 
     pub fn is_empty(&self) -> bool {
@@ -89,6 +90,7 @@ impl OwnedLogicalSxp {
         Self {
             inner: LogicalSxp(out),
             token,
+            len,
         }
     }
 }

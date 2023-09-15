@@ -12,6 +12,7 @@ pub struct OwnedListSxp {
     values: ListSxp,
     names: Option<OwnedStringSxp>,
     token: SEXP,
+    len: usize,
 }
 
 // TODO: This is a dummy stuct just to make the functions like elt() always
@@ -99,7 +100,7 @@ impl ListSxp {
 
 impl OwnedListSxp {
     pub fn len(&self) -> usize {
-        self.values.len()
+        self.len
     }
 
     pub fn is_empty(&self) -> bool {
@@ -172,6 +173,7 @@ impl OwnedListSxp {
             values: ListSxp(out),
             names,
             token,
+            len,
         }
     }
 }

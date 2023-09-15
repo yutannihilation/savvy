@@ -17,6 +17,7 @@ pub struct IntegerSxp(pub SEXP);
 pub struct OwnedIntegerSxp {
     pub inner: IntegerSxp,
     token: SEXP,
+    len: usize,
 }
 
 impl IntegerSxp {
@@ -64,7 +65,7 @@ impl IntegerSxp {
 
 impl OwnedIntegerSxp {
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.len
     }
 
     pub fn is_empty(&self) -> bool {
@@ -85,7 +86,7 @@ impl OwnedIntegerSxp {
     }
 
     pub fn as_slice(&self) -> &[i32] {
-        unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
+        unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len) }
     }
 
     pub fn inner(&self) -> SEXP {
@@ -104,6 +105,7 @@ impl OwnedIntegerSxp {
         Self {
             inner: IntegerSxp(out),
             token,
+            len,
         }
     }
 }

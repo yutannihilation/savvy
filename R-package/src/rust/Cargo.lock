@@ -148,7 +148,7 @@ dependencies = [
 
 [[package]]
 name = "savvy"
-version = "0.1.0"
+version = "0.1.5"
 dependencies = [
  "cc",
  "libR-sys",
@@ -158,7 +158,7 @@ dependencies = [
 
 [[package]]
 name = "savvy-bindgen"
-version = "0.1.0"
+version = "0.1.5"
 dependencies = [
  "clap",
  "proc-macro2",
@@ -168,7 +168,7 @@ dependencies = [
 
 [[package]]
 name = "savvy-macro"
-version = "0.1.0"
+version = "0.1.5"
 dependencies = [
  "proc-macro2",
  "quote",

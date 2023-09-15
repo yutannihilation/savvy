@@ -13,6 +13,7 @@ pub struct StringSxp(pub SEXP);
 pub struct OwnedStringSxp {
     inner: StringSxp,
     token: SEXP,
+    len: usize,
 }
 
 impl StringSxp {
@@ -47,7 +48,7 @@ impl StringSxp {
 
 impl OwnedStringSxp {
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.len
     }
 
     pub fn is_empty(&self) -> bool {
@@ -91,6 +92,7 @@ impl OwnedStringSxp {
         Self {
             inner: StringSxp(out),
             token,
+            len,
         }
     }
 }
