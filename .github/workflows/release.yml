@@ -122,8 +122,8 @@ jobs:
         # The two platforms don't agree on how to talk about env vars but they
         # do agree on 'cat' and '$()' so we use that to marshal values between commands.
         run: |
-          # TODO
-          export R_INCLUDE_DIR=$(Rscript -e 'normalizePath(file.path(Sys.getenv("R_HOME"), "include"))')
+          # TODO: this cannot be built
+          rm -rf ./savvy
 
           # Actually do builds and make zips and whatnot
           cargo dist build --tag=${{ github.ref_name }} --output-format=json ${{ matrix.dist-args }} > dist-manifest.json
