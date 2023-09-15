@@ -59,8 +59,7 @@ jobs:
           edition = "2021"
           authors = ["Hiroaki Yutani"]
           license = "MIT"
-          homepage = "https://github.com/yutannihilation/savvy/"
-          documentation = "https://github.com/yutannihilation/savvy/"
+          repository = "https://github.com/yutannihilation/savvy/"
           EOF
           
           mv Cargo.toml_tmp ./R-package/src/rust/Cargo.toml
