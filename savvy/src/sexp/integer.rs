@@ -89,6 +89,10 @@ impl OwnedIntegerSxp {
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len) }
     }
 
+    pub fn as_mut_slice(&mut self) -> &mut [i32] {
+        unsafe { std::slice::from_raw_parts_mut(INTEGER(self.inner()) as _, self.len) }
+    }
+
     pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }

@@ -76,6 +76,10 @@ impl OwnedRealSxp {
         unsafe { std::slice::from_raw_parts(REAL(self.inner()) as _, self.len) }
     }
 
+    pub fn as_mut_slice(&mut self) -> &mut [f64] {
+        unsafe { std::slice::from_raw_parts_mut(REAL(self.inner()) as _, self.len) }
+    }
+
     pub fn inner(&self) -> SEXP {
         self.inner.inner()
     }
