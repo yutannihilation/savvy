@@ -7,9 +7,10 @@ use crate::protect;
 
 pub struct LogicalSxp(pub SEXP);
 pub struct OwnedLogicalSxp {
-    inner: LogicalSxp,
+    inner: SEXP,
     token: SEXP,
     len: usize,
+    raw: *mut i32,
 }
 
 impl LogicalSxp {
@@ -33,7 +34,7 @@ impl LogicalSxp {
         };
 
         LogicalSxpIter {
-            sexp: self,
+            sexp: &self.0,
             raw,
             i: 0,
             len: self.len(),
@@ -55,19 +56,28 @@ impl OwnedLogicalSxp {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.len() == 0
+    }
+
+    pub fn as_read_only(&self) -> LogicalSxp {
+        LogicalSxp(self.inner)
     }
 
     pub fn iter(&self) -> LogicalSxpIter {
-        self.inner.iter()
+        LogicalSxpIter {
+            sexp: &self.inner,
+            raw: self.raw,
+            i: 0,
+            len: self.len,
+        }
     }
 
     pub fn to_vec(&self) -> Vec<bool> {
-        self.inner.to_vec()
+        self.iter().collect()
     }
 
     pub fn inner(&self) -> SEXP {
-        self.inner.inner()
+        self.inner
     }
 
     pub fn set_elt(&mut self, i: usize, v: bool) {
@@ -76,17 +86,19 @@ impl OwnedLogicalSxp {
             panic!("index out of bounds: the length is {len} but the index is {i}");
         }
         unsafe {
-            SET_LOGICAL_ELT(self.inner(), i as _, v as _);
+            SET_LOGICAL_ELT(self.inner, i as _, v as _);
         }
     }
 
     pub fn new(len: usize) -> Self {
-        let out = unsafe { Rf_allocVector(LGLSXP, len as _) };
-        let token = protect::insert_to_preserved_list(out);
+        let inner = unsafe { Rf_allocVector(LGLSXP, len as _) };
+        let token = protect::insert_to_preserved_list(inner);
+        let raw = unsafe { LOGICAL(inner) };
         Self {
-            inner: LogicalSxp(out),
+            inner,
             token,
             len,
+            raw,
         }
     }
 }
@@ -146,7 +158,7 @@ impl From<OwnedLogicalSxp> for SEXP {
 //     }
 
 pub struct LogicalSxpIter<'a> {
-    pub sexp: &'a LogicalSxp,
+    pub sexp: &'a SEXP,
     raw: *const i32,
     i: usize,
     len: usize,
@@ -165,7 +177,7 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(unsafe { LOGICAL_ELT(self.sexp.0, i as _) } == 1)
+            Some(unsafe { LOGICAL_ELT(*self.sexp, i as _) } == 1)
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i)) == 1) }

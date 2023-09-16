@@ -3,7 +3,10 @@ use libR_sys::{
     SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
-use crate::{protect, IntegerSxp, LogicalSxp, NullSxp, OwnedStringSxp, RealSxp, StringSxp};
+use crate::{
+    protect, IntegerSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
+    OwnedStringSxp, RealSxp, StringSxp,
+};
 
 use super::Sxp;
 
@@ -28,6 +31,38 @@ pub enum ListElement {
     Null(NullSxp),
     Unsupported(UnsupportedSxp),
 }
+
+macro_rules! into_list_elem {
+    ($ty: ty, $variant: ident) => {
+        impl From<$ty> for ListElement {
+            fn from(value: $ty) -> Self {
+                ListElement::$variant(value)
+            }
+        }
+    };
+}
+
+into_list_elem!(IntegerSxp, Integer);
+into_list_elem!(RealSxp, Real);
+into_list_elem!(StringSxp, String);
+into_list_elem!(LogicalSxp, Logical);
+into_list_elem!(ListSxp, List);
+into_list_elem!(NullSxp, Null);
+
+macro_rules! into_list_elem_owned {
+    ($ty: ty, $variant: ident) => {
+        impl From<$ty> for ListElement {
+            fn from(value: $ty) -> Self {
+                ListElement::$variant(value.as_read_only())
+            }
+        }
+    };
+}
+
+into_list_elem_owned!(OwnedIntegerSxp, Integer);
+into_list_elem_owned!(OwnedRealSxp, Real);
+into_list_elem_owned!(OwnedStringSxp, String);
+into_list_elem_owned!(OwnedLogicalSxp, Logical);
 
 impl ListSxp {
     pub fn len(&self) -> usize {

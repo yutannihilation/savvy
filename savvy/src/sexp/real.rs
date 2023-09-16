@@ -7,7 +7,7 @@ use crate::protect;
 
 pub struct RealSxp(pub SEXP);
 pub struct OwnedRealSxp {
-    inner: RealSxp,
+    inner: SEXP,
     token: SEXP,
     len: usize,
     raw: *mut f64,
@@ -34,7 +34,7 @@ impl RealSxp {
         };
 
         RealSxpIter {
-            sexp: self,
+            sexp: &self.0,
             raw,
             i: 0,
             len: self.len(),
@@ -56,7 +56,11 @@ impl OwnedRealSxp {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.len() == 0
+    }
+
+    pub fn as_read_only(&self) -> RealSxp {
+        RealSxp(self.inner)
     }
 
     pub fn iter(&self) -> RealSxpIter {
@@ -69,7 +73,7 @@ impl OwnedRealSxp {
     }
 
     pub fn to_vec(&self) -> Vec<f64> {
-        self.inner.to_vec()
+        self.iter().collect()
     }
 
     pub fn as_slice(&self) -> &[f64] {
@@ -81,7 +85,7 @@ impl OwnedRealSxp {
     }
 
     pub fn inner(&self) -> SEXP {
-        self.inner.inner()
+        self.inner
     }
 
     pub fn set_elt(&mut self, i: usize, v: f64) {
@@ -89,12 +93,12 @@ impl OwnedRealSxp {
     }
 
     pub fn new(len: usize) -> Self {
-        let out = unsafe { Rf_allocVector(REALSXP, len as _) };
-        let token = protect::insert_to_preserved_list(out);
-        let raw = unsafe { REAL(out) };
+        let inner = unsafe { Rf_allocVector(REALSXP, len as _) };
+        let token = protect::insert_to_preserved_list(inner);
+        let raw = unsafe { REAL(inner) };
 
         Self {
-            inner: RealSxp(out),
+            inner,
             token,
             len,
             raw,
@@ -129,6 +133,19 @@ impl From<&[f64]> for OwnedRealSxp {
     }
 }
 
+// This conflicts...
+//
+// impl<I> From<I> for OwnedRealSxp
+// where
+//     I: ExactSizeIterator + Iterator<Item = f64>,
+// {
+//     fn from(value: I) -> Self {
+//         let mut out = Self::new(value.len());
+//         value.enumerate().for_each(|(i, v)| out.set_elt(i, v));
+//         out
+//     }
+// }
+
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<RealSxp> for SEXP {
     fn from(value: RealSxp) -> Self {
@@ -143,7 +160,7 @@ impl From<OwnedRealSxp> for SEXP {
 }
 
 pub struct RealSxpIter<'a> {
-    pub sexp: &'a RealSxp,
+    pub sexp: &'a SEXP,
     raw: *const f64,
     i: usize,
     len: usize,
@@ -162,7 +179,7 @@ impl<'a> Iterator for RealSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(unsafe { REAL_ELT(self.sexp.0, i as _) })
+            Some(unsafe { REAL_ELT(*self.sexp, i as _) })
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i))) }

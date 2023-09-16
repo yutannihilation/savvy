@@ -11,7 +11,7 @@ use crate::protect;
 
 pub struct StringSxp(pub SEXP);
 pub struct OwnedStringSxp {
-    inner: StringSxp,
+    inner: SEXP,
     token: SEXP,
     len: usize,
 }
@@ -27,7 +27,7 @@ impl StringSxp {
 
     pub fn iter(&self) -> StringSxpIter {
         StringSxpIter {
-            sexp: self,
+            sexp: &self.0,
             i: 0,
             len: self.len(),
         }
@@ -48,19 +48,27 @@ impl OwnedStringSxp {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.len == 0
+    }
+
+    pub fn as_read_only(&self) -> StringSxp {
+        StringSxp(self.inner)
     }
 
     pub fn iter(&self) -> StringSxpIter {
-        self.inner.iter()
+        StringSxpIter {
+            sexp: &self.inner,
+            i: 0,
+            len: self.len,
+        }
     }
 
     pub fn to_vec(&self) -> Vec<&'static str> {
-        self.inner.to_vec()
+        self.iter().collect()
     }
 
     pub fn inner(&self) -> SEXP {
-        self.inner.inner()
+        self.inner
     }
 
     pub fn set_elt(&mut self, i: usize, v: &str) {
@@ -78,18 +86,14 @@ impl OwnedStringSxp {
                 Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
             };
 
-            SET_STRING_ELT(self.inner(), i as _, v_sexp);
+            SET_STRING_ELT(self.inner, i as _, v_sexp);
         }
     }
 
     pub fn new(len: usize) -> Self {
-        let out = unsafe { Rf_allocVector(STRSXP, len as _) };
-        let token = protect::insert_to_preserved_list(out);
-        Self {
-            inner: StringSxp(out),
-            token,
-            len,
-        }
+        let inner = unsafe { Rf_allocVector(STRSXP, len as _) };
+        let token = protect::insert_to_preserved_list(inner);
+        Self { inner, token, len }
     }
 }
 
@@ -140,7 +144,7 @@ impl From<OwnedStringSxp> for SEXP {
 }
 
 pub struct StringSxpIter<'a> {
-    pub sexp: &'a StringSxp,
+    pub sexp: &'a SEXP,
     i: usize,
     len: usize,
 }
@@ -160,7 +164,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
         }
 
         unsafe {
-            let e = STRING_ELT(self.sexp.0, i as _);
+            let e = STRING_ELT(*self.sexp, i as _);
 
             // Because `None` means the end of the iterator, we cannot return
             // `None` even for missing values.
