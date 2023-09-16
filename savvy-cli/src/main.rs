@@ -1,20 +1,10 @@
 use clap::{Parser, Subcommand};
-use savvy_fn::ParsedResult;
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
-use syn::parse_quote;
 
-mod savvy_fn;
-mod savvy_impl;
-mod utils;
-
-use savvy_fn::make_c_header_file;
-use savvy_fn::make_c_impl_file;
-use savvy_fn::make_r_impl_file;
-use savvy_fn::SavvyFn;
-use savvy_impl::SavvyImpl;
+use savvy_bindgen::make_c_header_file;
+use savvy_bindgen::make_c_impl_file;
+use savvy_bindgen::make_r_impl_file;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -51,110 +41,9 @@ enum Commands {
     },
 }
 
-pub fn parse_savvy_fn(item: &syn::Item) -> Option<SavvyFn> {
-    let func = match item {
-        syn::Item::Fn(func) => func,
-        _ => {
-            return None;
-        }
-    };
-
-    // Generate bindings only when the function is marked by #[savvy]
-    if func
-        .attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[savvy]))
-    {
-        Some(SavvyFn::from_fn(func))
-    } else {
-        None
-    }
-}
-
-pub fn parse_savvy_impl(item: &syn::Item) -> Vec<SavvyFn> {
-    let item_impl = match item {
-        syn::Item::Impl(item_impl) => item_impl,
-        _ => {
-            return Vec::new();
-        }
-    };
-
-    // Generate bindings only when the function is marked by #[savvy]
-    if item_impl
-        .attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[savvy]))
-    {
-        SavvyImpl::new(item_impl).fns
-    } else {
-        Vec::new()
-    }
-}
-
-fn is_marked(attrs: &[syn::Attribute]) -> bool {
-    attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
-}
-
-fn read_file(path: &Path) -> String {
-    if !path.exists() {
-        eprintln!("{} does not exist", path.to_string_lossy());
-        std::process::exit(1);
-    }
-
-    let mut file = match File::open(path) {
-        Ok(file) => file,
-        Err(_) => {
-            eprintln!("Failed to read the specified file");
-            std::process::exit(2);
-        }
-    };
-
-    let mut content = String::new();
-    if file.read_to_string(&mut content).is_err() {
-        eprintln!("Failed to read the specified file");
-        std::process::exit(2);
-    };
-
-    content
-}
-
-fn parse_file(path: &Path) -> ParsedResult {
-    let ast = match syn::parse_str::<syn::File>(&read_file(path)) {
-        Ok(ast) => ast,
-        Err(_) => {
-            eprintln!("Failed to parse the specified file");
-            std::process::exit(3);
-        }
-    };
-
-    let mut result = ParsedResult {
-        bare_fns: Vec::new(),
-        impls: Vec::new(),
-    };
-
-    for item in ast.items {
-        match item {
-            syn::Item::Fn(item_fn) => {
-                if is_marked(item_fn.attrs.as_slice()) {
-                    result.bare_fns.push(SavvyFn::from_fn(&item_fn))
-                }
-            }
-
-            syn::Item::Impl(item_impl) => {
-                if is_marked(item_impl.attrs.as_slice()) {
-                    result.impls.push(SavvyImpl::new(&item_impl))
-                }
-            }
-            _ => continue,
-        };
-    }
-
-    result
-}
-
 // Parse DESCRIPTION file and get the package name
 fn parse_description(path: &Path) -> Option<String> {
-    let content = read_file(path);
+    let content = savvy_bindgen::read_file(path);
     for line in content.lines() {
         if !line.starts_with("Package") {
             continue;
@@ -196,7 +85,7 @@ fn update(path: &Path) {
 
     let path_lib_rs = path.join(PATH_LIB_RS);
     println!("Parsing {}", path_lib_rs.to_string_lossy());
-    let parsed_result = parse_file(path_lib_rs.as_path());
+    let parsed_result = savvy_bindgen::parse_file(path_lib_rs.as_path());
 
     let path_c_header = path.join(PATH_C_HEADER);
     println!("Writing {}", path_c_header.to_string_lossy());
@@ -216,15 +105,15 @@ fn main() {
 
     match cli.command {
         Commands::CHeader { file } => {
-            let parsed_result = parse_file(file.as_path());
+            let parsed_result = savvy_bindgen::parse_file(file.as_path());
             println!("{}", make_c_header_file(&parsed_result));
         }
         Commands::CImpl { file } => {
-            let parsed_result = parse_file(file.as_path());
+            let parsed_result = savvy_bindgen::parse_file(file.as_path());
             println!("{}", make_c_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
         }
         Commands::RImpl { file } => {
-            let parsed_result = parse_file(file.as_path());
+            let parsed_result = savvy_bindgen::parse_file(file.as_path());
             println!("{}", make_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
         }
         Commands::Update { r_pkg_dir } => {

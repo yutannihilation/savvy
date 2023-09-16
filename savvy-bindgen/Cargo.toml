@@ -9,5 +9,4 @@ repository.workspace = true
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
-clap = { version = "4", features = ["derive"] }
 syn = { version = "2", features = ["full", "extra-traits"] }
