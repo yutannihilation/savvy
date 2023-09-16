@@ -48,7 +48,7 @@ fn parse_description(path: &Path) -> Option<String> {
         if !line.starts_with("Package") {
             continue;
         }
-        let mut s = line.split(":");
+        let mut s = line.split(':');
         s.next();
         if let Some(rhs) = s.next() {
             return Some(rhs.trim().to_string());
