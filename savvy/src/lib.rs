@@ -23,14 +23,14 @@ use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf};
 use std::ffi::CString;
 
 // TODO: make this r_println! macro
-pub fn r_print(msg: String) {
+pub fn r_print(msg: &str) {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         Rprintf(msg_c_string.as_ptr());
     }
 }
 
-pub fn r_eprint(msg: String) {
+pub fn r_eprint(msg: &str) {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         REprintf(msg_c_string.as_ptr());
