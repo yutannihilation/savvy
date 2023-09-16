@@ -168,6 +168,15 @@ impl<'a> Iterator for IntegerSxpIter<'a> {
             unsafe { Some(*(self.raw.add(i))) }
         }
     }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
+
+impl<'a> ExactSizeIterator for IntegerSxpIter<'a> {
+    fn len(&self) -> usize {
+        self.len
+    }
 }
 
 // You might also want to write something like:

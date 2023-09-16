@@ -160,4 +160,14 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
             unsafe { Some(*(self.raw.add(i)) == 1) }
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
+
+impl<'a> ExactSizeIterator for LogicalSxpIter<'a> {
+    fn len(&self) -> usize {
+        self.len
+    }
 }
