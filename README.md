@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Savvy - A safe, but unfriendly, extension interface using Rust.
+# Savvy - An unfriendly R extension interface using Rust
 
 <!-- badges: start -->
 
@@ -14,7 +14,8 @@
 This is nothing but my personal challenge to re-invent the wheel in
 order to get better understanding about what
 [extendr](https://extendr.github.io/) does. While this is usable,
-ergonomics is not included. Please use extendr.
+ergonomics is not included. If you prefer friendly one, please use
+extendr.
 
 ### Why savvy?
 
@@ -54,9 +55,7 @@ explicit operations than extendr.
   or `()`.
 - Savvy doesn’t take care of the output conversion. You have to create a
   new SEXP object by `Owned...Sxp::new()` and set values by `set_elt()`
-  one by one (`.iter_mut()` might be provided for int and real, but
-  string is not the case because the internal representation is not
-  `[&str]`).
+  one by one.
 
 ## Random thoughts
 
