@@ -64,6 +64,20 @@ into_list_elem_owned!(OwnedRealSxp, Real);
 into_list_elem_owned!(OwnedStringSxp, String);
 into_list_elem_owned!(OwnedLogicalSxp, Logical);
 
+impl From<ListElement> for SEXP {
+    fn from(value: ListElement) -> Self {
+        match value {
+            ListElement::Null(e) => e.into(),
+            ListElement::Integer(e) => e.inner(),
+            ListElement::Real(e) => e.inner(),
+            ListElement::String(e) => e.inner(),
+            ListElement::Logical(e) => e.inner(),
+            ListElement::List(e) => e.inner(),
+            ListElement::Unsupported(e) => e.0,
+        }
+    }
+}
+
 impl ListSxp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
@@ -170,26 +184,30 @@ impl OwnedListSxp {
         self.values.iter()
     }
 
-    pub fn set_value(&mut self, i: usize, v: ListElement) {
-        let v = match v {
-            ListElement::Null(_) => return,
-            ListElement::Integer(e) => e.inner(),
-            ListElement::Real(e) => e.inner(),
-            ListElement::String(e) => e.inner(),
-            ListElement::Logical(e) => e.inner(),
-            ListElement::List(e) => e.inner(),
-            ListElement::Unsupported(e) => e.0,
-        };
-
+    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) {
+        if i > self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            );
+        }
+        let v: ListElement = v.into();
         unsafe {
-            SET_VECTOR_ELT(self.values.inner(), i as _, v);
+            SET_VECTOR_ELT(self.values.inner(), i as _, v.into());
         }
     }
 
     pub fn set_name(&mut self, i: usize, k: &str) {
+        // OwnedStringSxp::set_elt() checks the length, so don't check here.
+
         if let Some(names) = self.names.as_mut() {
             names.set_elt(i, k);
         }
+    }
+
+    pub fn set_name_and_value<T: Into<ListElement>>(&mut self, i: usize, k: &str, v: T) {
+        self.set_name(i, k);
+        self.set_value(i, v);
     }
 
     pub fn new(len: usize, named: bool) -> Self {
