@@ -1,6 +1,4 @@
-use libR_sys::{
-    Rf_allocVector, Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, INTSXP, SET_INTEGER_ELT, SEXP,
-};
+use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, INTSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -18,6 +16,7 @@ pub struct OwnedIntegerSxp {
     pub inner: IntegerSxp,
     token: SEXP,
     len: usize,
+    raw: *mut i32,
 }
 
 impl IntegerSxp {
@@ -74,11 +73,16 @@ impl OwnedIntegerSxp {
 
     // It's probably fine to expose elt() for an owned SEXP
     pub fn elt(&self, i: usize) -> i32 {
-        self.inner.elt(i)
+        unsafe { *(self.raw.add(i)) }
     }
 
     pub fn iter(&self) -> IntegerSxpIter {
-        self.inner.iter()
+        IntegerSxpIter {
+            sexp: &self.inner,
+            raw: self.raw,
+            i: 0,
+            len: self.len,
+        }
     }
 
     pub fn to_vec(&self) -> Vec<i32> {
@@ -99,17 +103,20 @@ impl OwnedIntegerSxp {
 
     pub fn set_elt(&mut self, i: usize, v: i32) {
         unsafe {
-            SET_INTEGER_ELT(self.inner(), i as _, v);
+            *(self.raw.add(i)) = v;
         }
     }
 
     pub fn new(len: usize) -> Self {
         let out = unsafe { Rf_allocVector(INTSXP, len as _) };
         let token = protect::insert_to_preserved_list(out);
+        let raw = unsafe { INTEGER(out) };
+
         Self {
             inner: IntegerSxp(out),
             token,
             len,
+            raw,
         }
     }
 }

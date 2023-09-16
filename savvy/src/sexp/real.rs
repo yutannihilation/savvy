@@ -1,4 +1,4 @@
-use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SET_REAL_ELT, SEXP};
+use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -8,6 +8,7 @@ pub struct OwnedRealSxp {
     inner: RealSxp,
     token: SEXP,
     len: usize,
+    raw: *mut f64,
 }
 
 impl RealSxp {
@@ -61,11 +62,16 @@ impl OwnedRealSxp {
     }
 
     pub fn elt(&self, i: usize) -> f64 {
-        self.inner.elt(i)
+        unsafe { *(self.raw.add(i)) }
     }
 
     pub fn iter(&self) -> RealSxpIter {
-        self.inner.iter()
+        RealSxpIter {
+            sexp: &self.inner,
+            raw: self.raw,
+            i: 0,
+            len: self.len,
+        }
     }
 
     pub fn to_vec(&self) -> Vec<f64> {
@@ -73,11 +79,11 @@ impl OwnedRealSxp {
     }
 
     pub fn as_slice(&self) -> &[f64] {
-        unsafe { std::slice::from_raw_parts(REAL(self.inner()) as _, self.len) }
+        unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [f64] {
-        unsafe { std::slice::from_raw_parts_mut(REAL(self.inner()) as _, self.len) }
+        unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
     pub fn inner(&self) -> SEXP {
@@ -86,17 +92,20 @@ impl OwnedRealSxp {
 
     pub fn set_elt(&mut self, i: usize, v: f64) {
         unsafe {
-            SET_REAL_ELT(self.inner(), i as _, v);
+            *(self.raw.add(i)) = v;
         }
     }
 
     pub fn new(len: usize) -> Self {
         let out = unsafe { Rf_allocVector(REALSXP, len as _) };
         let token = protect::insert_to_preserved_list(out);
+        let raw = unsafe { REAL(out) };
+
         Self {
             inner: RealSxp(out),
             token,
             len,
+            raw,
         }
     }
 }
