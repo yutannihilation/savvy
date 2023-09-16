@@ -24,7 +24,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
         }
 
         let e_upper = e.to_uppercase();
-        out.set_elt(i, e_upper.as_str());
+        out.set_elt(i, &e_upper);
     }
 
     Ok(out.into())
@@ -46,7 +46,7 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
             continue;
         }
 
-        out.set_elt(i, format!("{e}_{y}").as_str());
+        out.set_elt(i, &format!("{e}_{y}"));
     }
 
     Ok(out.into())
@@ -63,9 +63,9 @@ fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, i32::na());
+            out[i] = i32::na();
         } else {
-            out.set_elt(i, e * 2);
+            out[i] = e * 2;
         }
     }
 
@@ -84,9 +84,9 @@ fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, i32::na());
+            out[i] = i32::na();
         } else {
-            out.set_elt(i, e * y);
+            out[i] = e * y;
         }
     }
 
@@ -104,9 +104,9 @@ fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, f64::na())
+            out[i] = f64::na();
         } else {
-            out.set_elt(i, e * 2.0)
+            out[i] = e * 2.0;
         }
     }
 
@@ -125,9 +125,9 @@ fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, f64::na());
+            out[i] = f64::na();
         } else {
-            out.set_elt(i, e * y);
+            out[i] = e * y;
         }
     }
 
@@ -238,7 +238,7 @@ impl Person {
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
         let mut out = OwnedStringSxp::new(1);
-        out.set_elt(0, self.name.as_str());
+        out.set_elt(0, &self.name);
         Ok(out.into())
     }
 
