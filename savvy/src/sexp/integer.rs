@@ -30,20 +30,6 @@ impl IntegerSxp {
         self.len() == 0
     }
 
-    // Do not expose elt() of an external SEXP. Users can access the values only
-    // via iter().
-    pub(crate) fn elt(&self, i: usize) -> i32 {
-        let len = self.len();
-        if i > len {
-            panic!("index out of bounds: the length is {len} but the index is {i}");
-        }
-        self.elt_unchecked(i)
-    }
-
-    fn elt_unchecked(&self, i: usize) -> i32 {
-        unsafe { INTEGER_ELT(self.0, i as _) }
-    }
-
     pub fn iter(&self) -> IntegerSxpIter {
         // if the vector is an ALTREP, we cannot directly access the underlying
         // data.
@@ -79,11 +65,6 @@ impl OwnedIntegerSxp {
 
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
-    }
-
-    // It's probably fine to expose elt() for an owned SEXP
-    pub fn elt(&self, i: usize) -> i32 {
-        self[i]
     }
 
     pub fn iter(&self) -> IntegerSxpIter {
@@ -181,7 +162,7 @@ impl<'a> Iterator for IntegerSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt_unchecked(i))
+            Some(unsafe { INTEGER_ELT(self.sexp.0, i as _) })
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i))) }

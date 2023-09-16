@@ -25,18 +25,6 @@ impl StringSxp {
         self.len() == 0
     }
 
-    pub(crate) fn elt(&self, i: usize) -> SEXP {
-        let len = self.len();
-        if i > len {
-            panic!("index out of bounds: the length is {len} but the index is {i}");
-        }
-        self.elt_unchecked(i)
-    }
-
-    fn elt_unchecked(&self, i: usize) -> SEXP {
-        unsafe { STRING_ELT(self.0, i as _) }
-    }
-
     pub fn iter(&self) -> StringSxpIter {
         StringSxpIter {
             sexp: self,
@@ -61,10 +49,6 @@ impl OwnedStringSxp {
 
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
-    }
-
-    pub fn elt(&self, i: usize) -> SEXP {
-        self.inner.elt(i)
     }
 
     pub fn iter(&self) -> StringSxpIter {
@@ -162,7 +146,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
         }
 
         unsafe {
-            let e = self.sexp.elt_unchecked(i);
+            let e = STRING_ELT(self.sexp.0, i as _);
 
             // Because `None` means the end of the iterator, we cannot return
             // `None` even for missing values.

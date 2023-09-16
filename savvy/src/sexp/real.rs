@@ -22,18 +22,6 @@ impl RealSxp {
         self.len() == 0
     }
 
-    pub(crate) fn elt(&self, i: usize) -> f64 {
-        let len = self.len();
-        if i > len {
-            panic!("index out of bounds: the length is {len} but the index is {i}");
-        }
-        self.elt_unchecked(i)
-    }
-
-    fn elt_unchecked(&self, i: usize) -> f64 {
-        unsafe { REAL_ELT(self.0, i as _) }
-    }
-
     pub fn iter(&self) -> RealSxpIter {
         // if the vector is an ALTREP, we cannot directly access the underlying
         // data.
@@ -69,10 +57,6 @@ impl OwnedRealSxp {
 
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
-    }
-
-    pub fn elt(&self, i: usize) -> f64 {
-        self[i]
     }
 
     pub fn iter(&self) -> RealSxpIter {
@@ -170,7 +154,7 @@ impl<'a> Iterator for RealSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt_unchecked(i))
+            Some(unsafe { REAL_ELT(self.sexp.0, i as _) })
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i))) }
