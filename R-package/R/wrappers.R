@@ -1,6 +1,6 @@
 #' @useDynLib savvy, .registration = TRUE
 #' @keywords internal
-"_PACKAGE"
+NULL
 
 #' Convert Input To Upper-Case
 #'

@@ -734,7 +734,7 @@ pub fn make_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String 
     format!(
         r#"#' @useDynLib {pkg_name}, .registration = TRUE
 #' @keywords internal
-"_PACKAGE"
+NULL
 
 {r_fns}
 {r_impls}
