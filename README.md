@@ -113,7 +113,7 @@ The binary can be found in the
 ``` console
 Generate C bindings and R bindings for a Rust library
 
-Usage: savvy-bindgen.exe <COMMAND>
+Usage: savvy-cli.exe <COMMAND>
 
 Commands:
   c-header  Generate C header file
@@ -127,8 +127,8 @@ Options:
 ```
 
 ``` sh
-cargo install --path .\savvy-bindgen\
-savvy-bindgen update .\R-package\
+cargo install --path .\savvy-cli\
+savvy-cli update .\R-package\
 ```
 
 ## Crates
@@ -136,6 +136,7 @@ savvy-bindgen update .\R-package\
 - `savvy`: a simple wrapper around R’s C API
 - `savvy-bindgen`: a crate for generating C and R bindings from Rust
   code
+- `savvy-cli`: a CLI to invoke `savvy-bindgen`’s functionalities
 - `savvy-macro`: a crate for `#[savvy]` macro, which is powered by
   `savvy-bindgen`
 
