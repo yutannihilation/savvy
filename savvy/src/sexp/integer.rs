@@ -219,7 +219,7 @@ impl Index<usize> for OwnedIntegerSxp {
     type Output = i32;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index > self.len {
+        if index >= self.len {
             panic!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, index
@@ -231,7 +231,7 @@ impl Index<usize> for OwnedIntegerSxp {
 
 impl IndexMut<usize> for OwnedIntegerSxp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index > self.len {
+        if index >= self.len {
             panic!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, index

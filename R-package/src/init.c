@@ -33,6 +33,26 @@ SEXP handle_result(SEXP res_) {
 }
 
 
+SEXP savvy_scalar_input_int_wrapper(SEXP x) {
+    SEXP res = savvy_scalar_input_int(x);
+    return handle_result(res);
+}
+
+SEXP savvy_scalar_input_real_wrapper(SEXP x) {
+    SEXP res = savvy_scalar_input_real(x);
+    return handle_result(res);
+}
+
+SEXP savvy_scalar_input_logical_wrapper(SEXP x) {
+    SEXP res = savvy_scalar_input_logical(x);
+    return handle_result(res);
+}
+
+SEXP savvy_scalar_input_str_wrapper(SEXP x) {
+    SEXP res = savvy_scalar_input_str(x);
+    return handle_result(res);
+}
+
 SEXP savvy_to_upper_wrapper(SEXP x) {
     SEXP res = savvy_to_upper(x);
     return handle_result(res);
@@ -101,6 +121,10 @@ SEXP savvy_Person_associated_function_wrapper() {
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"savvy_scalar_input_int", (DL_FUNC) &savvy_scalar_input_int_wrapper, 1},
+    {"savvy_scalar_input_real", (DL_FUNC) &savvy_scalar_input_real_wrapper, 1},
+    {"savvy_scalar_input_logical", (DL_FUNC) &savvy_scalar_input_logical_wrapper, 1},
+    {"savvy_scalar_input_str", (DL_FUNC) &savvy_scalar_input_str_wrapper, 1},
     {"savvy_to_upper", (DL_FUNC) &savvy_to_upper_wrapper, 1},
     {"savvy_add_suffix", (DL_FUNC) &savvy_add_suffix_wrapper, 2},
     {"savvy_times_two_int", (DL_FUNC) &savvy_times_two_int_wrapper, 1},

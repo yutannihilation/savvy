@@ -72,9 +72,11 @@ impl OwnedStringSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: &str) {
-        let len = self.len();
-        if i > len {
-            panic!("index out of bounds: the length is {len} but the index is {i}");
+        if i >= self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            );
         }
         unsafe {
             // We might be able to put `R_NaString` directly without using

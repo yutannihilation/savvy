@@ -2,6 +2,26 @@
 #' @keywords internal
 NULL
 
+
+scalar_input_int <- function(x) {
+  invisible(.Call(savvy_scalar_input_int, x))
+}
+
+
+scalar_input_real <- function(x) {
+  invisible(.Call(savvy_scalar_input_real, x))
+}
+
+
+scalar_input_logical <- function(x) {
+  invisible(.Call(savvy_scalar_input_logical, x))
+}
+
+
+scalar_input_str <- function(x) {
+  invisible(.Call(savvy_scalar_input_str, x))
+}
+
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.

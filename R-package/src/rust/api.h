@@ -1,3 +1,7 @@
+SEXP savvy_scalar_input_int(SEXP x);
+SEXP savvy_scalar_input_real(SEXP x);
+SEXP savvy_scalar_input_logical(SEXP x);
+SEXP savvy_scalar_input_str(SEXP x);
 SEXP savvy_to_upper(SEXP x);
 SEXP savvy_add_suffix(SEXP x, SEXP y);
 SEXP savvy_times_two_int(SEXP x);

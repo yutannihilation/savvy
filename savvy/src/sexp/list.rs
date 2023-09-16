@@ -185,7 +185,7 @@ impl OwnedListSxp {
     }
 
     pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) {
-        if i > self.len {
+        if i >= self.len {
             panic!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i

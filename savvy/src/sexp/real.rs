@@ -56,7 +56,7 @@ impl OwnedRealSxp {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.len() == 0
+        self.len == 0
     }
 
     pub fn as_read_only(&self) -> RealSxp {
@@ -201,7 +201,7 @@ impl Index<usize> for OwnedRealSxp {
     type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index > self.len {
+        if index >= self.len {
             panic!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, index
@@ -213,7 +213,7 @@ impl Index<usize> for OwnedRealSxp {
 
 impl IndexMut<usize> for OwnedRealSxp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index > self.len {
+        if index >= self.len {
             panic!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, index

@@ -56,7 +56,7 @@ impl OwnedLogicalSxp {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.len() == 0
+        self.len == 0
     }
 
     pub fn as_read_only(&self) -> LogicalSxp {
@@ -81,9 +81,11 @@ impl OwnedLogicalSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: bool) {
-        let len = self.len();
-        if i > len {
-            panic!("index out of bounds: the length is {len} but the index is {i}");
+        if i >= self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            );
         }
         unsafe {
             SET_LOGICAL_ELT(self.inner, i as _, v as _);
