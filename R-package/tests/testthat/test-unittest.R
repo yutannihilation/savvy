@@ -55,6 +55,10 @@ test_that("functions work", {
   )
 })
 
+test_that("functions can handle ALTREP", {
+  expect_equal(times_two_int(1:10), 1:10 * 2L)
+})
+
 test_that("scalar functions reject non-scalar values and missing values", {
   # no error
   expect_no_error(scalar_input_int(1L))
