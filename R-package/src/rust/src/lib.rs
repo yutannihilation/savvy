@@ -213,7 +213,7 @@ fn print_list(x: ListSxp) {
 
         let name = if k.is_empty() { "(no name)" } else { k };
 
-        savvy::r_print(format!("{name}: {content}\n"));
+        savvy::r_print(format!("{name}: {content}\n").as_str());
     }
 }
 

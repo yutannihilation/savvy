@@ -457,15 +457,20 @@ SEXP {fn_name}_wrapper({args_sig}) {{
         let args = self
             .get_c_args()
             .iter()
-            .map(|(pat, _)| pat.as_str())
-            .collect::<Vec<&str>>()
-            .join(", ");
+            .map(|(pat, _)| pat.clone())
+            .collect::<Vec<String>>();
+
+        let mut args_call = args.clone();
+        args_call.insert(0, fn_name_c.to_string());
+
+        let args = args.join(", ");
+        let args_call = args_call.join(", ");
 
         let body = if self.has_result {
-            format!(".Call({fn_name_c}, {args})")
+            format!(".Call({args_call})")
         } else {
             // If the result is NULL, wrap it with invisible
-            format!("invisible(.Call({fn_name_c}, {args}))")
+            format!("invisible(.Call({args_call}))")
         };
 
         format!(
@@ -529,7 +534,7 @@ fn make_c_function_call_entry(fns: &[SavvyFn]) -> String {
         .join("\n")
 }
 
-pub fn make_c_impl_file(parsed_result: &ParsedResult) -> String {
+pub fn make_c_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
     let common_part = r#"
 #include <stdint.h>
 #include <Rinternals.h>
@@ -606,7 +611,7 @@ static const R_CallMethodDef CallEntries[] = {{
     {{NULL, NULL, 0}}
 }};
 
-void R_init_savvy(DllInfo *dll) {{
+void R_init_{pkg_name}(DllInfo *dll) {{
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
 }}
@@ -711,7 +716,7 @@ fn make_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
     )
 }
 
-pub fn make_r_impl_file(parsed_result: &ParsedResult) -> String {
+pub fn make_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
     let r_fns = parsed_result
         .bare_fns
         .iter()
@@ -727,7 +732,7 @@ pub fn make_r_impl_file(parsed_result: &ParsedResult) -> String {
         .join("\n");
 
     format!(
-        r#"#' @useDynLib savvy, .registration = TRUE
+        r#"#' @useDynLib {pkg_name}, .registration = TRUE
 #' @keywords internal
 "_PACKAGE"
 

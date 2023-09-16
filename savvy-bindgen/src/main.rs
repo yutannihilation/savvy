@@ -95,7 +95,7 @@ fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
 }
 
-fn parse_file(path: &Path) -> ParsedResult {
+fn read_file(path: &Path) -> String {
     if !path.exists() {
         eprintln!("{} does not exist", path.to_string_lossy());
         std::process::exit(1);
@@ -115,7 +115,11 @@ fn parse_file(path: &Path) -> ParsedResult {
         std::process::exit(2);
     };
 
-    let ast = match syn::parse_str::<syn::File>(&content) {
+    content
+}
+
+fn parse_file(path: &Path) -> ParsedResult {
+    let ast = match syn::parse_str::<syn::File>(&read_file(path)) {
         Ok(ast) => ast,
         Err(_) => {
             eprintln!("Failed to parse the specified file");
@@ -148,6 +152,23 @@ fn parse_file(path: &Path) -> ParsedResult {
     result
 }
 
+// Parse DESCRIPTION file and get the package name
+fn parse_description(path: &Path) -> Option<String> {
+    let content = read_file(path);
+    for line in content.lines() {
+        if !line.starts_with("Package") {
+            continue;
+        }
+        let mut s = line.split(":");
+        s.next();
+        if let Some(rhs) = s.next() {
+            return Some(rhs.trim().to_string());
+        }
+    }
+
+    None
+}
+
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_C_HEADER: &str = "src/rust/api.h";
@@ -165,10 +186,13 @@ fn update(path: &Path) {
         std::process::exit(1);
     }
 
-    if !path.join(PATH_DESCRIPTION).exists() {
+    let pkg_name = parse_description(&path.join(PATH_DESCRIPTION));
+
+    if pkg_name.is_none() {
         eprintln!("{} is not an R package root", path.to_string_lossy());
         std::process::exit(4);
     }
+    let pkg_name = pkg_name.unwrap();
 
     let path_lib_rs = path.join(PATH_LIB_RS);
     println!("Parsing {}", path_lib_rs.to_string_lossy());
@@ -180,11 +204,11 @@ fn update(path: &Path) {
 
     let path_c_impl = path.join(PATH_C_IMPL);
     println!("Writing {}", path_c_impl.to_string_lossy());
-    std::fs::write(path_c_impl, make_c_impl_file(&parsed_result)).unwrap();
+    std::fs::write(path_c_impl, make_c_impl_file(&parsed_result, &pkg_name)).unwrap();
 
     let path_r_impl = path.join(PATH_R_IMPL);
     println!("Writing {}", path_r_impl.to_string_lossy());
-    std::fs::write(path_r_impl, make_r_impl_file(&parsed_result)).unwrap();
+    std::fs::write(path_r_impl, make_r_impl_file(&parsed_result, &pkg_name)).unwrap();
 }
 
 fn main() {
@@ -197,11 +221,11 @@ fn main() {
         }
         Commands::CImpl { file } => {
             let parsed_result = parse_file(file.as_path());
-            println!("{}", make_c_impl_file(&parsed_result));
+            println!("{}", make_c_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
         }
         Commands::RImpl { file } => {
             let parsed_result = parse_file(file.as_path());
-            println!("{}", make_r_impl_file(&parsed_result));
+            println!("{}", make_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
         }
         Commands::Update { r_pkg_dir } => {
             update(r_pkg_dir.as_path());
