@@ -129,6 +129,14 @@ impl TryFrom<Sxp> for IntegerSxp {
     }
 }
 
+impl From<&[i32]> for OwnedIntegerSxp {
+    fn from(value: &[i32]) -> Self {
+        let mut out = Self::new(value.len());
+        out.as_mut_slice().copy_from_slice(value);
+        out
+    }
+}
+
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<IntegerSxp> for SEXP {
     fn from(value: IntegerSxp) -> Self {

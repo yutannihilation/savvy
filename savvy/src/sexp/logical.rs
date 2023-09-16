@@ -110,6 +110,17 @@ impl TryFrom<Sxp> for LogicalSxp {
     }
 }
 
+impl From<&[bool]> for OwnedLogicalSxp {
+    fn from(value: &[bool]) -> Self {
+        let mut out = Self::new(value.len());
+        value
+            .iter()
+            .enumerate()
+            .for_each(|(i, v)| out.set_elt(i, *v));
+        out
+    }
+}
+
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<LogicalSxp> for SEXP {
     fn from(value: LogicalSxp) -> Self {

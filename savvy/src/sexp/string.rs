@@ -112,6 +112,20 @@ impl TryFrom<Sxp> for StringSxp {
     }
 }
 
+impl<T> From<&[T]> for OwnedStringSxp
+where
+    T: AsRef<str>, // This works both for &str and String
+{
+    fn from(value: &[T]) -> Self {
+        let mut out = Self::new(value.len());
+        value
+            .iter()
+            .enumerate()
+            .for_each(|(i, v)| out.set_elt(i, v.as_ref()));
+        out
+    }
+}
+
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<StringSxp> for SEXP {
     fn from(value: StringSxp) -> Self {
