@@ -1,3 +1,5 @@
+use libR_sys::LOGICAL_ELT;
+
 use crate::{IntegerSxp, LogicalSxp, RealSxp, StringSxp, Sxp};
 
 use super::na::NotAvailableValue;
@@ -13,7 +15,6 @@ macro_rules! impl_try_from_scalar {
                     return Err(crate::error::Error::NotScalar);
                 }
 
-                // Note: use iter().next() instead of elt(), because StringSxp::elt() returns SEXP.
                 let result = value.iter().next().unwrap();
 
                 if result.is_na() {
@@ -40,7 +41,7 @@ impl TryFrom<Sxp> for bool {
             return Err(crate::error::Error::NotScalar);
         }
 
-        let result_int = value.elt(0);
+        let result_int = unsafe { LOGICAL_ELT(value.0, 0) };
         if result_int.is_na() {
             return Err(crate::error::Error::NotScalar);
         }
