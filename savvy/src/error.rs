@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 use libR_sys::SEXP;
 
 #[derive(Debug)]

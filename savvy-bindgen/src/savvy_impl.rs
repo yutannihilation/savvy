@@ -64,10 +64,12 @@ impl SavvyImpl {
         }
     }
 
+    #[allow(dead_code)]
     pub fn make_inner_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.make_inner_fn()).collect()
     }
 
+    #[allow(dead_code)]
     pub fn make_outer_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.make_outer_fn()).collect()
     }

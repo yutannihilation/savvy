@@ -67,6 +67,10 @@ pub trait IntoExtPtrSxp: Sized {
     }
 }
 
+/// A Wrapper of R_ExternalPtrAddr() to use in savvy-bindgen
+///
+/// ## Safety
+/// This is intended to be used only in savvy-bindgen
 pub unsafe fn get_external_pointer_addr(x: SEXP) -> *mut std::os::raw::c_void {
     R_ExternalPtrAddr(x)
 }
