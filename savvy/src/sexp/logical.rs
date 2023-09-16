@@ -22,6 +22,14 @@ impl LogicalSxp {
     }
 
     pub(crate) fn elt(&self, i: usize) -> i32 {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
+        self.elt_unchecked(i)
+    }
+
+    fn elt_unchecked(&self, i: usize) -> i32 {
         unsafe { LOGICAL_ELT(self.0, i as _) }
     }
 
@@ -79,6 +87,10 @@ impl OwnedLogicalSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: bool) {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
         unsafe {
             SET_LOGICAL_ELT(self.inner(), i as _, v as _);
         }
@@ -158,7 +170,7 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt(i) == 1)
+            Some(self.sexp.elt_unchecked(i) == 1)
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i)) == 1) }

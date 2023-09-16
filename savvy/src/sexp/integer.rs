@@ -1,3 +1,5 @@
+use std::ops::{Index, IndexMut};
+
 use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, INTEGER, INTEGER_ELT, INTSXP, SEXP};
 
 use super::Sxp;
@@ -31,6 +33,14 @@ impl IntegerSxp {
     // Do not expose elt() of an external SEXP. Users can access the values only
     // via iter().
     pub(crate) fn elt(&self, i: usize) -> i32 {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
+        self.elt_unchecked(i)
+    }
+
+    fn elt_unchecked(&self, i: usize) -> i32 {
         unsafe { INTEGER_ELT(self.0, i as _) }
     }
 
@@ -73,7 +83,7 @@ impl OwnedIntegerSxp {
 
     // It's probably fine to expose elt() for an owned SEXP
     pub fn elt(&self, i: usize) -> i32 {
-        unsafe { *(self.raw.add(i)) }
+        self[i]
     }
 
     pub fn iter(&self) -> IntegerSxpIter {
@@ -102,9 +112,7 @@ impl OwnedIntegerSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: i32) {
-        unsafe {
-            *(self.raw.add(i)) = v;
-        }
+        self[i] = v;
     }
 
     pub fn new(len: usize) -> Self {
@@ -153,17 +161,6 @@ impl From<OwnedIntegerSxp> for SEXP {
     }
 }
 
-// I learned implementing the Index trait is wrong; the Index is to provide a
-// view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
-// all the values yet.
-//
-//     impl Index<usize> for IntegerSxp {
-//         type Output = i32;
-//         fn index(&self, index: usize) -> &Self::Output {
-//             &self.elt(index).clone()
-//         }
-//     }
-
 pub struct IntegerSxpIter<'a> {
     pub sexp: &'a IntegerSxp,
     raw: *const i32,
@@ -184,7 +181,7 @@ impl<'a> Iterator for IntegerSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt(i))
+            Some(self.sexp.elt_unchecked(i))
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i))) }
@@ -215,3 +212,29 @@ impl<'a> Iterator for IntegerSxpIter<'a> {
 //     }
 // }
 // ```
+
+impl Index<usize> for OwnedIntegerSxp {
+    type Output = i32;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if index > self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &*(self.raw.add(index)) }
+    }
+}
+
+impl IndexMut<usize> for OwnedIntegerSxp {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        if index > self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &mut *(self.raw.add(index)) }
+    }
+}

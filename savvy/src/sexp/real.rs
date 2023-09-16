@@ -1,3 +1,5 @@
+use std::ops::{Index, IndexMut};
+
 use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SEXP};
 
 use super::Sxp;
@@ -21,6 +23,14 @@ impl RealSxp {
     }
 
     pub(crate) fn elt(&self, i: usize) -> f64 {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
+        self.elt_unchecked(i)
+    }
+
+    fn elt_unchecked(&self, i: usize) -> f64 {
         unsafe { REAL_ELT(self.0, i as _) }
     }
 
@@ -62,7 +72,7 @@ impl OwnedRealSxp {
     }
 
     pub fn elt(&self, i: usize) -> f64 {
-        unsafe { *(self.raw.add(i)) }
+        self[i]
     }
 
     pub fn iter(&self) -> RealSxpIter {
@@ -91,9 +101,7 @@ impl OwnedRealSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: f64) {
-        unsafe {
-            *(self.raw.add(i)) = v;
-        }
+        self[i] = v;
     }
 
     pub fn new(len: usize) -> Self {
@@ -142,17 +150,6 @@ impl From<OwnedRealSxp> for SEXP {
     }
 }
 
-// I learned implementing the Index trait is wrong; the Index is to provide a
-// view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
-// all the values yet.
-//
-//     impl Index<usize> for RealSxp {
-//         type Output = f64;
-//         fn index(&self, index: usize) -> &Self::Output {
-//             &self.elt(index).clone()
-//         }
-//     }
-
 pub struct RealSxpIter<'a> {
     pub sexp: &'a RealSxp,
     raw: *const f64,
@@ -173,10 +170,36 @@ impl<'a> Iterator for RealSxpIter<'a> {
 
         if self.raw.is_null() {
             // When ALTREP, access to the value via *_ELT()
-            Some(self.sexp.elt(i))
+            Some(self.sexp.elt_unchecked(i))
         } else {
             // When non-ALTREP, access to the raw pointer
             unsafe { Some(*(self.raw.add(i))) }
         }
+    }
+}
+
+impl Index<usize> for OwnedRealSxp {
+    type Output = f64;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if index > self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &*(self.raw.add(index)) }
+    }
+}
+
+impl IndexMut<usize> for OwnedRealSxp {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        if index > self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &mut *(self.raw.add(index)) }
     }
 }

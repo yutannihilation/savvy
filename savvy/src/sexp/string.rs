@@ -26,6 +26,14 @@ impl StringSxp {
     }
 
     pub(crate) fn elt(&self, i: usize) -> SEXP {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
+        self.elt_unchecked(i)
+    }
+
+    fn elt_unchecked(&self, i: usize) -> SEXP {
         unsafe { STRING_ELT(self.0, i as _) }
     }
 
@@ -72,6 +80,10 @@ impl OwnedStringSxp {
     }
 
     pub fn set_elt(&mut self, i: usize, v: &str) {
+        let len = self.len();
+        if i > len {
+            panic!("index out of bounds: the length is {len} but the index is {i}");
+        }
         unsafe {
             // We might be able to put `R_NaString` directly without using
             // <&str>::na(), but probably this is an inevitable cost of
@@ -150,7 +162,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
         }
 
         unsafe {
-            let e = self.sexp.elt(i);
+            let e = self.sexp.elt_unchecked(i);
 
             // Because `None` means the end of the iterator, we cannot return
             // `None` even for missing values.
