@@ -1,5 +1,8 @@
+use std::ffi::CStr;
+
 use libR_sys::{
-    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, EXTPTRSXP, SEXP, TYPEOF, VECSXP,
+    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_type2char, EXTPTRSXP, SEXP, TYPEOF,
+    VECSXP,
 };
 
 pub mod external_pointer;
@@ -46,32 +49,10 @@ impl Sxp {
 
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
     pub fn get_human_readable_type_name(&self) -> &'static str {
-        match unsafe { TYPEOF(self.0) as u32 } {
-            libR_sys::INTSXP => "integer",
-            libR_sys::REALSXP => "real",
-            libR_sys::STRSXP => "string",
-            libR_sys::LGLSXP => "logical",
-            libR_sys::VECSXP => "list",
-            libR_sys::NILSXP => "NULL",
-            libR_sys::SYMSXP => "symbol",
-            libR_sys::CLOSXP => "closure",
-            libR_sys::ENVSXP => "environment",
-            libR_sys::PROMSXP => "promise",
-            libR_sys::LANGSXP => "language",
-            libR_sys::LISTSXP => "pairlist",
-            libR_sys::SPECIALSXP => "special function",
-            libR_sys::BUILTINSXP => "builtin function",
-            libR_sys::CHARSXP => "string",
-            libR_sys::CPLXSXP => "complex",
-            libR_sys::DOTSXP => "dot",
-            libR_sys::ANYSXP => "ANYSXP",
-            libR_sys::EXPRSXP => "expression",
-            libR_sys::BCODESXP => "byte code",
-            libR_sys::EXTPTRSXP => "external pointer",
-            libR_sys::WEAKREFSXP => "weak reference",
-            libR_sys::RAWSXP => "raw vector",
-            libR_sys::S4SXP => "S4 object",
-            _ => "Unknown",
+        unsafe {
+            // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
+            let c = Rf_type2char(TYPEOF(self.0) as _);
+            CStr::from_ptr(c).to_str().unwrap()
         }
     }
 }
