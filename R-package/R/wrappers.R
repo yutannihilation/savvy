@@ -1,6 +1,6 @@
 #' @useDynLib savvy, .registration = TRUE
 #' @keywords internal
-NULL
+"_PACKAGE"
 
 
 scalar_input_int <- function(x) {
