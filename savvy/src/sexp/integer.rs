@@ -30,27 +30,18 @@ impl IntegerSxp {
         self.len() == 0
     }
 
-    pub fn iter(&self) -> IntegerSxpIter {
-        // if the vector is an ALTREP, we cannot directly access the underlying
-        // data.
-        let raw = unsafe {
-            if ALTREP(self.0) == 1 {
-                std::ptr::null()
-            } else {
-                INTEGER(self.0)
-            }
-        };
+    pub fn as_slice(&self) -> &[i32] {
+        unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
+    }
 
-        IntegerSxpIter {
-            sexp: &self.0,
-            raw,
-            i: 0,
-            len: self.len(),
-        }
+    pub fn iter(&self) -> std::slice::Iter<i32> {
+        self.as_slice().iter()
     }
 
     pub fn to_vec(&self) -> Vec<i32> {
-        self.iter().collect()
+        let mut out = Vec::with_capacity(self.len());
+        out.copy_from_slice(self.as_slice());
+        out
     }
 
     pub fn inner(&self) -> SEXP {
@@ -71,25 +62,26 @@ impl OwnedIntegerSxp {
         IntegerSxp(self.inner)
     }
 
-    pub fn iter(&self) -> IntegerSxpIter {
-        IntegerSxpIter {
-            sexp: &self.inner,
-            raw: self.raw,
-            i: 0,
-            len: self.len,
-        }
-    }
-
-    pub fn to_vec(&self) -> Vec<i32> {
-        self.iter().collect()
-    }
-
     pub fn as_slice(&self) -> &[i32] {
-        unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len) }
+        unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [i32] {
-        unsafe { std::slice::from_raw_parts_mut(INTEGER(self.inner()) as _, self.len) }
+        unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<i32> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<i32> {
+        self.as_mut_slice().iter_mut()
+    }
+
+    pub fn to_vec(&self) -> Vec<i32> {
+        let mut out = Vec::with_capacity(self.len());
+        out.copy_from_slice(self.as_slice());
+        out
     }
 
     pub fn inner(&self) -> SEXP {

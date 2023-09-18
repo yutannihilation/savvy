@@ -21,7 +21,7 @@ macro_rules! impl_try_from_scalar {
                     return Err(crate::error::Error::NotScalar);
                 }
 
-                Ok(result)
+                Ok(result.clone())
             }
         }
     };

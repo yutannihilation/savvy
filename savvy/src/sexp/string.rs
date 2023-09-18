@@ -152,8 +152,8 @@ pub struct StringSxpIter<'a> {
 }
 
 impl<'a> Iterator for StringSxpIter<'a> {
-    // There lifetime here is 'static, not 'a, in the assumption that
-    // `Rf_translateCharUTF8()` will allocate it on R's side so it should be
+    // The lifetime here is 'static, not 'a, in the assumption that
+    // `Rf_translateCharUTF8()` allocate the string on R's side so it should be
     // there until the R session ends.
     type Item = &'static str;
 

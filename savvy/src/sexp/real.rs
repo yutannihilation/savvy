@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use libR_sys::{Rf_allocVector, Rf_xlength, ALTREP, REAL, REALSXP, REAL_ELT, SEXP};
+use libR_sys::{Rf_allocVector, Rf_xlength, REAL, REALSXP, REAL_ELT, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -22,27 +22,18 @@ impl RealSxp {
         self.len() == 0
     }
 
-    pub fn iter(&self) -> RealSxpIter {
-        // if the vector is an ALTREP, we cannot directly access the underlying
-        // data.
-        let raw = unsafe {
-            if ALTREP(self.0) == 1 {
-                std::ptr::null()
-            } else {
-                REAL(self.0)
-            }
-        };
+    pub fn as_slice(&self) -> &[f64] {
+        unsafe { std::slice::from_raw_parts(REAL(self.0), self.len()) }
+    }
 
-        RealSxpIter {
-            sexp: &self.0,
-            raw,
-            i: 0,
-            len: self.len(),
-        }
+    pub fn iter(&self) -> std::slice::Iter<f64> {
+        self.as_slice().iter()
     }
 
     pub fn to_vec(&self) -> Vec<f64> {
-        self.iter().collect()
+        let mut out = Vec::with_capacity(self.len());
+        out.copy_from_slice(self.as_slice());
+        out
     }
 
     pub fn inner(&self) -> SEXP {
@@ -63,25 +54,26 @@ impl OwnedRealSxp {
         RealSxp(self.inner)
     }
 
-    pub fn iter(&self) -> RealSxpIter {
-        RealSxpIter {
-            sexp: &self.inner,
-            raw: self.raw,
-            i: 0,
-            len: self.len,
-        }
-    }
-
-    pub fn to_vec(&self) -> Vec<f64> {
-        self.iter().collect()
-    }
-
     pub fn as_slice(&self) -> &[f64] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [f64] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<f64> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<f64> {
+        self.as_mut_slice().iter_mut()
+    }
+
+    pub fn to_vec(&self) -> Vec<f64> {
+        let mut out = Vec::with_capacity(self.len);
+        out.copy_from_slice(self.as_slice());
+        out
     }
 
     pub fn inner(&self) -> SEXP {
@@ -156,44 +148,6 @@ impl From<RealSxp> for SEXP {
 impl From<OwnedRealSxp> for SEXP {
     fn from(value: OwnedRealSxp) -> Self {
         value.inner()
-    }
-}
-
-pub struct RealSxpIter<'a> {
-    pub sexp: &'a SEXP,
-    raw: *const f64,
-    i: usize,
-    len: usize,
-}
-
-impl<'a> Iterator for RealSxpIter<'a> {
-    type Item = f64;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let i = self.i;
-        self.i += 1;
-
-        if i >= self.len {
-            return None;
-        }
-
-        if self.raw.is_null() {
-            // When ALTREP, access to the value via *_ELT()
-            Some(unsafe { REAL_ELT(*self.sexp, i as _) })
-        } else {
-            // When non-ALTREP, access to the raw pointer
-            unsafe { Some(*(self.raw.add(i))) }
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.len, Some(self.len))
-    }
-}
-
-impl<'a> ExactSizeIterator for RealSxpIter<'a> {
-    fn len(&self) -> usize {
-        self.len
     }
 }
 

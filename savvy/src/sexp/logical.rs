@@ -22,22 +22,13 @@ impl LogicalSxp {
         self.len() == 0
     }
 
-    pub fn iter(&self) -> LogicalSxpIter {
-        // if the vector is an ALTREP, we cannot directly access the underlying
-        // data.
-        let raw = unsafe {
-            if ALTREP(self.0) == 1 {
-                std::ptr::null()
-            } else {
-                LOGICAL(self.0)
-            }
-        };
+    fn as_slice_raw(&self) -> &[i32] {
+        unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
+    }
 
+    pub fn iter(&self) -> LogicalSxpIter {
         LogicalSxpIter {
-            sexp: &self.0,
-            raw,
-            i: 0,
-            len: self.len(),
+            iter_raw: self.as_slice_raw().iter(),
         }
     }
 
@@ -63,12 +54,13 @@ impl OwnedLogicalSxp {
         LogicalSxp(self.inner)
     }
 
+    fn as_slice_raw(&self) -> &[i32] {
+        unsafe { std::slice::from_raw_parts(self.raw, self.len()) }
+    }
+
     pub fn iter(&self) -> LogicalSxpIter {
         LogicalSxpIter {
-            sexp: &self.inner,
-            raw: self.raw,
-            i: 0,
-            len: self.len,
+            iter_raw: self.as_slice_raw().iter(),
         }
     }
 
@@ -160,39 +152,23 @@ impl From<OwnedLogicalSxp> for SEXP {
 //     }
 
 pub struct LogicalSxpIter<'a> {
-    pub sexp: &'a SEXP,
-    raw: *const i32,
-    i: usize,
-    len: usize,
+    iter_raw: std::slice::Iter<'a, i32>,
 }
 
 impl<'a> Iterator for LogicalSxpIter<'a> {
     type Item = bool;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let i = self.i;
-        self.i += 1;
-
-        if i >= self.len {
-            return None;
-        }
-
-        if self.raw.is_null() {
-            // When ALTREP, access to the value via *_ELT()
-            Some(unsafe { LOGICAL_ELT(*self.sexp, i as _) } == 1)
-        } else {
-            // When non-ALTREP, access to the raw pointer
-            unsafe { Some(*(self.raw.add(i)) == 1) }
-        }
+        self.iter_raw.next().map(|x| *x == 1)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.len, Some(self.len))
+        self.iter_raw.size_hint()
     }
 }
 
 impl<'a> ExactSizeIterator for LogicalSxpIter<'a> {
     fn len(&self) -> usize {
-        self.len
+        self.iter_raw.len()
     }
 }
