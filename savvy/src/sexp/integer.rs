@@ -34,6 +34,10 @@ impl IntegerSxp {
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
     }
 
+    /// If the input is an ALTREP, this materialize it first, so it might not be
+    /// most efficient. However, it seems Rust's slice implementation is very
+    /// fast, so probably being efficient for ALTREP is not worth giving up the
+    /// benefit.
     pub fn iter(&self) -> std::slice::Iter<i32> {
         self.as_slice().iter()
     }
