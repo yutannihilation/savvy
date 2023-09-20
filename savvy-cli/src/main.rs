@@ -2,9 +2,9 @@ use clap::{Parser, Subcommand};
 use std::path::Path;
 use std::path::PathBuf;
 
-use savvy_bindgen::make_c_header_file;
-use savvy_bindgen::make_c_impl_file;
-use savvy_bindgen::make_r_impl_file;
+use savvy_bindgen::generate_c_header_file;
+use savvy_bindgen::generate_c_impl_file;
+use savvy_bindgen::generate_r_impl_file;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -89,15 +89,15 @@ fn update(path: &Path) {
 
     let path_c_header = path.join(PATH_C_HEADER);
     println!("Writing {}", path_c_header.to_string_lossy());
-    std::fs::write(path_c_header, make_c_header_file(&parsed_result)).unwrap();
+    std::fs::write(path_c_header, generate_c_header_file(&parsed_result)).unwrap();
 
     let path_c_impl = path.join(PATH_C_IMPL);
     println!("Writing {}", path_c_impl.to_string_lossy());
-    std::fs::write(path_c_impl, make_c_impl_file(&parsed_result, &pkg_name)).unwrap();
+    std::fs::write(path_c_impl, generate_c_impl_file(&parsed_result, &pkg_name)).unwrap();
 
     let path_r_impl = path.join(PATH_R_IMPL);
     println!("Writing {}", path_r_impl.to_string_lossy());
-    std::fs::write(path_r_impl, make_r_impl_file(&parsed_result, &pkg_name)).unwrap();
+    std::fs::write(path_r_impl, generate_r_impl_file(&parsed_result, &pkg_name)).unwrap();
 }
 
 fn main() {
@@ -106,15 +106,21 @@ fn main() {
     match cli.command {
         Commands::CHeader { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!("{}", make_c_header_file(&parsed_result));
+            println!("{}", generate_c_header_file(&parsed_result));
         }
         Commands::CImpl { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!("{}", make_c_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
+            println!(
+                "{}",
+                generate_c_impl_file(&parsed_result, "%%PACKAGE_NAME%%")
+            );
         }
         Commands::RImpl { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!("{}", make_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%"));
+            println!(
+                "{}",
+                generate_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%")
+            );
         }
         Commands::Update { r_pkg_dir } => {
             update(r_pkg_dir.as_path());

@@ -245,7 +245,7 @@ impl SavvyFn {
         }
     }
 
-    pub fn make_inner_fn(&self) -> syn::ItemFn {
+    pub fn generate_inner_fn(&self) -> syn::ItemFn {
         let fn_name_orig = &self.fn_name;
         let fn_name_inner = self.fn_name_inner();
 
@@ -341,7 +341,7 @@ impl SavvyFn {
         out
     }
 
-    pub fn make_outer_fn(&self) -> syn::ItemFn {
+    pub fn generate_outer_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
         let fn_name_outer = self.fn_name_outer();
 
@@ -490,7 +490,7 @@ fn get_r_doc_comment(docs: &[String]) -> String {
         .join("\n")
 }
 
-pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
+pub fn generate_c_header_file(parsed_result: &ParsedResult) -> String {
     let bare_fns = parsed_result
         .bare_fns
         .iter()
@@ -520,21 +520,21 @@ pub fn make_c_header_file(parsed_result: &ParsedResult) -> String {
     format!("{bare_fns}\n{impls}")
 }
 
-fn make_c_function_impl(fns: &[SavvyFn]) -> String {
+fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
     fns.iter()
         .map(|x| x.to_c_function_impl())
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-fn make_c_function_call_entry(fns: &[SavvyFn]) -> String {
+fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
     fns.iter()
         .map(|x| x.to_c_function_call_entry())
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-pub fn make_c_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
+pub fn generate_c_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
     let common_part = r#"
 #include <stdint.h>
 #include <Rinternals.h>
@@ -570,7 +570,7 @@ SEXP handle_result(SEXP res_) {
 }
 "#;
 
-    let c_fns_bare = make_c_function_impl(parsed_result.bare_fns.as_slice());
+    let c_fns_bare = generate_c_function_impl(parsed_result.bare_fns.as_slice());
 
     let c_fns_impl = parsed_result
         .impls
@@ -579,13 +579,13 @@ SEXP handle_result(SEXP res_) {
             format!(
                 "\n// methods and associated functions for {}\n{}",
                 x.ty,
-                make_c_function_impl(x.fns.as_slice())
+                generate_c_function_impl(x.fns.as_slice())
             )
         })
         .collect::<Vec<String>>()
         .join("\n");
 
-    let call_entries_bare = make_c_function_call_entry(parsed_result.bare_fns.as_slice());
+    let call_entries_bare = generate_c_function_call_entry(parsed_result.bare_fns.as_slice());
 
     let call_entries_impl = parsed_result
         .impls
@@ -594,7 +594,7 @@ SEXP handle_result(SEXP res_) {
             format!(
                 "\n// methods and associated functions for {}\n{}",
                 x.ty,
-                make_c_function_call_entry(x.fns.as_slice())
+                generate_c_function_call_entry(x.fns.as_slice())
             )
         })
         .collect::<Vec<String>>()
@@ -619,7 +619,7 @@ void R_init_{pkg_name}(DllInfo *dll) {{
     )
 }
 
-fn make_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
+fn generate_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
     let mut ctors: Vec<&SavvyFn> = Vec::new();
     let mut others: Vec<&SavvyFn> = Vec::new();
     let class_r = savvy_impl.ty.clone();
@@ -716,7 +716,7 @@ fn make_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
     )
 }
 
-pub fn make_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
+pub fn generate_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
     let r_fns = parsed_result
         .bare_fns
         .iter()
@@ -727,7 +727,7 @@ pub fn make_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String 
     let r_impls = parsed_result
         .impls
         .iter()
-        .map(make_r_impl_for_impl)
+        .map(generate_r_impl_for_impl)
         .collect::<Vec<String>>()
         .join("\n");
 
