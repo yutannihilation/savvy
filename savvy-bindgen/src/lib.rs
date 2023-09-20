@@ -6,6 +6,7 @@ mod utils;
 
 pub use gen::c::{generate_c_header_file, generate_c_impl_file};
 pub use gen::r::generate_r_impl_file;
+pub use gen::static_files::{generate_gitignore, generate_makevars, generate_makevars_win};
 pub use savvy_fn::{ParsedResult, SavvyFn, SavvyFnArg, SavvyFnType};
 pub use savvy_impl::SavvyImpl;
 

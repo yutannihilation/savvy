@@ -34,6 +34,21 @@ enum Commands {
         file: PathBuf,
     },
 
+    /// Generate Makevars
+    Makevars {
+        /// package name
+        crate_name: String,
+    },
+
+    /// Generate Makevars.win
+    MakevarsWin {
+        /// package name
+        crate_name: String,
+    },
+
+    /// Generate .gitignore
+    Gitignore {},
+
     /// Update wrappers in an R package
     Update {
         /// Path to the root of an R package
@@ -121,6 +136,15 @@ fn main() {
                 "{}",
                 generate_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%")
             );
+        }
+        Commands::Makevars { crate_name } => {
+            println!("{}", savvy_bindgen::generate_makevars(&crate_name))
+        }
+        Commands::MakevarsWin { crate_name } => {
+            println!("{}", savvy_bindgen::generate_makevars_win(&crate_name))
+        }
+        Commands::Gitignore {} => {
+            println!("{}", savvy_bindgen::generate_gitignore())
         }
         Commands::Update { r_pkg_dir } => {
             update(r_pkg_dir.as_path());
