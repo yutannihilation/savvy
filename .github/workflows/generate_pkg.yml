@@ -22,6 +22,7 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
+            any::devtools
             any::usethis
           working-directory: R-package  # this isn't the actual R package, but this is needed to avoid an error
 
