@@ -90,6 +90,8 @@ impl SavvyFn {
                 #(#attrs)*
                 #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                    use savvy::IntoExtPtrSxp;
+
                     #(#stmts_additional)*
                     let x = #ty::#fn_name_orig(#(#args_pat),*);
                     Ok(x.into_external_pointer())

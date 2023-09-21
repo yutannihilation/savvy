@@ -8,7 +8,6 @@ use savvy::{
 };
 
 use savvy::sexp::na::NotAvailableValue;
-use savvy::IntoExtPtrSxp;
 
 #[savvy]
 fn scalar_input_int(x: i32) {
