@@ -26,8 +26,8 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
 fn savvy_fn(item_fn: &syn::ItemFn) -> TokenStream {
     let savvy_fn = SavvyFn::from_fn(item_fn);
 
-    let item_fn_inner = savvy_fn.make_inner_fn();
-    let item_fn_outer = savvy_fn.make_outer_fn();
+    let item_fn_inner = savvy_fn.generate_inner_fn();
+    let item_fn_outer = savvy_fn.generate_outer_fn();
 
     quote! {
         #item_fn_inner
@@ -41,8 +41,8 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> TokenStream {
     let orig = savvy_impl.orig.clone();
     let ty = savvy_impl.ty.clone();
 
-    let list_fn_inner = savvy_impl.make_inner_fns();
-    let list_fn_outer = savvy_impl.make_outer_fns();
+    let list_fn_inner = savvy_impl.generate_inner_fns();
+    let list_fn_outer = savvy_impl.generate_outer_fns();
 
     quote! {
         #orig
@@ -61,17 +61,17 @@ mod tests {
     use syn::parse_quote;
 
     fn assert_eq_inner(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig).make_inner_fn();
+        let result = SavvyFn::from_fn(&orig).generate_inner_fn();
         assert_eq!(result, expected);
     }
 
     fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig).make_outer_fn();
+        let result = SavvyFn::from_fn(&orig).generate_outer_fn();
         assert_eq!(result, expected);
     }
 
     #[test]
-    fn test_make_inner_fn() {
+    fn test_generate_inner_fn() {
         assert_eq_inner(
             parse_quote!(
                 #[savvy]
@@ -120,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn test_make_outer_fn() {
+    fn test_generate_outer_fn() {
         assert_eq_outer(
             parse_quote!(
                 #[savvy]
