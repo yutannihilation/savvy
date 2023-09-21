@@ -1,0 +1,41 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: Generate R package using savvy
+
+jobs:
+  generate_pkg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@nightly
+        if: matrix.config.rust == 'nightly'
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::rcmdcheck
+            any::usethis
+
+      - name: create tempdir
+        run: echo "TEMP_DIR=$(mktemp -d)" >> ${GITHUB_ENV}
+
+      - name: create package
+        run: |
+          Rscript -e "usethis::create_package('${{ env.TEMP_DIR }}/sawy')"
+          cargo run --manifest-path ./savvy-cli/Cargo.toml -- init ${{ env.TEMP_DIR }}/sawy
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual")'
+          upload-snapshots: true
+          working-directory: ${{ env.TEMP_DIR}}/sawy
