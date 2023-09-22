@@ -1,20 +1,8 @@
 ---
-output: github_document
-editor_options: 
-  markdown: 
-    wrap: 72
+format: gfm
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
 
 # Savvy - An unfriendly R extension interface using Rust
 
@@ -24,11 +12,11 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-## What's this?
+## What the hell is this?? Why do you create another framework when there's extendr?
 
 This is nothing but my personal challenge to re-invent the wheel in order to get
 better understanding about what [extendr](https://extendr.github.io/) does. While
-this is usable, ergonomics is not included. If you prefer friendly one, please
+this is usable, ergonomics is not included. If you prefer friendliness, please
 use extendr.
 
 ### Why savvy?
@@ -36,7 +24,26 @@ use extendr.
 In Japanese, "Rust" is pronounced as `sàbí`(錆). Since the sound is similar, and
 this framework is intended to be used by R-API-savvy people, I chose this name.
 
-## Basic usage
+## Getting Started
+
+### Workflow
+
+#### Create a new package
+
+```r
+usethis::create_package("path/to/foo")
+```
+
+```sh
+cd path/to/foo
+savvy-cli init .
+```
+
+```r
+devtools::document()
+```
+
+### Rust code
 
 ```rust
 #[savvy]

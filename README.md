@@ -5,16 +5,22 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
+<div>
+
+[![](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
+
+R-CMD-check
+
+</div>
 
 <!-- badges: end -->
 
-## What’s this?
+## What the hell is this?? Why do you create another framework when there’s extendr?
 
 This is nothing but my personal challenge to re-invent the wheel in
 order to get better understanding about what
 [extendr](https://extendr.github.io/) does. While this is usable,
-ergonomics is not included. If you prefer friendly one, please use
+ergonomics is not included. If you prefer friendliness, please use
 extendr.
 
 ### Why savvy?
@@ -23,7 +29,26 @@ In Japanese, “Rust” is pronounced as `sàbí`(錆). Since the sound is
 similar, and this framework is intended to be used by R-API-savvy
 people, I chose this name.
 
-## Basic usage
+## Getting Started
+
+### Workflow
+
+#### Create a new package
+
+``` r
+usethis::create_package("path/to/foo")
+```
+
+``` sh
+cd path/to/foo
+savvy-cli init .
+```
+
+``` r
+devtools::document()
+```
+
+### Rust code
 
 ``` rust
 #[savvy]
@@ -148,23 +173,36 @@ A toy example R package can be found in `R-package/` directory.
 library(savvy)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
-#> [1] "A"          NA           "A"          "座布団一枚"
+```
 
+    [1] "A"          NA           "A"          "座布団一枚"
+
+``` r
 times_two_int(c(1L, NA, 100L, 0L, -1L))
-#> [1]   2  NA 200   0  -2
+```
 
+    [1]   2  NA 200   0  -2
+
+``` r
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
-#> [1]  2.2   NA  0.0  Inf -Inf
+```
 
+    [1]  2.2   NA  0.0  Inf -Inf
+
+``` r
 flip_logical(c(TRUE, FALSE, NA))
-#> [1] FALSE  TRUE  TRUE
+```
 
+    [1] FALSE  TRUE  TRUE
+
+``` r
 x <- Person()
 
 x$set_name("たかし")
 x$name()
-#> [1] "たかし"
 ```
+
+    [1] "たかし"
 
 ## Rust API
 
