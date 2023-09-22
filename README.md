@@ -1,5 +1,5 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.qmd. Please edit that file -->
 
 # Savvy - An unfriendly R extension interface using Rust
 
@@ -206,36 +206,23 @@ A toy example R package can be found in `R-package/` directory.
 library(savvy)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
-```
+#> [1] "A"          NA           "A"          "座布団一枚"
 
-    [1] "A"          NA           "A"          "座布団一枚"
-
-``` r
 times_two_int(c(1L, NA, 100L, 0L, -1L))
-```
+#> [1]   2  NA 200   0  -2
 
-    [1]   2  NA 200   0  -2
-
-``` r
 times_two_numeric(c(1.1, NA, 0.0, Inf, -Inf))
-```
+#> [1]  2.2   NA  0.0  Inf -Inf
 
-    [1]  2.2   NA  0.0  Inf -Inf
-
-``` r
 flip_logical(c(TRUE, FALSE, NA))
-```
+#> [1] FALSE  TRUE  TRUE
 
-    [1] FALSE  TRUE  TRUE
-
-``` r
 x <- Person()
 
 x$set_name("たかし")
 x$name()
+#> [1] "たかし"
 ```
-
-    [1] "たかし"
 
 ## Rust API
 
