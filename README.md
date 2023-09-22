@@ -9,13 +9,11 @@
 
 [![](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
 
-R-CMD-check
-
 </div>
 
 <!-- badges: end -->
 
-## What the hell is this?? Why do you create another framework when there’s extendr?
+## What the hell is this?? Why do you need another framework when there’s extendr?
 
 This is nothing but my personal challenge to re-invent the wheel in
 order to get better understanding about what
@@ -29,26 +27,10 @@ In Japanese, “Rust” is pronounced as `sàbí`(錆). Since the sound is
 similar, and this framework is intended to be used by R-API-savvy
 people, I chose this name.
 
-## Getting Started
+## Example Rust code
 
-### Workflow
-
-#### Create a new package
-
-``` r
-usethis::create_package("path/to/foo")
-```
-
-``` sh
-cd path/to/foo
-savvy-cli init .
-```
-
-``` r
-devtools::document()
-```
-
-### Rust code
+With savvy, you can implement Rust function like below to create the
+corresponding R function `to_upper()`.
 
 ``` rust
 #[savvy]
@@ -81,6 +63,57 @@ explicit operations than extendr.
 - Savvy doesn’t take care of the output conversion. You have to create a
   new SEXP object by `Owned...Sxp::new()` and set values by `set_elt()`
   one by one.
+
+## Getting Started
+
+### Prerequisite
+
+Before starting, get `savvy-cli` command either by downloading the
+binary from
+[Releases](https://github.com/yutannihilation/savvy/releases) or by
+`cargo install`:
+
+``` sh
+ cargo install --git https://github.com/yutannihilation/savvy savvy-cli
+```
+
+### Create a new R package
+
+First, create a new package. `usethis::create_package()` is convenient
+for this.
+
+``` r
+usethis::create_package("path/to/foo")
+```
+
+Next, run `savvy-cli init` against the package directory. This will
+create necessary files like `Makevars` and `Cargo.toml`, as well as
+generating C and R wrapper code corresponding to the Rust code.
+
+``` sh
+savvy-cli init path/to/foo
+```
+
+Lastly, open an R session in the package directory and run
+`devtools::document()` to generate `NAMESPACE`.
+
+``` r
+devtools::document()
+```
+
+Now, this package is ready to install!
+
+### Update wrapper files
+
+After writing more Rust code, you can update the C and R wrapper files
+by running `savvy-cli update`.
+
+``` sh
+savvy-cli update path/to/foo
+```
+
+To update the documents, you also have to run `devtools::document()`
+again.
 
 ## Random thoughts
 
@@ -208,10 +241,10 @@ x$name()
 
 <table style="width:98%;">
 <colgroup>
-<col style="width: 16%" />
+<col style="width: 18%" />
 <col style="width: 23%" />
-<col style="width: 27%" />
-<col style="width: 30%" />
+<col style="width: 26%" />
+<col style="width: 29%" />
 </colgroup>
 <thead>
 <tr class="header">
