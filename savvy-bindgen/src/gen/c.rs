@@ -51,11 +51,11 @@ impl SavvyFn {
             .join(", ");
 
         format!(
-            "
-    SEXP {fn_name}_wrapper({args_sig}) {{
-        SEXP res = {fn_name}({args_call});
-        return handle_result(res);
-    }}"
+            "SEXP {fn_name}_wrapper({args_sig}) {{
+    SEXP res = {fn_name}({args_call});
+    return handle_result(res);
+}}
+"
         )
     }
 

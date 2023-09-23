@@ -32,7 +32,6 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
-
 SEXP savvy_scalar_input_int_wrapper(SEXP x) {
     SEXP res = savvy_scalar_input_int(x);
     return handle_result(res);
@@ -98,8 +97,8 @@ SEXP savvy_print_list_wrapper(SEXP x) {
     return handle_result(res);
 }
 
-// methods and associated functions for Person
 
+// methods and associated functions for Person
 SEXP savvy_Person_new_wrapper() {
     SEXP res = savvy_Person_new();
     return handle_result(res);
@@ -119,6 +118,7 @@ SEXP savvy_Person_associated_function_wrapper() {
     SEXP res = savvy_Person_associated_function();
     return handle_result(res);
 }
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"savvy_scalar_input_int", (DL_FUNC) &savvy_scalar_input_int_wrapper, 1},
