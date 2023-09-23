@@ -73,16 +73,19 @@ explicit operations than extendr.
   new SEXP object by `Owned...Sxp::new()` and copy values into it by
   `set_elt()` one by one.
 
+For more details about the design, please refer to
+[this](./docs/design.md).
+
 ## Getting Started
 
 ### Prerequisite
 
-Before starting, install an helper R package for savvy.
+Before starting, install a helper R package for savvy.
 
 ``` r
 install.packages(
-    'savvy',
-    repos = c('https://yutannihilation.r-universe.dev', 'https://cloud.r-project.org')
+    "savvy",
+    repos = c("https://yutannihilation.r-universe.dev", "https://cloud.r-project.org")
 )
 ```
 
@@ -122,7 +125,7 @@ wrapper files by running `savvy::savvy_update()` (under the hood, this
 simply runs `savvy-cli update`).
 
 ``` r
-savvy::savvy_init()
+savvy::savvy_update()
 devtools::document()
 ```
 
