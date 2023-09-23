@@ -33,12 +33,20 @@ With savvy, you can implement Rust function like below to create the
 corresponding R function `to_upper()`.
 
 ``` rust
+/// Convert to Upper-case
+/// 
+/// @param x A character vector.
+/// @export
 #[savvy]
 fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
+    // Use `Owned{type}Sxp` to allocate an R vector for output.
     let mut out = OwnedStringSxp::new(x.len());
 
     for (i, e) in x.iter().enumerate() {
+        // To Rust, missing value is an ordinary value. In `&str`'s case, it's just "NA".
+        // You have to use `.is_na()` method to distinguish the missing value.
         if e.is_na() {
+            // Values need to be set by `set_elt()` one by one.
             out.set_elt(i, <&str>::na());
             continue;
         }
@@ -47,6 +55,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
         out.set_elt(i, e_upper.as_str());
     }
 
+    // `Owned{type}Sxp` type implements `From` trait for `SEXP`, so you can use `into()`.
     Ok(out.into())
 }
 ```
@@ -61,8 +70,8 @@ explicit operations than extendr.
 - The function’s return type must be either `savvy::Result<savvy::SEXP>`
   or `()`.
 - Savvy doesn’t take care of the output conversion. You have to create a
-  new SEXP object by `Owned...Sxp::new()` and set values by `set_elt()`
-  one by one.
+  new SEXP object by `Owned...Sxp::new()` and copy values into it by
+  `set_elt()` one by one.
 
 ## Getting Started
 
@@ -105,14 +114,14 @@ Now, this package is ready to install!
 
 ### Update wrapper files
 
-After writing more Rust code, you can update the C and R wrapper files
-by running `savvy-cli update`.
+After modifying or adding some Rust code, you can update the C and R
+wrapper files by running `savvy-cli update`.
 
 ``` sh
 savvy-cli update path/to/foo
 ```
 
-To update the documents, you also have to run `devtools::document()`
+If you change R documents, you also have to run `devtools::document()`
 again.
 
 ## Random thoughts
@@ -163,31 +172,37 @@ entries. But, might it be easier to generate them by using an external
 CLI? I actually need this because I need to generate C code to handle
 the errors on C’s side.
 
-The binary can be found in the
-[Releases](https://github.com/yutannihilation/savvy/releases) section.
+But, static analysis has its pros and cons. While it would be good at
+parsing a single file `lib.rs`, it’s probably hard to understand
+multiple Rust files correctly. For example, if `misc.rs` defines a
+function with `#[savvy]` and `lib.rs` imports it, it might be hard to
+infer how the function is exported. On the other hand, extendr collects
+the metadata on compile time. So, this sort of problems should never
+happen.
 
 #### Usage
 
 ``` console
 Generate C bindings and R bindings for a Rust library
 
-Usage: savvy-cli.exe <COMMAND>
+Usage: savvy-cli <COMMAND>
 
 Commands:
-  c-header  Generate C header file
-  c-impl    Generate C implementation for init.c
-  r-impl    Generate R wrapper functions
-  update    Update wrappers in an R package
-  help      Print this message or the help of the given subcommand(s)
+  c-header      Generate C header file
+  c-impl        Generate C implementation for init.c
+  r-impl        Generate R wrapper functions
+  makevars      Generate Makevars
+  makevars-win  Generate Makevars.win
+  gitignore     Generate .gitignore
+  update        Update wrappers in an R package
+  init          Init savvy-powered Rust crate in an R package
+  help          Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help  Print help
 ```
 
-``` sh
-cargo install --path .\savvy-cli\
-savvy-cli update .\R-package\
-```
+For the real usage, please see “Getting Started” section above.
 
 ## Crates
 
