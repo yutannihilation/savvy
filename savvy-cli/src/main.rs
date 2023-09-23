@@ -4,7 +4,6 @@ use savvy_bindgen::generate_example_lib_rs;
 use savvy_bindgen::generate_gitignore;
 use savvy_bindgen::generate_makevars;
 use savvy_bindgen::generate_makevars_win;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -118,7 +117,7 @@ fn get_pkg_name(path: &Path) -> String {
 fn write_file(path: &Path, contents: &str) {
     let path_str = path.to_string_lossy();
     println!("Writing {}", path_str);
-    std::fs::write(path, contents).expect(&format!("Failed to write to {}", path_str));
+    std::fs::write(path, contents).unwrap_or_else(|_| panic!("Failed to write to {}", path_str));
 }
 
 fn update(path: &Path) {
