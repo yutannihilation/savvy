@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(savvy)
+library(savvyExamples)
 
-test_check("savvy")
+test_check("savvyExamples")
