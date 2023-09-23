@@ -167,8 +167,8 @@ impl SavvyFn {
 
     pub fn fn_name_outer(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
-            Some(ty) => format_ident!("savvy_{}_{}", ty, self.fn_name),
-            None => format_ident!("savvy_{}", self.fn_name),
+            Some(ty) => format_ident!("{}_{}", ty, self.fn_name),
+            None => self.fn_name.clone(),
         }
     }
 

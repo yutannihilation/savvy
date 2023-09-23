@@ -4,22 +4,22 @@ NULL
 
 
 scalar_input_int <- function(x) {
-  invisible(.Call(savvy_scalar_input_int, x))
+  invisible(.Call(scalar_input_int__impl, x))
 }
 
 
 scalar_input_real <- function(x) {
-  invisible(.Call(savvy_scalar_input_real, x))
+  invisible(.Call(scalar_input_real__impl, x))
 }
 
 
 scalar_input_logical <- function(x) {
-  invisible(.Call(savvy_scalar_input_logical, x))
+  invisible(.Call(scalar_input_logical__impl, x))
 }
 
 
 scalar_input_str <- function(x) {
-  invisible(.Call(savvy_scalar_input_str, x))
+  invisible(.Call(scalar_input_str__impl, x))
 }
 
 #' Convert Input To Upper-Case
@@ -28,7 +28,7 @@ scalar_input_str <- function(x) {
 #' @returns A character vector with upper case version of the input.
 #' @export
 to_upper <- function(x) {
-  .Call(savvy_to_upper, x)
+  .Call(to_upper__impl, x)
 }
 
 #' Add suffix
@@ -38,7 +38,7 @@ to_upper <- function(x) {
 #' @returns A character vector with upper case version of the input.
 #' @export
 add_suffix <- function(x, y) {
-  .Call(savvy_add_suffix, x, y)
+  .Call(add_suffix__impl, x, y)
 }
 
 #' Multiply Input By Two
@@ -47,7 +47,7 @@ add_suffix <- function(x, y) {
 #' @returns An integer vector with values multiplied by 2.
 #' @export
 times_two_int <- function(x) {
-  .Call(savvy_times_two_int, x)
+  .Call(times_two_int__impl, x)
 }
 
 #' Multiply Input By Another Input
@@ -57,7 +57,7 @@ times_two_int <- function(x) {
 #' @returns An integer vector with values multiplied by `y`.
 #' @export
 times_any_int <- function(x, y) {
-  .Call(savvy_times_any_int, x, y)
+  .Call(times_any_int__impl, x, y)
 }
 
 #' Multiply Input By Two
@@ -66,7 +66,7 @@ times_any_int <- function(x, y) {
 #' @returns A numeric vector with values multiplied by 2.
 #' @export
 times_two_numeric <- function(x) {
-  .Call(savvy_times_two_numeric, x)
+  .Call(times_two_numeric__impl, x)
 }
 
 #' Multiply Input By Another Input
@@ -76,7 +76,7 @@ times_two_numeric <- function(x) {
 #' @returns A real vector with values multiplied by `y`.
 #' @export
 times_any_numeric <- function(x, y) {
-  .Call(savvy_times_any_numeric, x, y)
+  .Call(times_any_numeric__impl, x, y)
 }
 
 #' Flip Input
@@ -85,7 +85,7 @@ times_any_numeric <- function(x, y) {
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
 flip_logical <- function(x) {
-  .Call(savvy_flip_logical, x)
+  .Call(flip_logical__impl, x)
 }
 
 #' Or operation
@@ -95,7 +95,7 @@ flip_logical <- function(x) {
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
 or_logical <- function(x, y) {
-  .Call(savvy_or_logical, x, y)
+  .Call(or_logical__impl, x, y)
 }
 
 #' Print the content of list
@@ -104,7 +104,7 @@ or_logical <- function(x, y) {
 #' @returns `NULL`
 #' @export
 print_list <- function(x) {
-  invisible(.Call(savvy_print_list, x))
+  invisible(.Call(print_list__impl, x))
 }
 
 #' A person with a name
@@ -112,7 +112,7 @@ print_list <- function(x) {
 #' @export
 Person <- function() {
   e <- new.env(parent = emptyenv())
-  self <- .Call(savvy_Person_new)
+  self <- .Call(Person_new__impl)
 
   e$set_name <- Person_set_name(self)
   e$name <- Person_name(self)
@@ -125,19 +125,19 @@ Person <- function() {
 
 Person_set_name <- function(self) {
   function(name) {
-    invisible(.Call(savvy_Person_set_name, self, name))
+    invisible(.Call(Person_set_name__impl, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-    .Call(savvy_Person_name, self)
+    .Call(Person_name__impl, self)
   }
 }
 
 Person_associated_function <- function(self) {
   function() {
-    .Call(savvy_Person_associated_function)
+    .Call(Person_associated_function__impl)
   }
 }
 

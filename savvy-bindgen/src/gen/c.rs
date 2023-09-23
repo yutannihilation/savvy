@@ -51,7 +51,7 @@ impl SavvyFn {
             .join(", ");
 
         format!(
-            "SEXP {fn_name}_wrapper({args_sig}) {{
+            "SEXP {fn_name}__impl({args_sig}) {{
     SEXP res = {fn_name}({args_call});
     return handle_result(res);
 }}
@@ -63,7 +63,7 @@ impl SavvyFn {
     fn to_c_function_call_entry(&self) -> String {
         let fn_name = self.fn_name_outer();
         let n_args = self.get_c_args().len();
-        format!(r#"    {{"{fn_name}", (DL_FUNC) &{fn_name}_wrapper, {n_args}}},"#)
+        format!(r#"    {{"{fn_name}__impl", (DL_FUNC) &{fn_name}__impl, {n_args}}},"#)
     }
 }
 

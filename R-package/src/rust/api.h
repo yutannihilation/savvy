@@ -1,19 +1,19 @@
-SEXP savvy_scalar_input_int(SEXP x);
-SEXP savvy_scalar_input_real(SEXP x);
-SEXP savvy_scalar_input_logical(SEXP x);
-SEXP savvy_scalar_input_str(SEXP x);
-SEXP savvy_to_upper(SEXP x);
-SEXP savvy_add_suffix(SEXP x, SEXP y);
-SEXP savvy_times_two_int(SEXP x);
-SEXP savvy_times_any_int(SEXP x, SEXP y);
-SEXP savvy_times_two_numeric(SEXP x);
-SEXP savvy_times_any_numeric(SEXP x, SEXP y);
-SEXP savvy_flip_logical(SEXP x);
-SEXP savvy_or_logical(SEXP x, SEXP y);
-SEXP savvy_print_list(SEXP x);
+SEXP scalar_input_int(SEXP x);
+SEXP scalar_input_real(SEXP x);
+SEXP scalar_input_logical(SEXP x);
+SEXP scalar_input_str(SEXP x);
+SEXP to_upper(SEXP x);
+SEXP add_suffix(SEXP x, SEXP y);
+SEXP times_two_int(SEXP x);
+SEXP times_any_int(SEXP x, SEXP y);
+SEXP times_two_numeric(SEXP x);
+SEXP times_any_numeric(SEXP x, SEXP y);
+SEXP flip_logical(SEXP x);
+SEXP or_logical(SEXP x, SEXP y);
+SEXP print_list(SEXP x);
 
 // methods and associated functions for Person
-SEXP savvy_Person_new();
-SEXP savvy_Person_set_name(SEXP self__, SEXP name);
-SEXP savvy_Person_name(SEXP self__);
-SEXP savvy_Person_associated_function();
+SEXP Person_new();
+SEXP Person_set_name(SEXP self__, SEXP name);
+SEXP Person_name(SEXP self__);
+SEXP Person_associated_function();
