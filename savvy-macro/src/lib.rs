@@ -131,7 +131,7 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn savvy_foo() -> savvy::SEXP {
+                pub unsafe extern "C" fn foo() -> savvy::SEXP {
                     savvy::handle_result(savvy_foo_inner())
                 }
             ),
@@ -151,7 +151,7 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn savvy_foo(
+                pub unsafe extern "C" fn foo(
                     x: savvy::SEXP,
                     y: savvy::SEXP
                 ) -> savvy::SEXP {

@@ -32,114 +32,110 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
-SEXP savvy_scalar_input_int_wrapper(SEXP x) {
-    SEXP res = savvy_scalar_input_int(x);
+SEXP to_upper__impl(SEXP x) {
+    SEXP res = to_upper(x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_real_wrapper(SEXP x) {
-    SEXP res = savvy_scalar_input_real(x);
+SEXP add_suffix__impl(SEXP x, SEXP y) {
+    SEXP res = add_suffix(x, y);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_logical_wrapper(SEXP x) {
-    SEXP res = savvy_scalar_input_logical(x);
+SEXP times_two_int__impl(SEXP x) {
+    SEXP res = times_two_int(x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_str_wrapper(SEXP x) {
-    SEXP res = savvy_scalar_input_str(x);
+SEXP times_any_int__impl(SEXP x, SEXP y) {
+    SEXP res = times_any_int(x, y);
     return handle_result(res);
 }
 
-SEXP savvy_to_upper_wrapper(SEXP x) {
-    SEXP res = savvy_to_upper(x);
+SEXP times_two_numeric__impl(SEXP x) {
+    SEXP res = times_two_numeric(x);
     return handle_result(res);
 }
 
-SEXP savvy_add_suffix_wrapper(SEXP x, SEXP y) {
-    SEXP res = savvy_add_suffix(x, y);
+SEXP times_any_numeric__impl(SEXP x, SEXP y) {
+    SEXP res = times_any_numeric(x, y);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_int_wrapper(SEXP x) {
-    SEXP res = savvy_times_two_int(x);
+SEXP flip_logical__impl(SEXP x) {
+    SEXP res = flip_logical(x);
     return handle_result(res);
 }
 
-SEXP savvy_times_any_int_wrapper(SEXP x, SEXP y) {
-    SEXP res = savvy_times_any_int(x, y);
+SEXP or_logical__impl(SEXP x, SEXP y) {
+    SEXP res = or_logical(x, y);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric_wrapper(SEXP x) {
-    SEXP res = savvy_times_two_numeric(x);
+SEXP print_list__impl(SEXP x) {
+    SEXP res = print_list(x);
     return handle_result(res);
 }
 
-SEXP savvy_times_any_numeric_wrapper(SEXP x, SEXP y) {
-    SEXP res = savvy_times_any_numeric(x, y);
+SEXP Person_new__impl() {
+    SEXP res = Person_new();
     return handle_result(res);
 }
 
-SEXP savvy_flip_logical_wrapper(SEXP x) {
-    SEXP res = savvy_flip_logical(x);
+SEXP Person_set_name__impl(SEXP self__, SEXP name) {
+    SEXP res = Person_set_name(self__, name);
     return handle_result(res);
 }
 
-SEXP savvy_or_logical_wrapper(SEXP x, SEXP y) {
-    SEXP res = savvy_or_logical(x, y);
+SEXP Person_name__impl(SEXP self__) {
+    SEXP res = Person_name(self__);
     return handle_result(res);
 }
 
-SEXP savvy_print_list_wrapper(SEXP x) {
-    SEXP res = savvy_print_list(x);
+SEXP Person_associated_function__impl() {
+    SEXP res = Person_associated_function();
     return handle_result(res);
 }
 
-
-// methods and associated functions for Person
-SEXP savvy_Person_new_wrapper() {
-    SEXP res = savvy_Person_new();
+SEXP scalar_input_int__impl(SEXP x) {
+    SEXP res = scalar_input_int(x);
     return handle_result(res);
 }
 
-SEXP savvy_Person_set_name_wrapper(SEXP self__, SEXP name) {
-    SEXP res = savvy_Person_set_name(self__, name);
+SEXP scalar_input_real__impl(SEXP x) {
+    SEXP res = scalar_input_real(x);
     return handle_result(res);
 }
 
-SEXP savvy_Person_name_wrapper(SEXP self__) {
-    SEXP res = savvy_Person_name(self__);
+SEXP scalar_input_logical__impl(SEXP x) {
+    SEXP res = scalar_input_logical(x);
     return handle_result(res);
 }
 
-SEXP savvy_Person_associated_function_wrapper() {
-    SEXP res = savvy_Person_associated_function();
+SEXP scalar_input_str__impl(SEXP x) {
+    SEXP res = scalar_input_str(x);
     return handle_result(res);
 }
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"savvy_scalar_input_int", (DL_FUNC) &savvy_scalar_input_int_wrapper, 1},
-    {"savvy_scalar_input_real", (DL_FUNC) &savvy_scalar_input_real_wrapper, 1},
-    {"savvy_scalar_input_logical", (DL_FUNC) &savvy_scalar_input_logical_wrapper, 1},
-    {"savvy_scalar_input_str", (DL_FUNC) &savvy_scalar_input_str_wrapper, 1},
-    {"savvy_to_upper", (DL_FUNC) &savvy_to_upper_wrapper, 1},
-    {"savvy_add_suffix", (DL_FUNC) &savvy_add_suffix_wrapper, 2},
-    {"savvy_times_two_int", (DL_FUNC) &savvy_times_two_int_wrapper, 1},
-    {"savvy_times_any_int", (DL_FUNC) &savvy_times_any_int_wrapper, 2},
-    {"savvy_times_two_numeric", (DL_FUNC) &savvy_times_two_numeric_wrapper, 1},
-    {"savvy_times_any_numeric", (DL_FUNC) &savvy_times_any_numeric_wrapper, 2},
-    {"savvy_flip_logical", (DL_FUNC) &savvy_flip_logical_wrapper, 1},
-    {"savvy_or_logical", (DL_FUNC) &savvy_or_logical_wrapper, 2},
-    {"savvy_print_list", (DL_FUNC) &savvy_print_list_wrapper, 1},
-
-// methods and associated functions for Person
-    {"savvy_Person_new", (DL_FUNC) &savvy_Person_new_wrapper, 0},
-    {"savvy_Person_set_name", (DL_FUNC) &savvy_Person_set_name_wrapper, 2},
-    {"savvy_Person_name", (DL_FUNC) &savvy_Person_name_wrapper, 1},
-    {"savvy_Person_associated_function", (DL_FUNC) &savvy_Person_associated_function_wrapper, 0},
+    {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
+    {"add_suffix__impl", (DL_FUNC) &add_suffix__impl, 2},
+    {"times_two_int__impl", (DL_FUNC) &times_two_int__impl, 1},
+    {"times_any_int__impl", (DL_FUNC) &times_any_int__impl, 2},
+    {"times_two_numeric__impl", (DL_FUNC) &times_two_numeric__impl, 1},
+    {"times_any_numeric__impl", (DL_FUNC) &times_any_numeric__impl, 2},
+    {"flip_logical__impl", (DL_FUNC) &flip_logical__impl, 1},
+    {"or_logical__impl", (DL_FUNC) &or_logical__impl, 2},
+    {"print_list__impl", (DL_FUNC) &print_list__impl, 1},
+    {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
+    {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
+    {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
+    {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
+    {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
+    {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
+    {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
+    {"scalar_input_str__impl", (DL_FUNC) &scalar_input_str__impl, 1},
     {NULL, NULL, 0}
 };
 

@@ -4,8 +4,11 @@ use savvy_bindgen::generate_example_lib_rs;
 use savvy_bindgen::generate_gitignore;
 use savvy_bindgen::generate_makevars;
 use savvy_bindgen::generate_makevars_win;
+use savvy_bindgen::ParsedResult;
 use std::path::Path;
 use std::path::PathBuf;
+use walkdir::DirEntry;
+use walkdir::WalkDir;
 
 use savvy_bindgen::generate_c_header_file;
 use savvy_bindgen::generate_c_impl_file;
@@ -120,26 +123,41 @@ fn write_file(path: &Path, contents: &str) {
     std::fs::write(path, contents).unwrap_or_else(|_| panic!("Failed to write to {}", path_str));
 }
 
+fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
+    if let Ok(entry) = x {
+        if entry.file_name().to_string_lossy().ends_with(".rs") {
+            Some(entry)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
 fn update(path: &Path) {
     let pkg_name = get_pkg_name(path);
+    let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    let path_lib_rs = path.join(PATH_LIB_RS);
-    println!("Parsing {}", path_lib_rs.to_string_lossy());
-    let parsed_result = savvy_bindgen::parse_file(path_lib_rs.as_path());
+    for e in WalkDir::new(PATH_SRC_DIR)
+        .into_iter()
+        .filter_map(get_rust_file)
+    {
+        println!("Parsing {}", e.path().to_string_lossy());
+        parsed.push(savvy_bindgen::parse_file(e.path()));
+    }
 
     write_file(
         &path.join(PATH_C_HEADER),
-        &generate_c_header_file(&parsed_result),
+        &generate_c_header_file(parsed.as_slice()),
     );
-
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(&parsed_result, &pkg_name),
+        &generate_c_impl_file(parsed.as_slice(), &pkg_name),
     );
-
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(&parsed_result, &pkg_name),
+        &generate_r_impl_file(parsed.as_slice(), &pkg_name),
     );
 }
 
@@ -171,20 +189,20 @@ fn main() {
     match cli.command {
         Commands::CHeader { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!("{}", generate_c_header_file(&parsed_result));
+            println!("{}", generate_c_header_file(&[parsed_result]));
         }
         Commands::CImpl { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
             println!(
                 "{}",
-                generate_c_impl_file(&parsed_result, "%%PACKAGE_NAME%%")
+                generate_c_impl_file(&[parsed_result], "%%PACKAGE_NAME%%")
             );
         }
         Commands::RImpl { file } => {
             let parsed_result = savvy_bindgen::parse_file(file.as_path());
             println!(
                 "{}",
-                generate_r_impl_file(&parsed_result, "%%PACKAGE_NAME%%")
+                generate_r_impl_file(&[parsed_result], "%%PACKAGE_NAME%%")
             );
         }
         Commands::Makevars { crate_name } => {

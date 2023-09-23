@@ -2,6 +2,13 @@ use quote::format_ident;
 
 use crate::{ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
 
+fn get_r_doc_comment(docs: &[String]) -> String {
+    docs.iter()
+        .map(|doc| format!("#'{doc}"))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
 impl SavvyFn {
     pub fn fn_name_r(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
@@ -42,7 +49,7 @@ impl SavvyFn {
             .collect::<Vec<String>>();
 
         let mut args_call = args.clone();
-        args_call.insert(0, fn_name_c.to_string());
+        args_call.insert(0, format!("{fn_name_c}__impl"));
 
         let args = args.join(", ");
         let args_call = args_call.join(", ");
@@ -64,85 +71,79 @@ impl SavvyFn {
     }
 }
 
-fn get_r_doc_comment(docs: &[String]) -> String {
-    docs.iter()
-        .map(|doc| format!("#'{doc}"))
-        .collect::<Vec<String>>()
-        .join("\n")
-}
+impl SavvyImpl {
+    fn generate_r_impl_for_impl(&self) -> String {
+        let mut ctors: Vec<&SavvyFn> = Vec::new();
+        let mut others: Vec<&SavvyFn> = Vec::new();
+        let class_r = self.ty.clone();
 
-fn generate_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
-    let mut ctors: Vec<&SavvyFn> = Vec::new();
-    let mut others: Vec<&SavvyFn> = Vec::new();
-    let class_r = savvy_impl.ty.clone();
-
-    for savvy_fn in &savvy_impl.fns {
-        match savvy_fn.fn_type {
-            SavvyFnType::Constructor(_) => ctors.push(savvy_fn),
-            _ => others.push(savvy_fn),
+        for savvy_fn in &self.fns {
+            match savvy_fn.fn_type {
+                SavvyFnType::Constructor(_) => ctors.push(savvy_fn),
+                _ => others.push(savvy_fn),
+            }
         }
-    }
 
-    // TODO: error if no ctor
+        // TODO: error if no ctor
 
-    let closures = others
-        .iter()
-        .map(|x| {
-            let fn_name = x.fn_name_r();
-            let fn_name_c = x.fn_name_outer();
+        let closures = others
+            .iter()
+            .map(|x| {
+                let fn_name = x.fn_name_r();
+                let fn_name_c = x.fn_name_outer();
 
-            let mut args = x.get_r_args();
-            // Remove self from arguments for R
-            let args_r = args
-                .clone()
-                .into_iter()
-                .filter(|e| *e != "self")
-                .collect::<Vec<String>>()
-                .join(", ");
+                let mut args = x.get_r_args();
+                // Remove self from arguments for R
+                let args_r = args
+                    .clone()
+                    .into_iter()
+                    .filter(|e| *e != "self")
+                    .collect::<Vec<String>>()
+                    .join(", ");
 
-            args.insert(0, fn_name_c.to_string());
-            let args_call = args.join(", ");
+                args.insert(0, format!("{fn_name_c}__impl"));
+                let args_call = args.join(", ");
 
-            let body = if x.has_result {
-                format!(".Call({args_call})")
-            } else {
-                // If the result is NULL, wrap it with invisible
-                format!("invisible(.Call({args_call}))")
-            };
+                let body = if x.has_result {
+                    format!(".Call({args_call})")
+                } else {
+                    // If the result is NULL, wrap it with invisible
+                    format!("invisible(.Call({args_call}))")
+                };
 
-            format!(
-                "{fn_name} <- function(self) {{
+                format!(
+                    "{fn_name} <- function(self) {{
   function({args_r}) {{
     {body}
   }}
 }}
 "
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+                )
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
 
-    let builders = ctors
-        .iter()
-        .map(|x| {
-            let fn_name = x.fn_name_r();
-            let fn_name_c = x.fn_name_outer();
+        let builders = ctors
+            .iter()
+            .map(|x| {
+                let fn_name = x.fn_name_r();
+                let fn_name_c = x.fn_name_outer();
 
-            let mut args = x.get_r_args();
+                let mut args = x.get_r_args();
 
-            let args_r = args.join(", ");
+                let args_r = args.join(", ");
 
-            args.insert(0, fn_name_c.to_string());
-            let args_call = args.join(", ");
+                args.insert(0, format!("{fn_name_c}__impl"));
+                let args_call = args.join(", ");
 
-            let methods = others
-                .iter()
-                .map(|o| format!("  e${} <- {}(self)", o.fn_name, o.fn_name_r()))
-                .collect::<Vec<String>>()
-                .join("\n");
+                let methods = others
+                    .iter()
+                    .map(|o| format!("  e${} <- {}(self)", o.fn_name, o.fn_name_r()))
+                    .collect::<Vec<String>>()
+                    .join("\n");
 
-            format!(
-                r#"{fn_name} <- function({args_r}) {{
+                format!(
+                    r#"{fn_name} <- function({args_r}) {{
   e <- new.env(parent = emptyenv())
   self <- .Call({args_call})
 
@@ -152,34 +153,35 @@ fn generate_r_impl_for_impl(savvy_impl: &SavvyImpl) -> String {
   e
 }}
 "#
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+                )
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
 
-    let doc_comments = get_r_doc_comment(savvy_impl.docs.as_slice());
+        let doc_comments = get_r_doc_comment(self.docs.as_slice());
 
-    format!(
-        "{doc_comments}
+        format!(
+            "{doc_comments}
 {builders}
 
 {closures}
 "
-    )
+        )
+    }
 }
 
-pub fn generate_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
-    let r_fns = parsed_result
-        .bare_fns
+pub fn generate_r_impl_file(parsed_results: &[ParsedResult], pkg_name: &str) -> String {
+    let r_fns = parsed_results
         .iter()
+        .flat_map(|x| &x.bare_fns)
         .map(|x| x.to_r_function())
         .collect::<Vec<String>>()
         .join("\n");
 
-    let r_impls = parsed_result
-        .impls
+    let r_impls = parsed_results
         .iter()
-        .map(generate_r_impl_for_impl)
+        .flat_map(|x| &x.impls)
+        .map(|x| x.generate_r_impl_for_impl())
         .collect::<Vec<String>>()
         .join("\n");
 
