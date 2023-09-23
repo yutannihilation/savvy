@@ -74,11 +74,16 @@ As you can see, this framework is unfriendly in that this requires more explicit
 
 ### Prerequisite
 
-Before starting, get `savvy-cli` command either by downloading the binary from [Releases](https://github.com/yutannihilation/savvy/releases) or by `cargo install`:
+Before starting, install an helper R package for savvy.
 
-``` sh
- cargo install --git https://github.com/yutannihilation/savvy savvy-cli
+``` r
+install.packages(
+    'savvy',
+    repos = c('https://yutannihilation.r-universe.dev', 'https://cloud.r-project.org')
+)
 ```
+
+Note that, under the hood, this is just a simple wrapper around `savvy-cli`. So, if you prefer shell, you can directly use the CLI instead, which is available on the [releases](https://github.com/yutannihilation/savvy/releases).
 
 ### Create a new R package
 
@@ -88,15 +93,12 @@ First, create a new package. `usethis::create_package()` is convenient for this.
 usethis::create_package("path/to/foo")
 ```
 
-Next, run `savvy-cli init` against the package directory. This will create necessary files like `Makevars` and `Cargo.toml`, as well as generating C and R wrapper code corresponding to the Rust code.
+Then, move to the package directory and generate necessary files like `Makevars` and `Cargo.toml`, as well as generating C and R wrapper code corresponding to the Rust code. `savvy::savvy_init()` does this all (under the hood, this simply runs `savvy-cli init`).
 
-``` sh
-savvy-cli init path/to/foo
-```
-
-Lastly, open an R session in the package directory and run `devtools::document()` to generate `NAMESPACE`.
+Lastly, run `devtools::document()` to generate `NAMESPACE` and documents.
 
 ``` r
+savvy::savvy_init()
 devtools::document()
 ```
 
@@ -104,13 +106,12 @@ Now, this package is ready to install!
 
 ### Update wrapper files
 
-After modifying or adding some Rust code, you can update the C and R wrapper files by running `savvy-cli update`.
+After modifying or adding some Rust code, you can update the C and R wrapper files by running `savvy::savvy_update()` (under the hood, this simply runs `savvy-cli update`).
 
-``` sh
-savvy-cli update path/to/foo
+``` r
+savvy::savvy_init()
+devtools::document()
 ```
-
-If you change R documents, you also have to run `devtools::document()` again.
 
 ## Random thoughts
 
@@ -174,7 +175,7 @@ For the real usage, please see "Getting Started" section above.
 A toy example R package can be found in `R-package/` directory.
 
 ```{r}
-library(savvy)
+library(savvyExamples)
 
 to_upper(c("a", NA, "A", "座布団一枚"))
 
