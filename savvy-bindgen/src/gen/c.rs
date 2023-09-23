@@ -155,17 +155,8 @@ SEXP handle_result(SEXP res_) {
         call_entries.push(generate_c_function_call_entry(p.bare_fns.as_slice()));
 
         for i in p.impls.iter() {
-            c_fns.push(format!(
-                "\n// methods and associated functions for {}\n{}",
-                i.ty,
-                generate_c_function_impl(i.fns.as_slice())
-            ));
-
-            call_entries.push(format!(
-                "\n// methods and associated functions for {}\n{}",
-                i.ty,
-                generate_c_function_call_entry(i.fns.as_slice())
-            ));
+            c_fns.push(generate_c_function_impl(i.fns.as_slice()));
+            call_entries.push(generate_c_function_call_entry(i.fns.as_slice()));
         }
     }
 
