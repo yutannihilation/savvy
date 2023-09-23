@@ -1,4 +1,4 @@
-#' @useDynLib savvy, .registration = TRUE
+#' @useDynLib savvyExamples, .registration = TRUE
 #' @keywords internal
 NULL
 
