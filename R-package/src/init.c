@@ -32,26 +32,6 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
-SEXP scalar_input_int__impl(SEXP x) {
-    SEXP res = scalar_input_int(x);
-    return handle_result(res);
-}
-
-SEXP scalar_input_real__impl(SEXP x) {
-    SEXP res = scalar_input_real(x);
-    return handle_result(res);
-}
-
-SEXP scalar_input_logical__impl(SEXP x) {
-    SEXP res = scalar_input_logical(x);
-    return handle_result(res);
-}
-
-SEXP scalar_input_str__impl(SEXP x) {
-    SEXP res = scalar_input_str(x);
-    return handle_result(res);
-}
-
 SEXP to_upper__impl(SEXP x) {
     SEXP res = to_upper(x);
     return handle_result(res);
@@ -119,12 +99,28 @@ SEXP Person_associated_function__impl() {
     return handle_result(res);
 }
 
+SEXP scalar_input_int__impl(SEXP x) {
+    SEXP res = scalar_input_int(x);
+    return handle_result(res);
+}
+
+SEXP scalar_input_real__impl(SEXP x) {
+    SEXP res = scalar_input_real(x);
+    return handle_result(res);
+}
+
+SEXP scalar_input_logical__impl(SEXP x) {
+    SEXP res = scalar_input_logical(x);
+    return handle_result(res);
+}
+
+SEXP scalar_input_str__impl(SEXP x) {
+    SEXP res = scalar_input_str(x);
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
-    {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
-    {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
-    {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
-    {"scalar_input_str__impl", (DL_FUNC) &scalar_input_str__impl, 1},
     {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
     {"add_suffix__impl", (DL_FUNC) &add_suffix__impl, 2},
     {"times_two_int__impl", (DL_FUNC) &times_two_int__impl, 1},
@@ -140,6 +136,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
+    {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
+    {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
+    {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
+    {"scalar_input_str__impl", (DL_FUNC) &scalar_input_str__impl, 1},
     {NULL, NULL, 0}
 };
 

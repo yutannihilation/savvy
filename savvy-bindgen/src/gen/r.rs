@@ -170,17 +170,17 @@ impl SavvyImpl {
     }
 }
 
-pub fn generate_r_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
-    let r_fns = parsed_result
-        .bare_fns
+pub fn generate_r_impl_file(parsed_results: &[ParsedResult], pkg_name: &str) -> String {
+    let r_fns = parsed_results
         .iter()
+        .flat_map(|x| &x.bare_fns)
         .map(|x| x.to_r_function())
         .collect::<Vec<String>>()
         .join("\n");
 
-    let r_impls = parsed_result
-        .impls
+    let r_impls = parsed_results
         .iter()
+        .flat_map(|x| &x.impls)
         .map(|x| x.generate_r_impl_for_impl())
         .collect::<Vec<String>>()
         .join("\n");

@@ -67,17 +67,17 @@ impl SavvyFn {
     }
 }
 
-pub fn generate_c_header_file(parsed_result: &ParsedResult) -> String {
-    let bare_fns = parsed_result
-        .bare_fns
+pub fn generate_c_header_file(parsed_results: &[ParsedResult]) -> String {
+    let bare_fns = parsed_results
         .iter()
+        .flat_map(|x| &x.bare_fns)
         .map(|x| x.to_c_function_for_header())
         .collect::<Vec<String>>()
         .join("\n");
 
-    let impls = parsed_result
-        .impls
+    let impls = parsed_results
         .iter()
+        .flat_map(|x| &x.impls)
         .map(|x| {
             let fns = x
                 .fns
@@ -111,7 +111,7 @@ fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
         .join("\n")
 }
 
-pub fn generate_c_impl_file(parsed_result: &ParsedResult, pkg_name: &str) -> String {
+pub fn generate_c_impl_file(parsed_results: &[ParsedResult], pkg_name: &str) -> String {
     let common_part = r#"
 #include <stdint.h>
 #include <Rinternals.h>
@@ -147,44 +147,37 @@ SEXP handle_result(SEXP res_) {
 }
 "#;
 
-    let c_fns_bare = generate_c_function_impl(parsed_result.bare_fns.as_slice());
+    let mut c_fns: Vec<String> = Vec::new();
+    let mut call_entries: Vec<String> = Vec::new();
 
-    let c_fns_impl = parsed_result
-        .impls
-        .iter()
-        .map(|x| {
-            format!(
+    for p in parsed_results.iter() {
+        c_fns.push(generate_c_function_impl(p.bare_fns.as_slice()));
+        call_entries.push(generate_c_function_call_entry(p.bare_fns.as_slice()));
+
+        for i in p.impls.iter() {
+            c_fns.push(format!(
                 "\n// methods and associated functions for {}\n{}",
-                x.ty,
-                generate_c_function_impl(x.fns.as_slice())
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+                i.ty,
+                generate_c_function_impl(i.fns.as_slice())
+            ));
 
-    let call_entries_bare = generate_c_function_call_entry(parsed_result.bare_fns.as_slice());
-
-    let call_entries_impl = parsed_result
-        .impls
-        .iter()
-        .map(|x| {
-            format!(
+            call_entries.push(format!(
                 "\n// methods and associated functions for {}\n{}",
-                x.ty,
-                generate_c_function_call_entry(x.fns.as_slice())
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+                i.ty,
+                generate_c_function_call_entry(i.fns.as_slice())
+            ));
+        }
+    }
+
+    let c_fns = c_fns.join("\n");
+    let call_entries = call_entries.join("\n");
 
     format!(
         "{common_part}
-{c_fns_bare}
-{c_fns_impl}
+{c_fns}
 
 static const R_CallMethodDef CallEntries[] = {{
-{call_entries_bare}
-{call_entries_impl}
+{call_entries}
     {{NULL, NULL, 0}}
 }};
 

@@ -2,26 +2,6 @@
 #' @keywords internal
 NULL
 
-
-scalar_input_int <- function(x) {
-  invisible(.Call(scalar_input_int__impl, x))
-}
-
-
-scalar_input_real <- function(x) {
-  invisible(.Call(scalar_input_real__impl, x))
-}
-
-
-scalar_input_logical <- function(x) {
-  invisible(.Call(scalar_input_logical__impl, x))
-}
-
-
-scalar_input_str <- function(x) {
-  invisible(.Call(scalar_input_str__impl, x))
-}
-
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.
@@ -105,6 +85,26 @@ or_logical <- function(x, y) {
 #' @export
 print_list <- function(x) {
   invisible(.Call(print_list__impl, x))
+}
+
+
+scalar_input_int <- function(x) {
+  invisible(.Call(scalar_input_int__impl, x))
+}
+
+
+scalar_input_real <- function(x) {
+  invisible(.Call(scalar_input_real__impl, x))
+}
+
+
+scalar_input_logical <- function(x) {
+  invisible(.Call(scalar_input_logical__impl, x))
+}
+
+
+scalar_input_str <- function(x) {
+  invisible(.Call(scalar_input_str__impl, x))
 }
 
 #' A person with a name

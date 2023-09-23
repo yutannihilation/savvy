@@ -1,5 +1,8 @@
 #![allow(unused_variables)]
 
+mod scalar;
+pub use scalar::*;
+
 use savvy::savvy;
 
 use savvy::{
@@ -8,26 +11,6 @@ use savvy::{
 };
 
 use savvy::sexp::na::NotAvailableValue;
-
-#[savvy]
-fn scalar_input_int(x: i32) {
-    savvy::r_print("Do nothing");
-}
-
-#[savvy]
-fn scalar_input_real(x: f64) {
-    savvy::r_print("Do nothing");
-}
-
-#[savvy]
-fn scalar_input_logical(x: bool) {
-    savvy::r_print("Do nothing");
-}
-
-#[savvy]
-fn scalar_input_str(x: &str) {
-    savvy::r_print("Do nothing");
-}
 
 /// Convert Input To Upper-Case
 ///
