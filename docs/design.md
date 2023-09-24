@@ -245,6 +245,71 @@ fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
 [1]  TRUE FALSE  TRUE
 ```
 
+#### Scalar input
+
+If the type of the input is scalar, `NA` is always rejected. This is
+inconsistent with the rule for vector input, but, this is my design decision in
+the assumption that a scalar missing value is rarely found useful on Rust's
+side. In this case, `bool` is also `NA`-aware.
+
+```no_run
+#[savvy]
+fn identity_logical_single(x: bool) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedLogicalSxp::new(1);
+    out.set_elt(0, x);
+    Ok(out.into())
+}
+```
+
+```text
+> identity_logical_single(NA)
+Error in identity_logical_single(NA) : 
+  Must be length 1 of non-missing value
+```
+
+### No implicit conversion
+
+savvy doesn't provide conversion between types. For example, you cannot supply a
+numeric vector to a function with a `IntegerSxp` argument.
+
+```no_run
+#[savvy]
+fn identity_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedIntegerSxp::new(x.len());
+
+    for (i, &v) in x.iter().enumerate() {
+        out[i] = v;
+    }
+
+    Ok(out.into())
+}
+```
+
+```text
+> identity_int(c(1, 2))
+Error in identity_int(c(1, 2)) : 
+  Unexpected type: Cannot convert double to integer
+```
+
+While you probably feel this is inconvenient, this is also a design decision.
+My concerns on supporting these conversion are
+
+* Complexity. It would make savvy's spec and implemenatation complicated.
+* Hidden allocation. Conversion requires a new allocation for storing the
+  converted values, which might be unhappy in some cases.
+
+So, you have to write some wrapper R function like below. This might feel a bit
+tiring, but, in general, **please do not avoid R code**. Since you are creating an R
+package, there's a lot you can do in R code instead of making things complicated
+in Rust code. Especially, it's easier on R's side to show user-friendly error
+messages.
+
+```text
+identity_int_wrapper <- function(x) {
+    identity_int(vctrs::vec_cast(x, integer()))
+}
+```
+
 ## Integer and real
 
 The integer types (`IntegerSxp`, `OwnedIntegerSxp`) and the real types
