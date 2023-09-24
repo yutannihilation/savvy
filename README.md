@@ -248,10 +248,10 @@ x$name()
 
 <table style="width:98%;">
 <colgroup>
-<col style="width: 18%" />
-<col style="width: 23%" />
-<col style="width: 26%" />
-<col style="width: 29%" />
+<col style="width: 19%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 30%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -294,22 +294,5 @@ x$name()
 <td><code>OwnedListSxp</code></td>
 <td></td>
 </tr>
-<tr class="even">
-<td><code>EXTPTRSXP</code></td>
-<td>-<a href="#fn1" class="footnote-ref" id="fnref1"
-role="doc-noteref"><sup>1</sup></a></td>
-<td><code>ExternalPointerSxp</code></td>
-<td></td>
-</tr>
 </tbody>
 </table>
-<section id="footnotes" class="footnotes footnotes-end-of-document"
-role="doc-endnotes">
-<hr />
-<ol>
-<li id="fn1"><p>This framework handles only <code>EXTPTRSXPs</code>
-created by this framework. While this is an “external” pointer to R,
-it’s internal from the viewpoint of Rust.<a href="#fnref1"
-class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section>

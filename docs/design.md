@@ -6,12 +6,11 @@ is read-only, and the latter, owned SEXP, is writable. Here's the list:
 
 | R type               | Read-only version | Writable version     |
 |:---------------------|:------------------|:---------------------|
-| `INTSXP` (integer)   | `IntegerSxp`      | `OwnedIntegerSxp`    |
-| `REALSXP` (numeric)  | `RealSxp`         | `OwnedRealSxp`       |
-| `LGLSXP` (logical)   | `LogicalSxp`      | `OwnedLogicalSxp`    |
-| `STRSXP` (character) | `StringSxp`       | `OwnedStringSxp`     |
-| `VECSXP` (list)      | `ListSxp`         | `OwnedListSxp`       |
-| `EXTPTRSXP`          | -                 | `ExternalPointerSxp` |
+| `INTSXP` (integer)   | [`IntegerSxp`]    | [`OwnedIntegerSxp`]  |
+| `REALSXP` (numeric)  | [`RealSxp`]       | [`OwnedRealSxp`]     |
+| `LGLSXP` (logical)   | [`LogicalSxp`]    | [`OwnedLogicalSxp`]  |
+| `STRSXP` (character) | [`StringSxp`]     | [`OwnedStringSxp`]   |
+| `VECSXP` (list)      | [`ListSxp`]       | [`OwnedListSxp`]     |
 
 You might wonder why this is needed when we can just use `mut` to distinguish
 the difference of mutability. I mainly had two motivations for this:
@@ -61,7 +60,7 @@ If you mark a funtion with `#[savvy]` macro, the corresponding implementations a
 
 1. Rust functions
     a. a wrapper function to handle Rust and R errors gracefully
-    b. a function with the original body and some conversion from raw `SEXP`s to savvy types.
+    b. a function with the original body and some conversion from raw [`SEXP`]s to savvy types.
 2. C signature for the header file
 3. C implementation
 4. R implementation
@@ -117,8 +116,8 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {...}
 
 The function must satisfy the following conditions
 
-* The function's inputs are either non-owned savvy types (e.g., `IntegerSxp` and
-  `RealSxp`) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
+* The function's inputs are either non-owned savvy types (e.g., [`IntegerSxp`]
+  and [`RealSxp`]) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
 * The function returns `savvy::Result<savvy::SEXP>` or nothing (in the latter
   case, an invisible `NULL` will be returned instead).
 
@@ -126,15 +125,15 @@ The function must satisfy the following conditions
 
 ### How to read the values from input R objects
 
-Basically, there are two ways to access the values. `IntegerSxp` and `RealSxp`
-have more convenient way, and `ListSxp`'s interface is a bit different. But,
-let's talk about it later, not here.
+Basically, there are two ways to access the values. [`IntegerSxp`] and
+[`RealSxp`] have more convenient way, and [`ListSxp`]'s interface is a bit
+different. But, let's talk about it later, not here.
 
 #### 1. `iter()`
 
-`IntegerSxp`, `RealSxp`, `LogicalSxp`, and `StringSxp` provide `iter()` method
-so that you can access to the value one by one. This can be efficient when the
-data is too large to copy.
+[`IntegerSxp`], [`RealSxp`], [`LogicalSxp`], and [`StringSxp`] provide `iter()`
+method so that you can access to the value one by one. This can be efficient
+when the data is too large to copy.
 
 ```no_run
 for (i, e) in x.iter().enumerate() {
@@ -172,7 +171,7 @@ for (i, e) in x.iter().enumerate() {
 }
 ```
 
-Then, you can convert it to `SEXP` by `into()`
+Then, you can convert it to [`SEXP`] by `into()`
 
 ```no_run
 Ok(out.into())

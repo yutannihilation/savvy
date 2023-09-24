@@ -1,4 +1,4 @@
-//! An unfriendly R interface
+//! # An unfriendly R interface
 //!
 
 #![doc = include_str!("../../docs/design.md")]
