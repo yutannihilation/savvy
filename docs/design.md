@@ -1,7 +1,7 @@
 ## Treating External SEXP and owned SEXP differently
 
 Savvy is opinionated in many points. One thing I think should be introduced
-before diving into thedetails is that savvy uses separate types for SEXP passed
+before diving into the details is that savvy uses separate types for SEXP passed
 from outside and that created within Rust function. The former, external SEXP,
 is read-only, and the latter, owned SEXP, is writable. Here's the list:
 
@@ -385,11 +385,14 @@ Under the hood, this uses [`copy_from_slice`][copy_from_slice], which does a
 TBD
 
 
+## String
+
+
 ## List
 
 TBD
 
-## struct
+## Struct
 
 TODO: write about the need of protection if the field is SEXP.
 
