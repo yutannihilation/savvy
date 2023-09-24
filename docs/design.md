@@ -123,17 +123,18 @@ add_suffix <- function(x, y) {
 The example function above has this signature.
 
 ```no_run
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {}
+fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP>
 ```
 
-As you can guess, with `#[savvy]` macro cannot be applied to arbitrary
-functions. The function must satisfy the following conditions
+As you can guess, `#[savvy]` macro cannot be applied to arbitrary functions. The
+function must satisfy the following conditions:
 
 * The function's inputs are either non-owned savvy types (e.g., [`IntegerSxp`]
   and [`RealSxp`]) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
 * The function returns `savvy::Result<savvy::SEXP>` or nothing (in the latter
   case, an invisible `NULL` will be returned instead).
 
+For more flexibility, I plan to support raw `SEXP` as input, but it's not yet.
 
 ### How to read the values from input R objects
 
@@ -404,12 +405,18 @@ TODO: write about the need of protection if the field is SEXP.
 
 TBD
 
-## Use the raw R's C API (libR-sys)
+## Advanced topics
 
-### `unwind_protect()`
+### Use the raw R's C API (libR-sys)
+
+#### `unwind_protect()`
+
+TBD
+
+### How to use multiple Rust files
 
 TBD
 
-## How to use multiple Rust files
+### Error handling
 
-TBD
+### Testing

@@ -73,8 +73,8 @@ explicit operations than extendr.
   new SEXP object by `Owned...Sxp::new()` and copy values into it by
   `set_elt()` one by one.
 
-For more details about the design, please read
-[this](https://yutannihilation.github.io/savvy/savvy/index.html).
+For the details, please read [the crate
+documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
 
 ## Getting Started
 
@@ -206,8 +206,6 @@ Commands:
 Options:
   -h, --help  Print help
 ```
-
-For the real usage, please see “Getting Started” section above.
 
 ## Crates
 
