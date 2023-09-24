@@ -73,8 +73,8 @@ explicit operations than extendr.
   new SEXP object by `Owned...Sxp::new()` and copy values into it by
   `set_elt()` one by one.
 
-For more details about the design, please refer to
-[this](./docs/design.md).
+For more details about the design, please read
+[this](https://yutannihilation.github.io/savvy/savvy/index.html).
 
 ## Getting Started
 
