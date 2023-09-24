@@ -5,7 +5,7 @@ struct Foo {}
 impl Drop for Foo {
     fn drop(&mut self) {
         // If Foo is dropped, this message should be emmited.
-        savvy::r_print("Foo is Dropped!\n");
+        let _ = savvy::r_print("Foo is Dropped!\n");
     }
 }
 

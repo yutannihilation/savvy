@@ -6,7 +6,7 @@ pub use scalar::*;
 mod unwind;
 pub use unwind::*;
 
-use savvy::savvy;
+use savvy::{r_print, savvy};
 
 use savvy::{
     IntegerSxp, ListElement, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp,
@@ -220,7 +220,7 @@ fn print_list(x: ListSxp) {
 
         let name = if k.is_empty() { "(no name)" } else { k };
 
-        savvy::r_print(format!("{name}: {content}\n").as_str());
+        r_print(format!("{name}: {content}\n").as_str())?;
     }
 }
 
