@@ -5,7 +5,13 @@ pub enum Error {
     UnexpectedType(String),
     NotScalar,
     Aborted(SEXP),
-    Unknown,
+    GeneralError(String),
+}
+
+impl Error {
+    pub fn new(msg: &str) -> Self {
+        Self::GeneralError(msg.to_string())
+    }
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -16,7 +22,7 @@ impl std::fmt::Display for Error {
             Error::UnexpectedType(type_name) => write!(f, "Unexpected type: {}", type_name),
             Error::NotScalar => write!(f, "Must be length 1 of non-missing value"),
             Error::Aborted(_) => write!(f, "Aborted due to some error"),
-            Error::Unknown => write!(f, "Unknown error"),
+            Error::GeneralError(msg) => write!(f, "{}", msg),
         }
     }
 }
