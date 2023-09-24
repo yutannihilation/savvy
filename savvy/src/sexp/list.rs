@@ -88,7 +88,7 @@ impl ListSxp {
     }
 
     pub fn get(&self, k: &str) -> Option<ListElement> {
-        let index = self.keys().position(|e| e == k);
+        let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
     }
 
@@ -115,7 +115,7 @@ impl ListSxp {
         }
     }
 
-    pub fn values(&self) -> ListSxpValueIter {
+    pub fn values_iter(&self) -> ListSxpValueIter {
         ListSxpValueIter {
             sexp: self,
             i: 0,
@@ -123,23 +123,23 @@ impl ListSxp {
         }
     }
 
-    pub fn keys(&self) -> std::vec::IntoIter<&'static str> {
-        let names = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
+    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+        let names_sexp = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
 
-        let keys: Vec<&'static str> = if names == unsafe { R_NilValue } {
+        let names: Vec<&'static str> = if names_sexp == unsafe { R_NilValue } {
             std::iter::repeat("").take(self.len()).collect()
         } else {
-            StringSxp(names).iter().collect()
+            StringSxp(names_sexp).iter().collect()
         };
 
-        keys.into_iter()
+        names.into_iter()
     }
 
     pub fn iter(&self) -> ListSxpIter {
-        let keys = self.keys();
-        let values = self.values();
+        let names = self.names_iter();
+        let values = self.values_iter();
 
-        std::iter::zip(keys, values)
+        std::iter::zip(names, values)
     }
 
     pub fn inner(&self) -> SEXP {
@@ -168,12 +168,12 @@ impl OwnedListSxp {
         self.values.get_by_index_unchecked(i)
     }
 
-    pub fn values(&self) -> ListSxpValueIter {
-        self.values.values()
+    pub fn values_iter(&self) -> ListSxpValueIter {
+        self.values.values_iter()
     }
 
-    pub fn keys(&self) -> std::vec::IntoIter<&'static str> {
-        self.values.keys()
+    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+        self.values.names_iter()
     }
 
     pub fn inner(&self) -> SEXP {
