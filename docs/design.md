@@ -312,23 +312,73 @@ identity_int_wrapper <- function(x) {
 
 ## Integer and real
 
-The integer types (`IntegerSxp`, `OwnedIntegerSxp`) and the real types
-(`RealSxp`, `OwnedRealSxp`) are easy in that the internal types of the SEXPs
-match with the type we expect. By taking this advantage, these types has more
-methods than other types:
+In cases of integer (`IntegerSxp`, `OwnedIntegerSxp`) and real (`RealSxp`,
+`OwnedRealSxp`), the internal representation of the SEXPs match with the Rust
+type we expect, i.e., `i32` and `f64`. By taking this advantage, these types has
+more methods than other types:
 
-* `as_slice()`
-* `as_mut_slice()` for the owned versions
+* `as_slice()` and `as_mut_slice()`
+* `Index` and `IndexMut`
+* `From<&[T]>` trait
 
-### `Index` and `IndexMut` trait for the owneed versions
+### `as_slice()` and `as_mut_slice()`
 
-So, for example, you can write
+These types can expose its underlying C array as a Rust slice by `as_slice()`.
+`as_mut_slice()` is available only for the owned versions. So, you don't need to
+use `to_vec()` to create a new vector just to pass the data to the function that
+requires slice. 
 
+```no_run
+#[savvy]
+fn foo(x: IntegerSxp) {
+    some_function_takes_slice(x.as_slice());
+}
+```
 
+### `Index` and `IndexMut`
 
-### `From<&[T]>` trait for the owned versions
+You can also access to the underlying data by `[`. `IndexMut` is available only
+for the owned versions. This means you can write assignment operation like below
+instead of `set_elt()`.
 
-TBD
+```no_run
+#[savvy]
+fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedIntegerSxp::new(x.len());
+
+    for (i, &v) in x.iter().enumerate() {
+        out[i] = v * 2;
+    }
+
+    Ok(out.into())
+}
+```
+
+### `From<&[T]>` trait
+
+As the owned versions implement `From<&[T]>`, you can use a Rust vector to store
+results and convert it to an R object in the end. So, you can rewrite the
+function above like below:
+
+```no_run
+#[savvy]
+fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out: Vec<i32> = Vec::with_capacity(x.len());
+
+    for &v in x.iter() {
+        out.push(v * 2);
+    }
+
+    let out_sxp: OwnedIntegerSxp = out.as_slice().into();
+    Ok(out_sxp.into())
+}
+```
+
+Under the hood, this uses [`copy_from_slice`][copy_from_slice], which does a
+`memcpy`. So, this is more efficient than copying values one by one.
+
+[copy_from_slice]: https://doc.rust-lang.org/std/primitive.slice.html#method.copy_from_slice
+
 
 ## Logical
 
