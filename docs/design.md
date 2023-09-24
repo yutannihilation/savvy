@@ -35,7 +35,7 @@ savvy is non-ALTREP-aware for int, real, and logical (See [#18][issue18]).
 This is a simple function to add the specified suffix to the input character
 vector.
 
-```rust
+```no_run
 #[savvy]
 fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
     let mut out = OwnedStringSxp::new(x.len());
@@ -70,7 +70,7 @@ For example, the above implementation generates the following codes.
 
 Rust functions:
 
-```rust
+```no_run
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn add_suffix(x: savvy::SEXP, y: savvy::SEXP) -> savvy::SEXP {
@@ -81,20 +81,20 @@ unsafe fn savvy_add_suffix_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Resul
     let x = <savvy::RealSxp>::try_from(savvy::Sxp(x))?;
     let y = <&str>::try_from(savvy::Sxp(y))?;
     
-    ...original body...
+    // ...original body...
 
 }
 ```
 
 C signature for the header file:
 
-```c
+```text
 SEXP add_suffix(SEXP x, SEXP y);
 ```
 
 C implementation:
 
-```c
+```text
 SEXP add_suffix__impl(SEXP x, SEXP y) {
     SEXP res = add_suffix(x, y);
     return handle_result(res);
@@ -103,7 +103,7 @@ SEXP add_suffix__impl(SEXP x, SEXP y) {
 
 R implementation:
 
-```r
+```text
 add_suffix <- function(x, y) {
   .Call(add_suffix__impl, x, y)
 }
@@ -111,8 +111,8 @@ add_suffix <- function(x, y) {
 
 ### Input and Output of savvy-able functions
 
-```rust
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
+```no_run
+fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {...}
 ```
 
 The function must satisfy the following conditions
@@ -136,9 +136,9 @@ let's talk about it later, not here.
 so that you can access to the value one by one. This can be efficient when the
 data is too large to copy.
 
-```rust
+```no_run
 for (i, e) in x.iter().enumerate() {
-    ...snip...
+    // ...snip...
 }
 ```
 
@@ -148,7 +148,7 @@ The types above also provides `to_vec()`. As the name indicates, this copies
 values to a Rust vector. Copying can be an overhead, but this is handy if you
 need to pass the data around among Rust functions.
 
-```rust
+```no_run
 let mut v = x.to_vec();
 some_function_takes_vec1(v);
 some_function_takes_vec2(v);
@@ -158,15 +158,15 @@ some_function_takes_vec2(v);
 
 As you saw above, an owned SEXP can be allocated by using `Owned{type}Sxp::new()`.
 
-```rust
+```no_run
 let mut out = OwnedStringSxp::new(x.len());
 ```
 
 Values can be written on it by `set_elt()` one by one.
 
-```rust
+```no_run
 for (i, e) in x.iter().enumerate() {
-    ...snip...
+    // ...snip...
 
     out.set_elt(i, &format!("{e}_{y}"));
 }
@@ -174,7 +174,7 @@ for (i, e) in x.iter().enumerate() {
 
 Then, you can convert it to `SEXP` by `into()`
 
-```rust
+```no_run
 Ok(out.into())
 ```
 
@@ -197,9 +197,7 @@ methods than other types:
 
 So, for example, you can write
 
-```rust
 
-```
 
 ### `From<&[T]>` trait for the owned versions
 

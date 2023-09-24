@@ -1,6 +1,8 @@
-/// An unfriendly R interface
-///
-/// #![doc = include_str!("../../docs/design.md")]
+//! An unfriendly R interface
+//!
+
+#![doc = include_str!("../../docs/design.md")]
+
 pub mod error;
 pub mod protect;
 pub mod sexp;
