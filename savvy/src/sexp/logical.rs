@@ -1,6 +1,4 @@
-use libR_sys::{
-    Rf_allocVector, Rf_xlength, ALTREP, LGLSXP, LOGICAL, LOGICAL_ELT, SET_LOGICAL_ELT, SEXP,
-};
+use libR_sys::{Rf_allocVector, Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::Sxp;
 use crate::protect;

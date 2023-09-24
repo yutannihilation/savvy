@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use libR_sys::{Rf_allocVector, Rf_xlength, REAL, REALSXP, REAL_ELT, SEXP};
+use libR_sys::{Rf_allocVector, Rf_xlength, REAL, REALSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
