@@ -171,6 +171,8 @@ you think it's worth, you should pay, and if not, you should not.
 
 ### How to prepare output R object
 
+#### 1. `new()`
+
 As you saw above, an owned SEXP can be allocated by using
 `Owned{type}Sxp::new()`. `new()` takes the length of the vector as the argument.
 If you need the same length of vector as the input, you can pass the `len()` of
@@ -195,6 +197,29 @@ Then, you can convert it to [`SEXP`] by `into()`
 ```no_run
 Ok(out.into())
 ```
+
+#### 2. `into()`
+
+Another way is to use a Rust vector to store the results and convert it to an R
+object at the end the function. Note that, while this is convenient, this might
+not be good in terms of efficiency in that this requires double size of memory.
+
+```no_run
+#[savvy]
+fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out: Vec<i32> = Vec::with_capacity(x.len());
+
+    for &v in x.iter() {
+        out.push(v * 2);
+    }
+
+    let out_sxp: OwnedIntegerSxp = out.as_slice().into();
+    Ok(out_sxp.into())
+}
+```
+
+Note that, the efficiency of copying differs depending on the types. For the
+details, see `From<&[T]>` section later.
 
 ### Missing values
 
@@ -230,9 +255,9 @@ for (i, e) in x.iter().enumerate() {
 ```
 
 The bad news is that `bool` is not the case. `bool` doesn't have `is_na()` or
-`na()`. `NA` is treated as `TRUE`. So, you have to make sure the input doesn't
-contain any missing values on R's side. So, for example, this function is not an
-identity function.
+`na()`. `NA` is treated as `TRUE` without any errors. So, you have to make sure
+the input doesn't contain any missing values on R's side. For example, this
+function is not an identity function.
 
 ```no_run
 #[savvy]
@@ -313,7 +338,8 @@ messages.
 
 ```text
 identity_int_wrapper <- function(x) {
-    identity_int(vctrs::vec_cast(x, integer()))
+  x <- vctrs::vec_cast(x, integer())
+  identity_int(x)
 }
 ```
 
@@ -326,7 +352,7 @@ more methods than other types:
 
 * `as_slice()` and `as_mut_slice()`
 * `Index` and `IndexMut`
-* `From<&[T]>` trait
+* efficient `From<&[T]>`
 
 ### `as_slice()` and `as_mut_slice()`
 
@@ -361,39 +387,81 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 }
 ```
 
-### `From<&[T]>` trait
+### Efficient `From<&[T]>`
 
-As the owned versions implement `From<&[T]>`, you can use a Rust vector to store
-results and convert it to an R object in the end. So, you can rewrite the
-function above like below:
-
-```no_run
-#[savvy]
-fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out: Vec<i32> = Vec::with_capacity(x.len());
-
-    for &v in x.iter() {
-        out.push(v * 2);
-    }
-
-    let out_sxp: OwnedIntegerSxp = out.as_slice().into();
-    Ok(out_sxp.into())
-}
-```
-
-Under the hood, this uses [`copy_from_slice`][copy_from_slice], which does a
-`memcpy`. So, this is more efficient than copying values one by one.
+`From<&[T]>` is not special to real and integer, but the implementation is
+different from that of logical and string; since the internal representations
+are the same, savvy uses [`copy_from_slice()`][copy_from_slice], which does a
+`memcpy`, to copy the data efficently (in logical and string case, the values
+are copied one by one).
 
 [copy_from_slice]: https://doc.rust-lang.org/std/primitive.slice.html#method.copy_from_slice
 
 
 ## Logical
 
-TBD
+While logical is 3-state (`TRUE`, `FALSE` and `NA`) on R's side, `bool` can
+represent only 2 states (`true` and `false`). This mismatch is a headache. There
+are many possible ways to handle this (e.g., use `Option<bool>`), but savvy
+chose to convert `NA` to `true` silently, assuming `NA` is not useful on Rust's
+side anyway. So, you have to make sure the input logical vector doesn't contain
+`NA` on R's side. For example,
 
+```text
+wrapper_of_some_savvy_fun <- function(x) {
+  out <- rep(NA, length(x))
+  idx <- is.na(x)
+
+  # apply function only non-NA elements
+  out[x] <- some_savvy_fun(x[idx])
+
+  out
+}
+```
+
+If you really want to handle the 3 states, use `IntegerSxp` as the argument type
+and convert the logical into an integer before calling the savvy function. To
+represent 3-state, the internal representation of `LGLSXP` is int, which is the
+same as `INTSXP`. So, the conversion should be cheap.
+
+```no_run
+#[savvy]
+fn some_savvy_fun(logical: IntegerSxp) {
+    for l in logical.iter() {
+        if l.is_na() {
+            r_print("NA\n");
+        } else if *l == 1 {
+            r_print("TRUE\n");
+        } else {
+            r_print("FALSE\n");
+        }
+    }
+}
+```
+```text
+wrapper_of_some_savvy_fun <- function(x) {
+  x <- vctrs::vec_cast(x, integer())
+  some_savvy_fun(x)
+}
+```
 
 ## String
 
+`STRSXP` is a vector of `CHARSXP`, not something like `*char`. So, it's not
+possible to expose the internal representation as `&str`. So, it requires
+several R's C API calls. To get a `&str`
+
+1. `STRING_ELT()` to subset a `CHARSXP`
+2. `Rf_translateCharUTF8()` to extract a UTF-8 string from `CHARSXP`
+
+Similarly, to set a `&str`
+
+1. `Rf_mkCharLenCE()` to convert `&str` to a `CHARSEXP`
+2. `SET_STRING_ELT()` to put the `CHARSXP` to the `STRSXP`
+
+This is a bit costly. So, if the strings need to be referenced and updated
+frequently, probably you should avoid using `OwnedStringSxp` as a substitute of
+`Vec<String>`.
 
 ## List
 
