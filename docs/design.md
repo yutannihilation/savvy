@@ -206,11 +206,44 @@ to R in case the type is either `i32`, `f64` or `&str`.
 [na_real]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/arithmetic.c#L90-L98
 [na_string]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/names.c#L1219
 
-The bad news is that `bool` is not the case.
+You can check if the value is `NA` by `is_na()`, and refer to the sentinel value
+of `NA` by `<T>::na()`. If you care about missing values, you always have to
+have a `if` branch for missing values like below. Otherwise, you will get a
+character `"NA_suffix"`, not `NA_character_`, on the R session.
 
+```no_run
+for (i, e) in x.iter().enumerate() {
+    if e.is_na() {
+        out.set_elt(i, <&str>::na());
+        continue;
+    }
 
+    out.set_elt(i, &format!("{e}_{y}"));
+}
+```
 
+The bad news is that `bool` is not the case. `bool` doesn't have `is_na()` or
+`na()`. `NA` is treated as `TRUE`. So, you have to make sure the input doesn't
+contain any missing values on R's side. So, for example, this function is not an
+identity function.
 
+```no_run
+#[savvy]
+fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedLogicalSxp::new(x.len());
+
+    for (i, e) in x.iter().enumerate() {
+        out.set_elt(i, e);
+    }
+
+    Ok(out.into())
+}
+```
+
+```text
+> identity_logical(c(TRUE, FALSE, NA))
+[1]  TRUE FALSE  TRUE
+```
 
 ## Integer and real
 
@@ -244,6 +277,12 @@ TBD
 ## struct
 
 TODO: write about the need of protection if the field is SEXP.
+
+TBD
+
+## Use the raw R's C API (libR-sys)
+
+### `unwind_protect()`
 
 TBD
 
