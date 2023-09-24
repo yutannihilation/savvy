@@ -1,6 +1,12 @@
+## Getting Started
+
+See [Getting Started section of the GitHub repo's README][getting-started].
+
+[getting-started]: https://github.com/yutannihilation/savvy/blob/master/README.md#getting-started
+
 ## Treating External SEXP and owned SEXP differently
 
-Savvy is opinionated in many points. One thing I think should be introduced
+Savvy is opinionated in many points. One thing I think should be explained
 before diving into the details is that savvy uses separate types for SEXP passed
 from outside and that created within Rust function. The former, external SEXP,
 is read-only, and the latter, owned SEXP, is writable. Here's the list:
