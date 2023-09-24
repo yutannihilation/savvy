@@ -107,6 +107,11 @@ scalar_input_str <- function(x) {
   invisible(.Call(scalar_input_str__impl, x))
 }
 
+
+safe_stop <- function() {
+  invisible(.Call(safe_stop__impl))
+}
+
 #' A person with a name
 #'
 #' @export

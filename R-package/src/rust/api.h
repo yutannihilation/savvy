@@ -11,6 +11,7 @@ SEXP scalar_input_int(SEXP x);
 SEXP scalar_input_real(SEXP x);
 SEXP scalar_input_logical(SEXP x);
 SEXP scalar_input_str(SEXP x);
+SEXP safe_stop();
 
 // methods and associated functions for Person
 SEXP Person_new();

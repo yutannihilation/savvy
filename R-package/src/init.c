@@ -117,6 +117,11 @@ SEXP scalar_input_str__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP safe_stop__impl() {
+    SEXP res = safe_stop();
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
@@ -136,6 +141,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
     {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
     {"scalar_input_str__impl", (DL_FUNC) &scalar_input_str__impl, 1},
+    {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
     {NULL, NULL, 0}
 };
 

@@ -96,3 +96,7 @@ test_that("structs work", {
 
   expect_equal(x$associated_function(), "associated_function")
 })
+
+test_that("unwind_protect() works as expected", {
+  expect_snapshot(safe_stop(), error = TRUE)
+})

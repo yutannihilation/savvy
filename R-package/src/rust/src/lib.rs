@@ -3,6 +3,9 @@
 mod scalar;
 pub use scalar::*;
 
+mod unwind;
+pub use unwind::*;
+
 use savvy::savvy;
 
 use savvy::{
