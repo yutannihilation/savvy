@@ -26,6 +26,13 @@ impl NotAvailableValue for i32 {
     }
 }
 
+use once_cell::sync::Lazy;
+
+pub(crate) static NA_CHAR_PTR: Lazy<&str> = Lazy::new(|| unsafe {
+    let c_ptr = libR_sys::R_CHAR(libR_sys::R_NaString) as _;
+    std::str::from_utf8_unchecked(std::slice::from_raw_parts(c_ptr, 2))
+});
+
 impl NotAvailableValue for &str {
     fn is_na(&self) -> bool {
         self.as_ptr() == Self::na().as_ptr()
@@ -37,9 +44,6 @@ impl NotAvailableValue for &str {
     //
     // cf., https://github.com/extendr/extendr/issues/483#issuecomment-1435499525
     fn na() -> Self {
-        unsafe {
-            let c_ptr = libR_sys::R_CHAR(libR_sys::R_NaString) as _;
-            std::str::from_utf8_unchecked(std::slice::from_raw_parts(c_ptr, 2))
-        }
+        NA_CHAR_PTR.as_ref()
     }
 }
