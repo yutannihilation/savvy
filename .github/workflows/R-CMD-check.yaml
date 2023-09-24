@@ -65,6 +65,7 @@ jobs:
           mv savvy/ ./R-package/src/rust/
           mv savvy-macro/ ./R-package/src/rust/
           mv savvy-bindgen/ ./R-package/src/rust/
+          mv docs/ ./R-package/src/rust/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
