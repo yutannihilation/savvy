@@ -1,6 +1,7 @@
-## External SEXP and owned SEXP
+## Treating External SEXP and owned SEXP differently
 
-First thing I want to discuss is that savvy uses separate types for SEXP passed
+Savvy is opinionated in many points. One thing I think should be introduced
+before diving into thedetails is that savvy uses separate types for SEXP passed
 from outside and that created within Rust function. The former, external SEXP,
 is read-only, and the latter, owned SEXP, is writable. Here's the list:
 
@@ -31,8 +32,8 @@ savvy is non-ALTREP-aware for int, real, and logical (See [#18][issue18]).
 
 ## Basic rule
 
-This is a simple function to add the specified suffix to the input character
-vector.
+This is a simple Rust function to add the specified suffix to the input
+character vector. `#[savvy]` macro turns this into an R function.
 
 ```no_run
 #[savvy]
@@ -52,17 +53,20 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 }
 ```
 
-Let's look at the lines one by one.
+Let's look at the details one by one.
 
 ### `#[savvy]` macro
+
+(`#[savvy]` macro can also be used for `impl` for a `struct`, but let's focus on
+function's case for now.)
 
 If you mark a funtion with `#[savvy]` macro, the corresponding implementations are generated:
 
 1. Rust functions
     a. a wrapper function to handle Rust and R errors gracefully
-    b. a function with the original body and some conversion from raw [`SEXP`]s to savvy types.
-2. C signature for the header file
-3. C implementation
+    b. a function with the original body and some conversion from raw `SEXP`s to savvy types.
+2. C function signature for the Rust function
+3. C implementation for bridging between R and Rust
 4. R implementation
 
 For example, the above implementation generates the following codes.
@@ -85,13 +89,13 @@ unsafe fn savvy_add_suffix_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Resul
 }
 ```
 
-C signature for the header file:
+C function signature:
 
 ```text
 SEXP add_suffix(SEXP x, SEXP y);
 ```
 
-C implementation:
+C implementation (let's skip the details about `handle_result` for now):
 
 ```text
 SEXP add_suffix__impl(SEXP x, SEXP y) {
@@ -110,18 +114,20 @@ add_suffix <- function(x, y) {
 
 ### Input and Output of savvy-able functions
 
+The example function above has this signature.
+
 ```no_run
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {...}
+fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {}
 ```
 
-The function must satisfy the following conditions
+As you can guess, with `#[savvy]` macro cannot be applied to arbitrary
+functions. The function must satisfy the following conditions
 
 * The function's inputs are either non-owned savvy types (e.g., [`IntegerSxp`]
   and [`RealSxp`]) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
 * The function returns `savvy::Result<savvy::SEXP>` or nothing (in the latter
   case, an invisible `NULL` will be returned instead).
 
-(`#[savvy]` macro can also be used for `impl` for a `struct`. Let's revisit later.)
 
 ### How to read the values from input R objects
 
@@ -143,19 +149,25 @@ for (i, e) in x.iter().enumerate() {
 
 #### 2. `to_vec()`
 
-The types above also provides `to_vec()`. As the name indicates, this copies
-values to a Rust vector. Copying can be an overhead, but this is handy if you
-need to pass the data around among Rust functions.
+The types above also provide `to_vec()`. As the name indicates, this copies
+values to a Rust vector. Copying can be costly for big data, but a vector is
+handy if you need to pass the data around among Rust functions.
 
 ```no_run
 let mut v = x.to_vec();
-some_function_takes_vec1(v);
-some_function_takes_vec2(v);
+some_function_takes_vec(v);
+another_function_takes_slice(v.as_slice());
 ```
+
+You can think of copying cost as "import tax" on crossing the FFI boundary. If
+you think it's worth, you should pay, and if not, you should not.
 
 ### How to prepare output R object
 
-As you saw above, an owned SEXP can be allocated by using `Owned{type}Sxp::new()`.
+As you saw above, an owned SEXP can be allocated by using
+`Owned{type}Sxp::new()`. `new()` takes the length of the vector as the argument.
+If you need the same length of vector as the input, you can pass the `len()` of
+the input `SEXP`.
 
 ```no_run
 let mut out = OwnedStringSxp::new(x.len());
@@ -179,7 +191,25 @@ Ok(out.into())
 
 ### Missing values
 
-TBD
+There's no concept of "missing value" on the corresponding types of `Rust`. So,
+it looks a normal value to Rust's side. But, the good news is that R uses the
+sentinel values to represent `NA`, so it's possible to check if a value is `NA`
+to R in case the type is either `i32`, `f64` or `&str`.
+
+* `i32`: [The minimum value of `int`][na_int] is used for representing `NA`.
+* `f64`: [A special value][na_real] is used for representing `NA`.
+* `&str`: [A `CHARSXP` of string `"NA"`][na_string] is used for representing
+  `NA`; this cannot be distinguished by comparing the content of the string, but
+  we can compare the pointer address of the underlying C `char` array.
+
+[na_int]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/arithmetic.c#L143
+[na_real]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/arithmetic.c#L90-L98
+[na_string]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/names.c#L1219
+
+The bad news is that `bool` is not the case.
+
+
+
 
 
 ## Integer and real
