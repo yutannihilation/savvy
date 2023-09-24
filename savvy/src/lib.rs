@@ -10,7 +10,7 @@ pub mod unwind_protect;
 
 pub use error::{Error, Result};
 pub use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
-pub use sexp::list::{ListSxp, OwnedListSxp};
+pub use sexp::list::{ListElement, ListSxp, OwnedListSxp};
 pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
 pub use sexp::null::NullSxp;
 pub use sexp::real::{OwnedRealSxp, RealSxp};

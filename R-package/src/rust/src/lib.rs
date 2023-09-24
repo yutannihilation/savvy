@@ -6,8 +6,8 @@ pub use scalar::*;
 use savvy::savvy;
 
 use savvy::{
-    IntegerSxp, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
-    OwnedStringSxp, RealSxp, StringSxp,
+    IntegerSxp, ListElement, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp,
+    OwnedRealSxp, OwnedStringSxp, RealSxp, StringSxp,
 };
 
 use savvy::sexp::na::NotAvailableValue;
@@ -180,7 +180,7 @@ fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
 fn print_list(x: ListSxp) {
     for (k, v) in x.iter() {
         let content = match v {
-            savvy::sexp::list::ListElement::Integer(x) => {
+            ListElement::Integer(x) => {
                 format!(
                     "integer [{}]",
                     x.iter()
@@ -189,7 +189,7 @@ fn print_list(x: ListSxp) {
                         .join(", ")
                 )
             }
-            savvy::sexp::list::ListElement::Real(x) => {
+            ListElement::Real(x) => {
                 format!(
                     "numeric [{}]",
                     x.iter()
@@ -198,10 +198,10 @@ fn print_list(x: ListSxp) {
                         .join(", ")
                 )
             }
-            savvy::sexp::list::ListElement::String(x) => {
+            ListElement::String(x) => {
                 format!("character [{}]", x.iter().collect::<Vec<&str>>().join(", "))
             }
-            savvy::sexp::list::ListElement::Logical(x) => {
+            ListElement::Logical(x) => {
                 format!(
                     "logical [{}]",
                     x.iter()
@@ -210,9 +210,9 @@ fn print_list(x: ListSxp) {
                         .join(", ")
                 )
             }
-            savvy::sexp::list::ListElement::List(_) => "list".to_string(),
-            savvy::sexp::list::ListElement::Null(_) => "NULL".to_string(),
-            savvy::sexp::list::ListElement::Unsupported(_) => "Unsupported".to_string(),
+            ListElement::List(_) => "list".to_string(),
+            ListElement::Null(_) => "NULL".to_string(),
+            ListElement::Unsupported(_) => "Unsupported".to_string(),
         };
 
         let name = if k.is_empty() { "(no name)" } else { k };
