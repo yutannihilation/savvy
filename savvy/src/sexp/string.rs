@@ -1,8 +1,8 @@
 use std::ffi::CStr;
 
 use libR_sys::{
-    cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength,
-    SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
+    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength, SET_STRING_ELT, SEXP,
+    STRING_ELT, STRSXP,
 };
 
 use super::na::NotAvailableValue;
@@ -92,10 +92,10 @@ impl OwnedStringSxp {
         }
     }
 
-    pub fn new(len: usize) -> Self {
-        let inner = unsafe { Rf_allocVector(STRSXP, len as _) };
+    pub fn new(len: usize) -> crate::Result<Self> {
+        let inner = crate::alloc_vector(STRSXP, len as _)?;
         let token = protect::insert_to_preserved_list(inner);
-        Self { inner, token, len }
+        Ok(Self { inner, token, len })
     }
 }
 
@@ -106,29 +106,31 @@ impl Drop for OwnedStringSxp {
 }
 
 impl TryFrom<Sxp> for StringSxp {
-    type Error = crate::error::Error;
+    type Error = crate::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sxp) -> crate::Result<Self> {
         if !value.is_string() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to string");
-            return Err(crate::error::Error::UnexpectedType(msg));
+            return Err(crate::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }
 }
 
-impl<T> From<&[T]> for OwnedStringSxp
+impl<T> TryFrom<&[T]> for OwnedStringSxp
 where
     T: AsRef<str>, // This works both for &str and String
 {
-    fn from(value: &[T]) -> Self {
-        let mut out = Self::new(value.len());
+    type Error = crate::Error;
+
+    fn try_from(value: &[T]) -> crate::Result<Self> {
+        let mut out = Self::new(value.len())?;
         value
             .iter()
             .enumerate()
             .for_each(|(i, v)| out.set_elt(i, v.as_ref()));
-        out
+        Ok(out)
     }
 }
 
