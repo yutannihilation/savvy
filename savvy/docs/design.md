@@ -1,8 +1,8 @@
 ## Getting Started
 
-See [Getting Started section of the GitHub repo's README][getting-started].
+See [Getting Started section of README][getting-started].
 
-[getting-started]: https://github.com/yutannihilation/savvy/blob/master/README.md#getting-started
+[getting-started]: https://crates.io/crates/savvy#getting-started
 
 ## Treating External SEXP and owned SEXP differently
 
