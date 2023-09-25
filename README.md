@@ -48,12 +48,12 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
         // You have to use `.is_na()` method to distinguish the missing value.
         if e.is_na() {
             // Values need to be set by `set_elt()` one by one.
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
         let e_upper = e.to_uppercase();
-        out.set_elt(i, e_upper.as_str());
+        out.set_elt(i, e_upper.as_str())?;
     }
 
     // `Owned{type}Sxp` type implements `From` trait for `SEXP`, so you can use `into()`.
