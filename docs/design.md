@@ -44,7 +44,7 @@ character vector. `#[savvy]` macro turns this into an R function.
 ```no_run
 #[savvy]
 fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len());
+    let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -178,8 +178,14 @@ As you saw above, an owned SEXP can be allocated by using
 If you need the same length of vector as the input, you can pass the `len()` of
 the input `SEXP`.
 
+`new()` returns [`savvy::Result`] because the memory allocation can fail in case
+when the vector is too large. If you are sure it won't happen, you can simply
+`unwrap()` it. If you use `new()` directly in the function marked with
+`#[savvy]`, it's as easy as just adding `?` because the return type is always
+`savvy::Result<SEXP>`.
+
 ```no_run
-let mut out = OwnedStringSxp::new(x.len());
+let mut out = OwnedStringSxp::new(x.len())?;
 ```
 
 Values can be written on it by `set_elt()` one by one.
@@ -198,11 +204,14 @@ Then, you can convert it to [`SEXP`] by `into()`
 Ok(out.into())
 ```
 
-#### 2. `into()`
+#### 2. `try_into()`
 
 Another way is to use a Rust vector to store the results and convert it to an R
-object at the end the function. Note that, while this is convenient, this might
-not be good in terms of efficiency in that this requires double size of memory.
+object at the end the function. This is fallible because this too uses the
+fallible `new()`.
+
+Note that, while this is convenient, this might not be good in terms of
+efficiency in that this requires double size of memory.
 
 ```no_run
 #[savvy]
@@ -213,13 +222,13 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
         out.push(v * 2);
     }
 
-    let out_sxp: OwnedIntegerSxp = out.as_slice().into();
+    let out_sxp: OwnedIntegerSxp = out.as_slice().try_into()?;
     Ok(out_sxp.into())
 }
 ```
 
 Note that, the efficiency of copying differs depending on the types. For the
-details, see `From<&[T]>` section later.
+details, see `TryFrom<&[T]>` section later.
 
 ### Missing values
 
@@ -262,7 +271,7 @@ function is not an identity function.
 ```no_run
 #[savvy]
 fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len());
+    let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, e);
@@ -287,7 +296,7 @@ side. In this case, `bool` is also `NA`-aware.
 ```no_run
 #[savvy]
 fn identity_logical_single(x: bool) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(1);
+    let mut out = OwnedLogicalSxp::new(1)?;
     out.set_elt(0, x);
     Ok(out.into())
 }
@@ -307,7 +316,7 @@ numeric vector to a function with a `IntegerSxp` argument.
 ```no_run
 #[savvy]
 fn identity_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len());
+    let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
         out[i] = v;
@@ -352,7 +361,7 @@ more methods than other types:
 
 * `as_slice()` and `as_mut_slice()`
 * `Index` and `IndexMut`
-* efficient `From<&[T]>`
+* efficient `TryFrom<&[T]>`
 
 ### `as_slice()` and `as_mut_slice()`
 
@@ -377,7 +386,7 @@ below instead of `set_elt()`.
 ```no_run
 #[savvy]
 fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len());
+    let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
         out[i] = v * 2;
@@ -387,9 +396,9 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 }
 ```
 
-### Efficient `From<&[T]>`
+### Efficient `TryFrom<&[T]>`
 
-`From<&[T]>` is not special to real and integer, but the implementation is
+`TryFrom<&[T]>` is not special to real and integer, but the implementation is
 different from that of logical and string; since the internal representations
 are the same, savvy uses [`copy_from_slice()`][copy_from_slice], which does a
 `memcpy`, to copy the data efficently (in logical and string case, the values
@@ -565,7 +574,7 @@ ignored.
 ```no_run
 #[savvy]
 fn list_with_no_values() -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedListSxp::new(2, true);
+    let mut out = OwnedListSxp::new(2, true)?;
 
     out.set_name(0, "foo");
     out.set_name(1, "bar");
@@ -592,10 +601,12 @@ implements it, you can simply pass it like below.
 ```no_run
 #[savvy]
 fn list_with_no_names() -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedListSxp::new(2, false);
-    let mut e1 = OwnedIntegerSxp::new(1);
+    let mut out = OwnedListSxp::new(2, false)?;
+
+    let mut e1 = OwnedIntegerSxp::new(1)?;
     e1[0] = 100;
-    let mut e2 = OwnedStringSxp::new(1);
+    
+    let mut e2 = OwnedStringSxp::new(1)?;
     e2.set_elt(0, "cool");
 
     out.set_value(0, e1);
@@ -641,14 +652,16 @@ impl Person {
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1);
+        let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, &self.name);
         Ok(out.into())
     }
 }
 ```
 
-allows you to use `Person` like below on R sessions.
+allows you to use `Person` like below on R sessions. One special convention is
+that, if the name of the method is `new`, it's used as the constructor function
+(in this case, `Person()`).
 
 ```text
 > x <- Person()

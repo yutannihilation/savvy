@@ -1,6 +1,6 @@
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_allocVector, Rf_getAttrib, Rf_setAttrib, Rf_xlength,
-    SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
+    TYPEOF, VECSXP, VECTOR_ELT,
 };
 
 use crate::{
@@ -210,24 +210,24 @@ impl OwnedListSxp {
         self.set_value(i, v);
     }
 
-    pub fn new(len: usize, named: bool) -> Self {
-        let out = unsafe { Rf_allocVector(VECSXP, len as _) };
+    pub fn new(len: usize, named: bool) -> crate::Result<Self> {
+        let out = crate::alloc_vector(VECSXP, len as _)?;
         let token = protect::insert_to_preserved_list(out);
 
         let names = if named {
-            let names = OwnedStringSxp::new(len);
+            let names = OwnedStringSxp::new(len)?;
             unsafe { Rf_setAttrib(out, R_NamesSymbol, names.inner()) };
             Some(names)
         } else {
             None
         };
 
-        Self {
+        Ok(Self {
             values: ListSxp(out),
             names,
             token,
             len,
-        }
+        })
     }
 }
 
@@ -238,13 +238,13 @@ impl Drop for OwnedListSxp {
 }
 
 impl TryFrom<Sxp> for ListSxp {
-    type Error = crate::error::Error;
+    type Error = crate::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sxp) -> crate::Result<Self> {
         if !value.is_list() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to list");
-            return Err(crate::error::Error::UnexpectedType(msg));
+            return Err(crate::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }

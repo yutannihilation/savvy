@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use libR_sys::{Rf_allocVector, Rf_xlength, REAL, REALSXP, SEXP};
+use libR_sys::{Rf_xlength, REAL, REALSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -84,17 +84,17 @@ impl OwnedRealSxp {
         self[i] = v;
     }
 
-    pub fn new(len: usize) -> Self {
-        let inner = unsafe { Rf_allocVector(REALSXP, len as _) };
+    pub fn new(len: usize) -> crate::Result<Self> {
+        let inner = crate::alloc_vector(REALSXP, len as _)?;
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { REAL(inner) };
 
-        Self {
+        Ok(Self {
             inner,
             token,
             len,
             raw,
-        }
+        })
     }
 }
 
@@ -105,23 +105,25 @@ impl Drop for OwnedRealSxp {
 }
 
 impl TryFrom<Sxp> for RealSxp {
-    type Error = crate::error::Error;
+    type Error = crate::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sxp) -> crate::Result<Self> {
         if !value.is_real() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to real");
-            return Err(crate::error::Error::UnexpectedType(msg));
+            return Err(crate::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }
 }
 
-impl From<&[f64]> for OwnedRealSxp {
-    fn from(value: &[f64]) -> Self {
-        let mut out = Self::new(value.len());
+impl TryFrom<&[f64]> for OwnedRealSxp {
+    type Error = crate::Error;
+
+    fn try_from(value: &[f64]) -> crate::Result<Self> {
+        let mut out = Self::new(value.len())?;
         out.as_mut_slice().copy_from_slice(value);
-        out
+        Ok(out)
     }
 }
 

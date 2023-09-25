@@ -19,27 +19,39 @@ pub use sexp::Sxp;
 
 pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
 
+pub use unwind_protect::unwind_protect;
+
 // re-export
 pub use libR_sys::SEXP;
 pub use savvy_macro::savvy;
 
-use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_mkCharLenCE, Rprintf};
+use libR_sys::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
 
 use std::ffi::CString;
 
 // TODO: make this r_println! macro
-pub fn r_print(msg: &str) {
+pub fn r_print(msg: &str) -> crate::error::Result<SEXP> {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
-        Rprintf(msg_c_string.as_ptr());
+        unwind_protect(|| {
+            Rprintf(msg_c_string.as_ptr());
+            NullSxp.into()
+        })
     }
 }
 
-pub fn r_eprint(msg: &str) {
+pub fn r_eprint(msg: &str) -> crate::error::Result<SEXP> {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
-        REprintf(msg_c_string.as_ptr());
+        unwind_protect(|| {
+            REprintf(msg_c_string.as_ptr());
+            NullSxp.into()
+        })
     }
+}
+
+fn alloc_vector(arg1: u32, arg2: isize) -> crate::error::Result<SEXP> {
+    unsafe { unwind_protect(|| Rf_allocVector(arg1, arg2)) }
 }
 
 // This wrapper function handles Error and panicks, and flag it by setting the

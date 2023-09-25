@@ -16,7 +16,7 @@ use savvy::sexp::na::NotAvailableValue;
 /// @export
 #[savvy]
 fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len());
+    let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -39,7 +39,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn int_times_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len());
+    let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -72,13 +72,13 @@ impl Person {
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1);
+        let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, &self.name);
         Ok(out.into())
     }
 
     fn associated_function() -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1);
+        let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, "associated_function");
         Ok(out.into())
     }
