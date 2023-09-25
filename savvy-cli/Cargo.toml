@@ -1,5 +1,6 @@
 [package]
 name = "savvy-cli"
+description = "A CLI for savvy framework"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

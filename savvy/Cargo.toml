@@ -1,5 +1,6 @@
 [package]
 name = "savvy"
+description = "An unfriendly R extension interface"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -1,5 +1,6 @@
 [package]
 name = "savvy-macro"
+description = "Generate R-ready Rust functions by adding `#[savvy]` macro"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
