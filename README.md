@@ -5,11 +5,9 @@
 
 <!-- badges: start -->
 
-<div>
-
 [![](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
-
-</div>
+[![](https://img.shields.io/crates/v/savvy?style=flat-square&logo=rust.png)](https://crates.io/crates/savvy)
+[![](https://img.shields.io/docsrs/savvy?style=flat-square&logo=docsdotrs.png)](https://docs.rs/savvy/latest/)
 
 <!-- badges: end -->
 
