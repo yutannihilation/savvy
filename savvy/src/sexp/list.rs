@@ -184,30 +184,42 @@ impl OwnedListSxp {
         self.values.iter()
     }
 
-    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) {
+    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) -> crate::Result<()> {
         if i >= self.len {
-            panic!(
+            return Err(crate::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
-            );
+            )));
         }
+
         let v: ListElement = v.into();
+
         unsafe {
             SET_VECTOR_ELT(self.values.inner(), i as _, v.into());
         }
+
+        Ok(())
     }
 
-    pub fn set_name(&mut self, i: usize, k: &str) {
+    pub fn set_name(&mut self, i: usize, k: &str) -> crate::Result<()> {
         // OwnedStringSxp::set_elt() checks the length, so don't check here.
 
         if let Some(names) = self.names.as_mut() {
-            names.set_elt(i, k);
+            names.set_elt(i, k)?;
         }
+
+        Ok(())
     }
 
-    pub fn set_name_and_value<T: Into<ListElement>>(&mut self, i: usize, k: &str, v: T) {
-        self.set_name(i, k);
-        self.set_value(i, v);
+    pub fn set_name_and_value<T: Into<ListElement>>(
+        &mut self,
+        i: usize,
+        k: &str,
+        v: T,
+    ) -> crate::Result<()> {
+        self.set_name(i, k)?;
+        self.set_value(i, v)?;
+        Ok(())
     }
 
     pub fn new(len: usize, named: bool) -> crate::Result<Self> {

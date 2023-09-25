@@ -92,8 +92,19 @@ impl OwnedIntegerSxp {
         self.inner
     }
 
-    pub fn set_elt(&mut self, i: usize, v: i32) {
-        self[i] = v;
+    pub fn set_elt(&mut self, i: usize, v: i32) -> crate::Result<()> {
+        if i >= self.len {
+            return Err(crate::Error::new(&format!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            )));
+        }
+
+        unsafe {
+            *(self.raw.add(i)) = v;
+        }
+
+        Ok(())
     }
 
     pub fn new(len: usize) -> crate::Result<Self> {
