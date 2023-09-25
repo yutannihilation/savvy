@@ -103,8 +103,28 @@ scalar_input_logical <- function(x) {
 }
 
 
-scalar_input_str <- function(x) {
-  invisible(.Call(scalar_input_str__impl, x))
+scalar_input_string <- function(x) {
+  invisible(.Call(scalar_input_string__impl, x))
+}
+
+
+scalar_output_int <- function() {
+  .Call(scalar_output_int__impl)
+}
+
+
+scalar_output_real <- function() {
+  .Call(scalar_output_real__impl)
+}
+
+
+scalar_output_logical <- function() {
+  .Call(scalar_output_logical__impl)
+}
+
+
+scalar_output_string <- function() {
+  .Call(scalar_output_string__impl)
 }
 
 

@@ -1,21 +1,41 @@
-use savvy::savvy;
+use savvy::{savvy, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp};
 
 #[savvy]
 fn scalar_input_int(x: i32) {
-    savvy::r_print("Do nothing")?;
+    savvy::r_print(&format!("{}\n", x))?;
 }
 
 #[savvy]
 fn scalar_input_real(x: f64) {
-    savvy::r_print("Do nothing")?;
+    savvy::r_print(&format!("{}\n", x))?;
 }
 
 #[savvy]
 fn scalar_input_logical(x: bool) {
-    savvy::r_print("Do nothing")?;
+    savvy::r_print(&format!("{}\n", x))?;
 }
 
 #[savvy]
-fn scalar_input_str(x: &str) {
-    savvy::r_print("Do nothing")?;
+fn scalar_input_string(x: &str) {
+    savvy::r_print(&format!("{}\n", x))?;
+}
+
+#[savvy]
+fn scalar_output_int() -> savvy::Result<savvy::SEXP> {
+    OwnedIntegerSxp::try_from(1).map(|x| x.into())
+}
+
+#[savvy]
+fn scalar_output_real() -> savvy::Result<savvy::SEXP> {
+    OwnedRealSxp::try_from(1.3).map(|x| x.into())
+}
+
+#[savvy]
+fn scalar_output_logical() -> savvy::Result<savvy::SEXP> {
+    OwnedLogicalSxp::try_from(false).map(|x| x.into())
+}
+
+#[savvy]
+fn scalar_output_string() -> savvy::Result<savvy::SEXP> {
+    OwnedStringSxp::try_from("foo").map(|x| x.into())
 }
