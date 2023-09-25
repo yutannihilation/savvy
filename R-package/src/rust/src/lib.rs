@@ -26,12 +26,12 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
         let e_upper = e.to_uppercase();
-        out.set_elt(i, &e_upper);
+        out.set_elt(i, &e_upper)?;
     }
 
     Ok(out.into())
@@ -49,11 +49,11 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
-        out.set_elt(i, &format!("{e}_{y}"));
+        out.set_elt(i, &format!("{e}_{y}"))?;
     }
 
     Ok(out.into())
@@ -151,7 +151,7 @@ fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
-        out.set_elt(i, !e);
+        out.set_elt(i, !e)?;
     }
 
     Ok(out.into())
@@ -168,7 +168,7 @@ fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
-        out.set_elt(i, e || y);
+        out.set_elt(i, e || y)?;
     }
 
     Ok(out.into())
@@ -245,13 +245,13 @@ impl Person {
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
         let mut out = OwnedStringSxp::new(1)?;
-        out.set_elt(0, &self.name);
+        out.set_elt(0, &self.name)?;
         Ok(out.into())
     }
 
     fn associated_function() -> savvy::Result<savvy::SEXP> {
         let mut out = OwnedStringSxp::new(1)?;
-        out.set_elt(0, "associated_function");
+        out.set_elt(0, "associated_function")?;
         Ok(out.into())
     }
 }

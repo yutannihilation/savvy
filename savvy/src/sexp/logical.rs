@@ -70,16 +70,19 @@ impl OwnedLogicalSxp {
         self.inner
     }
 
-    pub fn set_elt(&mut self, i: usize, v: bool) {
+    pub fn set_elt(&mut self, i: usize, v: bool) -> crate::Result<()> {
         if i >= self.len {
-            panic!(
+            return Err(crate::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
-            );
+            )));
         }
+
         unsafe {
             SET_LOGICAL_ELT(self.inner, i as _, v as _);
         }
+
+        Ok(())
     }
 
     pub fn new(len: usize) -> crate::Result<Self> {
@@ -119,10 +122,9 @@ impl TryFrom<&[bool]> for OwnedLogicalSxp {
 
     fn try_from(value: &[bool]) -> crate::Result<Self> {
         let mut out = Self::new(value.len())?;
-        value
-            .iter()
-            .enumerate()
-            .for_each(|(i, v)| out.set_elt(i, *v));
+        for (i, v) in value.iter().enumerate() {
+            out.set_elt(i, *v)?;
+        }
         Ok(out)
     }
 }

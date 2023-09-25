@@ -48,11 +48,11 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
-        out.set_elt(i, &format!("{e}_{y}"));
+        out.set_elt(i, &format!("{e}_{y}"))?;
     }
 
     Ok(out.into())
@@ -194,7 +194,7 @@ Values can be written on it by `set_elt()` one by one.
 for (i, e) in x.iter().enumerate() {
     // ...snip...
 
-    out.set_elt(i, &format!("{e}_{y}"));
+    out.set_elt(i, &format!("{e}_{y}"))?;
 }
 ```
 
@@ -255,11 +255,11 @@ character `"NA_suffix"`, not `NA_character_`, on the R session.
 ```no_run
 for (i, e) in x.iter().enumerate() {
     if e.is_na() {
-        out.set_elt(i, <&str>::na());
+        out.set_elt(i, <&str>::na())?;
         continue;
     }
 
-    out.set_elt(i, &format!("{e}_{y}"));
+    out.set_elt(i, &format!("{e}_{y}"))?;
 }
 ```
 
@@ -274,7 +274,7 @@ fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
     let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
-        out.set_elt(i, e);
+        out.set_elt(i, e)?;
     }
 
     Ok(out.into())
@@ -297,7 +297,7 @@ side. In this case, `bool` is also `NA`-aware.
 #[savvy]
 fn identity_logical_single(x: bool) -> savvy::Result<savvy::SEXP> {
     let mut out = OwnedLogicalSxp::new(1)?;
-    out.set_elt(0, x);
+    out.set_elt(0, x)?;
     Ok(out.into())
 }
 ```
@@ -607,7 +607,7 @@ fn list_with_no_names() -> savvy::Result<savvy::SEXP> {
     e1[0] = 100;
     
     let mut e2 = OwnedStringSxp::new(1)?;
-    e2.set_elt(0, "cool");
+    e2.set_elt(0, "cool")?;
 
     out.set_value(0, e1);
     out.set_value(1, e2);
@@ -653,7 +653,7 @@ impl Person {
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
         let mut out = OwnedStringSxp::new(1)?;
-        out.set_elt(0, &self.name);
+        out.set_elt(0, &self.name)?;
         Ok(out.into())
     }
 }

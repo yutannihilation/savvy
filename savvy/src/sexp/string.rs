@@ -71,12 +71,12 @@ impl OwnedStringSxp {
         self.inner
     }
 
-    pub fn set_elt(&mut self, i: usize, v: &str) {
+    pub fn set_elt(&mut self, i: usize, v: &str) -> crate::Result<()> {
         if i >= self.len {
-            panic!(
+            return Err(crate::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
-            );
+            )));
         }
         unsafe {
             // We might be able to put `R_NaString` directly without using
@@ -85,11 +85,15 @@ impl OwnedStringSxp {
             let v_sexp = if v.is_na() {
                 libR_sys::R_NaString
             } else {
-                Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
+                crate::unwind_protect(|| {
+                    Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
+                })?
             };
 
             SET_STRING_ELT(self.inner, i as _, v_sexp);
         }
+
+        Ok(())
     }
 
     pub fn new(len: usize) -> crate::Result<Self> {
@@ -126,10 +130,9 @@ where
 
     fn try_from(value: &[T]) -> crate::Result<Self> {
         let mut out = Self::new(value.len())?;
-        value
-            .iter()
-            .enumerate()
-            .for_each(|(i, v)| out.set_elt(i, v.as_ref()));
+        for (i, v) in value.iter().enumerate() {
+            out.set_elt(i, v.as_ref())?;
+        }
         Ok(out)
     }
 }
