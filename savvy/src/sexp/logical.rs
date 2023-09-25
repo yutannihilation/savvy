@@ -1,4 +1,4 @@
-use libR_sys::{Rf_allocVector, Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
+use libR_sys::{Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -82,16 +82,16 @@ impl OwnedLogicalSxp {
         }
     }
 
-    pub fn new(len: usize) -> Self {
-        let inner = unsafe { Rf_allocVector(LGLSXP, len as _) };
+    pub fn new(len: usize) -> crate::Result<Self> {
+        let inner = crate::alloc_vector(LGLSXP, len as _)?;
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { LOGICAL(inner) };
-        Self {
+        Ok(Self {
             inner,
             token,
             len,
             raw,
-        }
+        })
     }
 }
 
@@ -116,7 +116,7 @@ impl TryFrom<Sxp> for LogicalSxp {
 
 impl From<&[bool]> for OwnedLogicalSxp {
     fn from(value: &[bool]) -> Self {
-        let mut out = Self::new(value.len());
+        let mut out = Self::new(value.len()).expect("Couldn't allocate vector");
         value
             .iter()
             .enumerate()

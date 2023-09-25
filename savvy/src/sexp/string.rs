@@ -1,8 +1,8 @@
 use std::ffi::CStr;
 
 use libR_sys::{
-    cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength,
-    SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
+    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength, SET_STRING_ELT, SEXP,
+    STRING_ELT, STRSXP,
 };
 
 use super::na::NotAvailableValue;
@@ -92,10 +92,10 @@ impl OwnedStringSxp {
         }
     }
 
-    pub fn new(len: usize) -> Self {
-        let inner = unsafe { Rf_allocVector(STRSXP, len as _) };
+    pub fn new(len: usize) -> crate::Result<Self> {
+        let inner = crate::alloc_vector(STRSXP, len as _)?;
         let token = protect::insert_to_preserved_list(inner);
-        Self { inner, token, len }
+        Ok(Self { inner, token, len })
     }
 }
 
@@ -123,7 +123,7 @@ where
     T: AsRef<str>, // This works both for &str and String
 {
     fn from(value: &[T]) -> Self {
-        let mut out = Self::new(value.len());
+        let mut out = Self::new(value.len()).expect("Couldn't allocate vector");
         value
             .iter()
             .enumerate()

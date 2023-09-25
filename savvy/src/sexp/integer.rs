@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use libR_sys::{Rf_allocVector, Rf_xlength, INTEGER, INTEGER_ELT, INTSXP, SEXP};
+use libR_sys::{Rf_xlength, INTEGER, INTEGER_ELT, INTSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -96,17 +96,17 @@ impl OwnedIntegerSxp {
         self[i] = v;
     }
 
-    pub fn new(len: usize) -> Self {
-        let inner = unsafe { Rf_allocVector(INTSXP, len as _) };
+    pub fn new(len: usize) -> crate::Result<Self> {
+        let inner = crate::alloc_vector(INTSXP, len as _)?;
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { INTEGER(inner) };
 
-        Self {
+        Ok(Self {
             inner,
             token,
             len,
             raw,
-        }
+        })
     }
 }
 
@@ -131,7 +131,7 @@ impl TryFrom<Sxp> for IntegerSxp {
 
 impl From<&[i32]> for OwnedIntegerSxp {
     fn from(value: &[i32]) -> Self {
-        let mut out = Self::new(value.len());
+        let mut out = Self::new(value.len()).expect("Couldn't allocate vector");
         out.as_mut_slice().copy_from_slice(value);
         out
     }
