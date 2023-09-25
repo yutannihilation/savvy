@@ -1,4 +1,4 @@
-use savvy::{savvy, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp};
+use savvy::{savvy, IntegerSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp};
 
 #[savvy]
 fn scalar_input_int(x: i32) {
@@ -38,4 +38,16 @@ fn scalar_output_logical() -> savvy::Result<savvy::SEXP> {
 #[savvy]
 fn scalar_output_string() -> savvy::Result<savvy::SEXP> {
     OwnedStringSxp::try_from("foo").map(|x| x.into())
+}
+
+#[savvy]
+fn sum_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+    let sum: OwnedIntegerSxp = x.as_slice().iter().sum::<i32>().try_into()?;
+    Ok(sum.into())
+}
+
+#[savvy]
+fn sum_real(x: RealSxp) -> savvy::Result<savvy::SEXP> {
+    let sum: OwnedRealSxp = x.as_slice().iter().sum::<f64>().try_into()?;
+    Ok(sum.into())
 }

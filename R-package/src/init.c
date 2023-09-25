@@ -137,6 +137,16 @@ SEXP scalar_output_string__impl() {
     return handle_result(res);
 }
 
+SEXP sum_int__impl(SEXP x) {
+    SEXP res = sum_int(x);
+    return handle_result(res);
+}
+
+SEXP sum_real__impl(SEXP x) {
+    SEXP res = sum_real(x);
+    return handle_result(res);
+}
+
 SEXP safe_stop__impl() {
     SEXP res = safe_stop();
     return handle_result(res);
@@ -165,6 +175,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"scalar_output_real__impl", (DL_FUNC) &scalar_output_real__impl, 0},
     {"scalar_output_logical__impl", (DL_FUNC) &scalar_output_logical__impl, 0},
     {"scalar_output_string__impl", (DL_FUNC) &scalar_output_string__impl, 0},
+    {"sum_int__impl", (DL_FUNC) &sum_int__impl, 1},
+    {"sum_real__impl", (DL_FUNC) &sum_real__impl, 1},
     {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
     {NULL, NULL, 0}
 };

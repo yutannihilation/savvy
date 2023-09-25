@@ -128,6 +128,16 @@ scalar_output_string <- function() {
 }
 
 
+sum_int <- function(x) {
+  .Call(sum_int__impl, x)
+}
+
+
+sum_real <- function(x) {
+  .Call(sum_real__impl, x)
+}
+
+
 safe_stop <- function() {
   invisible(.Call(safe_stop__impl))
 }

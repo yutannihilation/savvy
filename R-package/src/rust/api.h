@@ -15,6 +15,8 @@ SEXP scalar_output_int();
 SEXP scalar_output_real();
 SEXP scalar_output_logical();
 SEXP scalar_output_string();
+SEXP sum_int(SEXP x);
+SEXP sum_real(SEXP x);
 SEXP safe_stop();
 
 // methods and associated functions for Person

@@ -24,3 +24,8 @@ test_that("function can return scalar value", {
   expect_equal(scalar_output_logical(), FALSE)
   expect_equal(scalar_output_string(), "foo")
 })
+
+test_that("sum functions", {
+  expect_equal(sum_int(1:10), 55L)
+  expect_equal(sum_real(c(1, 10, 100, 1000)), 1111)
+})
