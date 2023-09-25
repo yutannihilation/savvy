@@ -22,7 +22,7 @@ use savvy::sexp::na::NotAvailableValue;
 /// @export
 #[savvy]
 fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len());
+    let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -45,7 +45,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len());
+    let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -66,7 +66,7 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len());
+    let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -87,7 +87,7 @@ fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len());
+    let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -107,7 +107,7 @@ fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedRealSxp::new(x.len());
+    let mut out = OwnedRealSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -128,7 +128,7 @@ fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedRealSxp::new(x.len());
+    let mut out = OwnedRealSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -148,7 +148,7 @@ fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len());
+    let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, !e);
@@ -165,7 +165,7 @@ fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
 /// @export
 #[savvy]
 fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len());
+    let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, e || y);
@@ -244,13 +244,13 @@ impl Person {
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1);
+        let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, &self.name);
         Ok(out.into())
     }
 
     fn associated_function() -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1);
+        let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, "associated_function");
         Ok(out.into())
     }
