@@ -79,7 +79,7 @@ impl OwnedStringSxp {
             )));
         }
         unsafe {
-            let v_sexp = SET_STRING_ELT(self.inner, i as _, str_to_charsxp(v)?);
+            SET_STRING_ELT(self.inner, i as _, str_to_charsxp(v)?);
         }
 
         Ok(())
