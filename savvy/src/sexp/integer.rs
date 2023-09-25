@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use libR_sys::{Rf_xlength, INTEGER, INTEGER_ELT, INTSXP, SEXP};
+use libR_sys::{Rf_xlength, INTEGER, INTSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -149,43 +149,6 @@ impl From<IntegerSxp> for SEXP {
 impl From<OwnedIntegerSxp> for SEXP {
     fn from(value: OwnedIntegerSxp) -> Self {
         value.inner()
-    }
-}
-
-pub struct IntegerSxpIter<'a> {
-    pub sexp: &'a SEXP,
-    raw: *const i32,
-    i: usize,
-    len: usize,
-}
-
-impl<'a> Iterator for IntegerSxpIter<'a> {
-    type Item = i32;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let i = self.i;
-        self.i += 1;
-
-        if i >= self.len {
-            return None;
-        }
-
-        if self.raw.is_null() {
-            // When ALTREP, access to the value via *_ELT()
-            Some(unsafe { INTEGER_ELT(*self.sexp, i as _) })
-        } else {
-            // When non-ALTREP, access to the raw pointer
-            unsafe { Some(*(self.raw.add(i))) }
-        }
-    }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.len, Some(self.len))
-    }
-}
-
-impl<'a> ExactSizeIterator for IntegerSxpIter<'a> {
-    fn len(&self) -> usize {
-        self.len
     }
 }
 
