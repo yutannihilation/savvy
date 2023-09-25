@@ -127,19 +127,6 @@ impl TryFrom<&[f64]> for OwnedRealSxp {
     }
 }
 
-// This conflicts...
-//
-// impl<I> From<I> for OwnedRealSxp
-// where
-//     I: ExactSizeIterator + Iterator<Item = f64>,
-// {
-//     fn from(value: I) -> Self {
-//         let mut out = Self::new(value.len());
-//         value.enumerate().for_each(|(i, v)| out.set_elt(i, v));
-//         out
-//     }
-// }
-
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<RealSxp> for SEXP {
     fn from(value: RealSxp) -> Self {

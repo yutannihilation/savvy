@@ -152,30 +152,6 @@ impl From<OwnedIntegerSxp> for SEXP {
     }
 }
 
-// You might also want to write something like:
-//
-// ```rust
-// let sxp: OwnedIntegerSxp = i.map(...).collect();
-// ```
-//
-// But, this is inefficient in that this allocates twice just because the length
-// is not known inside `FromIterator` even when you know the actual length.
-//
-// ```rust
-// impl FromIterator<i32> for OwnedIntegerSxp {
-//     fn from_iter<T: IntoIterator<Item = i32>>(iter: T) -> Self {
-//         // In order to know the length, this has to be collected first.
-//         let v: Vec<i32> = iter.into_iter().collect();
-
-//         let mut out = Self::new(v.len());
-//         v.into_iter()
-//             .enumerate()
-//             .for_each(|(i, v)| out.set_elt(i, v));
-//         out
-//     }
-// }
-// ```
-
 impl Index<usize> for OwnedIntegerSxp {
     type Output = i32;
 
