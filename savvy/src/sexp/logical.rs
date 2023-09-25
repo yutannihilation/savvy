@@ -102,26 +102,28 @@ impl Drop for OwnedLogicalSxp {
 }
 
 impl TryFrom<Sxp> for LogicalSxp {
-    type Error = crate::error::Error;
+    type Error = crate::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sxp) -> crate::Result<Self> {
         if !value.is_logical() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to logical");
-            return Err(crate::error::Error::UnexpectedType(msg));
+            return Err(crate::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }
 }
 
-impl From<&[bool]> for OwnedLogicalSxp {
-    fn from(value: &[bool]) -> Self {
-        let mut out = Self::new(value.len()).expect("Couldn't allocate vector");
+impl TryFrom<&[bool]> for OwnedLogicalSxp {
+    type Error = crate::Error;
+
+    fn try_from(value: &[bool]) -> crate::Result<Self> {
+        let mut out = Self::new(value.len())?;
         value
             .iter()
             .enumerate()
             .for_each(|(i, v)| out.set_elt(i, *v));
-        out
+        Ok(out)
     }
 }
 

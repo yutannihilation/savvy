@@ -219,13 +219,13 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
         out.push(v * 2);
     }
 
-    let out_sxp: OwnedIntegerSxp = out.as_slice().into();
+    let out_sxp: OwnedIntegerSxp = out.as_slice().try_into()?;
     Ok(out_sxp.into())
 }
 ```
 
 Note that, the efficiency of copying differs depending on the types. For the
-details, see `From<&[T]>` section later.
+details, see `TryFrom<&[T]>` section later.
 
 ### Missing values
 
@@ -358,7 +358,7 @@ more methods than other types:
 
 * `as_slice()` and `as_mut_slice()`
 * `Index` and `IndexMut`
-* efficient `From<&[T]>`
+* efficient `TryFrom<&[T]>`
 
 ### `as_slice()` and `as_mut_slice()`
 
@@ -393,13 +393,15 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 }
 ```
 
-### Efficient `From<&[T]>`
+### Efficient `TryFrom<&[T]>`
 
-`From<&[T]>` is not special to real and integer, but the implementation is
+`TryFrom<&[T]>` is not special to real and integer, but the implementation is
 different from that of logical and string; since the internal representations
 are the same, savvy uses [`copy_from_slice()`][copy_from_slice], which does a
 `memcpy`, to copy the data efficently (in logical and string case, the values
 are copied one by one).
+
+Note that this is fallible because `new()` is fallible.
 
 [copy_from_slice]: https://doc.rust-lang.org/std/primitive.slice.html#method.copy_from_slice
 
