@@ -5,9 +5,9 @@
 
 <!-- badges: start -->
 
-[![](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
-[![](https://img.shields.io/crates/v/savvy?style=flat-square&logo=rust.png)](https://crates.io/crates/savvy)
-[![](https://img.shields.io/docsrs/savvy?style=flat-square&logo=docsdotrs.png)](https://docs.rs/savvy/latest/)
+[![](https://img.shields.io/github/actions/workflow/status/yutannihilation/savvy/R-CMD-check.yaml?style=flat-square&logo=github)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
+[![](https://img.shields.io/crates/v/savvy.svg?style=flat-square&logo=rust)](https://crates.io/crates/savvy)
+[![](https://img.shields.io/docsrs/savvy.svg?style=flat-square&logo=docsdotrs)](https://docs.rs/savvy/latest/)
 
 <!-- badges: end -->
 
