@@ -33,7 +33,8 @@ In Japanese, "Rust" is pronounced as `sàbí`(錆). Since the sound is similar, 
 
 ## Example Rust code
 
-With savvy, you can implement Rust function like below to create the corresponding R function `to_upper()`.
+With savvy, you can implement Rust function like below to create the corresponding R function `to_upper()`. As you can see, this framework is unfriendly in that this requires more explicit operations than extendr. For the full details, please read [the crate documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
+
 
 ``` rust
 /// Convert to Upper-case
@@ -62,15 +63,6 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
     Ok(out.into())
 }
 ```
-
-As you can see, this framework is unfriendly in that this requires more explicit operations than extendr.
-
--   All inputs are read-only. You always have to allocate a new SEXP for the return value.
--   The function's arguments must be savvy types (`...Sxp`). Scalar types (`i32`, `f64`, `bool`, and `&str`) are also allowed, though.
--   The function's return type must be either `savvy::Result<savvy::SEXP>` or `()`.
--   Savvy doesn't take care of the output conversion. You have to create a new SEXP object by `Owned...Sxp::new()` and copy values into it by `set_elt()` one by one.
-
-For the details, please read [the crate documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
 
 ## Getting Started
 
