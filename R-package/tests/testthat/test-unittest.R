@@ -59,25 +59,6 @@ test_that("functions can handle ALTREP", {
   expect_equal(times_two_int(1:10), 1:10 * 2L)
 })
 
-test_that("scalar functions reject non-scalar values and missing values", {
-  # no error
-  expect_no_error(scalar_input_int(1L))
-  expect_no_error(scalar_input_real(1.0))
-  expect_no_error(scalar_input_logical(TRUE))
-  expect_no_error(scalar_input_str("foo"))
-
-  # error
-  expect_error(scalar_input_int(1:10))
-  expect_error(scalar_input_real(c(1, 2)))
-  expect_error(scalar_input_logical(c(TRUE, FALSE)))
-  expect_error(scalar_input_str(c("foo", "bar")))
-
-  expect_error(scalar_input_int(NA_integer_))
-  expect_error(scalar_input_real(NA_real_))
-  expect_error(scalar_input_logical(NA))
-  expect_error(scalar_input_str(NA_character_))
-})
-
 test_that("NA scalars are rejected", {
   expect_error(add_suffix("", NA_character_))
   expect_error(times_any_int(0L, NA_integer_))

@@ -30,7 +30,7 @@ where
     let res: SEXP = unwind_protect_impl(fun, data);
 
     if (res as usize & 1) == 1 {
-        return Err(crate::Error::Aborted(res));
+        return Err(crate::error::Error::Aborted(res));
     }
 
     Ok(res)

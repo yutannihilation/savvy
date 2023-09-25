@@ -178,7 +178,7 @@ As you saw above, an owned SEXP can be allocated by using
 If you need the same length of vector as the input, you can pass the `len()` of
 the input `SEXP`.
 
-`new()` returns [`savvy::Result`] because the memory allocation can fail in case
+`new()` returns [`Result`] because the memory allocation can fail in case
 when the vector is too large. If you are sure it won't happen, you can simply
 `unwrap()` it. If you use `new()` directly in the function marked with
 `#[savvy]`, it's as easy as just adding `?` because the return type is always
@@ -229,6 +229,17 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 
 Note that, the efficiency of copying differs depending on the types. For the
 details, see `TryFrom<&[T]>` section later.
+
+For convenience, savvy also provides `TryFrom` for scalar types. This might be
+useful in some cases.
+
+```no_run
+#[savvy]
+fn sum_real(x: RealSxp) -> savvy::Result<savvy::SEXP> {
+    let sum: OwnedRealSxp = x.as_slice().iter().sum::<f64>().try_into()?;
+    Ok(sum.into())
+}
+```
 
 ### Missing values
 
@@ -340,10 +351,10 @@ My concerns on supporting these conversion are
   converted values, which might be unhappy in some cases.
 
 So, you have to write some wrapper R function like below. This might feel a bit
-tiring, but, in general, **please do not avoid R code**. Since you are creating an R
-package, there's a lot you can do in R code instead of making things complicated
-in Rust code. Especially, it's easier on R's side to show user-friendly error
-messages.
+tiring, but, in general, **please do not avoid writing R code**. Since you are
+creating an R package, there's a lot you can do in R code instead of making
+things complicated in Rust code. Especially, it's easier on R's side to show
+user-friendly error messages.
 
 ```text
 identity_int_wrapper <- function(x) {

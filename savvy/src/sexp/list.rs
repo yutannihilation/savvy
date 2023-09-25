@@ -184,9 +184,9 @@ impl OwnedListSxp {
         self.values.iter()
     }
 
-    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) -> crate::Result<()> {
+    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
         if i >= self.len {
-            return Err(crate::Error::new(&format!(
+            return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
             )));
@@ -201,7 +201,7 @@ impl OwnedListSxp {
         Ok(())
     }
 
-    pub fn set_name(&mut self, i: usize, k: &str) -> crate::Result<()> {
+    pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
         // OwnedStringSxp::set_elt() checks the length, so don't check here.
 
         if let Some(names) = self.names.as_mut() {
@@ -216,13 +216,13 @@ impl OwnedListSxp {
         i: usize,
         k: &str,
         v: T,
-    ) -> crate::Result<()> {
+    ) -> crate::error::Result<()> {
         self.set_name(i, k)?;
         self.set_value(i, v)?;
         Ok(())
     }
 
-    pub fn new(len: usize, named: bool) -> crate::Result<Self> {
+    pub fn new(len: usize, named: bool) -> crate::error::Result<Self> {
         let out = crate::alloc_vector(VECSXP, len as _)?;
         let token = protect::insert_to_preserved_list(out);
 
@@ -250,13 +250,13 @@ impl Drop for OwnedListSxp {
 }
 
 impl TryFrom<Sxp> for ListSxp {
-    type Error = crate::Error;
+    type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::Result<Self> {
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
         if !value.is_list() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to list");
-            return Err(crate::Error::UnexpectedType(msg));
+            return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }

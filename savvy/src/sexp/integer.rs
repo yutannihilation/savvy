@@ -92,9 +92,9 @@ impl OwnedIntegerSxp {
         self.inner
     }
 
-    pub fn set_elt(&mut self, i: usize, v: i32) -> crate::Result<()> {
+    pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {
         if i >= self.len {
-            return Err(crate::Error::new(&format!(
+            return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
             )));
@@ -107,8 +107,12 @@ impl OwnedIntegerSxp {
         Ok(())
     }
 
-    pub fn new(len: usize) -> crate::Result<Self> {
+    pub fn new(len: usize) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(INTSXP, len as _)?;
+        Self::new_from_raw_sexp(inner, len)
+    }
+
+    fn new_from_raw_sexp(inner: SEXP, len: usize) -> crate::error::Result<Self> {
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { INTEGER(inner) };
 
@@ -128,13 +132,13 @@ impl Drop for OwnedIntegerSxp {
 }
 
 impl TryFrom<Sxp> for IntegerSxp {
-    type Error = crate::Error;
+    type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::Result<Self> {
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
         if !value.is_integer() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to integer");
-            return Err(crate::Error::UnexpectedType(msg));
+            return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }
@@ -143,10 +147,19 @@ impl TryFrom<Sxp> for IntegerSxp {
 impl TryFrom<&[i32]> for OwnedIntegerSxp {
     type Error = crate::error::Error;
 
-    fn try_from(value: &[i32]) -> crate::Result<Self> {
+    fn try_from(value: &[i32]) -> crate::error::Result<Self> {
         let mut out = Self::new(value.len())?;
         out.as_mut_slice().copy_from_slice(value);
         Ok(out)
+    }
+}
+
+impl TryFrom<i32> for OwnedIntegerSxp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: i32) -> crate::error::Result<Self> {
+        let sexp = unsafe { crate::unwind_protect(|| libR_sys::Rf_ScalarInteger(value))? };
+        Self::new_from_raw_sexp(sexp, 1)
     }
 }
 
