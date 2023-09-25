@@ -204,11 +204,14 @@ Then, you can convert it to [`SEXP`] by `into()`
 Ok(out.into())
 ```
 
-#### 2. `into()`
+#### 2. `try_into()`
 
 Another way is to use a Rust vector to store the results and convert it to an R
-object at the end the function. Note that, while this is convenient, this might
-not be good in terms of efficiency in that this requires double size of memory.
+object at the end the function. This is fallible because this too uses the
+fallible `new()`.
+
+Note that, while this is convenient, this might not be good in terms of
+efficiency in that this requires double size of memory.
 
 ```no_run
 #[savvy]
@@ -400,8 +403,6 @@ different from that of logical and string; since the internal representations
 are the same, savvy uses [`copy_from_slice()`][copy_from_slice], which does a
 `memcpy`, to copy the data efficently (in logical and string case, the values
 are copied one by one).
-
-Note that this is fallible because `new()` is fallible.
 
 [copy_from_slice]: https://doc.rust-lang.org/std/primitive.slice.html#method.copy_from_slice
 
