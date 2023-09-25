@@ -71,35 +71,41 @@ impl OwnedStringSxp {
         self.inner
     }
 
-    pub fn set_elt(&mut self, i: usize, v: &str) -> crate::Result<()> {
+    pub fn set_elt(&mut self, i: usize, v: &str) -> crate::error::Result<()> {
         if i >= self.len {
-            return Err(crate::Error::new(&format!(
+            return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
                 self.len, i
             )));
         }
         unsafe {
-            // We might be able to put `R_NaString` directly without using
-            // <&str>::na(), but probably this is an inevitable cost of
-            // providing <&str>::na().
-            let v_sexp = if v.is_na() {
-                libR_sys::R_NaString
-            } else {
-                crate::unwind_protect(|| {
-                    Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
-                })?
-            };
-
-            SET_STRING_ELT(self.inner, i as _, v_sexp);
+            let v_sexp = SET_STRING_ELT(self.inner, i as _, str_to_charsxp(v)?);
         }
 
         Ok(())
     }
 
-    pub fn new(len: usize) -> crate::Result<Self> {
+    pub fn new(len: usize) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(STRSXP, len as _)?;
+        Self::new_from_raw_sexp(inner, len)
+    }
+
+    fn new_from_raw_sexp(inner: SEXP, len: usize) -> crate::error::Result<Self> {
         let token = protect::insert_to_preserved_list(inner);
         Ok(Self { inner, token, len })
+    }
+}
+
+unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
+    // We might be able to put `R_NaString` directly without using
+    // <&str>::na(), but probably this is an inevitable cost of
+    // providing <&str>::na().
+    if v.is_na() {
+        Ok(libR_sys::R_NaString)
+    } else {
+        crate::unwind_protect(|| {
+            Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
+        })
     }
 }
 
@@ -110,13 +116,13 @@ impl Drop for OwnedStringSxp {
 }
 
 impl TryFrom<Sxp> for StringSxp {
-    type Error = crate::Error;
+    type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::Result<Self> {
+    fn try_from(value: Sxp) -> crate::error::Result<Self> {
         if !value.is_string() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to string");
-            return Err(crate::Error::UnexpectedType(msg));
+            return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
     }
@@ -126,14 +132,41 @@ impl<T> TryFrom<&[T]> for OwnedStringSxp
 where
     T: AsRef<str>, // This works both for &str and String
 {
-    type Error = crate::Error;
+    type Error = crate::error::Error;
 
-    fn try_from(value: &[T]) -> crate::Result<Self> {
+    fn try_from(value: &[T]) -> crate::error::Result<Self> {
         let mut out = Self::new(value.len())?;
         for (i, v) in value.iter().enumerate() {
             out.set_elt(i, v.as_ref())?;
         }
         Ok(out)
+    }
+}
+
+impl TryFrom<&str> for OwnedStringSxp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: &str) -> crate::error::Result<Self> {
+        let sexp = unsafe {
+            // Note: unlike `new()`, this allocates a STRSXP after creating a
+            // CHARSXP. So, the `CHARSXP` needs to be protected.
+            let charsxp = str_to_charsxp(value)?;
+            libR_sys::Rf_protect(charsxp);
+            let out = crate::unwind_protect(|| libR_sys::Rf_ScalarString(charsxp))?;
+            libR_sys::Rf_unprotect(1);
+            out
+        };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
+}
+
+// TODO: if I turn this to `impl<T: AsRef<str>> TryFrom<T>`, the compiler warns
+// this is a conflicting implementation. Why...?
+impl TryFrom<String> for OwnedStringSxp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: String) -> crate::error::Result<Self> {
+        OwnedStringSxp::try_from(value.as_str())
     }
 }
 
