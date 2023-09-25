@@ -1,7 +1,7 @@
 //! # Savvy - An Unfriendly R Interface
 //!
 
-#![doc = include_str!("../../docs/design.md")]
+#![doc = include_str!("../docs/design.md")]
 
 pub mod error;
 pub mod protect;
