@@ -3,8 +3,8 @@
 mod scalar;
 pub use scalar::*;
 
-mod unwind;
-pub use unwind::*;
+mod error_handling;
+pub use error_handling::*;
 
 use savvy::{r_print, savvy};
 

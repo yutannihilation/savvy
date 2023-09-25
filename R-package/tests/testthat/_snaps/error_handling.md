@@ -1,4 +1,4 @@
-# unwind_protect() works as expected
+# error handling works
 
     Code
       safe_stop()

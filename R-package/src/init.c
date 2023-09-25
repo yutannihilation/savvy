@@ -21,7 +21,7 @@ SEXP handle_result(SEXP res_) {
         if (TYPEOF(res_aligned) == CHARSXP) {
             // In case 1, the result is an error message that can be passed to
             // Rf_error() directly.
-            Rf_error("%s", CHAR(res_aligned));
+            Rf_errorcall(R_NilValue, "%s", CHAR(res_aligned));
         } else {
             // In case 2, the result is the token to restart the
             // cleanup process on R's side.
@@ -30,6 +30,16 @@ SEXP handle_result(SEXP res_) {
     }
 
     return (SEXP)res;
+}
+
+SEXP safe_stop__impl() {
+    SEXP res = safe_stop();
+    return handle_result(res);
+}
+
+SEXP raise_error__impl() {
+    SEXP res = raise_error();
+    return handle_result(res);
 }
 
 SEXP to_upper__impl(SEXP x) {
@@ -147,13 +157,10 @@ SEXP sum_real__impl(SEXP x) {
     return handle_result(res);
 }
 
-SEXP safe_stop__impl() {
-    SEXP res = safe_stop();
-    return handle_result(res);
-}
-
 
 static const R_CallMethodDef CallEntries[] = {
+    {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
+    {"raise_error__impl", (DL_FUNC) &raise_error__impl, 0},
     {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
     {"add_suffix__impl", (DL_FUNC) &add_suffix__impl, 2},
     {"times_two_int__impl", (DL_FUNC) &times_two_int__impl, 1},
@@ -177,7 +184,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"scalar_output_string__impl", (DL_FUNC) &scalar_output_string__impl, 0},
     {"sum_int__impl", (DL_FUNC) &sum_int__impl, 1},
     {"sum_real__impl", (DL_FUNC) &sum_real__impl, 1},
-    {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
     {NULL, NULL, 0}
 };
 

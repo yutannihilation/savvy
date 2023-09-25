@@ -18,3 +18,8 @@ fn safe_stop() {
         libR_sys::Rf_error(msg.as_ptr());
     })?;
 }
+
+#[savvy]
+fn raise_error() -> savvy::Result<savvy::SEXP> {
+    Err(savvy::Error::new("This is my custom error"))
+}

@@ -743,8 +743,27 @@ struct Foo {
 }
 ```
 
-
 ## Advanced topics
+
+### Error handling
+
+To propagate your errors to the R session, you can use `savvy::Error::new()` to
+create an error with a custom error message.
+
+```no_run
+#[savvy]
+fn raise_error() -> savvy::Result<savvy::SEXP> {
+    Err(savvy::Error::new("This is my custom error"))
+}
+```
+
+```text
+> raise_error()
+Error: This is my custom error
+```
+
+### Testing
+
 
 ### Use the raw R's C API (libR-sys)
 
@@ -756,6 +775,3 @@ TBD
 
 TBD
 
-### Error handling
-
-### Testing

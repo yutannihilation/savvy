@@ -1,3 +1,5 @@
+SEXP safe_stop();
+SEXP raise_error();
 SEXP to_upper(SEXP x);
 SEXP add_suffix(SEXP x, SEXP y);
 SEXP times_two_int(SEXP x);
@@ -17,7 +19,6 @@ SEXP scalar_output_logical();
 SEXP scalar_output_string();
 SEXP sum_int(SEXP x);
 SEXP sum_real(SEXP x);
-SEXP safe_stop();
 
 // methods and associated functions for Person
 SEXP Person_new();

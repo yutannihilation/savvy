@@ -2,6 +2,16 @@
 #' @keywords internal
 NULL
 
+
+safe_stop <- function() {
+  invisible(.Call(safe_stop__impl))
+}
+
+
+raise_error <- function() {
+  .Call(raise_error__impl)
+}
+
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.
@@ -135,11 +145,6 @@ sum_int <- function(x) {
 
 sum_real <- function(x) {
   .Call(sum_real__impl, x)
-}
-
-
-safe_stop <- function() {
-  invisible(.Call(safe_stop__impl))
 }
 
 #' A person with a name
