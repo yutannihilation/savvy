@@ -11,5 +11,5 @@ repository.workspace = true
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
-savvy-bindgen = { version = "*", path = "../savvy-bindgen" }
+savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
 walkdir = "2"
