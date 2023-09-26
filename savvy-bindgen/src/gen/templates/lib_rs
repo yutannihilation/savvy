@@ -67,8 +67,9 @@ impl Person {
         }
     }
 
-    fn set_name(&mut self, name: &str) {
+    fn set_name(&mut self, name: &str) -> savvy::Result<()> {
         self.name = name.to_string();
+        Ok(())
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
