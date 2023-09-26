@@ -59,31 +59,22 @@ fn alloc_vector(arg1: u32, arg2: isize) -> crate::error::Result<SEXP> {
 // on the corresponding C function.
 //
 // cf. https://en.wikipedia.org/wiki/Tagged_pointer
-pub fn handle_result(result: crate::error::Result<SEXP>) -> SEXP {
-    match result {
-        // NOTE: At first, I wrote `(res as usize & !1) as SEXP` to ensure the
-        // error flag is off, but it's unnecessary because an SEXP should be an
-        // aligned address, otherwise it should have failed before this point,
-        // and unaligned address cannot be restored on the C function's side
-        // anyway.
-        Ok(res) => res,
+pub fn handle_error(e: crate::error::Error) -> SEXP {
+    match e {
+        // The token is already tagged, so pass it as it is.
+        error::Error::Aborted(token) => token,
 
-        Err(e) => match e {
-            // The token is already tagged, so pass it as it is.
-            error::Error::Aborted(token) => token,
+        // In other cases, return the error string with the tag
+        e => unsafe {
+            let msg = e.to_string();
+            let r_error = Rf_mkCharLenCE(
+                msg.as_ptr() as *const i8,
+                msg.len() as i32,
+                cetype_t_CE_UTF8,
+            );
 
-            // In other cases, return the error string with the tag
-            e => unsafe {
-                let msg = e.to_string();
-                let r_error = Rf_mkCharLenCE(
-                    msg.as_ptr() as *const i8,
-                    msg.len() as i32,
-                    cetype_t_CE_UTF8,
-                );
-
-                // set the error flag
-                (r_error as usize | 1) as SEXP
-            },
+            // set the error flag
+            (r_error as usize | 1) as SEXP
         },
     }
 }

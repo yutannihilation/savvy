@@ -121,8 +121,9 @@ mod tests {
                     }
                 }
 
-                fn set_name(&mut self, name: StringSxp) {
+                fn set_name(&mut self, name: StringSxp) -> savvy::Result<()> {
                     self.name = name.iter().next().unwrap().to_string();
+                    Ok(())
                 }
 
                 fn name(&self) -> savvy::Result<savvy::SEXP> {
@@ -131,7 +132,7 @@ mod tests {
                     Ok(out.into())
                 }
 
-                fn do_nothing() {}
+                fn do_nothing() -> savvy::Result<()> {}
             }
         );
 

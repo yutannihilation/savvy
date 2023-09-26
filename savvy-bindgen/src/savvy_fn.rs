@@ -109,6 +109,21 @@ impl SavvyFnArg {
     }
 }
 
+/// Currently, only `Result::<SEXP>`, `Result<()>`, and Self are supported
+pub enum SavvyFnReturnType {
+    ResultSexp(syn::ReturnType),
+    ResultUnit(syn::ReturnType),
+}
+
+impl SavvyFnReturnType {
+    pub fn inner(&self) -> &syn::ReturnType {
+        match self {
+            SavvyFnReturnType::ResultSexp(ret_ty) => ret_ty,
+            SavvyFnReturnType::ResultUnit(ret_ty) => ret_ty,
+        }
+    }
+}
+
 pub enum SavvyFnType {
     BareFunction,
     Constructor(syn::Type),
@@ -127,8 +142,8 @@ pub struct SavvyFn {
     pub fn_type: SavvyFnType,
     /// Function arguments
     pub args: Vec<SavvyFnArg>,
-    /// Whether the function has return value
-    pub has_result: bool,
+    /// Return type of the function
+    pub return_type: SavvyFnReturnType,
     /// Original body of the function
     pub stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
@@ -235,20 +250,159 @@ impl SavvyFn {
             })
             .collect();
 
-        let has_result = match sig.output {
-            syn::ReturnType::Default => false,
-            syn::ReturnType::Type(_, _) => true,
-        };
-
         Self {
             docs,
             attrs,
             fn_name,
             fn_type,
             args: args_new,
-            has_result,
+            // TODO: propagate error
+            return_type: get_savvy_return_type(&sig.output).unwrap(),
             stmts_orig,
             stmts_additional,
+        }
+    }
+}
+
+// Allowed return types are the followings. Note that, `Self` is converted to
+// `EXTPTRSXP`, so the same as `savvy::Result<savvy::SEXP>`.
+//
+// - `savvy::Result<savvy::SEXP>`
+// - `savvy::Result<()>`
+// - `Self`
+fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnReturnType> {
+    match return_type {
+        syn::ReturnType::Default => Err(syn::Error::new_spanned(
+            return_type.clone(),
+            "function must have return type",
+        )),
+        syn::ReturnType::Type(_, ty) => {
+            let e = Err(syn::Error::new_spanned(
+                return_type.clone(),
+                "the return type must be either syn::Result<SEXP> or syn::Result<()>",
+            ));
+
+            // Check if the type path is savvy::Result<..> or Result<..> and get
+            // the arguments inside < >.
+            let path_args = match ty.as_ref() {
+                syn::Type::Path(type_path) => {
+                    if !is_type_path_savvy_or_no_qualifier(type_path) {
+                        return e;
+                    }
+
+                    let last_path_seg = type_path.path.segments.last().unwrap();
+                    match last_path_seg.ident.to_string().as_str() {
+                        "Result" => {}
+                        "Self" => {
+                            let ret_ty: syn::ReturnType =
+                                parse_quote!(-> savvy::Result<savvy::SEXP>);
+                            return Ok(SavvyFnReturnType::ResultSexp(ret_ty));
+                        }
+                        _ => return e,
+                    }
+                    &last_path_seg.arguments
+                }
+                _ => return e,
+            };
+
+            // Check if the args inside < > is either savvy::SEXP, SEXP, or ()
+            match path_args {
+                syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                    args,
+                    ..
+                }) => {
+                    if args.len() != 1 {
+                        return e;
+                    }
+                    match &args.first().unwrap() {
+                        syn::GenericArgument::Type(ty) => match ty {
+                            syn::Type::Tuple(type_tuple) => {
+                                if type_tuple.elems.is_empty() {
+                                    Ok(SavvyFnReturnType::ResultUnit(return_type.clone()))
+                                } else {
+                                    e
+                                }
+                            }
+                            syn::Type::Path(type_path) => {
+                                if !is_type_path_savvy_or_no_qualifier(type_path) {
+                                    return e;
+                                }
+
+                                let last_path_seg = type_path.path.segments.last().unwrap();
+                                if &last_path_seg.ident.to_string() != "SEXP" {
+                                    return e;
+                                }
+
+                                Ok(SavvyFnReturnType::ResultSexp(return_type.clone()))
+                            }
+                            _ => e,
+                        },
+                        _ => e,
+                    }
+                }
+                _ => e,
+            }
+        }
+    }
+}
+
+/// check if the type path either starts with `savvy::` or no qualifier
+fn is_type_path_savvy_or_no_qualifier(type_path: &syn::TypePath) -> bool {
+    if type_path.qself.is_some() || type_path.path.leading_colon.is_some() {
+        return false;
+    }
+
+    match type_path.path.segments.len() {
+        1 => true,
+        2 => {
+            let first_path_seg = type_path.path.segments.first().unwrap();
+            first_path_seg.arguments.is_none() && &first_path_seg.ident.to_string() == "savvy"
+        }
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_detect_return_type() {
+        let ok_cases1: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<SEXP>),
+            parse_quote!(-> savvy::Result<SEXP>),
+            parse_quote!(-> savvy::Result<savvy::SEXP>),
+            parse_quote!(-> Self),
+        ];
+
+        for rt in ok_cases1 {
+            let srt = get_savvy_return_type(rt);
+            assert!(srt.is_ok());
+            assert!(matches!(srt.unwrap(), SavvyFnReturnType::ResultSexp(_)));
+        }
+
+        let ok_cases2: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<()>),
+            parse_quote!(-> savvy::Result<()>),
+        ];
+
+        for rt in ok_cases2 {
+            let srt = get_savvy_return_type(rt);
+            assert!(srt.is_ok());
+            assert!(matches!(srt.unwrap(), SavvyFnReturnType::ResultUnit(_)));
+        }
+
+        let err_cases: &[syn::ReturnType] = &[
+            parse_quote!(-> FOO),
+            parse_quote!(-> savvy::Result<FOO>),
+            parse_quote!(-> savvy::Result<(T, T)>),
+            parse_quote!(-> foo::Result<SEXP>),
+            parse_quote!(),
+        ];
+
+        for rt in err_cases {
+            assert!(get_savvy_return_type(rt).is_err())
         }
     }
 }

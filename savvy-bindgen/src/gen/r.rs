@@ -1,6 +1,6 @@
 use quote::format_ident;
 
-use crate::{ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
+use crate::{savvy_fn::SavvyFnReturnType, ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
 
 fn get_r_doc_comment(docs: &[String]) -> String {
     docs.iter()
@@ -54,11 +54,10 @@ impl SavvyFn {
         let args = args.join(", ");
         let args_call = args_call.join(", ");
 
-        let body = if self.has_result {
-            format!(".Call({args_call})")
-        } else {
-            // If the result is NULL, wrap it with invisible
-            format!("invisible(.Call({args_call}))")
+        // If the result is NULL, wrap it with invisible
+        let body = match self.return_type {
+            SavvyFnReturnType::ResultSexp(_) => format!(".Call({args_call})"),
+            SavvyFnReturnType::ResultUnit(_) => format!("invisible(.Call({args_call}))"),
         };
 
         format!(
@@ -104,11 +103,10 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                let body = if x.has_result {
-                    format!(".Call({args_call})")
-                } else {
-                    // If the result is NULL, wrap it with invisible
-                    format!("invisible(.Call({args_call}))")
+                // If the result is NULL, wrap it with invisible
+                let body = match x.return_type {
+                    SavvyFnReturnType::ResultSexp(_) => format!(".Call({args_call})"),
+                    SavvyFnReturnType::ResultUnit(_) => format!("invisible(.Call({args_call}))"),
                 };
 
                 format!(

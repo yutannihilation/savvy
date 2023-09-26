@@ -83,7 +83,10 @@ Rust functions:
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn add_suffix(x: savvy::SEXP, y: savvy::SEXP) -> savvy::SEXP {
-    savvy::handle_result(savvy_add_suffix_inner(x, y))
+    match savvy_add_suffix_inner(x, y) {
+        Ok(result) => result,
+        Err(e) => savvy::handle_error(e),
+    }
 }
 
 unsafe fn savvy_add_suffix_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
@@ -131,8 +134,8 @@ function must satisfy the following conditions:
 
 * The function's inputs are either non-owned savvy types (e.g., [`IntegerSxp`]
   and [`RealSxp`]) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
-* The function returns `savvy::Result<savvy::SEXP>` or nothing (in the latter
-  case, an invisible `NULL` will be returned instead).
+* The function returns `savvy::Result<savvy::SEXP>` or `savvy::Result<()>` (in
+  the latter case, an invisible `NULL` will be returned instead).
 
 For more flexibility, I plan to support raw `SEXP` as input, but it's not yet.
 
@@ -383,8 +386,9 @@ requires slice.
 
 ```no_run
 #[savvy]
-fn foo(x: IntegerSxp) {
+fn foo(x: IntegerSxp) -> savvy::Result<()> {
     some_function_takes_slice(x.as_slice());
+    Ok(())
 }
 ```
 
@@ -446,7 +450,7 @@ same as `INTSXP`. So, the conversion should be cheap.
 
 ```no_run
 #[savvy]
-fn some_savvy_fun(logical: IntegerSxp) {
+fn some_savvy_fun(logical: IntegerSxp) -> savvy::Result<()> {
     for l in logical.iter() {
         if l.is_na() {
             r_print("NA\n");
@@ -456,6 +460,8 @@ fn some_savvy_fun(logical: IntegerSxp) {
             r_print("FALSE\n");
         }
     }
+
+    Ok(())
 }
 ```
 
@@ -512,15 +518,17 @@ possible because it's too complex.
 
 ```no_run
 #[savvy]
-fn print_list_names(x: ListSxp) {
+fn print_list_names(x: ListSxp) -> savvy::Result<()> {
     for k in x.names_iter() {
         if k.is_empty() {
-            r_print("(no name)");
+            r_print("(no name)")?;
         } else {
-            r_print(k);
+            r_print(k)?;
         }
-        r_print("\n");
+        r_print("\n")?;
     }
+
+    Ok(())
 }
 ```
 
@@ -538,13 +546,15 @@ to extract the inner data.
 
 ```no_run
 #[savvy]
-fn print_list_values_if_int(x: ListSxp) {
+fn print_list_values_if_int(x: ListSxp) -> savvy::Result<()>  {
     for v in x.values_iter() {
         match v {
-            ListElement::Integer(i) => r_print(&format!("int {}\n", i.as_slice()[0])),
-            _ => r_print("not int\n")
+            ListElement::Integer(i) => r_print(&format!("int {}\n", i.as_slice()[0]))?,
+            _ => r_print("not int\n")?
         }
     }
+
+    Ok(())
 }
 ```
 
@@ -562,10 +572,12 @@ If you want pairs of name and value, you can use `iter()`. This is basically a
 
 ```no_run
 #[savvy]
-fn print_list(x: ListSxp) {
+fn print_list(x: ListSxp)  -> savvy::Result<()> {
     for (k, v) in x.iter() {
         // ...snip...
     }
+
+    Ok(())
 }
 ```
 
@@ -658,8 +670,9 @@ impl Person {
         }
     }
 
-    fn set_name(&mut self, name: &str) {
+    fn set_name(&mut self, name: &str) -> savvy::Result<()> {
         self.name = name.to_string();
+        Ok(())
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {

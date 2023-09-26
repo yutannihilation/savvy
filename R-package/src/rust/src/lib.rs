@@ -180,7 +180,7 @@ fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
 /// @returns `NULL`
 /// @export
 #[savvy]
-fn print_list(x: ListSxp) {
+fn print_list(x: ListSxp) -> savvy::Result<()> {
     for (k, v) in x.iter() {
         let content = match v {
             ListElement::Integer(x) => {
@@ -222,6 +222,8 @@ fn print_list(x: ListSxp) {
 
         r_print(format!("{name}: {content}\n").as_str())?;
     }
+
+    Ok(())
 }
 
 struct Person {
@@ -239,8 +241,9 @@ impl Person {
         }
     }
 
-    fn set_name(&mut self, name: &str) {
+    fn set_name(&mut self, name: &str) -> savvy::Result<()> {
         self.name = name.to_string();
+        Ok(())
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {

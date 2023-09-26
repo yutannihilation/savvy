@@ -1,6 +1,6 @@
 use syn::parse_quote;
 
-use crate::{SavvyFn, SavvyFnType};
+use crate::{savvy_fn::SavvyFnReturnType, SavvyFn, SavvyFnType};
 
 impl SavvyFn {
     pub fn generate_inner_fn(&self) -> syn::ItemFn {
@@ -18,78 +18,43 @@ impl SavvyFn {
         let stmts_orig = &self.stmts_orig;
         let attrs = &self.attrs;
 
-        let out: syn::ItemFn = match (&self.fn_type, self.has_result) {
-            // A bare function with result
-            (SavvyFnType::BareFunction, true) => parse_quote!(
+        let ret_ty = self.return_type.inner();
+        let out: syn::ItemFn = match &self.fn_type {
+            // A bare function
+            SavvyFnType::BareFunction => parse_quote!(
                 #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) #ret_ty {
                     #(#stmts_additional)*
                     #(#stmts_orig)*
                 }
             ),
-            // A bare function without result; return a dummy value
-            (SavvyFnType::BareFunction, false) => parse_quote!(
-                #(#attrs)*
-                unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
-                    #(#stmts_additional)*
-                    #(#stmts_orig)*
-
-                    // Dummy return value
-                    Ok(savvy::NullSxp.into())
-                }
-            ),
-            // A method with result
-            (SavvyFnType::Method(ty), true) => parse_quote!(
+            // A method
+            SavvyFnType::Method(ty) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
                     let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
                     (*self__).#fn_name_orig(#(#args_pat),*)
                 }
             ),
-            // A method without result; return a dummy value
-            (SavvyFnType::Method(ty), false) => parse_quote!(
+            // An associated function
+            SavvyFnType::AssociatedFunction(ty) => {
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                        #(#stmts_additional)*
+
+                        #ty::#fn_name_orig(#(#args_pat),*)
+                    }
+                )
+            }
+            SavvyFnType::Constructor(ty) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
-                    let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
-                    #(#stmts_additional)*
-
-                    (*self__).#fn_name_orig(#(#args_pat),*);
-
-                    // Dummy return value
-                    Ok(savvy::NullSxp.into())
-                }
-            ),
-            // An associated function with a result
-            (SavvyFnType::AssociatedFunction(ty), true) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
-                    #(#stmts_additional)*
-
-                    #ty::#fn_name_orig(#(#args_pat),*)
-                }
-            ),
-            // An associated function without result; return a dummy value
-            (SavvyFnType::AssociatedFunction(ty), false) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
-                    #(#stmts_additional)*
-
-                    #ty::#fn_name_orig(#(#args_pat),*);
-
-                    // Dummy return value
-                    Ok(savvy::NullSxp.into())
-                }
-            ),
-            (SavvyFnType::Constructor(ty), _) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) -> savvy::Result<savvy::SEXP> {
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
                     use savvy::IntoExtPtrSxp;
 
                     #(#stmts_additional)*
@@ -112,20 +77,32 @@ impl SavvyFn {
             .map(|arg| arg.to_rust_type_inner())
             .collect();
 
+        let (ok_lhs, ok_rhs): (syn::Expr, syn::Expr) = match &self.return_type {
+            SavvyFnReturnType::ResultSexp(_) => (parse_quote!(result), parse_quote!(result)),
+            SavvyFnReturnType::ResultUnit(_) => {
+                (parse_quote!(_), parse_quote!(savvy::NullSxp.into()))
+            }
+        };
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
             SavvyFnType::Method(_) => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn #fn_name_outer(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::SEXP {
-                    savvy::handle_result(#fn_name_inner(self__, #(#args_pat),*))
+                    match #fn_name_inner(self__, #(#args_pat),*) {
+                        Ok(#ok_lhs) => #ok_rhs,
+                        Err(e) => savvy::handle_error(e),
+                    }
                 }
             ),
             _ => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> savvy::SEXP {
-                    savvy::handle_result(#fn_name_inner(#(#args_pat),*))
+                    match #fn_name_inner(#(#args_pat),*) {
+                        Ok(#ok_lhs) => #ok_rhs,
+                        Err(e) => savvy::handle_error(e),
+                    }
                 }
             ),
         };

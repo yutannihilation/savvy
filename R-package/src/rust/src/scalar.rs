@@ -1,23 +1,27 @@
 use savvy::{savvy, IntegerSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp};
 
 #[savvy]
-fn scalar_input_int(x: i32) {
+fn scalar_input_int(x: i32) -> savvy::Result<()> {
     savvy::r_print(&format!("{}\n", x))?;
+    Ok(())
 }
 
 #[savvy]
-fn scalar_input_real(x: f64) {
+fn scalar_input_real(x: f64) -> savvy::Result<()> {
     savvy::r_print(&format!("{}\n", x))?;
+    Ok(())
 }
 
 #[savvy]
-fn scalar_input_logical(x: bool) {
+fn scalar_input_logical(x: bool) -> savvy::Result<()> {
     savvy::r_print(&format!("{}\n", x))?;
+    Ok(())
 }
 
 #[savvy]
-fn scalar_input_string(x: &str) {
+fn scalar_input_string(x: &str) -> savvy::Result<()> {
     savvy::r_print(&format!("{}\n", x))?;
+    Ok(())
 }
 
 #[savvy]
