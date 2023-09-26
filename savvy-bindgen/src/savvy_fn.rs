@@ -112,6 +112,12 @@ impl SavvyFnArg {
     }
 }
 
+/// Currently, only `Result::<SEXP>` or `Result<()>` is supported
+pub enum SavvyFnReturnType {
+    ResultSexp(syn::ReturnType),
+    ResultUnit(syn::ReturnType),
+}
+
 pub enum SavvyFnType {
     BareFunction,
     Constructor(syn::Type),
@@ -256,7 +262,7 @@ impl SavvyFn {
     }
 }
 
-fn check_return_type(return_type: &syn::ReturnType) -> syn::Result<()> {
+fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnReturnType> {
     match return_type {
         syn::ReturnType::Default => Err(syn::Error::new_spanned(
             return_type.clone(),
@@ -298,7 +304,7 @@ fn check_return_type(return_type: &syn::ReturnType) -> syn::Result<()> {
                         syn::GenericArgument::Type(ty) => match ty {
                             syn::Type::Tuple(type_tuple) => {
                                 if type_tuple.elems.is_empty() {
-                                    Ok(())
+                                    Ok(SavvyFnReturnType::ResultUnit(return_type.clone()))
                                 } else {
                                     e
                                 }
@@ -313,7 +319,7 @@ fn check_return_type(return_type: &syn::ReturnType) -> syn::Result<()> {
                                     return e;
                                 }
 
-                                Ok(())
+                                Ok(SavvyFnReturnType::ResultSexp(return_type.clone()))
                             }
                             _ => e,
                         },
@@ -349,15 +355,27 @@ mod tests {
 
     #[test]
     fn test_detect_return_type() {
-        let ok_cases: &[syn::ReturnType] = &[
+        let ok_cases1: &[syn::ReturnType] = &[
             parse_quote!(-> Result<SEXP>),
             parse_quote!(-> savvy::Result<SEXP>),
             parse_quote!(-> savvy::Result<savvy::SEXP>),
+        ];
+
+        for rt in ok_cases1 {
+            let srt = get_savvy_return_type(rt);
+            assert!(srt.is_ok());
+            assert!(matches!(srt.unwrap(), SavvyFnReturnType::ResultSexp(_)));
+        }
+
+        let ok_cases2: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<()>),
             parse_quote!(-> savvy::Result<()>),
         ];
 
-        for rt in ok_cases {
-            assert!(check_return_type(rt).is_ok())
+        for rt in ok_cases2 {
+            let srt = get_savvy_return_type(rt);
+            assert!(srt.is_ok());
+            assert!(matches!(srt.unwrap(), SavvyFnReturnType::ResultUnit(_)));
         }
 
         let err_cases: &[syn::ReturnType] = &[
@@ -369,7 +387,7 @@ mod tests {
         ];
 
         for rt in err_cases {
-            assert!(check_return_type(rt).is_err())
+            assert!(get_savvy_return_type(rt).is_err())
         }
     }
 }
