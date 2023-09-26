@@ -1,4 +1,7 @@
+use std::path;
+
 use quote::format_ident;
+use syn::spanned::Spanned;
 use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::{savvy_impl::SavvyImpl, utils::extract_docs};
@@ -249,6 +252,124 @@ impl SavvyFn {
             has_result,
             stmts_orig,
             stmts_additional,
+        }
+    }
+}
+
+fn check_return_type(return_type: &syn::ReturnType) -> syn::Result<()> {
+    match return_type {
+        syn::ReturnType::Default => Err(syn::Error::new_spanned(
+            return_type.clone(),
+            "function must have return type",
+        )),
+        syn::ReturnType::Type(_, ty) => {
+            let e = Err(syn::Error::new_spanned(
+                return_type.clone(),
+                "the return type must be either syn::Result<SEXP> or syn::Result<()>",
+            ));
+
+            // Check if the type path is savvy::Result<..> or Result<..> and get
+            // the arguments inside < >.
+            let path_args = match ty.as_ref() {
+                syn::Type::Path(type_path) => {
+                    if !is_type_path_savvy_or_no_qualifier(type_path) {
+                        return e;
+                    }
+
+                    let last_path_seg = type_path.path.segments.last().unwrap();
+                    if &last_path_seg.ident.to_string() != "Result" {
+                        return e;
+                    }
+                    &last_path_seg.arguments
+                }
+                _ => return e,
+            };
+
+            // Check if the args inside < > is either savvy::SEXP, SEXP, or ()
+            match path_args {
+                syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                    args,
+                    ..
+                }) => {
+                    if args.len() != 1 {
+                        return e;
+                    }
+                    match &args.first().unwrap() {
+                        syn::GenericArgument::Type(ty) => match ty {
+                            syn::Type::Tuple(type_tuple) => {
+                                if type_tuple.elems.is_empty() {
+                                    Ok(())
+                                } else {
+                                    e
+                                }
+                            }
+                            syn::Type::Path(type_path) => {
+                                if !is_type_path_savvy_or_no_qualifier(type_path) {
+                                    return e;
+                                }
+
+                                let last_path_seg = type_path.path.segments.last().unwrap();
+                                if &last_path_seg.ident.to_string() != "SEXP" {
+                                    return e;
+                                }
+
+                                Ok(())
+                            }
+                            _ => e,
+                        },
+                        _ => e,
+                    }
+                }
+                _ => e,
+            }
+        }
+    }
+}
+
+/// check if the type path either starts with `savvy::` or no qualifier
+fn is_type_path_savvy_or_no_qualifier(type_path: &syn::TypePath) -> bool {
+    if type_path.qself.is_some() || type_path.path.leading_colon.is_some() {
+        return false;
+    }
+
+    match type_path.path.segments.len() {
+        1 => true,
+        2 => {
+            let first_path_seg = type_path.path.segments.first().unwrap();
+            first_path_seg.arguments.is_none() && &first_path_seg.ident.to_string() == "savvy"
+        }
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_detect_return_type() {
+        let ok_cases: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<SEXP>),
+            parse_quote!(-> savvy::Result<SEXP>),
+            parse_quote!(-> savvy::Result<savvy::SEXP>),
+            parse_quote!(-> savvy::Result<()>),
+        ];
+
+        for rt in ok_cases {
+            assert!(check_return_type(rt).is_ok())
+        }
+
+        let err_cases: &[syn::ReturnType] = &[
+            parse_quote!(-> FOO),
+            parse_quote!(-> savvy::Result<FOO>),
+            parse_quote!(-> savvy::Result<(T, T)>),
+            parse_quote!(-> foo::Result<SEXP>),
+            parse_quote!(),
+        ];
+
+        for rt in err_cases {
+            assert!(check_return_type(rt).is_err())
         }
     }
 }
