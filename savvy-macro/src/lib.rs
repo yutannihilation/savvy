@@ -132,7 +132,10 @@ mod tests {
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn foo() -> savvy::SEXP {
-                    savvy::handle_result(savvy_foo_inner())
+                    match savvy_foo_inner() {
+                        Ok(result) => result,
+                        Err(e) => savvy::handle_error(e),
+                    }
                 }
             ),
         );
@@ -155,7 +158,10 @@ mod tests {
                     x: savvy::SEXP,
                     y: savvy::SEXP
                 ) -> savvy::SEXP {
-                    savvy::handle_result(savvy_foo_inner(x, y))
+                    match savvy_foo_inner(x, y) {
+                        Ok(result) => result,
+                        Err(e) => savvy::handle_error(e),
+                    }
                 }
             ),
         );
