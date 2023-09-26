@@ -1,7 +1,4 @@
-use std::path;
-
 use quote::format_ident;
-use syn::spanned::Spanned;
 use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::{savvy_impl::SavvyImpl, utils::extract_docs};
@@ -112,10 +109,19 @@ impl SavvyFnArg {
     }
 }
 
-/// Currently, only `Result::<SEXP>` or `Result<()>` is supported
+/// Currently, only `Result::<SEXP>`, `Result<()>`, and Self are supported
 pub enum SavvyFnReturnType {
     ResultSexp(syn::ReturnType),
     ResultUnit(syn::ReturnType),
+}
+
+impl SavvyFnReturnType {
+    pub fn inner(&self) -> &syn::ReturnType {
+        match self {
+            SavvyFnReturnType::ResultSexp(ret_ty) => ret_ty,
+            SavvyFnReturnType::ResultUnit(ret_ty) => ret_ty,
+        }
+    }
 }
 
 pub enum SavvyFnType {
@@ -136,8 +142,8 @@ pub struct SavvyFn {
     pub fn_type: SavvyFnType,
     /// Function arguments
     pub args: Vec<SavvyFnArg>,
-    /// Whether the function has return value
-    pub has_result: bool,
+    /// Return type of the function
+    pub return_type: SavvyFnReturnType,
     /// Original body of the function
     pub stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
@@ -244,24 +250,26 @@ impl SavvyFn {
             })
             .collect();
 
-        let has_result = match sig.output {
-            syn::ReturnType::Default => false,
-            syn::ReturnType::Type(_, _) => true,
-        };
-
         Self {
             docs,
             attrs,
             fn_name,
             fn_type,
             args: args_new,
-            has_result,
+            // TODO: propagate error
+            return_type: get_savvy_return_type(&sig.output).unwrap(),
             stmts_orig,
             stmts_additional,
         }
     }
 }
 
+// Allowed return types are the followings. Note that, `Self` is converted to
+// `EXTPTRSXP`, so the same as `savvy::Result<savvy::SEXP>`.
+//
+// - `savvy::Result<savvy::SEXP>`
+// - `savvy::Result<()>`
+// - `Self`
 fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnReturnType> {
     match return_type {
         syn::ReturnType::Default => Err(syn::Error::new_spanned(
@@ -283,8 +291,14 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
                     }
 
                     let last_path_seg = type_path.path.segments.last().unwrap();
-                    if &last_path_seg.ident.to_string() != "Result" {
-                        return e;
+                    match last_path_seg.ident.to_string().as_str() {
+                        "Result" => {}
+                        "Self" => {
+                            let ret_ty: syn::ReturnType =
+                                parse_quote!(-> savvy::Result<savvy::SEXP>);
+                            return Ok(SavvyFnReturnType::ResultSexp(ret_ty));
+                        }
+                        _ => return e,
                     }
                     &last_path_seg.arguments
                 }
@@ -359,6 +373,7 @@ mod tests {
             parse_quote!(-> Result<SEXP>),
             parse_quote!(-> savvy::Result<SEXP>),
             parse_quote!(-> savvy::Result<savvy::SEXP>),
+            parse_quote!(-> Self),
         ];
 
         for rt in ok_cases1 {
