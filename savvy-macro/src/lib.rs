@@ -65,11 +65,6 @@ mod tests {
         assert_eq!(result, expected);
     }
 
-    fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig).generate_outer_fn();
-        assert_eq!(result, expected);
-    }
-
     #[test]
     fn test_generate_inner_fn() {
         assert_eq_inner(
@@ -82,6 +77,22 @@ mod tests {
             parse_quote!(
                 unsafe fn savvy_foo_inner() -> savvy::Result<savvy::SEXP> {
                     bar()
+                }
+            ),
+        );
+
+        assert_eq_inner(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<()> {
+                    bar();
+                    Ok(())
+                }
+            ),
+            parse_quote!(
+                unsafe fn savvy_foo_inner() -> savvy::Result<()> {
+                    bar();
+                    Ok(())
                 }
             ),
         );
@@ -119,6 +130,11 @@ mod tests {
         );
     }
 
+    fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
+        let result = SavvyFn::from_fn(&orig).generate_outer_fn();
+        assert_eq!(result, expected);
+    }
+
     #[test]
     fn test_generate_outer_fn() {
         assert_eq_outer(
@@ -134,6 +150,26 @@ mod tests {
                 pub unsafe extern "C" fn foo() -> savvy::SEXP {
                     match savvy_foo_inner() {
                         Ok(result) => result,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+        );
+
+        assert_eq_outer(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<()> {
+                    bar();
+                    Ok(())
+                }
+            ),
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn foo() -> savvy::SEXP {
+                    match savvy_foo_inner() {
+                        Ok(_) => savvy::NullSxp.into(),
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -164,6 +200,80 @@ mod tests {
                     }
                 }
             ),
+        );
+    }
+
+    fn assert_eq_outer_impl(orig: &syn::ItemImpl, expected: syn::ItemFn, i: usize) {
+        let result = SavvyImpl::new(orig).fns[i].generate_outer_fn();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_generate_outer_fn_impl() {
+        let impl1: syn::ItemImpl = parse_quote!(
+            #[savvy]
+            impl Person {
+                fn new() -> Self {
+                    Self {}
+                }
+                fn name(&self) -> savvy::Result<savvy::SEXP> {
+                    Ok(out.into())
+                }
+                fn set_name(&self, name: StringSxp) -> Result<()> {
+                    Ok(())
+                }
+            }
+        );
+
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_new() -> savvy::SEXP {
+                    match savvy_Person_new_inner() {
+                        Ok(result) => result,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            0,
+        );
+
+        // TODO
+        //
+        // assert_eq_outer_impl(
+        //     &impl1,
+        //     parse_quote!(
+        //         #[allow(clippy::missing_safety_doc)]
+        //         #[no_mangle]
+        //         pub unsafe extern "C" fn Person_name(self__: savvy::SEXP) -> savvy::SEXP {
+        //             match savvy_Person_name_inner(self__) {
+        //                 Ok(result) => result,
+        //                 Err(e) => savvy::handle_error(e),
+        //             }
+        //         }
+        //     ),
+        //     1,
+        // );
+
+        #[rustfmt::skip]
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_set_name(
+                    self__: savvy::SEXP,
+                    name: savvy::SEXP
+                ) -> savvy::SEXP {
+                    match savvy_Person_set_name_inner(self__, name) {
+                        Ok(_) => savvy::NullSxp.into(),
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            2,
         );
     }
 }
