@@ -4,7 +4,7 @@ NULL
 
 
 safe_stop <- function() {
-  invisible(.Call(safe_stop__impl))
+  .Call(safe_stop__impl)
 }
 
 
@@ -94,27 +94,27 @@ or_logical <- function(x, y) {
 #' @returns `NULL`
 #' @export
 print_list <- function(x) {
-  invisible(.Call(print_list__impl, x))
+  .Call(print_list__impl, x)
 }
 
 
 scalar_input_int <- function(x) {
-  invisible(.Call(scalar_input_int__impl, x))
+  .Call(scalar_input_int__impl, x)
 }
 
 
 scalar_input_real <- function(x) {
-  invisible(.Call(scalar_input_real__impl, x))
+  .Call(scalar_input_real__impl, x)
 }
 
 
 scalar_input_logical <- function(x) {
-  invisible(.Call(scalar_input_logical__impl, x))
+  .Call(scalar_input_logical__impl, x)
 }
 
 
 scalar_input_string <- function(x) {
-  invisible(.Call(scalar_input_string__impl, x))
+  .Call(scalar_input_string__impl, x)
 }
 
 
@@ -165,7 +165,7 @@ Person <- function() {
 
 Person_set_name <- function(self) {
   function(name) {
-    invisible(.Call(Person_set_name__impl, self, name))
+    .Call(Person_set_name__impl, self, name)
   }
 }
 
