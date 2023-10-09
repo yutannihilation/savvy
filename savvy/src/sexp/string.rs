@@ -33,8 +33,8 @@ impl StringSxp {
         }
     }
 
-    pub fn to_vec(&self) -> Vec<&'static str> {
-        self.iter().collect()
+    pub fn to_vec(&self) -> Vec<String> {
+        self.iter().map(|x| x.to_string()).collect()
     }
 
     pub fn inner(&self) -> SEXP {
@@ -63,8 +63,8 @@ impl OwnedStringSxp {
         }
     }
 
-    pub fn to_vec(&self) -> Vec<&'static str> {
-        self.iter().collect()
+    pub fn to_vec(&self) -> Vec<String> {
+        self.iter().map(|x| x.to_string()).collect()
     }
 
     pub fn inner(&self) -> SEXP {
@@ -193,7 +193,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
     // The lifetime here is 'static, not 'a, in the assumption that
     // `Rf_translateCharUTF8()` allocate the string on R's side so it should be
     // there until the R session ends.
-    type Item = &'static str;
+    type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
@@ -216,7 +216,11 @@ impl<'a> Iterator for StringSxpIter<'a> {
 
             // As `e_utf8` is translated into UTF-8, it must be a valid UTF-8
             // data, so we just unwrap it without any aditional check.
-            Some(CStr::from_ptr(e_utf8).to_str().unwrap())
+            Some(
+                CStr::from_ptr(e_utf8)
+                    .to_str()
+                    .expect("Invalid UTF-8 character"),
+            )
         }
     }
 

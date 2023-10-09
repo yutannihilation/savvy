@@ -8,7 +8,7 @@ use crate::{
     OwnedStringSxp, RealSxp, StringSxp,
 };
 
-use super::Sxp;
+use super::{string::StringSxpIter, Sxp};
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -123,16 +123,14 @@ impl ListSxp {
         }
     }
 
-    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+    pub fn names_iter(&self) -> NamesIter {
         let names_sexp = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
 
-        let names: Vec<&'static str> = if names_sexp == unsafe { R_NilValue } {
-            std::iter::repeat("").take(self.len()).collect()
+        if names_sexp == unsafe { R_NilValue } {
+            NamesIter::Unnamed(std::iter::repeat("").take(self.len()))
         } else {
-            StringSxp(names_sexp).iter().collect()
-        };
-
-        names.into_iter()
+            NamesIter::Named(StringSxp(names_sexp).iter())
+        }
     }
 
     pub fn iter(&self) -> ListSxpIter {
@@ -172,7 +170,7 @@ impl OwnedListSxp {
         self.values.values_iter()
     }
 
-    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+    pub fn names_iter(&self) -> NamesIter<'_> {
         self.values.names_iter()
     }
 
@@ -296,4 +294,20 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
     }
 }
 
-type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;
+pub enum NamesIter<'a> {
+    Named(StringSxpIter<'a>),
+    Unnamed(std::iter::Take<std::iter::Repeat<&'static str>>),
+}
+
+impl<'a> Iterator for NamesIter<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            NamesIter::Named(i) => i.next(),
+            NamesIter::Unnamed(i) => i.next(),
+        }
+    }
+}
+
+type ListSxpIter<'a> = std::iter::Zip<NamesIter<'a>, ListSxpValueIter<'a>>;
