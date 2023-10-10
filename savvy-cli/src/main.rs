@@ -16,7 +16,7 @@ use savvy_bindgen::generate_r_impl_file;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
-#[command(about, long_about = None)]
+#[command(about, version, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
