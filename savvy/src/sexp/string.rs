@@ -1,8 +1,8 @@
 use std::ffi::CStr;
 
 use libR_sys::{
-    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength, SET_STRING_ELT, SEXP,
-    STRING_ELT, STRSXP,
+    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength, R_CHAR, SET_STRING_ELT,
+    SEXP, STRING_ELT, STRSXP,
 };
 
 use super::na::NotAvailableValue;
@@ -190,9 +190,17 @@ pub struct StringSxpIter<'a> {
 }
 
 impl<'a> Iterator for StringSxpIter<'a> {
-    // The lifetime here is 'static, not 'a, in the assumption that
-    // `Rf_translateCharUTF8()` allocate the string on R's side so it should be
-    // there until the R session ends.
+    // The lifetime here is 'static, not 'a, in the assumption that strings in
+    // `R_StringHash`, the global `CHARSXP` cache, won't be deleted during the R
+    // session.
+    //
+    // Note that, I don't use `Rf_translateCharUTF8()` here because it doesn't
+    // use `R_StringHash` and allocates the string on R's side, which means it's
+    // not guaranteed to stay during the whole R session.
+    //
+    // cf.)
+    // - https://cran.r-project.org/doc/manuals/r-devel/R-ints.html#The-CHARSXP-cache
+    // - https://github.com/wch/r-source/blob/023ada039c86bf9b65983a71110c586b5994e18d/src/main/sysutils.c#L1284-L1296
     type Item = &'static str;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -212,11 +220,17 @@ impl<'a> Iterator for StringSxpIter<'a> {
                 return Some(Self::Item::na());
             }
 
-            let e_utf8 = Rf_translateCharUTF8(e);
+            // I bravely assume all string is in the valid UTF-8 because using
+            // `Rf_translateCharUTF8()` might bring some trouble.
+            let ptr = R_CHAR(e) as *const u8;
+            let e_utf8 = std::slice::from_raw_parts(ptr, Rf_xlength(e) as usize + 1); // +1 for NUL
 
-            // As `e_utf8` is translated into UTF-8, it must be a valid UTF-8
-            // data, so we just unwrap it without any aditional check.
-            Some(CStr::from_ptr(e_utf8).to_str().unwrap())
+            // Use CStr to check the UTF-8 validity.
+            Some(
+                CStr::from_bytes_with_nul_unchecked(e_utf8)
+                    .to_str()
+                    .unwrap_or_default(),
+            )
         }
     }
 
