@@ -22,10 +22,10 @@ pub struct OwnedListSxp {
 // succeed. Maybe replace this with Sxp?
 pub struct UnsupportedSxp(SEXP);
 
-pub enum ListElement {
+pub enum ListElement<'a> {
     Integer(IntegerSxp),
     Real(RealSxp),
-    String(StringSxp),
+    String(StringSxp<'a>),
     Logical(LogicalSxp),
     List(ListSxp),
     Null(NullSxp),

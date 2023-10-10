@@ -31,7 +31,7 @@ impl_try_from_scalar!(i32, IntegerSxp);
 impl_try_from_scalar!(f64, RealSxp);
 
 // bool doesn't have na() method, so define manually.
-impl TryFrom<Sxp> for String {
+impl<'a> TryFrom<Sxp> for &'a str {
     type Error = crate::error::Error;
 
     fn try_from(value: Sxp) -> crate::error::Result<Self> {
@@ -46,7 +46,7 @@ impl TryFrom<Sxp> for String {
             return Err(crate::error::Error::NotScalar);
         }
 
-        Ok(result.to_string())
+        Ok(result)
     }
 }
 

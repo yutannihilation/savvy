@@ -9,16 +9,19 @@ use super::na::NotAvailableValue;
 use super::Sxp;
 use crate::protect;
 
-pub struct StringSxp(pub SEXP);
+pub struct StringSxp<'a> {
+    pub inner: SEXP,
+    marker: std::marker::PhantomData<&'a SEXP>,
+}
 pub struct OwnedStringSxp {
     inner: SEXP,
     token: SEXP,
     len: usize,
 }
 
-impl StringSxp {
+impl<'a> StringSxp<'a> {
     pub fn len(&self) -> usize {
-        unsafe { Rf_xlength(self.0) as _ }
+        unsafe { Rf_xlength(self.inner) as _ }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -27,7 +30,7 @@ impl StringSxp {
 
     pub fn iter(&self) -> StringSxpIter {
         StringSxpIter {
-            sexp: &self.0,
+            sexp: &self.inner,
             i: 0,
             len: self.len(),
         }
@@ -38,7 +41,7 @@ impl StringSxp {
     }
 
     pub fn inner(&self) -> SEXP {
-        self.0
+        self.inner
     }
 }
 
@@ -52,7 +55,10 @@ impl OwnedStringSxp {
     }
 
     pub fn as_read_only(&self) -> StringSxp {
-        StringSxp(self.inner)
+        StringSxp {
+            inner: self.inner,
+            marker: std::marker::PhantomData,
+        }
     }
 
     pub fn iter(&self) -> StringSxpIter {
@@ -115,7 +121,7 @@ impl Drop for OwnedStringSxp {
     }
 }
 
-impl TryFrom<Sxp> for StringSxp {
+impl<'a> TryFrom<Sxp> for StringSxp<'a> {
     type Error = crate::error::Error;
 
     fn try_from(value: Sxp) -> crate::error::Result<Self> {
@@ -124,7 +130,10 @@ impl TryFrom<Sxp> for StringSxp {
             let msg = format!("Cannot convert {type_name} to string");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
-        Ok(Self(value.0))
+        Ok(Self {
+            inner: value.0,
+            marker: std::marker::PhantomData,
+        })
     }
 }
 
@@ -171,7 +180,7 @@ impl TryFrom<String> for OwnedStringSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<StringSxp> for SEXP {
+impl<'a> From<StringSxp<'a>> for SEXP {
     fn from(value: StringSxp) -> Self {
         value.inner()
     }
