@@ -1,6 +1,6 @@
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
-    TYPEOF, VECSXP, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_protect, Rf_setAttrib, Rf_unprotect, Rf_xlength,
+    SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
 };
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
     OwnedStringSxp, RealSxp, StringSxp,
 };
 
-use super::{string::StringSxpIter, Sxp};
+use super::Sxp;
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -123,14 +123,24 @@ impl ListSxp {
         }
     }
 
-    pub fn names_iter(&self) -> NamesIter {
-        let names_sexp = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
+    // TODO: can this return &'a str?
+    pub fn names_iter(&self) -> std::vec::IntoIter<String> {
+        let names_sexp = unsafe { Rf_protect(Rf_getAttrib(self.inner(), R_NamesSymbol)) };
 
-        if names_sexp == unsafe { R_NilValue } {
-            NamesIter::Unnamed(std::iter::repeat("").take(self.len()))
+        let names: Vec<String> = if names_sexp == unsafe { R_NilValue } {
+            std::iter::repeat("".to_string()).take(self.len()).collect()
         } else {
-            NamesIter::Named(StringSxp(names_sexp).iter())
+            StringSxp(names_sexp)
+                .iter()
+                .map(|x| x.to_string())
+                .collect()
+        };
+
+        unsafe {
+            Rf_unprotect(1);
         }
+
+        names.into_iter()
     }
 
     pub fn iter(&self) -> ListSxpIter {
@@ -170,7 +180,7 @@ impl OwnedListSxp {
         self.values.values_iter()
     }
 
-    pub fn names_iter(&self) -> NamesIter<'_> {
+    pub fn names_iter(&self) -> std::vec::IntoIter<String> {
         self.values.names_iter()
     }
 
@@ -294,20 +304,4 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
     }
 }
 
-pub enum NamesIter<'a> {
-    Named(StringSxpIter<'a>),
-    Unnamed(std::iter::Take<std::iter::Repeat<&'static str>>),
-}
-
-impl<'a> Iterator for NamesIter<'a> {
-    type Item = &'a str;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            NamesIter::Named(i) => i.next(),
-            NamesIter::Unnamed(i) => i.next(),
-        }
-    }
-}
-
-type ListSxpIter<'a> = std::iter::Zip<NamesIter<'a>, ListSxpValueIter<'a>>;
+type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<String>, ListSxpValueIter<'a>>;
