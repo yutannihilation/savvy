@@ -193,9 +193,10 @@ impl<'a> Iterator for StringSxpIter<'a> {
     // `R_StringHash`, the global `CHARSXP` cache, won't be deleted during the R
     // session.
     //
-    // Note that, I don't use `Rf_translateCharUTF8()` here because it doesn't
-    // use `R_StringHash` and allocates the string on R's side, which means it's
-    // not guaranteed to stay during the whole R session.
+    // Note that, in order to stick with 'static lifetime, I can't use
+    // `Rf_translateCharUTF8()` here because it doesn't use `R_StringHash` and
+    // allocates the string on R's side, which means it's not guaranteed to stay
+    // during the whole R session.
     //
     // cf.)
     // - https://cran.r-project.org/doc/manuals/r-devel/R-ints.html#The-CHARSXP-cache
@@ -219,8 +220,8 @@ impl<'a> Iterator for StringSxpIter<'a> {
                 return Some(Self::Item::na());
             }
 
-            // I bravely assume all string is in the valid UTF-8 because using
-            // `Rf_translateCharUTF8()` might bring some trouble.
+            // I bravely assume all strings are valid UTF-8 and don't use
+            // `Rf_translateCharUTF8()`!
             let ptr = R_CHAR(e) as *const u8;
             let e_utf8 = std::slice::from_raw_parts(ptr, Rf_xlength(e) as usize + 1); // +1 for NUL
 
