@@ -1,6 +1,6 @@
 use libR_sys::{
-    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_protect, Rf_setAttrib, Rf_unprotect, Rf_xlength,
-    SET_VECTOR_ELT, SEXP, TYPEOF, VECSXP, VECTOR_ELT,
+    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
+    TYPEOF, VECSXP, VECTOR_ELT,
 };
 
 use crate::{
@@ -22,10 +22,10 @@ pub struct OwnedListSxp {
 // succeed. Maybe replace this with Sxp?
 pub struct UnsupportedSxp(SEXP);
 
-pub enum ListElement<'a> {
+pub enum ListElement {
     Integer(IntegerSxp),
     Real(RealSxp),
-    String(StringSxp<'a>),
+    String(StringSxp),
     Logical(LogicalSxp),
     List(ListSxp),
     Null(NullSxp),
@@ -123,22 +123,14 @@ impl ListSxp {
         }
     }
 
-    // TODO: can this return &'a str?
-    pub fn names_iter(&self) -> std::vec::IntoIter<String> {
-        let names_sexp = unsafe { Rf_protect(Rf_getAttrib(self.inner(), R_NamesSymbol)) };
+    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+        let names_sexp = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
 
-        let names: Vec<String> = if names_sexp == unsafe { R_NilValue } {
-            std::iter::repeat("".to_string()).take(self.len()).collect()
+        let names: Vec<&'static str> = if names_sexp == unsafe { R_NilValue } {
+            std::iter::repeat("").take(self.len()).collect()
         } else {
-            StringSxp(names_sexp)
-                .iter()
-                .map(|x| x.to_string())
-                .collect()
+            StringSxp(names_sexp).iter().collect()
         };
-
-        unsafe {
-            Rf_unprotect(1);
-        }
 
         names.into_iter()
     }
@@ -180,7 +172,7 @@ impl OwnedListSxp {
         self.values.values_iter()
     }
 
-    pub fn names_iter(&self) -> std::vec::IntoIter<String> {
+    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
         self.values.names_iter()
     }
 
@@ -304,4 +296,4 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
     }
 }
 
-type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<String>, ListSxpValueIter<'a>>;
+type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;

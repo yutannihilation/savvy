@@ -9,19 +9,16 @@ use super::na::NotAvailableValue;
 use super::Sxp;
 use crate::protect;
 
-pub struct StringSxp<'a> {
-    pub inner: SEXP,
-    marker: std::marker::PhantomData<&'a SEXP>,
-}
+pub struct StringSxp(pub SEXP);
 pub struct OwnedStringSxp {
     inner: SEXP,
     token: SEXP,
     len: usize,
 }
 
-impl<'a> StringSxp<'a> {
+impl StringSxp {
     pub fn len(&self) -> usize {
-        unsafe { Rf_xlength(self.inner) as _ }
+        unsafe { Rf_xlength(self.0) as _ }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -30,18 +27,18 @@ impl<'a> StringSxp<'a> {
 
     pub fn iter(&self) -> StringSxpIter {
         StringSxpIter {
-            sexp: &self.inner,
+            sexp: &self.0,
             i: 0,
             len: self.len(),
         }
     }
 
-    pub fn to_vec(&self) -> Vec<String> {
-        self.iter().map(|x| x.to_string()).collect()
+    pub fn to_vec(&self) -> Vec<&'static str> {
+        self.iter().collect()
     }
 
     pub fn inner(&self) -> SEXP {
-        self.inner
+        self.0
     }
 }
 
@@ -55,10 +52,7 @@ impl OwnedStringSxp {
     }
 
     pub fn as_read_only(&self) -> StringSxp {
-        StringSxp {
-            inner: self.inner,
-            marker: std::marker::PhantomData,
-        }
+        StringSxp(self.inner)
     }
 
     pub fn iter(&self) -> StringSxpIter {
@@ -69,8 +63,8 @@ impl OwnedStringSxp {
         }
     }
 
-    pub fn to_vec(&self) -> Vec<String> {
-        self.iter().map(|x| x.to_string()).collect()
+    pub fn to_vec(&self) -> Vec<&'static str> {
+        self.iter().collect()
     }
 
     pub fn inner(&self) -> SEXP {
@@ -121,7 +115,7 @@ impl Drop for OwnedStringSxp {
     }
 }
 
-impl<'a> TryFrom<Sxp> for StringSxp<'a> {
+impl TryFrom<Sxp> for StringSxp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sxp) -> crate::error::Result<Self> {
@@ -130,10 +124,7 @@ impl<'a> TryFrom<Sxp> for StringSxp<'a> {
             let msg = format!("Cannot convert {type_name} to string");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
-        Ok(Self {
-            inner: value.0,
-            marker: std::marker::PhantomData,
-        })
+        Ok(Self(value.0))
     }
 }
 
@@ -180,7 +171,7 @@ impl TryFrom<String> for OwnedStringSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl<'a> From<StringSxp<'a>> for SEXP {
+impl From<StringSxp> for SEXP {
     fn from(value: StringSxp) -> Self {
         value.inner()
     }
@@ -202,7 +193,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
     // The lifetime here is 'static, not 'a, in the assumption that
     // `Rf_translateCharUTF8()` allocate the string on R's side so it should be
     // there until the R session ends.
-    type Item = &'a str;
+    type Item = &'static str;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
@@ -225,11 +216,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
 
             // As `e_utf8` is translated into UTF-8, it must be a valid UTF-8
             // data, so we just unwrap it without any aditional check.
-            Some(
-                CStr::from_ptr(e_utf8)
-                    .to_str()
-                    .expect("Invalid UTF-8 character"),
-            )
+            Some(CStr::from_ptr(e_utf8).to_str().unwrap())
         }
     }
 
