@@ -20,8 +20,8 @@ SEXP handle_result(SEXP res_) {
         //
         if (TYPEOF(res_aligned) == CHARSXP) {
             // In case 1, the result is an error message that can be passed to
-            // Rf_error() directly.
-            Rf_error("%s", CHAR(res_aligned));
+            // Rf_errorcall() directly.
+            Rf_errorcall(R_NilValue, "%s", CHAR(res_aligned));
         } else {
             // In case 2, the result is the token to restart the
             // cleanup process on R's side.
