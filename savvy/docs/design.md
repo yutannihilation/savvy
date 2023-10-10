@@ -479,7 +479,7 @@ possible to expose the internal representation as `&str`. So, it requires
 several R's C API calls. To get a `&str`
 
 1. `STRING_ELT()` to subset a `CHARSXP`
-2. `Rf_translateCharUTF8()` to extract a UTF-8 string from `CHARSXP`
+2. `R_CHAR()` to extract the string from `CHARSXP`
 
 Similarly, to set a `&str`
 
@@ -489,6 +489,30 @@ Similarly, to set a `&str`
 This is a bit costly. So, if the strings need to be referenced and updated
 frequently, probably you should avoid using `OwnedStringSxp` as a substitute of
 `Vec<String>`.
+
+### Encoding and `'static` lifetime
+
+While Rust's string is UTF-8, R's string is not guaranteed to be UTF-8. R
+provides `Rf_translateCharUTF8()` to convert the string to UTF-8. However, savvy
+chose not to use it. There are two reasons:
+
+1. As of version 4.2.0, R uses UTF-8 as the native encoding even on Windows
+   systems. While old Windows systems are not the case, I bravely assumes it's
+   rare and time will solve.
+2. The result of `R_CHAR()` is the string stored in `R_StringHash`, [the global
+   `CHARSXP` cache][charsxp-cache]. In my understanding, this will never be
+   removed during the session. So, this allows savvy to mark the result `&str`
+   with `'static` lifetime. However, the result of `Rf_translateCharUTF8()` is
+   on an `R_alloc()`-ed memory ([code][Rf_translateCharUTF8]), which can be
+   claimed by GC.
+   
+In short, in order to stick with `'static` lifetime for the sake of simplicity,
+I decided to neglect relatively-rare case. Note that, invalid UTF-8 charactars
+are rejected (= currently, silently replaced with `""`) by `CStr`, so it's not
+very unsafe.
+
+[charsxp-cache]: https://cran.r-project.org/doc/manuals/r-devel/R-ints.html#The-CHARSXP-cache
+[Rf_translateCharUTF8]: https://github.com/wch/r-source/blob/c3423d28830acbbbf7b38daa58f436fb06d91381/src/main/sysutils.c#L1284-L1296
 
 ## List
 
