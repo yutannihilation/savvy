@@ -1,8 +1,7 @@
 use std::ffi::CStr;
 
 use libR_sys::{
-    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_translateCharUTF8, Rf_xlength, R_CHAR, SET_STRING_ELT,
-    SEXP, STRING_ELT, STRSXP,
+    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
 };
 
 use super::na::NotAvailableValue;
