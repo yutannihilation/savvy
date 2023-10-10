@@ -17,3 +17,6 @@ quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
 
 savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
+
+[package.metadata.dist]
+dist = false

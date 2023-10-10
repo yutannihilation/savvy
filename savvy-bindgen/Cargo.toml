@@ -12,3 +12,6 @@ readme = "README.md"
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
+
+[package.metadata.dist]
+dist = false
