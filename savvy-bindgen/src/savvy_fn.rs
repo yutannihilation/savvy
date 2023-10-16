@@ -11,11 +11,11 @@ pub struct ParsedResult {
 
 #[allow(clippy::enum_variant_names)]
 pub enum SavvySupportedTypes {
-    IntegerSxp,
-    RealSxp,
-    LogicalSxp,
-    StringSxp,
-    ListSxp,
+    IntegerSxp(syn::TypePath),
+    RealSxp(syn::TypePath),
+    LogicalSxp(syn::TypePath),
+    StringSxp(syn::TypePath),
+    ListSxp(syn::TypePath),
     // scalar
     BareI32,
     BareF64,
@@ -32,11 +32,11 @@ impl SavvySupportedTypes {
             syn::Type::Path(type_path) => {
                 let type_ident = &type_path.path.segments.last().unwrap().ident;
                 match type_ident.to_string().as_str() {
-                    "IntegerSxp" => Some(Self::IntegerSxp),
-                    "RealSxp" => Some(Self::RealSxp),
-                    "LogicalSxp" => Some(Self::LogicalSxp),
-                    "StringSxp" => Some(Self::StringSxp),
-                    "ListSxp" => Some(Self::ListSxp),
+                    "IntegerSxp" => Some(Self::IntegerSxp(type_path.clone())),
+                    "RealSxp" => Some(Self::RealSxp(type_path.clone())),
+                    "LogicalSxp" => Some(Self::LogicalSxp(type_path.clone())),
+                    "StringSxp" => Some(Self::StringSxp(type_path.clone())),
+                    "ListSxp" => Some(Self::ListSxp(type_path.clone())),
                     "i32" => Some(Self::BareI32),
                     "f64" => Some(Self::BareF64),
                     "bool" => Some(Self::BareBool),
@@ -59,11 +59,11 @@ impl SavvySupportedTypes {
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
         match &self {
-            Self::IntegerSxp => parse_quote!(savvy::IntegerSxp),
-            Self::RealSxp => parse_quote!(savvy::RealSxp),
-            Self::LogicalSxp => parse_quote!(savvy::LogicalSxp),
-            Self::StringSxp => parse_quote!(savvy::StringSxp),
-            Self::ListSxp => parse_quote!(savvy::ListSxp),
+            Self::IntegerSxp(type_path) => parse_quote!(#type_path),
+            Self::RealSxp(type_path) => parse_quote!(#type_path),
+            Self::LogicalSxp(type_path) => parse_quote!(#type_path),
+            Self::StringSxp(type_path) => parse_quote!(#type_path),
+            Self::ListSxp(type_path) => parse_quote!(#type_path),
             Self::BareI32 => parse_quote!(i32),
             Self::BareF64 => parse_quote!(f64),
             Self::BareStr => parse_quote!(&str),

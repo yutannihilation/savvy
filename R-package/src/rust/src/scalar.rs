@@ -1,4 +1,6 @@
-use savvy::{savvy, IntegerSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp};
+use savvy::{
+    savvy, IntegerSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp, OwnedStringSxp, RealSxp,
+};
 
 #[savvy]
 fn scalar_input_int(x: i32) -> savvy::Result<()> {
