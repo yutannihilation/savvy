@@ -187,7 +187,7 @@ impl SavvyFn {
         }
     }
 
-    pub fn from_fn(orig: &syn::ItemFn) -> Self {
+    pub fn from_fn(orig: &syn::ItemFn) -> syn::Result<Self> {
         Self::new(
             &orig.attrs,
             &orig.sig,
@@ -196,11 +196,16 @@ impl SavvyFn {
         )
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> Self {
+    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> syn::Result<Self> {
         Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type)
     }
 
-    pub fn new(attrs: &[Attribute], sig: &Signature, block: &Block, fn_type: SavvyFnType) -> Self {
+    pub fn new(
+        attrs: &[Attribute],
+        sig: &Signature,
+        block: &Block,
+        fn_type: SavvyFnType,
+    ) -> syn::Result<Self> {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = attrs.to_vec();
@@ -250,7 +255,7 @@ impl SavvyFn {
             })
             .collect();
 
-        Self {
+        Ok(Self {
             docs,
             attrs,
             fn_name,
@@ -260,7 +265,7 @@ impl SavvyFn {
             return_type: get_savvy_return_type(&sig.output).unwrap(),
             stmts_orig,
             stmts_additional,
-        }
+        })
     }
 }
 

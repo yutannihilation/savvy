@@ -18,7 +18,7 @@ pub struct SavvyImpl {
 }
 
 impl SavvyImpl {
-    pub fn new(orig: &syn::ItemImpl) -> Self {
+    pub fn new(orig: &syn::ItemImpl) -> syn::Result<Self> {
         let mut attrs = orig.attrs.clone();
         // Remove #[savvy]
         attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
@@ -34,7 +34,7 @@ impl SavvyImpl {
             }
         };
 
-        let fns: Vec<SavvyFn> = orig
+        let fns: syn::Result<Vec<SavvyFn>> = orig
             .items
             .clone()
             .iter()
@@ -55,13 +55,13 @@ impl SavvyImpl {
             })
             .collect();
 
-        Self {
+        Ok(Self {
             docs,
             attrs,
             ty,
-            fns,
+            fns: fns?,
             orig: orig.clone(),
-        }
+        })
     }
 
     #[allow(dead_code)]
@@ -136,7 +136,7 @@ mod tests {
             }
         );
 
-        let parsed = SavvyImpl::new(&item_impl);
+        let parsed = SavvyImpl::new(&item_impl).expect("Failed to parse");
         assert_eq!(parsed.ty.to_string().as_str(), "Person");
 
         assert_eq!(parsed.fns.len(), 4);

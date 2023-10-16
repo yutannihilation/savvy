@@ -4,46 +4,6 @@ use syn::parse_quote;
 
 use crate::{ParsedResult, SavvyFn, SavvyImpl};
 
-pub fn parse_savvy_fn(item: &syn::Item) -> Option<SavvyFn> {
-    let func = match item {
-        syn::Item::Fn(func) => func,
-        _ => {
-            return None;
-        }
-    };
-
-    // Generate bindings only when the function is marked by #[savvy]
-    if func
-        .attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[savvy]))
-    {
-        Some(SavvyFn::from_fn(func))
-    } else {
-        None
-    }
-}
-
-pub fn parse_savvy_impl(item: &syn::Item) -> Vec<SavvyFn> {
-    let item_impl = match item {
-        syn::Item::Impl(item_impl) => item_impl,
-        _ => {
-            return Vec::new();
-        }
-    };
-
-    // Generate bindings only when the function is marked by #[savvy]
-    if item_impl
-        .attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[savvy]))
-    {
-        SavvyImpl::new(item_impl).fns
-    } else {
-        Vec::new()
-    }
-}
-
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
 }
@@ -89,13 +49,17 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         match item {
             syn::Item::Fn(item_fn) => {
                 if is_marked(item_fn.attrs.as_slice()) {
-                    result.bare_fns.push(SavvyFn::from_fn(&item_fn))
+                    result
+                        .bare_fns
+                        .push(SavvyFn::from_fn(&item_fn).expect("Failed to parse function"))
                 }
             }
 
             syn::Item::Impl(item_impl) => {
                 if is_marked(item_impl.attrs.as_slice()) {
-                    result.impls.push(SavvyImpl::new(&item_impl))
+                    result
+                        .impls
+                        .push(SavvyImpl::new(&item_impl).expect("Failed to parse impl"))
                 }
             }
             _ => continue,
