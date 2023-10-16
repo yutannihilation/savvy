@@ -29,3 +29,9 @@ error: the return type must be either syn::Result<SEXP> or syn::Result<()>
    |
 16 | fn foo_wrong_return_type(x: i32) -> i32 {}
    |                                  ^^^^^^
+
+error: For safety, a function that takes `self` and returns `Self` is not allowed
+  --> tests/cases/simple_cases.rs:22:5
+   |
+22 |     fn foo_self(&self) -> Self {}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
