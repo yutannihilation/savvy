@@ -237,12 +237,7 @@ impl SavvyFn {
 
                     let ty = match SavvySupportedTypes::from_type(ty.as_ref()) {
                         Some(ty) => ty,
-                        None => {
-                            return Some(Err(syn::Error::new_spanned(
-                                pat,
-                                "the type is not supported",
-                            )))
-                        }
+                        None => return Some(Err(syn::Error::new_spanned(ty, "Unsupported type"))),
                     };
                     let ty_ident = ty.to_rust_type_outer();
 
@@ -272,8 +267,7 @@ impl SavvyFn {
             fn_name,
             fn_type,
             args: args_new,
-            // TODO: propagate error
-            return_type: get_savvy_return_type(&sig.output).unwrap(),
+            return_type: get_savvy_return_type(&sig.output)?,
             stmts_orig,
             stmts_additional,
         })

@@ -18,5 +18,8 @@ syn = { version = "2", features = ["full", "extra-traits"] }
 
 savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
 
+[dev-dependencies]
+trybuild = "1"
+
 [package.metadata.dist]
 dist = false

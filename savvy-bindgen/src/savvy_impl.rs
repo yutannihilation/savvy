@@ -1,4 +1,3 @@
-use quote::format_ident;
 use syn::parse_quote;
 
 use crate::savvy_fn::{SavvyFn, SavvyFnType};
