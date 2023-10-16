@@ -220,26 +220,37 @@ impl SavvyFn {
         let stmts_orig = block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        let args_new: Vec<SavvyFnArg> = sig
+        let args_new = sig
             .inputs
             .iter()
             .filter_map(|arg| match arg {
                 Typed(PatType { pat, ty, .. }) => {
                     let pat = match pat.as_ref() {
                         Ident(arg) => arg.ident.clone(),
-                        _ => panic!("non-ident is not supported"),
+                        _ => {
+                            return Some(Err(syn::Error::new_spanned(
+                                pat,
+                                "non-ident is not supported",
+                            )));
+                        }
                     };
 
-                    let ty = SavvySupportedTypes::from_type(ty.as_ref())
-                        .expect("the type is not supported");
-
+                    let ty = match SavvySupportedTypes::from_type(ty.as_ref()) {
+                        Some(ty) => ty,
+                        None => {
+                            return Some(Err(syn::Error::new_spanned(
+                                pat,
+                                "the type is not supported",
+                            )))
+                        }
+                    };
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
                         let #pat = <#ty_ident>::try_from(savvy::Sxp(#pat))?;
                     });
 
-                    Some(SavvyFnArg { pat, ty })
+                    Some(Ok(SavvyFnArg { pat, ty }))
                 }
                 // Skip `self`
                 syn::FnArg::Receiver(syn::Receiver { reference, .. }) => {
@@ -253,7 +264,7 @@ impl SavvyFn {
                     None
                 }
             })
-            .collect();
+            .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
 
         Ok(Self {
             docs,
