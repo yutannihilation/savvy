@@ -6,12 +6,18 @@ use savvy_bindgen::{SavvyFn, SavvyImpl};
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
-        return savvy_fn(&item_fn);
+        match savvy_fn(&item_fn) {
+            Ok(result) => return result,
+            Err(e) => return e.into_compile_error().into(),
+        }
     }
 
     let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
     if let Ok(item_impl) = parse_result {
-        return savvy_impl(&item_impl);
+        match savvy_impl(&item_impl) {
+            Ok(result) => return result,
+            Err(e) => return e.into_compile_error().into(),
+        }
     }
 
     proc_macro::TokenStream::from(
@@ -23,28 +29,28 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     )
 }
 
-fn savvy_fn(item_fn: &syn::ItemFn) -> TokenStream {
-    let savvy_fn = SavvyFn::from_fn(item_fn);
+fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
+    let savvy_fn = SavvyFn::from_fn(item_fn)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
     let item_fn_outer = savvy_fn.generate_outer_fn();
 
-    quote! {
+    Ok(quote! {
         #item_fn_inner
         #item_fn_outer
     }
-    .into()
+    .into())
 }
 
-fn savvy_impl(item_impl: &syn::ItemImpl) -> TokenStream {
-    let savvy_impl = SavvyImpl::new(item_impl);
+fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
+    let savvy_impl = SavvyImpl::new(item_impl)?;
     let orig = savvy_impl.orig.clone();
     let ty = savvy_impl.ty.clone();
 
     let list_fn_inner = savvy_impl.generate_inner_fns();
     let list_fn_outer = savvy_impl.generate_outer_fns();
 
-    quote! {
+    Ok(quote! {
         #orig
 
         impl savvy::IntoExtPtrSxp for #ty {}
@@ -52,7 +58,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> TokenStream {
         #(#list_fn_inner)*
         #(#list_fn_outer)*
     }
-    .into()
+    .into())
 }
 
 #[cfg(test)]
@@ -61,7 +67,9 @@ mod tests {
     use syn::parse_quote;
 
     fn assert_eq_inner(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig).generate_inner_fn();
+        let result = SavvyFn::from_fn(&orig)
+            .expect("Failed to parse a function")
+            .generate_inner_fn();
         assert_eq!(result, expected);
     }
 
@@ -134,7 +142,9 @@ mod tests {
     }
 
     fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig).generate_outer_fn();
+        let result = SavvyFn::from_fn(&orig)
+            .expect("Failed to parse an impl")
+            .generate_outer_fn();
         assert_eq!(result, expected);
     }
 
@@ -207,7 +217,8 @@ mod tests {
     }
 
     fn assert_eq_outer_impl(orig: &syn::ItemImpl, expected: syn::ItemFn, i: usize) {
-        let result = SavvyImpl::new(orig).fns[i].generate_outer_fn();
+        let result =
+            SavvyImpl::new(orig).expect("Failed to parse an impl").fns[i].generate_outer_fn();
         assert_eq!(result, expected);
     }
 

@@ -1,4 +1,3 @@
-use quote::format_ident;
 use syn::parse_quote;
 
 use crate::savvy_fn::{SavvyFn, SavvyFnType};
@@ -18,50 +17,54 @@ pub struct SavvyImpl {
 }
 
 impl SavvyImpl {
-    pub fn new(orig: &syn::ItemImpl) -> Self {
+    pub fn new(orig: &syn::ItemImpl) -> syn::Result<Self> {
         let mut attrs = orig.attrs.clone();
         // Remove #[savvy]
         attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
         // Extract doc comments
         let docs = extract_docs(attrs.as_slice());
+        let self_ty = orig.self_ty.as_ref();
 
-        let ty = match orig.self_ty.as_ref() {
+        let ty = match self_ty {
             syn::Type::Path(type_path) => type_path.path.segments.last().unwrap().ident.clone(),
             _ => {
-                // TODO: propagate syn::Error
-                // panic!("should not happen");
-                format_ident!("UNEXPETED")
+                return Err(syn::Error::new_spanned(self_ty, "Unexpected type"));
             }
         };
 
-        let fns: Vec<SavvyFn> = orig
+        let fns = orig
             .items
             .clone()
             .iter()
             .filter_map(|f| match f {
                 syn::ImplItem::Fn(impl_item_fn) => {
-                    let ty = orig.self_ty.as_ref().clone();
+                    let ty = self_ty.clone();
 
                     let fn_type = match (is_method(impl_item_fn), is_ctor(impl_item_fn)) {
                         (true, false) => SavvyFnType::Method(ty),
                         (false, true) => SavvyFnType::Constructor(ty),
                         (false, false) => SavvyFnType::AssociatedFunction(ty),
-                        (true, true) => panic!("`fn foo(self, ...) -> Self` is not allowed"),
+                        (true, true) => {
+                            return Some(Err(syn::Error::new_spanned(
+                                f,
+                                "For safety, a function that takes `self` and returns `Self` is not allowed",
+                            )));
+                        }
                     };
 
                     Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type))
                 }
                 _ => None,
             })
-            .collect();
+            .collect::<syn::Result<Vec<SavvyFn>>>()?;
 
-        Self {
+        Ok(Self {
             docs,
             attrs,
             ty,
             fns,
             orig: orig.clone(),
-        }
+        })
     }
 
     #[allow(dead_code)]
@@ -136,7 +139,7 @@ mod tests {
             }
         );
 
-        let parsed = SavvyImpl::new(&item_impl);
+        let parsed = SavvyImpl::new(&item_impl).expect("Failed to parse");
         assert_eq!(parsed.ty.to_string().as_str(), "Person");
 
         assert_eq!(parsed.fns.len(), 4);

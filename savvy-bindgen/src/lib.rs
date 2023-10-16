@@ -15,4 +15,4 @@ pub use savvy_impl::SavvyImpl;
 
 pub use utils::extract_docs;
 
-pub use parse_file::{parse_file, parse_savvy_fn, parse_savvy_impl, read_file};
+pub use parse_file::{parse_file, read_file};

@@ -187,7 +187,7 @@ impl SavvyFn {
         }
     }
 
-    pub fn from_fn(orig: &syn::ItemFn) -> Self {
+    pub fn from_fn(orig: &syn::ItemFn) -> syn::Result<Self> {
         Self::new(
             &orig.attrs,
             &orig.sig,
@@ -196,11 +196,16 @@ impl SavvyFn {
         )
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> Self {
+    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> syn::Result<Self> {
         Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type)
     }
 
-    pub fn new(attrs: &[Attribute], sig: &Signature, block: &Block, fn_type: SavvyFnType) -> Self {
+    pub fn new(
+        attrs: &[Attribute],
+        sig: &Signature,
+        block: &Block,
+        fn_type: SavvyFnType,
+    ) -> syn::Result<Self> {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = attrs.to_vec();
@@ -215,26 +220,32 @@ impl SavvyFn {
         let stmts_orig = block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
-        let args_new: Vec<SavvyFnArg> = sig
+        let args_new = sig
             .inputs
             .iter()
             .filter_map(|arg| match arg {
                 Typed(PatType { pat, ty, .. }) => {
                     let pat = match pat.as_ref() {
                         Ident(arg) => arg.ident.clone(),
-                        _ => panic!("non-ident is not supported"),
+                        _ => {
+                            return Some(Err(syn::Error::new_spanned(
+                                pat,
+                                "non-ident is not supported",
+                            )));
+                        }
                     };
 
-                    let ty = SavvySupportedTypes::from_type(ty.as_ref())
-                        .expect("the type is not supported");
-
+                    let ty = match SavvySupportedTypes::from_type(ty.as_ref()) {
+                        Some(ty) => ty,
+                        None => return Some(Err(syn::Error::new_spanned(ty, "Unsupported type"))),
+                    };
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
                         let #pat = <#ty_ident>::try_from(savvy::Sxp(#pat))?;
                     });
 
-                    Some(SavvyFnArg { pat, ty })
+                    Some(Ok(SavvyFnArg { pat, ty }))
                 }
                 // Skip `self`
                 syn::FnArg::Receiver(syn::Receiver { reference, .. }) => {
@@ -248,19 +259,18 @@ impl SavvyFn {
                     None
                 }
             })
-            .collect();
+            .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
 
-        Self {
+        Ok(Self {
             docs,
             attrs,
             fn_name,
             fn_type,
             args: args_new,
-            // TODO: propagate error
-            return_type: get_savvy_return_type(&sig.output).unwrap(),
+            return_type: get_savvy_return_type(&sig.output)?,
             stmts_orig,
             stmts_additional,
-        }
+        })
     }
 }
 
