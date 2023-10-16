@@ -99,15 +99,18 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq_inner(
+            // The qualified form (with `savvy::`) and non-qualified form is
+            // kept between conversions.
             parse_quote!(
                 #[savvy]
-                fn foo(x: RealSxp) -> savvy::Result<savvy::SEXP> {
+                fn foo(x: RealSxp, y: savvy::IntegerSxp) -> savvy::Result<savvy::SEXP> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner(x: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
-                    let x = <savvy::RealSxp>::try_from(savvy::Sxp(x))?;
+                unsafe fn savvy_foo_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
+                    let x = <RealSxp>::try_from(savvy::Sxp(x))?;
+                    let y = <savvy::IntegerSxp>::try_from(savvy::Sxp(y))?;
                     bar()
                 }
             ),
