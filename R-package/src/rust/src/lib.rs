@@ -9,8 +9,8 @@ pub use error_handling::*;
 use savvy::{r_print, savvy};
 
 use savvy::{
-    IntegerSxp, ListElement, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp,
-    OwnedRealSxp, OwnedStringSxp, RealSxp, StringSxp,
+    IntegerSxp, ListElement, ListSxp, LogicalSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
+    OwnedStringSxp, RealSxp, StringSxp,
 };
 
 use savvy::sexp::na::NotAvailableValue;
