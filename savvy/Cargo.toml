@@ -9,7 +9,7 @@ repository.workspace = true
 readme = "README.md"
 
 [dependencies]
-libR-sys = { version = "0", git = "https://github.com/extendr/libR-sys" }
+rlang-ffi-lite = { verion = "*", path = "../rlang-ffi-lite" }
 once_cell = "1"
 
 savvy-macro = { version = "0", path = "../savvy-macro" }

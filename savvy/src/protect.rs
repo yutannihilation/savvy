@@ -31,11 +31,11 @@
 // But, my implementation doesn't implement `Clone` trait, so I don't need to
 // worry that there still exists another instance on dropping it.
 
-use libR_sys::{
+use once_cell::sync::Lazy;
+use rlang_ffi_lite::{
     R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
     SET_TAG, SEXP,
 };
-use once_cell::sync::Lazy;
 
 pub(crate) struct PreservedList(SEXP);
 

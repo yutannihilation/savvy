@@ -8,6 +8,6 @@ crate-type = ["staticlib"]
 
 [dependencies]
 savvy = { path = "../../../savvy" }
-libR-sys = { git = "https://github.com/extendr/libR-sys" }
+rlang-ffi-lite = { path = "../../../rlang-ffi-lite" }
 
 [workspace]

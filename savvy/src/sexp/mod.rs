@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use libR_sys::{
+use rlang_ffi_lite::{
     Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_type2char, EXTPTRSXP, SEXP, TYPEOF,
     VECSXP,
 };

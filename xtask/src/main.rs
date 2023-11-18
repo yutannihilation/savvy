@@ -1,6 +1,5 @@
 type DynError = Box<dyn std::error::Error>;
 use std::env;
-use std::path::PathBuf;
 
 fn main() {
     if let Err(e) = try_main() {
@@ -70,6 +69,9 @@ fn show() -> Result<(), DynError> {
         .allowlist_var("WEAKREFSXP")
         .allowlist_var("RAWSXP")
         .allowlist_var("OBJSXP")
+        // pre-defined symbols
+        .allowlist_var("R_NamesSymbol")
+        .allowlist_var("R_ClassSymbol")
         // NULL-related
         .allowlist_var("R_NilValue")
         // Missing values
@@ -88,22 +90,29 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("INTEGER_ELT")
         .allowlist_function("SET_INTEGER_ELT")
         .allowlist_function("Rf_ScalarInteger")
+        .allowlist_function("Rf_isInteger")
         // Real
         .allowlist_function("REAL")
         .allowlist_function("REAL_ELT")
         .allowlist_function("SET_REAL_ELT")
         .allowlist_function("Rf_ScalarReal")
+        .allowlist_function("Rf_isReal")
         // Logical
         .allowlist_function("LOGICAL")
         .allowlist_function("LOGICAL_ELT")
         .allowlist_function("SET_LOGICAL_ELT")
         .allowlist_function("Rf_ScalarLogical")
+        .allowlist_function("Rf_isLogical")
         // String and character
         .allowlist_function("STRING_ELT")
         .allowlist_function("SET_STRING_ELT")
         .allowlist_function("Rf_ScalarString")
+        .allowlist_function("Rf_isString")
         .allowlist_function("R_CHAR")
         .allowlist_function("Rf_mkCharLenCE")
+        // List
+        .allowlist_function("VECTOR_ELT")
+        .allowlist_function("SET_VECTOR_ELT")
         // External pointer
         .allowlist_function("R_ClearExternalPtr")
         .allowlist_function("R_ExternalPtrAddr")
@@ -120,6 +129,9 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_protect")
         .allowlist_function("Rf_unprotect")
         .allowlist_function("R_PreserveObject")
+        // type
+        .allowlist_function("Rf_type2char")
+        .allowlist_function("TYPEOF")
         // error
         .allowlist_function("Rf_errorcall")
         // I/O

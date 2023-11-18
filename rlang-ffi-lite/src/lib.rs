@@ -1,3 +1,7 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
 // internal types
 
 pub type R_xlen_t = isize;
@@ -38,6 +42,12 @@ pub const WEAKREFSXP: u32 = 23;
 pub const RAWSXP: u32 = 24;
 pub const OBJSXP: u32 = 25;
 
+// pre-defined symbols
+extern "C" {
+    pub static mut R_NamesSymbol: SEXP;
+    pub static mut R_ClassSymbol: SEXP;
+}
+
 // NULL
 extern "C" {
     pub static mut R_NilValue: SEXP;
@@ -66,6 +76,7 @@ extern "C" {
     pub fn INTEGER_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
     pub fn SET_INTEGER_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int);
     pub fn Rf_ScalarInteger(arg1: ::std::os::raw::c_int) -> SEXP;
+    pub fn Rf_isInteger(arg1: SEXP) -> Rboolean;
 }
 
 // Real
@@ -74,6 +85,7 @@ extern "C" {
     pub fn REAL_ELT(x: SEXP, i: R_xlen_t) -> f64;
     pub fn SET_REAL_ELT(x: SEXP, i: R_xlen_t, v: f64);
     pub fn Rf_ScalarReal(arg1: f64) -> SEXP;
+    pub fn Rf_isReal(s: SEXP) -> Rboolean;
 }
 
 // Logical
@@ -82,6 +94,7 @@ extern "C" {
     pub fn LOGICAL_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
     pub fn SET_LOGICAL_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int);
     pub fn Rf_ScalarLogical(arg1: ::std::os::raw::c_int) -> SEXP;
+    pub fn Rf_isLogical(s: SEXP) -> Rboolean;
 }
 
 // String and character
@@ -98,12 +111,20 @@ extern "C" {
     pub fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP);
     pub fn Rf_ScalarString(arg1: SEXP) -> SEXP;
+    pub fn Rf_isString(s: SEXP) -> Rboolean;
+
     pub fn R_CHAR(x: SEXP) -> *const ::std::os::raw::c_char;
     pub fn Rf_mkCharLenCE(
         arg1: *const ::std::os::raw::c_char,
         arg2: ::std::os::raw::c_int,
         arg3: cetype_t,
     ) -> SEXP;
+}
+
+// List
+extern "C" {
+    pub fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
+    pub fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP;
 }
 
 // External pointer
@@ -132,6 +153,12 @@ extern "C" {
     pub fn Rf_protect(arg1: SEXP) -> SEXP;
     pub fn Rf_unprotect(arg1: ::std::os::raw::c_int);
     pub fn R_PreserveObject(arg1: SEXP);
+}
+
+// type
+extern "C" {
+    pub fn TYPEOF(x: SEXP) -> ::std::os::raw::c_int;
+    pub fn Rf_type2char(arg1: SEXPTYPE) -> *const ::std::os::raw::c_char;
 }
 
 // error
