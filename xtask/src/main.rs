@@ -31,6 +31,7 @@ fn show() -> Result<(), DynError> {
     println!("cargo:rerun-if-changed=wrapper.h");
 
     let builder = bindgen::Builder::default().header("wrapper.h").clang_args([
+        // TODO: this works only on my Windows laptop...
         format!("-I{}", "C:/Program Files/R/R-devel/include"),
         // format!("--target={target}"),
     ]);
