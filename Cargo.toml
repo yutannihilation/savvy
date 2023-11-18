@@ -1,5 +1,12 @@
 [workspace]
-members = ["savvy", "savvy-macro", "savvy-bindgen", "savvy-cli"]
+members = [
+    "savvy",
+    "savvy-macro",
+    "savvy-bindgen",
+    "savvy-cli",
+    "rlang-ffi-lite",
+    "xtask",
+]
 resolver = "2"
 
 [workspace.package]
