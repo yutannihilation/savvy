@@ -1,4 +1,4 @@
-use libR_sys::SEXP;
+use rlang_ffi_lite::SEXP;
 
 extern "C" {
     fn unwind_protect_impl(

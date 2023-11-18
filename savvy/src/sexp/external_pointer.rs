@@ -1,4 +1,4 @@
-use libR_sys::{
+use rlang_ffi_lite::{
     R_ClearExternalPtr, R_ExternalPtrAddr, R_MakeExternalPtr, R_NilValue, R_RegisterCFinalizerEx,
     Rf_protect, Rf_unprotect, SEXP,
 };

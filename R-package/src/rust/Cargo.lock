@@ -12,11 +12,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "libR-sys"
-version = "0.6.0"
-source = "git+https://github.com/extendr/libR-sys#bcfeb7200416347cf0c400cece7d6561206c46d4"
-
-[[package]]
 name = "libc"
 version = "0.2.149"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -47,18 +42,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "rlang-ffi-lite"
+version = "0.1.16"
+
+[[package]]
 name = "savvy"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "cc",
- "libR-sys",
  "once_cell",
+ "rlang-ffi-lite",
  "savvy-macro",
 ]
 
 [[package]]
 name = "savvy-bindgen"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -67,7 +66,7 @@ dependencies = [
 
 [[package]]
 name = "savvy-macro"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -79,7 +78,7 @@ dependencies = [
 name = "simple-savvy"
 version = "0.1.0"
 dependencies = [
- "libR-sys",
+ "rlang-ffi-lite",
  "savvy",
 ]
 

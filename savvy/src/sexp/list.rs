@@ -1,4 +1,4 @@
-use libR_sys::{
+use rlang_ffi_lite::{
     R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
     TYPEOF, VECSXP, VECTOR_ELT,
 };
@@ -104,12 +104,12 @@ impl ListSxp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
             match TYPEOF(e) as u32 {
-                libR_sys::INTSXP => ListElement::Integer(IntegerSxp(e)),
-                libR_sys::REALSXP => ListElement::Real(RealSxp(e)),
-                libR_sys::STRSXP => ListElement::String(StringSxp(e)),
-                libR_sys::LGLSXP => ListElement::Logical(LogicalSxp(e)),
-                libR_sys::VECSXP => ListElement::List(ListSxp(e)),
-                libR_sys::NILSXP => ListElement::Null(NullSxp),
+                rlang_ffi_lite::INTSXP => ListElement::Integer(IntegerSxp(e)),
+                rlang_ffi_lite::REALSXP => ListElement::Real(RealSxp(e)),
+                rlang_ffi_lite::STRSXP => ListElement::String(StringSxp(e)),
+                rlang_ffi_lite::LGLSXP => ListElement::Logical(LogicalSxp(e)),
+                rlang_ffi_lite::VECSXP => ListElement::List(ListSxp(e)),
+                rlang_ffi_lite::NILSXP => ListElement::Null(NullSxp),
                 _ => ListElement::Unsupported(UnsupportedSxp(e)),
             }
         }
