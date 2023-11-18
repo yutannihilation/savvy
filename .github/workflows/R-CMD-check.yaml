@@ -70,8 +70,6 @@ jobs:
           license = "MIT"
           repository = "https://github.com/yutannihilation/savvy/"
           EOF
-          
-          mv Cargo.toml_tmp 
 
           mv savvy/ ./R-package/src/rust/
           mv savvy-macro/ ./R-package/src/rust/
