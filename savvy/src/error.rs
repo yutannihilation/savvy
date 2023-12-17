@@ -1,4 +1,4 @@
-use rlang_ffi_lite::SEXP;
+use savvy_ffi::SEXP;
 
 #[derive(Debug)]
 pub enum Error {

@@ -1,4 +1,4 @@
-use rlang_ffi_lite::{Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
+use savvy_ffi::{Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -137,8 +137,7 @@ impl TryFrom<bool> for OwnedLogicalSxp {
     type Error = crate::error::Error;
 
     fn try_from(value: bool) -> crate::error::Result<Self> {
-        let sexp =
-            unsafe { crate::unwind_protect(|| rlang_ffi_lite::Rf_ScalarLogical(value as i32))? };
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarLogical(value as i32))? };
         Self::new_from_raw_sexp(sexp, 1)
     }
 }

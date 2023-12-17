@@ -22,10 +22,10 @@ pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
 pub use unwind_protect::unwind_protect;
 
 // re-export
-pub use rlang_ffi_lite::SEXP;
+pub use savvy_ffi::SEXP;
 pub use savvy_macro::savvy;
 
-use rlang_ffi_lite::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
+use savvy_ffi::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
 
 use std::ffi::CString;
 

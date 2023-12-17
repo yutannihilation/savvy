@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use rlang_ffi_lite::{Rf_xlength, INTEGER, INTSXP, SEXP};
+use savvy_ffi::{Rf_xlength, INTEGER, INTSXP, SEXP};
 
 use super::Sxp;
 use crate::protect;
@@ -158,7 +158,7 @@ impl TryFrom<i32> for OwnedIntegerSxp {
     type Error = crate::error::Error;
 
     fn try_from(value: i32) -> crate::error::Result<Self> {
-        let sexp = unsafe { crate::unwind_protect(|| rlang_ffi_lite::Rf_ScalarInteger(value))? };
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
         Self::new_from_raw_sexp(sexp, 1)
     }
 }

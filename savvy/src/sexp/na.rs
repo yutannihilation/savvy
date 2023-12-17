@@ -8,28 +8,28 @@ pub trait NotAvailableValue {
 
 impl NotAvailableValue for f64 {
     fn is_na(&self) -> bool {
-        unsafe { rlang_ffi_lite::R_IsNA(*self) != 0 }
+        unsafe { savvy_ffi::R_IsNA(*self) != 0 }
     }
 
     fn na() -> Self {
-        unsafe { rlang_ffi_lite::R_NaReal }
+        unsafe { savvy_ffi::R_NaReal }
     }
 }
 
 impl NotAvailableValue for i32 {
     fn is_na(&self) -> bool {
-        unsafe { *self == rlang_ffi_lite::R_NaInt }
+        unsafe { *self == savvy_ffi::R_NaInt }
     }
 
     fn na() -> Self {
-        unsafe { rlang_ffi_lite::R_NaInt }
+        unsafe { savvy_ffi::R_NaInt }
     }
 }
 
 use once_cell::sync::Lazy;
 
 pub(crate) static NA_CHAR_PTR: Lazy<&str> = Lazy::new(|| unsafe {
-    let c_ptr = rlang_ffi_lite::R_CHAR(rlang_ffi_lite::R_NaString) as _;
+    let c_ptr = savvy_ffi::R_CHAR(savvy_ffi::R_NaString) as _;
     std::str::from_utf8_unchecked(std::slice::from_raw_parts(c_ptr, 2))
 });
 

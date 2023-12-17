@@ -1,4 +1,4 @@
-use rlang_ffi_lite::LOGICAL_ELT;
+use savvy_ffi::LOGICAL_ELT;
 
 use crate::{IntegerSxp, LogicalSxp, RealSxp, StringSxp, Sxp};
 

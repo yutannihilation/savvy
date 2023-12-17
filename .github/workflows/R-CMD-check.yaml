@@ -58,10 +58,10 @@ jobs:
 
           [dependencies]
           savvy = { path = "./savvy" }
-          rlang-ffi-lite = { path = "./rlang-ffi-lite" }
+          savvy-ffi = { path = "./savvy-ffi" }
 
           [workspace]
-          members = ["savvy", "savvy-macro", "savvy-bindgen", "rlang-ffi-lite"]
+          members = ["savvy", "savvy-macro", "savvy-bindgen", "savvy-ffi"]
 
           [workspace.package]
           version = "0.1.0"
@@ -74,7 +74,7 @@ jobs:
           mv savvy/ ./R-package/src/rust/
           mv savvy-macro/ ./R-package/src/rust/
           mv savvy-bindgen/ ./R-package/src/rust/
-          mv rlang-ffi-lite/ ./R-package/src/rust/
+          mv savvy-ffi/ ./R-package/src/rust/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2

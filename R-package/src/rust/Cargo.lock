@@ -42,7 +42,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rlang-ffi-lite"
+name = "savvy-ffi"
 version = "0.1.16"
 
 [[package]]
@@ -51,7 +51,7 @@ version = "0.1.16"
 dependencies = [
  "cc",
  "once_cell",
- "rlang-ffi-lite",
+ "savvy-ffi",
  "savvy-macro",
 ]
 
@@ -78,7 +78,7 @@ dependencies = [
 name = "simple-savvy"
 version = "0.1.0"
 dependencies = [
- "rlang-ffi-lite",
+ "savvy-ffi",
  "savvy",
 ]
 

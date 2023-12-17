@@ -15,7 +15,7 @@ fn safe_stop() -> savvy::Result<()> {
 
     savvy::unwind_protect::unwind_protect(|| unsafe {
         let msg = CString::new("Error!").unwrap();
-        rlang_ffi_lite::Rf_errorcall(rlang_ffi_lite::R_NilValue, msg.as_ptr());
+        savvy_ffi::Rf_errorcall(savvy_ffi::R_NilValue, msg.as_ptr());
     })?;
 
     Ok(())

@@ -32,7 +32,7 @@
 // worry that there still exists another instance on dropping it.
 
 use once_cell::sync::Lazy;
-use rlang_ffi_lite::{
+use savvy_ffi::{
     R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
     SET_TAG, SEXP,
 };

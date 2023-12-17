@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use rlang_ffi_lite::{
+use savvy_ffi::{
     cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
 };
 
@@ -100,7 +100,7 @@ unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
     // <&str>::na(), but probably this is an inevitable cost of
     // providing <&str>::na().
     if v.is_na() {
-        Ok(rlang_ffi_lite::R_NaString)
+        Ok(savvy_ffi::R_NaString)
     } else {
         crate::unwind_protect(|| {
             Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
@@ -150,9 +150,9 @@ impl TryFrom<&str> for OwnedStringSxp {
             // Note: unlike `new()`, this allocates a STRSXP after creating a
             // CHARSXP. So, the `CHARSXP` needs to be protected.
             let charsxp = str_to_charsxp(value)?;
-            rlang_ffi_lite::Rf_protect(charsxp);
-            let out = crate::unwind_protect(|| rlang_ffi_lite::Rf_ScalarString(charsxp))?;
-            rlang_ffi_lite::Rf_unprotect(1);
+            savvy_ffi::Rf_protect(charsxp);
+            let out = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
+            savvy_ffi::Rf_unprotect(1);
             out
         };
         Self::new_from_raw_sexp(sexp, 1)
@@ -216,7 +216,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
 
             // Because `None` means the end of the iterator, we cannot return
             // `None` even for missing values.
-            if e == rlang_ffi_lite::R_NaString {
+            if e == savvy_ffi::R_NaString {
                 return Some(Self::Item::na());
             }
 
