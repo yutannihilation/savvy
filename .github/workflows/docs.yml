@@ -33,7 +33,6 @@ jobs:
         uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@nightly
-        if: matrix.config.rust == 'nightly'
 
       - name: Docs
         run: cargo doc --no-deps
