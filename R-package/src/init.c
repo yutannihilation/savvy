@@ -32,12 +32,12 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
-SEXP safe_stop__impl() {
+SEXP safe_stop__impl(void) {
     SEXP res = safe_stop();
     return handle_result(res);
 }
 
-SEXP raise_error__impl() {
+SEXP raise_error__impl(void) {
     SEXP res = raise_error();
     return handle_result(res);
 }
@@ -87,7 +87,7 @@ SEXP print_list__impl(SEXP x) {
     return handle_result(res);
 }
 
-SEXP Person_new__impl() {
+SEXP Person_new__impl(void) {
     SEXP res = Person_new();
     return handle_result(res);
 }
@@ -102,7 +102,7 @@ SEXP Person_name__impl(SEXP self__) {
     return handle_result(res);
 }
 
-SEXP Person_associated_function__impl() {
+SEXP Person_associated_function__impl(void) {
     SEXP res = Person_associated_function();
     return handle_result(res);
 }
@@ -127,22 +127,22 @@ SEXP scalar_input_string__impl(SEXP x) {
     return handle_result(res);
 }
 
-SEXP scalar_output_int__impl() {
+SEXP scalar_output_int__impl(void) {
     SEXP res = scalar_output_int();
     return handle_result(res);
 }
 
-SEXP scalar_output_real__impl() {
+SEXP scalar_output_real__impl(void) {
     SEXP res = scalar_output_real();
     return handle_result(res);
 }
 
-SEXP scalar_output_logical__impl() {
+SEXP scalar_output_logical__impl(void) {
     SEXP res = scalar_output_logical();
     return handle_result(res);
 }
 
-SEXP scalar_output_string__impl() {
+SEXP scalar_output_string__impl(void) {
     SEXP res = scalar_output_string();
     return handle_result(res);
 }

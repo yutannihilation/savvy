@@ -23,14 +23,18 @@ impl SavvyFn {
     /// Generate C function signature
     fn to_c_function_for_header(&self) -> String {
         let fn_name = self.fn_name_outer();
-        let args = self
-            .get_c_args()
-            .iter()
-            .map(|(pat, ty)| format!("{ty} {pat}"))
-            .collect::<Vec<String>>()
-            .join(", ");
+        let args = self.get_c_args();
 
-        format!("SEXP {fn_name}({args});")
+        let args_sig = if args.is_empty() {
+            "void".to_string()
+        } else {
+            args.iter()
+                .map(|(pat, ty)| format!("{ty} {pat}"))
+                .collect::<Vec<String>>()
+                .join(", ")
+        };
+
+        format!("SEXP {fn_name}({args_sig});")
     }
 
     /// Generate C function implementation
@@ -38,17 +42,23 @@ impl SavvyFn {
         let fn_name = self.fn_name_outer();
         let args = self.get_c_args();
 
-        let args_sig = args
-            .iter()
-            .map(|(pat, ty)| format!("{ty} {pat}"))
-            .collect::<Vec<String>>()
-            .join(", ");
+        let (args_sig, args_call) = if args.is_empty() {
+            ("void".to_string(), "".to_string())
+        } else {
+            let args_sig = args
+                .iter()
+                .map(|(pat, ty)| format!("{ty} {pat}"))
+                .collect::<Vec<String>>()
+                .join(", ");
 
-        let args_call = args
-            .iter()
-            .map(|(pat, _)| pat.as_str())
-            .collect::<Vec<&str>>()
-            .join(", ");
+            let args_call = args
+                .iter()
+                .map(|(pat, _)| pat.as_str())
+                .collect::<Vec<&str>>()
+                .join(", ");
+
+            (args_sig, args_call)
+        };
 
         format!(
             "SEXP {fn_name}__impl({args_sig}) {{
