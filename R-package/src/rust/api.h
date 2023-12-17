@@ -1,5 +1,5 @@
-SEXP safe_stop();
-SEXP raise_error();
+SEXP safe_stop(void);
+SEXP raise_error(void);
 SEXP to_upper(SEXP x);
 SEXP add_suffix(SEXP x, SEXP y);
 SEXP times_two_int(SEXP x);
@@ -13,15 +13,15 @@ SEXP scalar_input_int(SEXP x);
 SEXP scalar_input_real(SEXP x);
 SEXP scalar_input_logical(SEXP x);
 SEXP scalar_input_string(SEXP x);
-SEXP scalar_output_int();
-SEXP scalar_output_real();
-SEXP scalar_output_logical();
-SEXP scalar_output_string();
+SEXP scalar_output_int(void);
+SEXP scalar_output_real(void);
+SEXP scalar_output_logical(void);
+SEXP scalar_output_string(void);
 SEXP sum_int(SEXP x);
 SEXP sum_real(SEXP x);
 
 // methods and associated functions for Person
-SEXP Person_new();
+SEXP Person_new(void);
 SEXP Person_set_name(SEXP self__, SEXP name);
 SEXP Person_name(SEXP self__);
-SEXP Person_associated_function();
+SEXP Person_associated_function(void);
