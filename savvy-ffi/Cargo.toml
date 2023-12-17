@@ -1,5 +1,6 @@
 [package]
 name = "savvy-ffi"
+description = "Minimal FFI bindings for R's C API"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
