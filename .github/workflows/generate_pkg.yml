@@ -32,13 +32,13 @@ jobs:
 
       - name: create package
         run: |
-          Rscript -e "usethis::create_package('${{ env.TEMP_DIR }}/sawy')"
-          cargo run --manifest-path ./savvy-cli/Cargo.toml -- init ${{ env.TEMP_DIR }}/sawy
-          cd ${{ env.TEMP_DIR }}/sawy
+          Rscript -e "usethis::create_package('${{ runner.temp }}/sawy')"
+          cargo run --manifest-path ./savvy-cli/Cargo.toml -- init ${{ runner.temp }}/sawy
+          cd ${{ runner.temp }}/sawy
           Rscript -e "usethis::use_mit_license('foo')"
           Rscript -e "devtools::document()"
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual")'
-          working-directory: ${{ env.TEMP_DIR}}/sawy
+          working-directory: ${{ runner.temp }}/sawy
