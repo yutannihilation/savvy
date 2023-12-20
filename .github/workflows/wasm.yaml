@@ -55,7 +55,7 @@ jobs:
         shell: bash
 
       - name: Build wasm packages
-        uses: r-wasm/actions/build-rwasm@main
+        uses: r-wasm/actions/build-rwasm@v1
         with:
             packages: cli
 
