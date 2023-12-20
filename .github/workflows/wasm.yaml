@@ -1,0 +1,68 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  push:
+    branches: [main, master, tweak-ci]
+  pull_request:
+    branches: [main, master]
+  
+name: build-wasm
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+  
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-emscripten
+
+      - name: Tweak
+        run: |
+          cat - <<EOF > ./R-package/src/rust/Cargo.toml
+          [package]
+          name = "simple-savvy"
+          version = "0.1.0"
+          edition = "2021"
+
+          [lib]
+          crate-type = ["staticlib"]
+
+          [dependencies]
+          savvy = { path = "./savvy" }
+          savvy-ffi = { path = "./savvy-ffi" }
+
+          [workspace]
+          members = ["savvy", "savvy-macro", "savvy-bindgen", "savvy-ffi"]
+
+          [workspace.package]
+          version = "0.1.0"
+          edition = "2021"
+          authors = ["Hiroaki Yutani"]
+          license = "MIT"
+          repository = "https://github.com/yutannihilation/savvy/"
+          EOF
+
+          mv savvy/ ./R-package/src/rust/
+          mv savvy-macro/ ./R-package/src/rust/
+          mv savvy-bindgen/ ./R-package/src/rust/
+          mv savvy-ffi/ ./R-package/src/rust/
+        shell: bash
+
+      - name: Build wasm packages
+        uses: r-wasm/actions/build-rwasm@v1
+
+    #   - uses: r-lib/actions/setup-r-dependencies@v2
+        # with:
+        #   extra-packages: any::rcmdcheck
+        #   needs: check
+        #   working-directory: R-package
+# 
+    #   - uses: r-lib/actions/check-r-package@v2
+        # with:
+        #   args: 'c("--no-manual")'  # no --as-cran
+        #   upload-snapshots: true
+        #   working-directory: R-package
+  
