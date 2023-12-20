@@ -11,7 +11,10 @@ name: build-wasm
 jobs:
   build-wasm:
     runs-on: ubuntu-latest
-    
+
+    env:
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
   
