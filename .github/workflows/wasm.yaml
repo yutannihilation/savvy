@@ -61,4 +61,4 @@ jobs:
       - name: Build wasm packages
         uses: yutannihilation/r-wasm-actions/build-rwasm@rust
         with:
-          packages: "."
+          packages: "local::./R-package"
