@@ -54,20 +54,11 @@ jobs:
           mv savvy-ffi/ ./R-package/src/rust/
         shell: bash
 
-      - name: Build wasm packages
-        uses: r-wasm/actions/build-rwasm@v1
-        with:
-            packages: cli
+      - name: Extra tweak for WebR
+        run: |
+          mv src/Makevars.webr src/Makevars
 
-    #   - uses: r-lib/actions/setup-r-dependencies@v2
-        # with:
-        #   extra-packages: any::rcmdcheck
-        #   needs: check
-        #   working-directory: R-package
-# 
-    #   - uses: r-lib/actions/check-r-package@v2
-        # with:
-        #   args: 'c("--no-manual")'  # no --as-cran
-        #   upload-snapshots: true
-        #   working-directory: R-package
-  
+      - name: Build wasm packages
+        uses: yutannihilation/r-wasm-actions/build-rwasm@rust
+        with:
+          packages: "."

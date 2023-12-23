@@ -3,3 +3,8 @@
 ^LICENSE\.md$
 ^README\.Rmd$
 ^\.github$
+
+^src/.cargo$
+^src/rust/.cargo$
+^src/rust/.vscode$
+^src/Makevars.webr$
