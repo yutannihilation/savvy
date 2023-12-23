@@ -56,7 +56,7 @@ jobs:
 
       - name: Extra tweak for WebR
         run: |
-          mv src/Makevars.webr src/Makevars
+          mv ./R-package/src/Makevars.webr ./R-package/src/Makevars
 
       - name: Build wasm packages
         uses: yutannihilation/r-wasm-actions/build-rwasm@rust
