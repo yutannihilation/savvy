@@ -58,7 +58,7 @@ jobs:
       #       However, for WebR, it's the very file neccessary to make compilation success.
       - name: Extra tweak for WebR
         run: |
-          sed -i '/Makevars\.webr/d' ./R-package/.Rbuildignore
+          sed -i '/Makevars.webr/d' ./R-package/.Rbuildignore
 
       - name: Build wasm packages
         uses: yutannihilation/r-wasm-actions/build-rwasm@rust
