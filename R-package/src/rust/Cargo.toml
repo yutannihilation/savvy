@@ -11,3 +11,6 @@ savvy = { path = "../../../savvy" }
 savvy-ffi = { path = "../../../savvy-ffi" }
 
 [workspace]
+
+[profile.release]
+panic = "abort"
