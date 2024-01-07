@@ -19,6 +19,7 @@ SEXP scalar_output_logical(void);
 SEXP scalar_output_string(void);
 SEXP sum_int(SEXP x);
 SEXP sum_real(SEXP x);
+SEXP my_integer(SEXP x);
 
 // methods and associated functions for Person
 SEXP Person_new(void);

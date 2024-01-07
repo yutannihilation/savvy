@@ -147,6 +147,11 @@ sum_real <- function(x) {
   .Call(sum_real__impl, x)
 }
 
+
+my_integer <- function(x) {
+  invisible(.Call(my_integer__impl, x))
+}
+
 #' A person with a name
 #'
 #' @export
