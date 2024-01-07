@@ -9,66 +9,17 @@ pub struct ParsedResult {
     pub impls: Vec<SavvyImpl>,
 }
 
-#[allow(clippy::enum_variant_names)]
-pub enum SavvySupportedTypes {
-    IntegerSxp(syn::TypePath),
-    RealSxp(syn::TypePath),
-    LogicalSxp(syn::TypePath),
-    StringSxp(syn::TypePath),
-    ListSxp(syn::TypePath),
-    // scalar
-    BareI32,
-    BareF64,
-    BareStr,
-    BareBool,
-}
+struct SavvyInputType(syn::Type);
 
 #[allow(dead_code)]
-impl SavvySupportedTypes {
-    fn from_type(ty: &syn::Type) -> Option<Self> {
-        // Use only the last part to support both the qualified type path (e.g.,
-        // `savvy::IntegerSxp`), and single type (e.g., `IntegerSxp`)
-        match ty {
-            syn::Type::Path(type_path) => {
-                let type_ident = &type_path.path.segments.last().unwrap().ident;
-                match type_ident.to_string().as_str() {
-                    "IntegerSxp" => Some(Self::IntegerSxp(type_path.clone())),
-                    "RealSxp" => Some(Self::RealSxp(type_path.clone())),
-                    "LogicalSxp" => Some(Self::LogicalSxp(type_path.clone())),
-                    "StringSxp" => Some(Self::StringSxp(type_path.clone())),
-                    "ListSxp" => Some(Self::ListSxp(type_path.clone())),
-                    "i32" => Some(Self::BareI32),
-                    "f64" => Some(Self::BareF64),
-                    "bool" => Some(Self::BareBool),
-                    _ => None,
-                }
-            }
-            syn::Type::Reference(type_ref) => {
-                if let syn::Type::Path(type_path) = type_ref.elem.as_ref() {
-                    let type_ident = &type_path.path.segments.last().unwrap().ident;
-                    if type_ident.to_string().as_str() == "str" {
-                        return Some(Self::BareStr);
-                    }
-                }
-                None
-            }
-            _ => None,
-        }
+impl SavvyInputType {
+    fn from_type(ty: &syn::Type) -> Self {
+        Self(ty.clone())
     }
 
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
-        match &self {
-            Self::IntegerSxp(type_path) => parse_quote!(#type_path),
-            Self::RealSxp(type_path) => parse_quote!(#type_path),
-            Self::LogicalSxp(type_path) => parse_quote!(#type_path),
-            Self::StringSxp(type_path) => parse_quote!(#type_path),
-            Self::ListSxp(type_path) => parse_quote!(#type_path),
-            Self::BareI32 => parse_quote!(i32),
-            Self::BareF64 => parse_quote!(f64),
-            Self::BareStr => parse_quote!(&str),
-            Self::BareBool => parse_quote!(bool),
-        }
+        self.0.clone()
     }
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
@@ -84,7 +35,7 @@ impl SavvySupportedTypes {
 
 pub struct SavvyFnArg {
     pat: syn::Ident,
-    ty: SavvySupportedTypes,
+    ty: SavvyInputType,
 }
 
 impl SavvyFnArg {
@@ -235,10 +186,7 @@ impl SavvyFn {
                         }
                     };
 
-                    let ty = match SavvySupportedTypes::from_type(ty.as_ref()) {
-                        Some(ty) => ty,
-                        None => return Some(Err(syn::Error::new_spanned(ty, "Unsupported type"))),
-                    };
+                    let ty = SavvyInputType::from_type(ty.as_ref());
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
