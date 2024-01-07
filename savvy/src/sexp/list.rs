@@ -1,14 +1,11 @@
 use savvy_ffi::{
     R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
-    TYPEOF, VECSXP, VECTOR_ELT,
+    VECSXP, VECTOR_ELT,
 };
 
-use crate::{
-    protect, IntegerSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
-    OwnedStringSxp, RealSxp, StringSxp,
-};
+use crate::{protect, OwnedStringSxp, StringSxp};
 
-use super::Sxp;
+use super::{Sxp, TypedSxp};
 
 pub struct ListSxp(pub SEXP);
 pub struct OwnedListSxp {
@@ -16,66 +13,6 @@ pub struct OwnedListSxp {
     names: Option<OwnedStringSxp>,
     token: SEXP,
     len: usize,
-}
-
-// TODO: This is a dummy stuct just to make the functions like elt() always
-// succeed. Maybe replace this with Sxp?
-pub struct UnsupportedSxp(SEXP);
-
-pub enum ListElement {
-    Integer(IntegerSxp),
-    Real(RealSxp),
-    String(StringSxp),
-    Logical(LogicalSxp),
-    List(ListSxp),
-    Null(NullSxp),
-    Unsupported(UnsupportedSxp),
-}
-
-macro_rules! into_list_elem {
-    ($ty: ty, $variant: ident) => {
-        impl From<$ty> for ListElement {
-            fn from(value: $ty) -> Self {
-                ListElement::$variant(value)
-            }
-        }
-    };
-}
-
-into_list_elem!(IntegerSxp, Integer);
-into_list_elem!(RealSxp, Real);
-into_list_elem!(StringSxp, String);
-into_list_elem!(LogicalSxp, Logical);
-into_list_elem!(ListSxp, List);
-into_list_elem!(NullSxp, Null);
-
-macro_rules! into_list_elem_owned {
-    ($ty: ty, $variant: ident) => {
-        impl From<$ty> for ListElement {
-            fn from(value: $ty) -> Self {
-                ListElement::$variant(value.as_read_only())
-            }
-        }
-    };
-}
-
-into_list_elem_owned!(OwnedIntegerSxp, Integer);
-into_list_elem_owned!(OwnedRealSxp, Real);
-into_list_elem_owned!(OwnedStringSxp, String);
-into_list_elem_owned!(OwnedLogicalSxp, Logical);
-
-impl From<ListElement> for SEXP {
-    fn from(value: ListElement) -> Self {
-        match value {
-            ListElement::Null(e) => e.into(),
-            ListElement::Integer(e) => e.inner(),
-            ListElement::Real(e) => e.inner(),
-            ListElement::String(e) => e.inner(),
-            ListElement::Logical(e) => e.inner(),
-            ListElement::List(e) => e.inner(),
-            ListElement::Unsupported(e) => e.0,
-        }
-    }
 }
 
 impl ListSxp {
@@ -87,12 +24,12 @@ impl ListSxp {
         self.len() == 0
     }
 
-    pub fn get(&self, k: &str) -> Option<ListElement> {
+    pub fn get(&self, k: &str) -> Option<TypedSxp> {
         let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<ListElement> {
+    pub fn get_by_index(&self, i: usize) -> Option<TypedSxp> {
         if i >= self.len() {
             return None;
         }
@@ -100,18 +37,10 @@ impl ListSxp {
         Some(self.get_by_index_unchecked(i))
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> ListElement {
+    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSxp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
-            match TYPEOF(e) as u32 {
-                savvy_ffi::INTSXP => ListElement::Integer(IntegerSxp(e)),
-                savvy_ffi::REALSXP => ListElement::Real(RealSxp(e)),
-                savvy_ffi::STRSXP => ListElement::String(StringSxp(e)),
-                savvy_ffi::LGLSXP => ListElement::Logical(LogicalSxp(e)),
-                savvy_ffi::VECSXP => ListElement::List(ListSxp(e)),
-                savvy_ffi::NILSXP => ListElement::Null(NullSxp),
-                _ => ListElement::Unsupported(UnsupportedSxp(e)),
-            }
+            Sxp(e).into_typed()
         }
     }
 
@@ -156,15 +85,15 @@ impl OwnedListSxp {
         self.values.is_empty()
     }
 
-    pub fn get(&self, k: &str) -> Option<ListElement> {
+    pub fn get(&self, k: &str) -> Option<TypedSxp> {
         self.values.get(k)
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<ListElement> {
+    pub fn get_by_index(&self, i: usize) -> Option<TypedSxp> {
         self.values.get_by_index(i)
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> ListElement {
+    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSxp {
         self.values.get_by_index_unchecked(i)
     }
 
@@ -184,7 +113,7 @@ impl OwnedListSxp {
         self.values.iter()
     }
 
-    pub fn set_value<T: Into<ListElement>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
+    pub fn set_value<T: Into<TypedSxp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
         if i >= self.len {
             return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
@@ -192,7 +121,7 @@ impl OwnedListSxp {
             )));
         }
 
-        let v: ListElement = v.into();
+        let v: TypedSxp = v.into();
 
         unsafe {
             SET_VECTOR_ELT(self.values.inner(), i as _, v.into());
@@ -211,7 +140,7 @@ impl OwnedListSxp {
         Ok(())
     }
 
-    pub fn set_name_and_value<T: Into<ListElement>>(
+    pub fn set_name_and_value<T: Into<TypedSxp>>(
         &mut self,
         i: usize,
         k: &str,
@@ -282,7 +211,7 @@ pub struct ListSxpValueIter<'a> {
 }
 
 impl<'a> Iterator for ListSxpValueIter<'a> {
-    type Item = ListElement;
+    type Item = TypedSxp;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;

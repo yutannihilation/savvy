@@ -9,8 +9,8 @@ pub use error_handling::*;
 use savvy::{r_print, savvy};
 
 use savvy::{
-    IntegerSxp, ListElement, ListSxp, LogicalSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
-    OwnedStringSxp, RealSxp, StringSxp,
+    IntegerSxp, ListSxp, LogicalSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
+    OwnedStringSxp, RealSxp, StringSxp, TypedSxp,
 };
 
 use savvy::sexp::na::NotAvailableValue;
@@ -183,7 +183,7 @@ fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
 fn print_list(x: ListSxp) -> savvy::Result<()> {
     for (k, v) in x.iter() {
         let content = match v {
-            ListElement::Integer(x) => {
+            TypedSxp::Integer(x) => {
                 format!(
                     "integer [{}]",
                     x.iter()
@@ -192,7 +192,7 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            ListElement::Real(x) => {
+            TypedSxp::Real(x) => {
                 format!(
                     "numeric [{}]",
                     x.iter()
@@ -201,10 +201,10 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            ListElement::String(x) => {
+            TypedSxp::String(x) => {
                 format!("character [{}]", x.iter().collect::<Vec<&str>>().join(", "))
             }
-            ListElement::Logical(x) => {
+            TypedSxp::Logical(x) => {
                 format!(
                     "logical [{}]",
                     x.iter()
@@ -213,9 +213,9 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            ListElement::List(_) => "list".to_string(),
-            ListElement::Null(_) => "NULL".to_string(),
-            ListElement::Unsupported(_) => "Unsupported".to_string(),
+            TypedSxp::List(_) => "list".to_string(),
+            TypedSxp::Null(_) => "NULL".to_string(),
+            TypedSxp::Other(_) => "Unsupported".to_string(),
         };
 
         let name = if k.is_empty() { "(no name)" } else { k };

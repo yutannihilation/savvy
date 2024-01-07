@@ -5,6 +5,11 @@ use savvy_ffi::{
     VECSXP,
 };
 
+use crate::{
+    IntegerSxp, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
+    OwnedStringSxp, RealSxp, StringSxp,
+};
+
 pub mod external_pointer;
 pub mod integer;
 pub mod list;
@@ -53,6 +58,77 @@ impl Sxp {
             // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
             let c = Rf_type2char(TYPEOF(self.0) as _);
             CStr::from_ptr(c).to_str().unwrap()
+        }
+    }
+}
+
+pub enum TypedSxp {
+    Integer(IntegerSxp),
+    Real(RealSxp),
+    String(StringSxp),
+    Logical(LogicalSxp),
+    List(ListSxp),
+    Null(NullSxp),
+    Other(SEXP),
+}
+
+macro_rules! into_typed_sxp {
+    ($ty: ty, $variant: ident) => {
+        impl From<$ty> for TypedSxp {
+            fn from(value: $ty) -> Self {
+                TypedSxp::$variant(value)
+            }
+        }
+    };
+}
+
+into_typed_sxp!(IntegerSxp, Integer);
+into_typed_sxp!(RealSxp, Real);
+into_typed_sxp!(StringSxp, String);
+into_typed_sxp!(LogicalSxp, Logical);
+into_typed_sxp!(ListSxp, List);
+into_typed_sxp!(NullSxp, Null);
+
+macro_rules! into_typed_sxp_owned {
+    ($ty: ty, $variant: ident) => {
+        impl From<$ty> for TypedSxp {
+            fn from(value: $ty) -> Self {
+                TypedSxp::$variant(value.as_read_only())
+            }
+        }
+    };
+}
+
+into_typed_sxp_owned!(OwnedIntegerSxp, Integer);
+into_typed_sxp_owned!(OwnedRealSxp, Real);
+into_typed_sxp_owned!(OwnedStringSxp, String);
+into_typed_sxp_owned!(OwnedLogicalSxp, Logical);
+
+impl From<TypedSxp> for SEXP {
+    fn from(value: TypedSxp) -> Self {
+        match value {
+            TypedSxp::Null(e) => e.into(),
+            TypedSxp::Integer(e) => e.inner(),
+            TypedSxp::Real(e) => e.inner(),
+            TypedSxp::String(e) => e.inner(),
+            TypedSxp::Logical(e) => e.inner(),
+            TypedSxp::List(e) => e.inner(),
+            TypedSxp::Other(e) => e,
+        }
+    }
+}
+
+impl Sxp {
+    pub fn into_typed(self) -> TypedSxp {
+        let ty = unsafe { TYPEOF(self.0) };
+        match ty as u32 {
+            savvy_ffi::INTSXP => TypedSxp::Integer(IntegerSxp(self.0)),
+            savvy_ffi::REALSXP => TypedSxp::Real(RealSxp(self.0)),
+            savvy_ffi::STRSXP => TypedSxp::String(StringSxp(self.0)),
+            savvy_ffi::LGLSXP => TypedSxp::Logical(LogicalSxp(self.0)),
+            savvy_ffi::VECSXP => TypedSxp::List(ListSxp(self.0)),
+            savvy_ffi::NILSXP => TypedSxp::Null(NullSxp),
+            _ => TypedSxp::Other(self.0),
         }
     }
 }
