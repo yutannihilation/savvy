@@ -6,6 +6,9 @@ pub use scalar::*;
 mod error_handling;
 pub use error_handling::*;
 
+mod try_from;
+pub use try_from::*;
+
 use savvy::{r_print, savvy};
 
 use savvy::{
