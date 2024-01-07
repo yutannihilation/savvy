@@ -11,3 +11,4 @@ target
 .vscode
 
 /Cargo.lock
+/R-package/src/rust/Cargo.lock
