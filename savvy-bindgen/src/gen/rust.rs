@@ -40,17 +40,15 @@ impl SavvyFn {
                 }
             ),
             // An associated function
-            SavvyFnType::AssociatedFunction(ty) => {
-                parse_quote!(
-                    #(#attrs)*
-                    #[allow(non_snake_case)]
-                    unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                        #(#stmts_additional)*
+            SavvyFnType::AssociatedFunction(ty) => parse_quote!(
+                #(#attrs)*
+                #[allow(non_snake_case)]
+                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                    #(#stmts_additional)*
 
-                        #ty::#fn_name_orig(#(#args_pat),*)
-                    }
-                )
-            }
+                    #ty::#fn_name_orig(#(#args_pat),*)
+                }
+            ),
             SavvyFnType::Constructor(ty) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
