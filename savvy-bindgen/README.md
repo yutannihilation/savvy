@@ -28,7 +28,6 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, e_upper.as_str())?;
     }
 
-    // `Owned{type}Sexp` type implements `From` trait for `SEXP`, so you can use `into()`.
-    Ok(out.into())
+    out.into()
 }
 ```

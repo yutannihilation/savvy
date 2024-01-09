@@ -20,15 +20,14 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         // You have to use `.is_na()` method to distinguish the missing value.
         if e.is_na() {
             // Values need to be set by `set_elt()` one by one.
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
         let e_upper = e.to_uppercase();
-        out.set_elt(i, e_upper.as_str());
+        out.set_elt(i, e_upper.as_str())?;
     }
 
-    // `Owned{type}Sexp` type implements `From` trait for `Sexp`, so you can use `into()`.
-    Ok(out.into())
+    out.into()
 }
 ```

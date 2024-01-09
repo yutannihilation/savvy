@@ -55,7 +55,7 @@ fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, &format!("{e}_{y}"))?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 ```
 
@@ -175,7 +175,7 @@ you think it's worth, you should pay, and if not, you should not.
 
 ### How to prepare an output R object
 
-#### 1. `new()`
+#### 1. Create a new R object first and record values on it
 
 As you saw above, an owned SEXP can be allocated by using
 `Owned{type}Sexp::new()`. `new()` takes the length of the vector as the argument.
@@ -202,23 +202,25 @@ for (i, e) in x.iter().enumerate() {
 }
 ```
 
-Then, you can convert it to [`Sexp`] by `into()`
+Then, you can convert it to `Result<Sexp>` by `into()`.
 
 ```no_run
-Ok(out.into())
+out.into()
 ```
 
-#### 2. `try_into()`
+#### 2. Convert a Rust scalar or vector by `try_into()` at last
 
 Another way is to use a Rust vector to store the results and convert it to an R
-object at the end the function. This is fallible because this too uses the
-fallible `new()`.
+object at the end the function. This is fallible because this anyway needs to
+create a new R object under the hood, which can fail. So, this time, the
+conversion is done by `try_into()`, not by `into()`.
 
 Note that, while this is convenient, this might not be good in terms of
 efficiency in that this requires double size of memory. For the details, see
 `TryFrom<&[T]>` section later.
 
 ```no_run
+// vector output
 #[savvy]
 fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out: Vec<i32> = Vec::with_capacity(x.len());
@@ -227,19 +229,14 @@ fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
         out.push(v * 2);
     }
 
-    let out_sxp: OwnedIntegerSexp = out.as_slice().try_into()?;
-    Ok(out_sxp.into())
+    out.try_into()
 }
-```
 
-For convenience, savvy also provides `TryFrom<T>` for scalar types. This might be
-useful in some cases.
-
-```no_run
+// scalar output
 #[savvy]
 fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
-    let sum: OwnedRealSexp = x.as_slice().iter().sum::<f64>().try_into()?;
-    Ok(sum.into())
+    let sum: f64 = x.as_slice().iter().sum();
+    sum.try_into()
 }
 ```
 
@@ -290,7 +287,7 @@ fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, e)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 ```
 
@@ -311,7 +308,7 @@ side.
 fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(1)?;
     out.set_elt(0, x)?;
-    Ok(out.into())
+    out.into()
 }
 ```
 
@@ -335,7 +332,7 @@ fn identity_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
         out[i] = v;
     }
 
-    Ok(out.into())
+    out.into()
 }
 ```
 
@@ -406,7 +403,7 @@ fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
         out[i] = v * 2;
     }
 
-    Ok(out.into())
+    out.into()
 }
 ```
 
@@ -625,7 +622,7 @@ fn list_with_no_values() -> savvy::Result<savvy::Sexp> {
     out.set_name(0, "foo");
     out.set_name(1, "bar");
 
-    Ok(out.into())
+    out.into()
 }
 ```
 ```text
@@ -658,7 +655,7 @@ fn list_with_no_names() -> savvy::Result<savvy::Sexp> {
     out.set_value(0, e1);
     out.set_value(1, e2);
 
-    Ok(out.into())
+    out.into()
 }
 ```
 ```text
@@ -701,7 +698,7 @@ impl Person {
     fn name(&self) -> savvy::Result<savvy::Sexp> {
         let mut out = OwnedStringSexp::new(1)?;
         out.set_elt(0, &self.name)?;
-        Ok(out.into())
+        out.into()
     }
 }
 ```
@@ -800,6 +797,7 @@ Error: This is my custom error
 
 ### Testing
 
+TBD
 
 ### Use the raw R's C API (libR-sys)
 
