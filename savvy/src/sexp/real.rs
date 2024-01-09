@@ -127,7 +127,7 @@ impl TryFrom<Sexp> for RealSexp {
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_real() {
             let type_name = value.get_human_readable_type_name();
-            let msg = format!("Cannot convert {type_name} to real");
+            let msg = format!("Expected reals, got {type_name}s");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
