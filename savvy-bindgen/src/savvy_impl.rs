@@ -129,7 +129,7 @@ mod tests {
                     Ok(())
                 }
 
-                fn name(&self) -> savvy::Result<savvy::SEXP> {
+                fn name(&self) -> savvy::Result<savvy::Sxp> {
                     let mut out = OwnedStringSxp::new(1);
                     out.set_elt(0, self.name.as_str());
                     Ok(out.into())
