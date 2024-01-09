@@ -52,13 +52,13 @@ fn scalar_output_string() -> savvy::Result<savvy::Sexp> {
 
 #[savvy]
 fn sum_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
-    let sum: i32 = x.as_slice().iter().sum();
+    let sum: i32 = x.iter().sum();
     sum.try_into()
 }
 
 #[savvy]
 fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
-    let sum: f64 = x.as_slice().iter().sum();
+    let sum: f64 = x.iter().sum();
     sum.try_into()
 }
 

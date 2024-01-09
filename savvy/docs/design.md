@@ -215,30 +215,28 @@ object at the end the function. This is fallible because this anyway needs to
 create a new R object under the hood, which can fail. So, this time, the
 conversion is done by `try_into()`, not by `into()`.
 
-Note that, while this is convenient, this might not be good in terms of
-efficiency in that this requires double size of memory. For the details, see
-`TryFrom<&[T]>` section later.
-
 ```no_run
+// Let's not consider for handling NAs at all for simplicity...
+
 // vector output
 #[savvy]
 fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
-    let mut out: Vec<i32> = Vec::with_capacity(x.len());
-
-    for &v in x.iter() {
-        out.push(v * 2);
-    }
-
+    let out: Vec<i32> = x.iter().map(|v| v * 2).collect();
     out.try_into()
 }
 
 // scalar output
 #[savvy]
 fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
-    let sum: f64 = x.as_slice().iter().sum();
+    let sum: f64 = x.iter().sum();
     sum.try_into()
 }
 ```
+
+Note that, while this looks handy, this might not be very efficient; for example,
+`times_two()` above allocates a Rust vector, and then copy the values into a new
+R vector in `try_into()`. The copying cost can be innegligible when the vector
+is very huge.
 
 ### Missing values
 
