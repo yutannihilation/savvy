@@ -22,6 +22,6 @@ fn safe_stop() -> savvy::Result<()> {
 }
 
 #[savvy]
-fn raise_error() -> savvy::Result<savvy::SEXP> {
+fn raise_error() -> savvy::Result<savvy::Sxp> {
     Err(savvy::Error::new("This is my custom error"))
 }

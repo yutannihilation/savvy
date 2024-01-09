@@ -3,6 +3,8 @@ use savvy_ffi::{
     Rf_protect, Rf_unprotect, SEXP,
 };
 
+use crate::Sxp;
+
 // Some notes about the design.
 //
 // 1. conversion from Rust struct into SEXP
@@ -36,7 +38,7 @@ pub trait IntoExtPtrSxp: Sized {
     //
     // I'm not immediately sure about the pros and cons, but I bet it's good to
     // enable this by default.
-    fn into_external_pointer(self) -> SEXP {
+    fn into_external_pointer(self) -> Sxp {
         let boxed = Box::new(self);
         let ptr = Box::into_raw(boxed);
 
@@ -62,7 +64,7 @@ pub trait IntoExtPtrSxp: Sized {
 
             Rf_unprotect(1);
 
-            external_pointer
+            Sxp(external_pointer)
         }
     }
 }

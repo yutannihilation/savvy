@@ -143,15 +143,15 @@ impl TryFrom<bool> for OwnedLogicalSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<LogicalSxp> for SEXP {
+impl From<LogicalSxp> for Sxp {
     fn from(value: LogicalSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
-impl From<OwnedLogicalSxp> for SEXP {
+impl From<OwnedLogicalSxp> for Sxp {
     fn from(value: OwnedLogicalSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 

@@ -107,13 +107,13 @@ into_typed_sxp_owned!(OwnedLogicalSxp, Logical);
 impl From<TypedSxp> for SEXP {
     fn from(value: TypedSxp) -> Self {
         match value {
-            TypedSxp::Null(e) => e.into(),
-            TypedSxp::Integer(e) => e.inner(),
-            TypedSxp::Real(e) => e.inner(),
-            TypedSxp::String(e) => e.inner(),
-            TypedSxp::Logical(e) => e.inner(),
-            TypedSxp::List(e) => e.inner(),
-            TypedSxp::Other(e) => e,
+            TypedSxp::Null(_) => unsafe { savvy_ffi::R_NilValue },
+            TypedSxp::Integer(sxp) => sxp.inner(),
+            TypedSxp::Real(sxp) => sxp.inner(),
+            TypedSxp::String(sxp) => sxp.inner(),
+            TypedSxp::Logical(sxp) => sxp.inner(),
+            TypedSxp::List(sxp) => sxp.inner(),
+            TypedSxp::Other(sxp) => sxp,
         }
     }
 }

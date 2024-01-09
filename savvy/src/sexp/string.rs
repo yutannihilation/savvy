@@ -170,15 +170,15 @@ impl TryFrom<String> for OwnedStringSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<StringSxp> for SEXP {
+impl From<StringSxp> for Sxp {
     fn from(value: StringSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
-impl From<OwnedStringSxp> for SEXP {
+impl From<OwnedStringSxp> for Sxp {
     fn from(value: OwnedStringSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 

@@ -24,7 +24,7 @@ use savvy::sexp::na::NotAvailableValue;
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
+fn to_upper(x: StringSxp) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -47,7 +47,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
+fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -68,7 +68,7 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 /// @returns An integer vector with values multiplied by 2.
 /// @export
 #[savvy]
-fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -89,7 +89,7 @@ fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns An integer vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
+fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -109,7 +109,7 @@ fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
 /// @returns A numeric vector with values multiplied by 2.
 /// @export
 #[savvy]
-fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
+fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedRealSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -130,7 +130,7 @@ fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A real vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
+fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedRealSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -150,7 +150,7 @@ fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
 /// @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 /// @export
 #[savvy]
-fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
+fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -167,7 +167,7 @@ fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 /// @export
 #[savvy]
-fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
+fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedLogicalSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -249,13 +249,13 @@ impl Person {
         Ok(())
     }
 
-    fn name(&self) -> savvy::Result<savvy::SEXP> {
+    fn name(&self) -> savvy::Result<savvy::Sxp> {
         let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, &self.name)?;
         Ok(out.into())
     }
 
-    fn associated_function() -> savvy::Result<savvy::SEXP> {
+    fn associated_function() -> savvy::Result<savvy::Sxp> {
         let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, "associated_function")?;
         Ok(out.into())

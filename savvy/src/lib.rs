@@ -35,7 +35,7 @@ pub fn r_print(msg: &str) -> crate::error::Result<SEXP> {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             Rprintf(msg_c_string.as_ptr());
-            NullSxp.into()
+            savvy_ffi::R_NilValue
         })
     }
 }
@@ -45,7 +45,7 @@ pub fn r_eprint(msg: &str) -> crate::error::Result<SEXP> {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             REprintf(msg_c_string.as_ptr());
-            NullSxp.into()
+            savvy_ffi::R_NilValue
         })
     }
 }

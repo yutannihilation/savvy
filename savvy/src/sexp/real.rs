@@ -152,15 +152,15 @@ impl TryFrom<f64> for OwnedRealSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<RealSxp> for SEXP {
+impl From<RealSxp> for Sxp {
     fn from(value: RealSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
-impl From<OwnedRealSxp> for SEXP {
+impl From<OwnedRealSxp> for Sxp {
     fn from(value: OwnedRealSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 

@@ -6,7 +6,7 @@ error: function must have return type
   |
   = note: this error originates in the attribute macro `savvy` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: the return type must be either syn::Result<SEXP> or syn::Result<()>
+error: the return type must be either syn::Result<Sxp> or syn::Result<()>
  --> tests/cases/simple_cases.rs:7:34
   |
 7 | fn foo_wrong_return_type(x: i32) -> i32 {}

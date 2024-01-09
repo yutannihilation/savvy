@@ -192,15 +192,15 @@ impl TryFrom<Sxp> for ListSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<ListSxp> for SEXP {
+impl From<ListSxp> for Sxp {
     fn from(value: ListSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
-impl From<OwnedListSxp> for SEXP {
+impl From<OwnedListSxp> for Sxp {
     fn from(value: OwnedListSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 

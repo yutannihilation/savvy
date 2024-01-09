@@ -15,7 +15,7 @@ use savvy::sexp::na::NotAvailableValue;
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
+fn to_upper(x: StringSxp) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedStringSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -38,7 +38,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns An integer vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn int_times_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
+fn int_times_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::Sxp> {
     let mut out = OwnedIntegerSxp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -72,13 +72,13 @@ impl Person {
         Ok(())
     }
 
-    fn name(&self) -> savvy::Result<savvy::SEXP> {
+    fn name(&self) -> savvy::Result<savvy::Sxp> {
         let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, &self.name);
         Ok(out.into())
     }
 
-    fn associated_function() -> savvy::Result<savvy::SEXP> {
+    fn associated_function() -> savvy::Result<savvy::Sxp> {
         let mut out = OwnedStringSxp::new(1)?;
         out.set_elt(0, "associated_function");
         Ok(out.into())

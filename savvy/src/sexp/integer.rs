@@ -164,15 +164,15 @@ impl TryFrom<i32> for OwnedIntegerSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<IntegerSxp> for SEXP {
+impl From<IntegerSxp> for Sxp {
     fn from(value: IntegerSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
-impl From<OwnedIntegerSxp> for SEXP {
+impl From<OwnedIntegerSxp> for Sxp {
     fn from(value: OwnedIntegerSxp) -> Self {
-        value.inner()
+        Self(value.inner())
     }
 }
 
