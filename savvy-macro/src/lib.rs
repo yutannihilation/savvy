@@ -78,12 +78,12 @@ mod tests {
         assert_eq_inner(
             parse_quote!(
                 #[savvy]
-                fn foo() -> savvy::Result<savvy::SEXP> {
+                fn foo() -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner() -> savvy::Result<savvy::SEXP> {
+                unsafe fn savvy_foo_inner() -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
@@ -111,12 +111,12 @@ mod tests {
             // kept between conversions.
             parse_quote!(
                 #[savvy]
-                fn foo(x: RealSxp, y: savvy::IntegerSxp) -> savvy::Result<savvy::SEXP> {
+                fn foo(x: RealSxp, y: savvy::IntegerSxp) -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
+                unsafe fn savvy_foo_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::Sxp> {
                     let x = <RealSxp>::try_from(savvy::Sxp(x))?;
                     let y = <savvy::IntegerSxp>::try_from(savvy::Sxp(y))?;
                     bar()
@@ -128,12 +128,12 @@ mod tests {
         assert_eq_inner(
             parse_quote!(
                 #[savvy]
-                fn foo(x: f64) -> savvy::Result<savvy::SEXP> {
+                fn foo(x: f64) -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner(x: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
+                unsafe fn savvy_foo_inner(x: savvy::SEXP) -> savvy::Result<savvy::Sxp> {
                     let x = <f64>::try_from(savvy::Sxp(x))?;
                     bar()
                 }
@@ -153,7 +153,7 @@ mod tests {
         assert_eq_outer(
             parse_quote!(
                 #[savvy]
-                fn foo() -> savvy::Result<savvy::SEXP> {
+                fn foo() -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
@@ -162,7 +162,7 @@ mod tests {
                 #[no_mangle]
                 pub unsafe extern "C" fn foo() -> savvy::SEXP {
                     match savvy_foo_inner() {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -182,7 +182,7 @@ mod tests {
                 #[no_mangle]
                 pub unsafe extern "C" fn foo() -> savvy::SEXP {
                     match savvy_foo_inner() {
-                        Ok(_) => savvy::NullSxp.into(),
+                        Ok(_) => savvy::sexp::null::null(),
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -196,7 +196,7 @@ mod tests {
                 fn foo(
                     x: RealSxp,
                     y: savvy::RealSxp,
-                ) -> savvy::Result<savvy::SEXP> {
+                ) -> savvy::Result<savvy::Sxp> {
                     bar()
                 }
             ),
@@ -208,7 +208,7 @@ mod tests {
                     y: savvy::SEXP
                 ) -> savvy::SEXP {
                     match savvy_foo_inner(x, y) {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -230,7 +230,7 @@ mod tests {
                 fn new() -> Self {
                     Self {}
                 }
-                fn name(&self) -> savvy::Result<savvy::SEXP> {
+                fn name(&self) -> savvy::Result<savvy::Sxp> {
                     Ok(out.into())
                 }
                 fn set_name(&self, name: StringSxp) -> Result<()> {
@@ -246,7 +246,7 @@ mod tests {
                 #[no_mangle]
                 pub unsafe extern "C" fn Person_new() -> savvy::SEXP {
                     match savvy_Person_new_inner() {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -282,7 +282,7 @@ mod tests {
                     name: savvy::SEXP
                 ) -> savvy::SEXP {
                     match savvy_Person_set_name_inner(self__, name) {
-                        Ok(_) => savvy::NullSxp.into(),
+                        Ok(_) => savvy::sexp::null::null(),
                         Err(e) => savvy::handle_error(e),
                     }
                 }
