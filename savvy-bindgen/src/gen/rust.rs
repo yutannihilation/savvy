@@ -32,7 +32,7 @@ impl SavvyFn {
             SavvyFnType::Method(ty) => parse_quote!(
                 #(#attrs)*
                 #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
                     let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
                     #(#stmts_additional)*
 
@@ -87,7 +87,7 @@ impl SavvyFn {
             SavvyFnType::Method(_) => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer(self__: savvy::SEXP, #(#args_pat: #args_ty),* ) -> savvy::SEXP {
+                pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                     match #fn_name_inner(self__, #(#args_pat),*) {
                         Ok(#ok_lhs) => #ok_rhs,
                         Err(e) => savvy::handle_error(e),
@@ -97,7 +97,7 @@ impl SavvyFn {
             _ => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> savvy::SEXP {
+                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                     match #fn_name_inner(#(#args_pat),*) {
                         Ok(#ok_lhs) => #ok_rhs,
                         Err(e) => savvy::handle_error(e),

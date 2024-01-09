@@ -39,7 +39,7 @@ documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
 /// @param x A character vector.
 /// @export
 #[savvy]
-fn to_upper(x: StringSexp) -> savvy::Result<savvy::SEXP> {
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
     // Use `Owned{type}Sexp` to allocate an R vector for output.
     let mut out = OwnedStringSexp::new(x.len())?;
 

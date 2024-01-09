@@ -24,7 +24,7 @@ impl SavvyInputType {
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
     fn to_rust_type_inner(&self) -> syn::Type {
-        parse_quote!(savvy::SEXP)
+        parse_quote!(savvy::ffi::SEXP)
     }
 
     /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).

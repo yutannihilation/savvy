@@ -43,7 +43,7 @@ character vector. `#[savvy]` macro turns this into an R function.
 
 ```no_run
 #[savvy]
-fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::SEXP> {
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -82,14 +82,14 @@ Rust functions:
 ```no_run
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
-pub unsafe extern "C" fn add_suffix(x: savvy::SEXP, y: savvy::SEXP) -> savvy::SEXP {
+pub unsafe extern "C" fn add_suffix(x: SEXP, y: SEXP) -> SEXP {
     match savvy_add_suffix_inner(x, y) {
-        Ok(result) => result,
+        Ok(result) => result.0,
         Err(e) => savvy::handle_error(e),
     }
 }
 
-unsafe fn savvy_add_suffix_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
+unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp> {
     let x = <savvy::RealSexp>::try_from(savvy::Sexp(x))?;
     let y = <&str>::try_from(savvy::Sexp(y))?;
     
@@ -126,7 +126,7 @@ add_suffix <- function(x, y) {
 The example function above has this signature.
 
 ```no_run
-fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::SEXP>
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp>
 ```
 
 As you can guess, `#[savvy]` macro cannot be applied to arbitrary functions. The
@@ -137,7 +137,7 @@ function must satisfy the following conditions:
     * corresponding Rust types for scalar (e.g., `i32` and `f64`)
     * arbitrary custom type that implements `TryFrom<savvy::Sexp>`
 * The function's return value must be either
-    * `savvy::Result<savvy::SEXP>` for the case of some return value
+    * `savvy::Result<savvy::Sexp>` for the case of some return value
     * `savvy::Result<()>` for the case of no actual return value
 
 ### How to read the values from input R objects
@@ -202,7 +202,7 @@ for (i, e) in x.iter().enumerate() {
 }
 ```
 
-Then, you can convert it to [`SEXP`] by `into()`
+Then, you can convert it to [`Sexp`] by `into()`
 
 ```no_run
 Ok(out.into())
@@ -220,7 +220,7 @@ efficiency in that this requires double size of memory. For the details, see
 
 ```no_run
 #[savvy]
-fn times_two(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
+fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out: Vec<i32> = Vec::with_capacity(x.len());
 
     for &v in x.iter() {
@@ -237,7 +237,7 @@ useful in some cases.
 
 ```no_run
 #[savvy]
-fn sum_real(x: RealSexp) -> savvy::Result<savvy::SEXP> {
+fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let sum: OwnedRealSexp = x.as_slice().iter().sum::<f64>().try_into()?;
     Ok(sum.into())
 }
@@ -283,7 +283,7 @@ function is not an identity function.
 
 ```no_run
 #[savvy]
-fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::SEXP> {
+fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -308,7 +308,7 @@ side.
 
 ```no_run
 #[savvy]
-fn identity_logical_single(x: bool) -> savvy::Result<savvy::SEXP> {
+fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(1)?;
     out.set_elt(0, x)?;
     Ok(out.into())
@@ -328,7 +328,7 @@ numeric vector to a function with a `IntegerSexp` argument.
 
 ```no_run
 #[savvy]
-fn identity_int(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
+fn identity_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
@@ -399,7 +399,7 @@ below instead of `set_elt()`.
 
 ```no_run
 #[savvy]
-fn times_two(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
+fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
@@ -619,7 +619,7 @@ ignored.
 
 ```no_run
 #[savvy]
-fn list_with_no_values() -> savvy::Result<savvy::SEXP> {
+fn list_with_no_values() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, true)?;
 
     out.set_name(0, "foo");
@@ -646,7 +646,7 @@ implements it, you can simply pass it like below.
 
 ```no_run
 #[savvy]
-fn list_with_no_names() -> savvy::Result<savvy::SEXP> {
+fn list_with_no_names() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, false)?;
 
     let mut e1 = OwnedIntegerSexp::new(1)?;
@@ -698,7 +698,7 @@ impl Person {
         Ok(())
     }
 
-    fn name(&self) -> savvy::Result<savvy::SEXP> {
+    fn name(&self) -> savvy::Result<savvy::Sexp> {
         let mut out = OwnedStringSexp::new(1)?;
         out.set_elt(0, &self.name)?;
         Ok(out.into())
@@ -788,7 +788,7 @@ create an error with a custom error message.
 
 ```no_run
 #[savvy]
-fn raise_error() -> savvy::Result<savvy::SEXP> {
+fn raise_error() -> savvy::Result<savvy::Sexp> {
     Err(savvy::Error::new("This is my custom error"))
 }
 ```

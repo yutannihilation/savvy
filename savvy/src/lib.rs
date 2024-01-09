@@ -4,6 +4,7 @@
 #![doc = include_str!("../docs/design.md")]
 
 pub mod error;
+pub mod ffi;
 pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
@@ -22,9 +23,9 @@ pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSexp};
 pub use unwind_protect::unwind_protect;
 
 // re-export
-pub use savvy_ffi::SEXP;
 pub use savvy_macro::savvy;
 
+use ffi::SEXP;
 use savvy_ffi::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
 
 use std::ffi::CString;

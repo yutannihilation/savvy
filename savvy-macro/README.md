@@ -11,7 +11,7 @@ documentation](https://docs.rs/savvy/latest/).
 /// @param x A character vector.
 /// @export
 #[savvy]
-fn to_upper(x: StringSexp) -> savvy::Result<savvy::SEXP> {
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
     // Use `Owned{type}Sexp` to allocate an R vector for output.
     let mut out = OwnedStringSexp::new(x.len())?;
 
@@ -28,7 +28,7 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::SEXP> {
         out.set_elt(i, e_upper.as_str());
     }
 
-    // `Owned{type}Sexp` type implements `From` trait for `SEXP`, so you can use `into()`.
+    // `Owned{type}Sexp` type implements `From` trait for `Sexp`, so you can use `into()`.
     Ok(out.into())
 }
 ```
