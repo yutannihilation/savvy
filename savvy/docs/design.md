@@ -175,7 +175,7 @@ you think it's worth, you should pay, and if not, you should not.
 
 ### How to prepare an output R object
 
-#### 1. Create a new R object first and record values on it
+#### 1. Create a new R object first and put values on it
 
 As you saw above, an owned SEXP can be allocated by using
 `Owned{type}Sexp::new()`. `new()` takes the length of the vector as the argument.
