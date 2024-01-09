@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.qmd. Please edit that file -->
 
-# Savvy - An unfriendly R extension interface using Rust
+# Savvy - A simple R extension interface using Rust
 
 <!-- badges: start -->
 
@@ -28,9 +28,9 @@ people, I chose this name.
 ## Example Rust code
 
 With savvy, you can implement Rust function like below to create the
-corresponding R function `to_upper()`. As you can see, this framework is
-unfriendly in that this requires more explicit operations than extendr.
-For the full details, please read [the crate
+corresponding R function `to_upper()`. As you can see, unlike extendr,
+this framework is simple in the sense that this does few implicit
+conversions. For the full details, please read [the crate
 documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
 
 ``` rust

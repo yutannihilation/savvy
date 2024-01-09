@@ -1,6 +1,6 @@
 # savvy
 
-Savvy is an unfriendly R extension interface using Rust.
+Savvy is a simple R extension interface using Rust.
 
 This is nothing but my personal challenge to re-invent the wheel in order to get
 better understanding about what [extendr](https://extendr.github.io/) does.
