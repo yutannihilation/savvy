@@ -228,37 +228,53 @@ x$name()
 
 ## Rust API
 
-<table>
+<table style="width:98%;">
 <colgroup>
-<col style="width: 19%" />
-<col style="width: 80%" />
+<col style="width: 18%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 29%" />
 </colgroup>
+<thead>
+<tr class="header">
+<th>R type</th>
+<th>Read-only version</th>
+<th>Writable version</th>
+<th>Note</th>
+</tr>
+</thead>
 <tbody>
 <tr class="odd">
-<td rowspan="2"><h1 id="r-type">R type</h1>
-<p><code>INTSXP</code></p></td>
-<td rowspan="2">Read-only version | Writable version | Note |
-===================+===================+========================+
-<code>IntegerSexp</code> | <code>OwnedIntegerSexp</code> |</td>
+<td><code>INTSXP</code></td>
+<td><code>IntegerSexp</code></td>
+<td><code>OwnedIntegerSexp</code></td>
+<td></td>
 </tr>
 <tr class="even">
-</tr>
-<tr class="odd">
 <td><code>REALSXP</code></td>
-<td><code>RealSexp</code> | <code>OwnedRealSexp</code> |</td>
-</tr>
-<tr class="even">
-<td><code>LGLSXP</code></td>
-<td><code>LogicalSexp</code> | <code>OwnedLogicalSexp</code> | - cannot
-handle <code>NA</code></td>
+<td><code>RealSexp</code></td>
+<td><code>OwnedRealSexp</code></td>
+<td></td>
 </tr>
 <tr class="odd">
-<td><code>STRSXP</code></td>
-<td><code>StringSexp</code> | <code>OwnedStringSexp</code> |</td>
+<td><code>LGLSXP</code></td>
+<td><code>LogicalSexp</code></td>
+<td><code>OwnedLogicalSexp</code></td>
+<td><ul>
+<li>cannot handle <code>NA</code></li>
+</ul></td>
 </tr>
 <tr class="even">
+<td><code>STRSXP</code></td>
+<td><code>StringSexp</code></td>
+<td><code>OwnedStringSexp</code></td>
+<td></td>
+</tr>
+<tr class="odd">
 <td><code>VECSXP</code></td>
-<td><code>ListSexp</code> | <code>OwnedListSexp</code> |</td>
+<td><code>ListSexp</code></td>
+<td><code>OwnedListSexp</code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
