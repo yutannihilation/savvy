@@ -2,18 +2,18 @@ use std::ops::{Index, IndexMut};
 
 use savvy_ffi::{Rf_xlength, REAL, REALSXP, SEXP};
 
-use super::Sxp;
+use super::Sexp;
 use crate::protect;
 
-pub struct RealSxp(pub SEXP);
-pub struct OwnedRealSxp {
+pub struct RealSexp(pub SEXP);
+pub struct OwnedRealSexp {
     inner: SEXP,
     token: SEXP,
     len: usize,
     raw: *mut f64,
 }
 
-impl RealSxp {
+impl RealSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -41,7 +41,7 @@ impl RealSxp {
     }
 }
 
-impl OwnedRealSxp {
+impl OwnedRealSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -50,8 +50,8 @@ impl OwnedRealSxp {
         self.len == 0
     }
 
-    pub fn as_read_only(&self) -> RealSxp {
-        RealSxp(self.inner)
+    pub fn as_read_only(&self) -> RealSexp {
+        RealSexp(self.inner)
     }
 
     pub fn as_slice(&self) -> &[f64] {
@@ -113,16 +113,18 @@ impl OwnedRealSxp {
     }
 }
 
-impl Drop for OwnedRealSxp {
+impl Drop for OwnedRealSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for RealSxp {
+// conversions from/to RealSexp ***************
+
+impl TryFrom<Sexp> for RealSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_real() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to real");
@@ -132,7 +134,21 @@ impl TryFrom<Sxp> for RealSxp {
     }
 }
 
-impl TryFrom<&[f64]> for OwnedRealSxp {
+impl From<RealSexp> for Sexp {
+    fn from(value: RealSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<RealSexp> for crate::error::Result<Sexp> {
+    fn from(value: RealSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedRealSexp ***************
+
+impl TryFrom<&[f64]> for OwnedRealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[f64]) -> crate::error::Result<Self> {
@@ -142,7 +158,15 @@ impl TryFrom<&[f64]> for OwnedRealSxp {
     }
 }
 
-impl TryFrom<f64> for OwnedRealSxp {
+impl TryFrom<Vec<f64>> for OwnedRealSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<f64>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
+    }
+}
+
+impl TryFrom<f64> for OwnedRealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: f64) -> crate::error::Result<Self> {
@@ -151,20 +175,37 @@ impl TryFrom<f64> for OwnedRealSxp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<RealSxp> for SEXP {
-    fn from(value: RealSxp) -> Self {
-        value.inner()
+impl From<OwnedRealSexp> for Sexp {
+    fn from(value: OwnedRealSexp) -> Self {
+        Self(value.inner())
     }
 }
 
-impl From<OwnedRealSxp> for SEXP {
-    fn from(value: OwnedRealSxp) -> Self {
-        value.inner()
+impl From<OwnedRealSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedRealSexp) -> Self {
+        Ok(<Sexp>::from(value))
     }
 }
 
-impl Index<usize> for OwnedRealSxp {
+macro_rules! impl_try_from_rust_reals {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedRealSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_reals!(&[f64]);
+impl_try_from_rust_reals!(Vec<f64>);
+impl_try_from_rust_reals!(f64);
+
+// Index for OwnedRealSexp ***************
+
+impl Index<usize> for OwnedRealSexp {
     type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -178,7 +219,7 @@ impl Index<usize> for OwnedRealSxp {
     }
 }
 
-impl IndexMut<usize> for OwnedRealSxp {
+impl IndexMut<usize> for OwnedRealSexp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         if index >= self.len {
             panic!(

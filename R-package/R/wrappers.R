@@ -3,6 +3,96 @@
 NULL
 
 
+scalar_input_int <- function(x) {
+  invisible(.Call(scalar_input_int__impl, x))
+}
+
+
+scalar_input_real <- function(x) {
+  invisible(.Call(scalar_input_real__impl, x))
+}
+
+
+scalar_input_logical <- function(x) {
+  invisible(.Call(scalar_input_logical__impl, x))
+}
+
+
+scalar_input_string <- function(x) {
+  invisible(.Call(scalar_input_string__impl, x))
+}
+
+
+scalar_output_int <- function() {
+  .Call(scalar_output_int__impl)
+}
+
+
+scalar_output_real <- function() {
+  .Call(scalar_output_real__impl)
+}
+
+
+scalar_output_logical <- function() {
+  .Call(scalar_output_logical__impl)
+}
+
+
+scalar_output_string <- function() {
+  .Call(scalar_output_string__impl)
+}
+
+
+sum_int <- function(x) {
+  .Call(sum_int__impl, x)
+}
+
+
+sum_real <- function(x) {
+  .Call(sum_real__impl, x)
+}
+
+
+rep_int_vec <- function(x) {
+  .Call(rep_int_vec__impl, x)
+}
+
+
+rep_int_slice <- function(x) {
+  .Call(rep_int_slice__impl, x)
+}
+
+
+rep_real_vec <- function(x) {
+  .Call(rep_real_vec__impl, x)
+}
+
+
+rep_real_slice <- function(x) {
+  .Call(rep_real_slice__impl, x)
+}
+
+
+rep_bool_vec <- function(x) {
+  .Call(rep_bool_vec__impl, x)
+}
+
+
+rep_bool_slice <- function(x) {
+  .Call(rep_bool_slice__impl, x)
+}
+
+
+rep_str_vec <- function(x) {
+  .Call(rep_str_vec__impl, x)
+}
+
+
+rep_str_slice <- function(x) {
+  .Call(rep_str_slice__impl, x)
+}
+
+
 safe_stop <- function() {
   invisible(.Call(safe_stop__impl))
 }
@@ -95,56 +185,6 @@ or_logical <- function(x, y) {
 #' @export
 print_list <- function(x) {
   invisible(.Call(print_list__impl, x))
-}
-
-
-scalar_input_int <- function(x) {
-  invisible(.Call(scalar_input_int__impl, x))
-}
-
-
-scalar_input_real <- function(x) {
-  invisible(.Call(scalar_input_real__impl, x))
-}
-
-
-scalar_input_logical <- function(x) {
-  invisible(.Call(scalar_input_logical__impl, x))
-}
-
-
-scalar_input_string <- function(x) {
-  invisible(.Call(scalar_input_string__impl, x))
-}
-
-
-scalar_output_int <- function() {
-  .Call(scalar_output_int__impl)
-}
-
-
-scalar_output_real <- function() {
-  .Call(scalar_output_real__impl)
-}
-
-
-scalar_output_logical <- function() {
-  .Call(scalar_output_logical__impl)
-}
-
-
-scalar_output_string <- function() {
-  .Call(scalar_output_string__impl)
-}
-
-
-sum_int <- function(x) {
-  .Call(sum_int__impl, x)
-}
-
-
-sum_real <- function(x) {
-  .Call(sum_real__impl, x)
 }
 
 

@@ -3,6 +3,8 @@ use savvy_ffi::{
     Rf_protect, Rf_unprotect, SEXP,
 };
 
+use crate::Sexp;
+
 // Some notes about the design.
 //
 // 1. conversion from Rust struct into SEXP
@@ -17,7 +19,7 @@ use savvy_ffi::{
 // `R_ExternalPtrAddr(x) as *mut T` if we can optimistically assume the user never
 // supply a wrong input. This assumption should be ensured on R's side.
 
-pub trait IntoExtPtrSxp: Sized {
+pub trait IntoExtPtrSexp: Sized {
     // Note: I can add two more arguments here just as cpp11 does
     // (https://github.com/r-lib/cpp11/blob/500f642b4ea132ec8c168fc70a28e81e9510ece3/inst/include/cpp11/external_pointer.hpp#L58)
     //
@@ -36,7 +38,7 @@ pub trait IntoExtPtrSxp: Sized {
     //
     // I'm not immediately sure about the pros and cons, but I bet it's good to
     // enable this by default.
-    fn into_external_pointer(self) -> SEXP {
+    fn into_external_pointer(self) -> Sexp {
         let boxed = Box::new(self);
         let ptr = Box::into_raw(boxed);
 
@@ -62,7 +64,7 @@ pub trait IntoExtPtrSxp: Sized {
 
             Rf_unprotect(1);
 
-            external_pointer
+            Sexp(external_pointer)
         }
     }
 }

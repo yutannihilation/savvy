@@ -4,27 +4,28 @@
 #![doc = include_str!("../docs/design.md")]
 
 pub mod error;
+pub mod ffi;
 pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
 
 pub use error::{Error, Result};
-pub use sexp::integer::{IntegerSxp, OwnedIntegerSxp};
-pub use sexp::list::{ListSxp, OwnedListSxp};
-pub use sexp::logical::{LogicalSxp, OwnedLogicalSxp};
-pub use sexp::null::NullSxp;
-pub use sexp::real::{OwnedRealSxp, RealSxp};
-pub use sexp::string::{OwnedStringSxp, StringSxp};
-pub use sexp::{Sxp, TypedSxp};
+pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
+pub use sexp::list::{ListSexp, OwnedListSexp};
+pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};
+pub use sexp::null::NullSexp;
+pub use sexp::real::{OwnedRealSexp, RealSexp};
+pub use sexp::string::{OwnedStringSexp, StringSexp};
+pub use sexp::{Sexp, TypedSexp};
 
-pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSxp};
+pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSexp};
 
 pub use unwind_protect::unwind_protect;
 
 // re-export
-pub use savvy_ffi::SEXP;
 pub use savvy_macro::savvy;
 
+use ffi::SEXP;
 use savvy_ffi::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
 
 use std::ffi::CString;
@@ -35,7 +36,7 @@ pub fn r_print(msg: &str) -> crate::error::Result<SEXP> {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             Rprintf(msg_c_string.as_ptr());
-            NullSxp.into()
+            savvy_ffi::R_NilValue
         })
     }
 }
@@ -45,7 +46,7 @@ pub fn r_eprint(msg: &str) -> crate::error::Result<SEXP> {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             REprintf(msg_c_string.as_ptr());
-            NullSxp.into()
+            savvy_ffi::R_NilValue
         })
     }
 }

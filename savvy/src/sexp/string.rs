@@ -5,17 +5,17 @@ use savvy_ffi::{
 };
 
 use super::na::NotAvailableValue;
-use super::Sxp;
+use super::Sexp;
 use crate::protect;
 
-pub struct StringSxp(pub SEXP);
-pub struct OwnedStringSxp {
+pub struct StringSexp(pub SEXP);
+pub struct OwnedStringSexp {
     inner: SEXP,
     token: SEXP,
     len: usize,
 }
 
-impl StringSxp {
+impl StringSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -24,8 +24,8 @@ impl StringSxp {
         self.len() == 0
     }
 
-    pub fn iter(&self) -> StringSxpIter {
-        StringSxpIter {
+    pub fn iter(&self) -> StringSexpIter {
+        StringSexpIter {
             sexp: &self.0,
             i: 0,
             len: self.len(),
@@ -41,7 +41,7 @@ impl StringSxp {
     }
 }
 
-impl OwnedStringSxp {
+impl OwnedStringSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -50,12 +50,12 @@ impl OwnedStringSxp {
         self.len == 0
     }
 
-    pub fn as_read_only(&self) -> StringSxp {
-        StringSxp(self.inner)
+    pub fn as_read_only(&self) -> StringSexp {
+        StringSexp(self.inner)
     }
 
-    pub fn iter(&self) -> StringSxpIter {
-        StringSxpIter {
+    pub fn iter(&self) -> StringSexpIter {
+        StringSexpIter {
             sexp: &self.inner,
             i: 0,
             len: self.len,
@@ -108,16 +108,18 @@ unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
     }
 }
 
-impl Drop for OwnedStringSxp {
+impl Drop for OwnedStringSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for StringSxp {
+// conversions from/to StringSexp ***************
+
+impl TryFrom<Sexp> for StringSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_string() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to string");
@@ -127,7 +129,21 @@ impl TryFrom<Sxp> for StringSxp {
     }
 }
 
-impl<T> TryFrom<&[T]> for OwnedStringSxp
+impl From<StringSexp> for Sexp {
+    fn from(value: StringSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<StringSexp> for crate::error::Result<Sexp> {
+    fn from(value: StringSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to StringSexp ***************
+
+impl<T> TryFrom<&[T]> for OwnedStringSexp
 where
     T: AsRef<str>, // This works both for &str and String
 {
@@ -142,7 +158,18 @@ where
     }
 }
 
-impl TryFrom<&str> for OwnedStringSxp {
+impl<T> TryFrom<Vec<T>> for OwnedStringSexp
+where
+    T: AsRef<str>, // This works both for &str and String
+{
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<T>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
+    }
+}
+
+impl TryFrom<&str> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &str) -> crate::error::Result<Self> {
@@ -161,34 +188,54 @@ impl TryFrom<&str> for OwnedStringSxp {
 
 // TODO: if I turn this to `impl<T: AsRef<str>> TryFrom<T>`, the compiler warns
 // this is a conflicting implementation. Why...?
-impl TryFrom<String> for OwnedStringSxp {
+impl TryFrom<String> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: String) -> crate::error::Result<Self> {
-        OwnedStringSxp::try_from(value.as_str())
+        OwnedStringSexp::try_from(value.as_str())
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<StringSxp> for SEXP {
-    fn from(value: StringSxp) -> Self {
-        value.inner()
+impl From<OwnedStringSexp> for Sexp {
+    fn from(value: OwnedStringSexp) -> Self {
+        Self(value.inner())
     }
 }
 
-impl From<OwnedStringSxp> for SEXP {
-    fn from(value: OwnedStringSxp) -> Self {
-        value.inner()
+impl From<OwnedStringSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedStringSexp) -> Self {
+        Ok(<Sexp>::from(value))
     }
 }
 
-pub struct StringSxpIter<'a> {
+macro_rules! impl_try_from_rust_strings {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedStringSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_strings!(&[&str]);
+impl_try_from_rust_strings!(&[String]);
+impl_try_from_rust_strings!(Vec<&str>);
+impl_try_from_rust_strings!(Vec<String>);
+impl_try_from_rust_strings!(&str);
+impl_try_from_rust_strings!(String);
+
+// Iterator for StringSexp ***************
+
+pub struct StringSexpIter<'a> {
     pub sexp: &'a SEXP,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for StringSxpIter<'a> {
+impl<'a> Iterator for StringSexpIter<'a> {
     // The lifetime here is 'static, not 'a, in the assumption that strings in
     // `R_StringHash`, the global `CHARSXP` cache, won't be deleted during the R
     // session.
@@ -239,7 +286,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StringSxpIter<'a> {
+impl<'a> ExactSizeIterator for StringSexpIter<'a> {
     fn len(&self) -> usize {
         self.len
     }

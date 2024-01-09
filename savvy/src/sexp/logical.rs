@@ -1,17 +1,17 @@
 use savvy_ffi::{Rf_xlength, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
-use super::Sxp;
+use super::Sexp;
 use crate::protect;
 
-pub struct LogicalSxp(pub SEXP);
-pub struct OwnedLogicalSxp {
+pub struct LogicalSexp(pub SEXP);
+pub struct OwnedLogicalSexp {
     inner: SEXP,
     token: SEXP,
     len: usize,
     raw: *mut i32,
 }
 
-impl LogicalSxp {
+impl LogicalSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -24,8 +24,8 @@ impl LogicalSxp {
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
     }
 
-    pub fn iter(&self) -> LogicalSxpIter {
-        LogicalSxpIter {
+    pub fn iter(&self) -> LogicalSexpIter {
+        LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
     }
@@ -39,7 +39,7 @@ impl LogicalSxp {
     }
 }
 
-impl OwnedLogicalSxp {
+impl OwnedLogicalSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -48,16 +48,16 @@ impl OwnedLogicalSxp {
         self.len == 0
     }
 
-    pub fn as_read_only(&self) -> LogicalSxp {
-        LogicalSxp(self.inner)
+    pub fn as_read_only(&self) -> LogicalSexp {
+        LogicalSexp(self.inner)
     }
 
     fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len()) }
     }
 
-    pub fn iter(&self) -> LogicalSxpIter {
-        LogicalSxpIter {
+    pub fn iter(&self) -> LogicalSexpIter {
+        LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
     }
@@ -102,16 +102,18 @@ impl OwnedLogicalSxp {
     }
 }
 
-impl Drop for OwnedLogicalSxp {
+impl Drop for OwnedLogicalSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for LogicalSxp {
+// conversions from/to LogicalSexp ***************
+
+impl TryFrom<Sexp> for LogicalSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_logical() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to logical");
@@ -121,7 +123,21 @@ impl TryFrom<Sxp> for LogicalSxp {
     }
 }
 
-impl TryFrom<&[bool]> for OwnedLogicalSxp {
+impl From<LogicalSexp> for Sexp {
+    fn from(value: LogicalSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<LogicalSexp> for crate::error::Result<Sexp> {
+    fn from(value: LogicalSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedLogicalSexp ***************
+
+impl TryFrom<&[bool]> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[bool]) -> crate::error::Result<Self> {
@@ -133,7 +149,15 @@ impl TryFrom<&[bool]> for OwnedLogicalSxp {
     }
 }
 
-impl TryFrom<bool> for OwnedLogicalSxp {
+impl TryFrom<Vec<bool>> for OwnedLogicalSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<bool>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
+    }
+}
+
+impl TryFrom<bool> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: bool) -> crate::error::Result<Self> {
@@ -142,35 +166,41 @@ impl TryFrom<bool> for OwnedLogicalSxp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<LogicalSxp> for SEXP {
-    fn from(value: LogicalSxp) -> Self {
-        value.inner()
+macro_rules! impl_try_from_rust_reals {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedLogicalSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_reals!(&[bool]);
+impl_try_from_rust_reals!(Vec<bool>);
+impl_try_from_rust_reals!(bool);
+
+impl From<OwnedLogicalSexp> for Sexp {
+    fn from(value: OwnedLogicalSexp) -> Self {
+        Self(value.inner())
     }
 }
 
-impl From<OwnedLogicalSxp> for SEXP {
-    fn from(value: OwnedLogicalSxp) -> Self {
-        value.inner()
+impl From<OwnedLogicalSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedLogicalSexp) -> Self {
+        Ok(<Sexp>::from(value))
     }
 }
 
-// I learned implementing the Index trait is wrong; the Index is to provide a
-// view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
-// all the values yet.
-//
-//     impl Index<usize> for LogicalSxp {
-//         type Output = i32;
-//         fn index(&self, index: usize) -> &Self::Output {
-//             &self.elt(index).clone()
-//         }
-//     }
+// Index for OwnedIntegerSexp ***************
 
-pub struct LogicalSxpIter<'a> {
+pub struct LogicalSexpIter<'a> {
     iter_raw: std::slice::Iter<'a, i32>,
 }
 
-impl<'a> Iterator for LogicalSxpIter<'a> {
+impl<'a> Iterator for LogicalSexpIter<'a> {
     type Item = bool;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -182,7 +212,7 @@ impl<'a> Iterator for LogicalSxpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for LogicalSxpIter<'a> {
+impl<'a> ExactSizeIterator for LogicalSexpIter<'a> {
     fn len(&self) -> usize {
         self.iter_raw.len()
     }

@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
-mod scalar;
-pub use scalar::*;
+mod convert_from_rust_types;
+pub use convert_from_rust_types::*;
 
 mod error_handling;
 pub use error_handling::*;
@@ -12,8 +12,8 @@ pub use try_from::*;
 use savvy::{r_print, savvy};
 
 use savvy::{
-    IntegerSxp, ListSxp, LogicalSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
-    OwnedStringSxp, RealSxp, StringSxp, TypedSxp,
+    IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
+    OwnedStringSexp, RealSexp, StringSexp, TypedSexp,
 };
 
 use savvy::sexp::na::NotAvailableValue;
@@ -24,8 +24,8 @@ use savvy::sexp::na::NotAvailableValue;
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len())?;
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -37,7 +37,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
         out.set_elt(i, &e_upper)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Add suffix
@@ -47,8 +47,8 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len())?;
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -59,7 +59,7 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
         out.set_elt(i, &format!("{e}_{y}"))?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Two
@@ -68,8 +68,8 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
 /// @returns An integer vector with values multiplied by 2.
 /// @export
 #[savvy]
-fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len())?;
+fn times_two_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -79,7 +79,7 @@ fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Another Input
@@ -89,8 +89,8 @@ fn times_two_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns An integer vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len())?;
+fn times_any_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -100,7 +100,7 @@ fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Two
@@ -109,8 +109,8 @@ fn times_any_int(x: IntegerSxp, y: i32) -> savvy::Result<savvy::SEXP> {
 /// @returns A numeric vector with values multiplied by 2.
 /// @export
 #[savvy]
-fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedRealSxp::new(x.len())?;
+fn times_two_numeric(x: RealSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedRealSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -120,7 +120,7 @@ fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Another Input
@@ -130,8 +130,8 @@ fn times_two_numeric(x: RealSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A real vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedRealSxp::new(x.len())?;
+fn times_any_numeric(x: RealSexp, y: f64) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedRealSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -141,7 +141,7 @@ fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Flip Input
@@ -150,14 +150,14 @@ fn times_any_numeric(x: RealSxp, y: f64) -> savvy::Result<savvy::SEXP> {
 /// @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 /// @export
 #[savvy]
-fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len())?;
+fn flip_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, !e)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Or operation
@@ -167,14 +167,14 @@ fn flip_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
 /// @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 /// @export
 #[savvy]
-fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len())?;
+fn or_logical(x: LogicalSexp, y: bool) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, e || y)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Print the content of list
@@ -183,10 +183,10 @@ fn or_logical(x: LogicalSxp, y: bool) -> savvy::Result<savvy::SEXP> {
 /// @returns `NULL`
 /// @export
 #[savvy]
-fn print_list(x: ListSxp) -> savvy::Result<()> {
+fn print_list(x: ListSexp) -> savvy::Result<()> {
     for (k, v) in x.iter() {
         let content = match v {
-            TypedSxp::Integer(x) => {
+            TypedSexp::Integer(x) => {
                 format!(
                     "integer [{}]",
                     x.iter()
@@ -195,7 +195,7 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            TypedSxp::Real(x) => {
+            TypedSexp::Real(x) => {
                 format!(
                     "numeric [{}]",
                     x.iter()
@@ -204,10 +204,10 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            TypedSxp::String(x) => {
+            TypedSexp::String(x) => {
                 format!("character [{}]", x.iter().collect::<Vec<&str>>().join(", "))
             }
-            TypedSxp::Logical(x) => {
+            TypedSexp::Logical(x) => {
                 format!(
                     "logical [{}]",
                     x.iter()
@@ -216,9 +216,9 @@ fn print_list(x: ListSxp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            TypedSxp::List(_) => "list".to_string(),
-            TypedSxp::Null(_) => "NULL".to_string(),
-            TypedSxp::Other(_) => "Unsupported".to_string(),
+            TypedSexp::List(_) => "list".to_string(),
+            TypedSexp::Null(_) => "NULL".to_string(),
+            TypedSexp::Other(_) => "Unsupported".to_string(),
         };
 
         let name = if k.is_empty() { "(no name)" } else { k };
@@ -249,15 +249,12 @@ impl Person {
         Ok(())
     }
 
-    fn name(&self) -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1)?;
-        out.set_elt(0, &self.name)?;
-        Ok(out.into())
+    fn name(&self) -> savvy::Result<savvy::Sexp> {
+        let name = self.name.as_str();
+        name.try_into()
     }
 
-    fn associated_function() -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1)?;
-        out.set_elt(0, "associated_function")?;
-        Ok(out.into())
+    fn associated_function() -> savvy::Result<savvy::Sexp> {
+        "associated_function".try_into()
     }
 }

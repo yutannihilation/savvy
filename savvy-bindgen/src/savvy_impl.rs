@@ -124,13 +124,13 @@ mod tests {
                     }
                 }
 
-                fn set_name(&mut self, name: StringSxp) -> savvy::Result<()> {
+                fn set_name(&mut self, name: StringSexp) -> savvy::Result<()> {
                     self.name = name.iter().next().unwrap().to_string();
                     Ok(())
                 }
 
-                fn name(&self) -> savvy::Result<savvy::SEXP> {
-                    let mut out = OwnedStringSxp::new(1);
+                fn name(&self) -> savvy::Result<savvy::Sexp> {
+                    let mut out = OwnedStringSexp::new(1);
                     out.set_elt(0, self.name.as_str());
                     Ok(out.into())
                 }

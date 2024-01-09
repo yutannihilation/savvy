@@ -6,8 +6,8 @@ use savvy_ffi::{
 };
 
 use crate::{
-    IntegerSxp, ListSxp, LogicalSxp, NullSxp, OwnedIntegerSxp, OwnedLogicalSxp, OwnedRealSxp,
-    OwnedStringSxp, RealSxp, StringSxp,
+    IntegerSexp, ListSexp, LogicalSexp, NullSexp, OwnedIntegerSexp, OwnedLogicalSexp,
+    OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
 };
 
 pub mod external_pointer;
@@ -20,9 +20,9 @@ pub mod real;
 pub mod scalar;
 pub mod string;
 
-pub struct Sxp(pub SEXP);
+pub struct Sexp(pub SEXP);
 
-impl Sxp {
+impl Sexp {
     // There are two versions of Rf_isString(), but anyway this should be cheap.
     //
     // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
@@ -62,73 +62,73 @@ impl Sxp {
     }
 }
 
-pub enum TypedSxp {
-    Integer(IntegerSxp),
-    Real(RealSxp),
-    String(StringSxp),
-    Logical(LogicalSxp),
-    List(ListSxp),
-    Null(NullSxp),
+pub enum TypedSexp {
+    Integer(IntegerSexp),
+    Real(RealSexp),
+    String(StringSexp),
+    Logical(LogicalSexp),
+    List(ListSexp),
+    Null(NullSexp),
     Other(SEXP),
 }
 
 macro_rules! into_typed_sxp {
     ($ty: ty, $variant: ident) => {
-        impl From<$ty> for TypedSxp {
+        impl From<$ty> for TypedSexp {
             fn from(value: $ty) -> Self {
-                TypedSxp::$variant(value)
+                TypedSexp::$variant(value)
             }
         }
     };
 }
 
-into_typed_sxp!(IntegerSxp, Integer);
-into_typed_sxp!(RealSxp, Real);
-into_typed_sxp!(StringSxp, String);
-into_typed_sxp!(LogicalSxp, Logical);
-into_typed_sxp!(ListSxp, List);
-into_typed_sxp!(NullSxp, Null);
+into_typed_sxp!(IntegerSexp, Integer);
+into_typed_sxp!(RealSexp, Real);
+into_typed_sxp!(StringSexp, String);
+into_typed_sxp!(LogicalSexp, Logical);
+into_typed_sxp!(ListSexp, List);
+into_typed_sxp!(NullSexp, Null);
 
 macro_rules! into_typed_sxp_owned {
     ($ty: ty, $variant: ident) => {
-        impl From<$ty> for TypedSxp {
+        impl From<$ty> for TypedSexp {
             fn from(value: $ty) -> Self {
-                TypedSxp::$variant(value.as_read_only())
+                TypedSexp::$variant(value.as_read_only())
             }
         }
     };
 }
 
-into_typed_sxp_owned!(OwnedIntegerSxp, Integer);
-into_typed_sxp_owned!(OwnedRealSxp, Real);
-into_typed_sxp_owned!(OwnedStringSxp, String);
-into_typed_sxp_owned!(OwnedLogicalSxp, Logical);
+into_typed_sxp_owned!(OwnedIntegerSexp, Integer);
+into_typed_sxp_owned!(OwnedRealSexp, Real);
+into_typed_sxp_owned!(OwnedStringSexp, String);
+into_typed_sxp_owned!(OwnedLogicalSexp, Logical);
 
-impl From<TypedSxp> for SEXP {
-    fn from(value: TypedSxp) -> Self {
+impl From<TypedSexp> for SEXP {
+    fn from(value: TypedSexp) -> Self {
         match value {
-            TypedSxp::Null(e) => e.into(),
-            TypedSxp::Integer(e) => e.inner(),
-            TypedSxp::Real(e) => e.inner(),
-            TypedSxp::String(e) => e.inner(),
-            TypedSxp::Logical(e) => e.inner(),
-            TypedSxp::List(e) => e.inner(),
-            TypedSxp::Other(e) => e,
+            TypedSexp::Null(_) => unsafe { savvy_ffi::R_NilValue },
+            TypedSexp::Integer(sxp) => sxp.inner(),
+            TypedSexp::Real(sxp) => sxp.inner(),
+            TypedSexp::String(sxp) => sxp.inner(),
+            TypedSexp::Logical(sxp) => sxp.inner(),
+            TypedSexp::List(sxp) => sxp.inner(),
+            TypedSexp::Other(sxp) => sxp,
         }
     }
 }
 
-impl Sxp {
-    pub fn into_typed(self) -> TypedSxp {
+impl Sexp {
+    pub fn into_typed(self) -> TypedSexp {
         let ty = unsafe { TYPEOF(self.0) };
         match ty as u32 {
-            savvy_ffi::INTSXP => TypedSxp::Integer(IntegerSxp(self.0)),
-            savvy_ffi::REALSXP => TypedSxp::Real(RealSxp(self.0)),
-            savvy_ffi::STRSXP => TypedSxp::String(StringSxp(self.0)),
-            savvy_ffi::LGLSXP => TypedSxp::Logical(LogicalSxp(self.0)),
-            savvy_ffi::VECSXP => TypedSxp::List(ListSxp(self.0)),
-            savvy_ffi::NILSXP => TypedSxp::Null(NullSxp),
-            _ => TypedSxp::Other(self.0),
+            savvy_ffi::INTSXP => TypedSexp::Integer(IntegerSexp(self.0)),
+            savvy_ffi::REALSXP => TypedSexp::Real(RealSexp(self.0)),
+            savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
+            savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
+            savvy_ffi::VECSXP => TypedSexp::List(ListSexp(self.0)),
+            savvy_ffi::NILSXP => TypedSexp::Null(NullSexp),
+            _ => TypedSexp::Other(self.0),
         }
     }
 }

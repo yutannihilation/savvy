@@ -1,3 +1,21 @@
+SEXP scalar_input_int(SEXP x);
+SEXP scalar_input_real(SEXP x);
+SEXP scalar_input_logical(SEXP x);
+SEXP scalar_input_string(SEXP x);
+SEXP scalar_output_int(void);
+SEXP scalar_output_real(void);
+SEXP scalar_output_logical(void);
+SEXP scalar_output_string(void);
+SEXP sum_int(SEXP x);
+SEXP sum_real(SEXP x);
+SEXP rep_int_vec(SEXP x);
+SEXP rep_int_slice(SEXP x);
+SEXP rep_real_vec(SEXP x);
+SEXP rep_real_slice(SEXP x);
+SEXP rep_bool_vec(SEXP x);
+SEXP rep_bool_slice(SEXP x);
+SEXP rep_str_vec(SEXP x);
+SEXP rep_str_slice(SEXP x);
 SEXP safe_stop(void);
 SEXP raise_error(void);
 SEXP to_upper(SEXP x);
@@ -9,16 +27,6 @@ SEXP times_any_numeric(SEXP x, SEXP y);
 SEXP flip_logical(SEXP x);
 SEXP or_logical(SEXP x, SEXP y);
 SEXP print_list(SEXP x);
-SEXP scalar_input_int(SEXP x);
-SEXP scalar_input_real(SEXP x);
-SEXP scalar_input_logical(SEXP x);
-SEXP scalar_input_string(SEXP x);
-SEXP scalar_output_int(void);
-SEXP scalar_output_real(void);
-SEXP scalar_output_logical(void);
-SEXP scalar_output_string(void);
-SEXP sum_int(SEXP x);
-SEXP sum_real(SEXP x);
 SEXP my_integer(SEXP x);
 
 // methods and associated functions for Person

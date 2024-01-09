@@ -53,7 +53,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
     Ok(quote! {
         #orig
 
-        impl savvy::IntoExtPtrSxp for #ty {}
+        impl savvy::IntoExtPtrSexp for #ty {}
 
         #(#list_fn_inner)*
         #(#list_fn_outer)*
@@ -78,12 +78,12 @@ mod tests {
         assert_eq_inner(
             parse_quote!(
                 #[savvy]
-                fn foo() -> savvy::Result<savvy::SEXP> {
+                fn foo() -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner() -> savvy::Result<savvy::SEXP> {
+                unsafe fn savvy_foo_inner() -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
@@ -111,14 +111,14 @@ mod tests {
             // kept between conversions.
             parse_quote!(
                 #[savvy]
-                fn foo(x: RealSxp, y: savvy::IntegerSxp) -> savvy::Result<savvy::SEXP> {
+                fn foo(x: RealSexp, y: savvy::IntegerSexp) -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
-                    let x = <RealSxp>::try_from(savvy::Sxp(x))?;
-                    let y = <savvy::IntegerSxp>::try_from(savvy::Sxp(y))?;
+                unsafe fn savvy_foo_inner(x: savvy::ffi::SEXP, y: savvy::ffi::SEXP) -> savvy::Result<savvy::Sexp> {
+                    let x = <RealSexp>::try_from(savvy::Sexp(x))?;
+                    let y = <savvy::IntegerSexp>::try_from(savvy::Sexp(y))?;
                     bar()
                 }
             ),
@@ -128,13 +128,13 @@ mod tests {
         assert_eq_inner(
             parse_quote!(
                 #[savvy]
-                fn foo(x: f64) -> savvy::Result<savvy::SEXP> {
+                fn foo(x: f64) -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
             parse_quote!(
-                unsafe fn savvy_foo_inner(x: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
-                    let x = <f64>::try_from(savvy::Sxp(x))?;
+                unsafe fn savvy_foo_inner(x: savvy::ffi::SEXP) -> savvy::Result<savvy::Sexp> {
+                    let x = <f64>::try_from(savvy::Sexp(x))?;
                     bar()
                 }
             ),
@@ -153,16 +153,16 @@ mod tests {
         assert_eq_outer(
             parse_quote!(
                 #[savvy]
-                fn foo() -> savvy::Result<savvy::SEXP> {
+                fn foo() -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn foo() -> savvy::SEXP {
+                pub unsafe extern "C" fn foo() -> savvy::ffi::SEXP {
                     match savvy_foo_inner() {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -180,9 +180,9 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn foo() -> savvy::SEXP {
+                pub unsafe extern "C" fn foo() -> savvy::ffi::SEXP {
                     match savvy_foo_inner() {
-                        Ok(_) => savvy::NullSxp.into(),
+                        Ok(_) => savvy::sexp::null::null(),
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -194,9 +194,9 @@ mod tests {
             parse_quote!(
                 #[savvy]
                 fn foo(
-                    x: RealSxp,
-                    y: savvy::RealSxp,
-                ) -> savvy::Result<savvy::SEXP> {
+                    x: RealSexp,
+                    y: savvy::RealSexp,
+                ) -> savvy::Result<savvy::Sexp> {
                     bar()
                 }
             ),
@@ -204,11 +204,11 @@ mod tests {
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn foo(
-                    x: savvy::SEXP,
-                    y: savvy::SEXP
-                ) -> savvy::SEXP {
+                    x: savvy::ffi::SEXP,
+                    y: savvy::ffi::SEXP
+                ) -> savvy::ffi::SEXP {
                     match savvy_foo_inner(x, y) {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -230,10 +230,10 @@ mod tests {
                 fn new() -> Self {
                     Self {}
                 }
-                fn name(&self) -> savvy::Result<savvy::SEXP> {
+                fn name(&self) -> savvy::Result<savvy::Sexp> {
                     Ok(out.into())
                 }
-                fn set_name(&self, name: StringSxp) -> Result<()> {
+                fn set_name(&self, name: StringSexp) -> Result<()> {
                     Ok(())
                 }
             }
@@ -244,9 +244,9 @@ mod tests {
             parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn Person_new() -> savvy::SEXP {
+                pub unsafe extern "C" fn Person_new() -> savvy::ffi::SEXP {
                     match savvy_Person_new_inner() {
-                        Ok(result) => result,
+                        Ok(result) => result.0,
                         Err(e) => savvy::handle_error(e),
                     }
                 }
@@ -261,7 +261,7 @@ mod tests {
         //     parse_quote!(
         //         #[allow(clippy::missing_safety_doc)]
         //         #[no_mangle]
-        //         pub unsafe extern "C" fn Person_name(self__: savvy::SEXP) -> savvy::SEXP {
+        //         pub unsafe extern "C" fn Person_name(self__: savvy::ffi::SEXP) -> savvy::ffi::SEXP {
         //             match savvy_Person_name_inner(self__) {
         //                 Ok(result) => result,
         //                 Err(e) => savvy::handle_error(e),
@@ -278,11 +278,11 @@ mod tests {
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn Person_set_name(
-                    self__: savvy::SEXP,
-                    name: savvy::SEXP
-                ) -> savvy::SEXP {
+                    self__: savvy::ffi::SEXP,
+                    name: savvy::ffi::SEXP
+                ) -> savvy::ffi::SEXP {
                     match savvy_Person_set_name_inner(self__, name) {
-                        Ok(_) => savvy::NullSxp.into(),
+                        Ok(_) => savvy::sexp::null::null(),
                         Err(e) => savvy::handle_error(e),
                     }
                 }

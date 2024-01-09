@@ -3,19 +3,19 @@ use savvy_ffi::{
     VECSXP, VECTOR_ELT,
 };
 
-use crate::{protect, OwnedStringSxp, StringSxp};
+use crate::{protect, OwnedStringSexp, StringSexp};
 
-use super::{Sxp, TypedSxp};
+use super::{Sexp, TypedSexp};
 
-pub struct ListSxp(pub SEXP);
-pub struct OwnedListSxp {
-    values: ListSxp,
-    names: Option<OwnedStringSxp>,
+pub struct ListSexp(pub SEXP);
+pub struct OwnedListSexp {
+    values: ListSexp,
+    names: Option<OwnedStringSexp>,
     token: SEXP,
     len: usize,
 }
 
-impl ListSxp {
+impl ListSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -24,12 +24,12 @@ impl ListSxp {
         self.len() == 0
     }
 
-    pub fn get(&self, k: &str) -> Option<TypedSxp> {
+    pub fn get(&self, k: &str) -> Option<TypedSexp> {
         let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<TypedSxp> {
+    pub fn get_by_index(&self, i: usize) -> Option<TypedSexp> {
         if i >= self.len() {
             return None;
         }
@@ -37,15 +37,15 @@ impl ListSxp {
         Some(self.get_by_index_unchecked(i))
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSxp {
+    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSexp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
-            Sxp(e).into_typed()
+            Sexp(e).into_typed()
         }
     }
 
-    pub fn values_iter(&self) -> ListSxpValueIter {
-        ListSxpValueIter {
+    pub fn values_iter(&self) -> ListSexpValueIter {
+        ListSexpValueIter {
             sexp: self,
             i: 0,
             len: self.len(),
@@ -58,13 +58,13 @@ impl ListSxp {
         let names: Vec<&'static str> = if names_sexp == unsafe { R_NilValue } {
             std::iter::repeat("").take(self.len()).collect()
         } else {
-            StringSxp(names_sexp).iter().collect()
+            StringSexp(names_sexp).iter().collect()
         };
 
         names.into_iter()
     }
 
-    pub fn iter(&self) -> ListSxpIter {
+    pub fn iter(&self) -> ListSexpIter {
         let names = self.names_iter();
         let values = self.values_iter();
 
@@ -76,7 +76,7 @@ impl ListSxp {
     }
 }
 
-impl OwnedListSxp {
+impl OwnedListSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -85,19 +85,19 @@ impl OwnedListSxp {
         self.values.is_empty()
     }
 
-    pub fn get(&self, k: &str) -> Option<TypedSxp> {
+    pub fn get(&self, k: &str) -> Option<TypedSexp> {
         self.values.get(k)
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<TypedSxp> {
+    pub fn get_by_index(&self, i: usize) -> Option<TypedSexp> {
         self.values.get_by_index(i)
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSxp {
+    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSexp {
         self.values.get_by_index_unchecked(i)
     }
 
-    pub fn values_iter(&self) -> ListSxpValueIter {
+    pub fn values_iter(&self) -> ListSexpValueIter {
         self.values.values_iter()
     }
 
@@ -109,11 +109,11 @@ impl OwnedListSxp {
         self.values.inner()
     }
 
-    pub fn iter(&self) -> ListSxpIter {
+    pub fn iter(&self) -> ListSexpIter {
         self.values.iter()
     }
 
-    pub fn set_value<T: Into<TypedSxp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
+    pub fn set_value<T: Into<TypedSexp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
         if i >= self.len {
             return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
@@ -121,7 +121,7 @@ impl OwnedListSxp {
             )));
         }
 
-        let v: TypedSxp = v.into();
+        let v: TypedSexp = v.into();
 
         unsafe {
             SET_VECTOR_ELT(self.values.inner(), i as _, v.into());
@@ -131,7 +131,7 @@ impl OwnedListSxp {
     }
 
     pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
-        // OwnedStringSxp::set_elt() checks the length, so don't check here.
+        // OwnedStringSexp::set_elt() checks the length, so don't check here.
 
         if let Some(names) = self.names.as_mut() {
             names.set_elt(i, k)?;
@@ -140,7 +140,7 @@ impl OwnedListSxp {
         Ok(())
     }
 
-    pub fn set_name_and_value<T: Into<TypedSxp>>(
+    pub fn set_name_and_value<T: Into<TypedSexp>>(
         &mut self,
         i: usize,
         k: &str,
@@ -156,7 +156,7 @@ impl OwnedListSxp {
         let token = protect::insert_to_preserved_list(out);
 
         let names = if named {
-            let names = OwnedStringSxp::new(len)?;
+            let names = OwnedStringSexp::new(len)?;
             unsafe { Rf_setAttrib(out, R_NamesSymbol, names.inner()) };
             Some(names)
         } else {
@@ -164,7 +164,7 @@ impl OwnedListSxp {
         };
 
         Ok(Self {
-            values: ListSxp(out),
+            values: ListSexp(out),
             names,
             token,
             len,
@@ -172,16 +172,18 @@ impl OwnedListSxp {
     }
 }
 
-impl Drop for OwnedListSxp {
+impl Drop for OwnedListSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for ListSxp {
+// conversions from/to ListSexp ***************
+
+impl TryFrom<Sexp> for ListSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_list() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to list");
@@ -191,27 +193,42 @@ impl TryFrom<Sxp> for ListSxp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<ListSxp> for SEXP {
-    fn from(value: ListSxp) -> Self {
-        value.inner()
+impl From<ListSexp> for Sexp {
+    fn from(value: ListSexp) -> Self {
+        Self(value.inner())
     }
 }
 
-impl From<OwnedListSxp> for SEXP {
-    fn from(value: OwnedListSxp) -> Self {
-        value.inner()
+impl From<ListSexp> for crate::error::Result<Sexp> {
+    fn from(value: ListSexp) -> Self {
+        Ok(<Sexp>::from(value))
     }
 }
 
-pub struct ListSxpValueIter<'a> {
-    pub sexp: &'a ListSxp,
+// conversions from/to OwnedListSexp ***************
+
+impl From<OwnedListSexp> for Sexp {
+    fn from(value: OwnedListSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<OwnedListSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedListSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// Iterator for ListSexp ***************
+
+pub struct ListSexpValueIter<'a> {
+    pub sexp: &'a ListSexp,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for ListSxpValueIter<'a> {
-    type Item = TypedSxp;
+impl<'a> Iterator for ListSexpValueIter<'a> {
+    type Item = TypedSexp;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
@@ -225,4 +242,4 @@ impl<'a> Iterator for ListSxpValueIter<'a> {
     }
 }
 
-type ListSxpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSxpValueIter<'a>>;
+type ListSexpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSexpValueIter<'a>>;
