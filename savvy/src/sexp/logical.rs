@@ -121,6 +121,12 @@ impl TryFrom<Sexp> for LogicalSexp {
     }
 }
 
+impl From<LogicalSexp> for Sexp {
+    fn from(value: LogicalSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
 impl TryFrom<&[bool]> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
@@ -133,6 +139,14 @@ impl TryFrom<&[bool]> for OwnedLogicalSexp {
     }
 }
 
+impl TryFrom<Vec<bool>> for OwnedLogicalSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<bool>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
+    }
+}
+
 impl TryFrom<bool> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
@@ -142,12 +156,21 @@ impl TryFrom<bool> for OwnedLogicalSexp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<LogicalSexp> for Sexp {
-    fn from(value: LogicalSexp) -> Self {
-        Self(value.inner())
-    }
+macro_rules! impl_try_from_rust_reals {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedLogicalSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
 }
+
+impl_try_from_rust_reals!(&[bool]);
+impl_try_from_rust_reals!(Vec<bool>);
+impl_try_from_rust_reals!(bool);
 
 impl From<OwnedLogicalSexp> for Sexp {
     fn from(value: OwnedLogicalSexp) -> Self {

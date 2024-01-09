@@ -132,6 +132,12 @@ impl TryFrom<Sexp> for RealSexp {
     }
 }
 
+impl From<RealSexp> for Sexp {
+    fn from(value: RealSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
 impl TryFrom<&[f64]> for OwnedRealSexp {
     type Error = crate::error::Error;
 
@@ -139,6 +145,14 @@ impl TryFrom<&[f64]> for OwnedRealSexp {
         let mut out = Self::new(value.len())?;
         out.as_mut_slice().copy_from_slice(value);
         Ok(out)
+    }
+}
+
+impl TryFrom<Vec<f64>> for OwnedRealSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<f64>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
     }
 }
 
@@ -151,18 +165,27 @@ impl TryFrom<f64> for OwnedRealSexp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<RealSexp> for Sexp {
-    fn from(value: RealSexp) -> Self {
-        Self(value.inner())
-    }
-}
-
 impl From<OwnedRealSexp> for Sexp {
     fn from(value: OwnedRealSexp) -> Self {
         Self(value.inner())
     }
 }
+
+macro_rules! impl_try_from_rust_reals {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedRealSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_reals!(&[f64]);
+impl_try_from_rust_reals!(Vec<f64>);
+impl_try_from_rust_reals!(f64);
 
 impl Index<usize> for OwnedRealSexp {
     type Output = f64;

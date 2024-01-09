@@ -127,6 +127,12 @@ impl TryFrom<Sexp> for StringSexp {
     }
 }
 
+impl From<StringSexp> for Sexp {
+    fn from(value: StringSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
 impl<T> TryFrom<&[T]> for OwnedStringSexp
 where
     T: AsRef<str>, // This works both for &str and String
@@ -139,6 +145,17 @@ where
             out.set_elt(i, v.as_ref())?;
         }
         Ok(out)
+    }
+}
+
+impl<T> TryFrom<Vec<T>> for OwnedStringSexp
+where
+    T: AsRef<str>, // This works both for &str and String
+{
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<T>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
     }
 }
 
@@ -169,18 +186,30 @@ impl TryFrom<String> for OwnedStringSexp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<StringSexp> for Sexp {
-    fn from(value: StringSexp) -> Self {
-        Self(value.inner())
-    }
-}
-
 impl From<OwnedStringSexp> for Sexp {
     fn from(value: OwnedStringSexp) -> Self {
         Self(value.inner())
     }
 }
+
+macro_rules! impl_try_from_rust_strings {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedStringSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_strings!(&[&str]);
+impl_try_from_rust_strings!(&[String]);
+impl_try_from_rust_strings!(Vec<&str>);
+impl_try_from_rust_strings!(Vec<String>);
+impl_try_from_rust_strings!(&str);
+impl_try_from_rust_strings!(String);
 
 pub struct StringSexpIter<'a> {
     pub sexp: &'a SEXP,

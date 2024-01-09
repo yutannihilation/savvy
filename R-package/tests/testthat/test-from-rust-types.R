@@ -29,3 +29,14 @@ test_that("sum functions", {
   expect_equal(sum_int(1:10), 55L)
   expect_equal(sum_real(c(1, 10, 100, 1000)), 1111)
 })
+
+test_that("conversion from vectors", {
+  expect_equal(rep_int_vec(3L), c(0L, 0L, 0L))
+  expect_equal(rep_int_slice(3L), c(0L, 0L, 0L))
+  expect_equal(rep_real_vec(3L), c(0, 0, 0))
+  expect_equal(rep_real_slice(3L), c(0, 0, 0))
+  expect_equal(rep_bool_vec(3L), c(TRUE, TRUE, TRUE))
+  expect_equal(rep_bool_slice(3L), c(TRUE, TRUE, TRUE))
+  expect_equal(rep_str_vec(3L), c("foo", "foo", "foo"))
+  expect_equal(rep_str_slice(3L), c("foo", "foo", "foo"))
+})

@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
-mod scalar;
-pub use scalar::*;
+mod convert_from_rust_types;
+pub use convert_from_rust_types::*;
 
 mod error_handling;
 pub use error_handling::*;
@@ -250,14 +250,11 @@ impl Person {
     }
 
     fn name(&self) -> savvy::Result<savvy::Sexp> {
-        let mut out = OwnedStringSexp::new(1)?;
-        out.set_elt(0, &self.name)?;
-        Ok(out.into())
+        let name = self.name.as_str();
+        name.try_into()
     }
 
     fn associated_function() -> savvy::Result<savvy::Sexp> {
-        let mut out = OwnedStringSexp::new(1)?;
-        out.set_elt(0, "associated_function")?;
-        Ok(out.into())
+        "associated_function".try_into()
     }
 }

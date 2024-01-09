@@ -144,6 +144,12 @@ impl TryFrom<Sexp> for IntegerSexp {
     }
 }
 
+impl From<IntegerSexp> for Sexp {
+    fn from(value: IntegerSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
 impl TryFrom<&[i32]> for OwnedIntegerSexp {
     type Error = crate::error::Error;
 
@@ -151,6 +157,14 @@ impl TryFrom<&[i32]> for OwnedIntegerSexp {
         let mut out = Self::new(value.len())?;
         out.as_mut_slice().copy_from_slice(value);
         Ok(out)
+    }
+}
+
+impl TryFrom<Vec<i32>> for OwnedIntegerSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<i32>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
     }
 }
 
@@ -163,18 +177,27 @@ impl TryFrom<i32> for OwnedIntegerSexp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<IntegerSexp> for Sexp {
-    fn from(value: IntegerSexp) -> Self {
-        Self(value.inner())
-    }
-}
-
 impl From<OwnedIntegerSexp> for Sexp {
     fn from(value: OwnedIntegerSexp) -> Self {
         Self(value.inner())
     }
 }
+
+macro_rules! impl_try_from_rust_integers {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedIntegerSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_integers!(&[i32]);
+impl_try_from_rust_integers!(Vec<i32>);
+impl_try_from_rust_integers!(i32);
 
 impl Index<usize> for OwnedIntegerSexp {
     type Output = i32;
