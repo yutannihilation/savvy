@@ -13,10 +13,13 @@
 
 ## What the hell is this?? Why do you need another framework when there’s extendr?
 
-This is nothing but my personal challenge to re-invent the wheel in
-order to get better understanding about what
-[extendr](https://extendr.github.io/) does. While this is usable,
-ergonomics is not included. If you prefer friendliness, please use
+[extendr](https://extendr.github.io/) is great and ready to use, but
+it’s not perfect in some points (e.g., [error
+handling](https://github.com/extendr/extendr/issues/278)) and it’s a
+kind of stuck; extendr is too feature-rich and complex that no one can
+introduce a big change easily. So, I needed to create a new, simple
+framework to experiment with. The main goal of savvy is to provide a
+simpler option other than extendr, not to be a complete alternative to
 extendr.
 
 ### Why savvy?
