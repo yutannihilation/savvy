@@ -132,12 +132,13 @@ fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP>
 As you can guess, `#[savvy]` macro cannot be applied to arbitrary functions. The
 function must satisfy the following conditions:
 
-* The function's inputs are either non-owned savvy types (e.g., [`IntegerSxp`]
-  and [`RealSxp`]) or corresponding Rust types for scalar (e.g., `i32` and `f64`).
-* The function returns `savvy::Result<savvy::SEXP>` or `savvy::Result<()>` (in
-  the latter case, an invisible `NULL` will be returned instead).
-
-For more flexibility, I plan to support raw `SEXP` as input, but it's not yet.
+* The function's inputs can be
+    * non-owned savvy types (e.g., [`IntegerSxp`] and [`RealSxp`])
+    * corresponding Rust types for scalar (e.g., `i32` and `f64`)
+    * arbitrary custom type that implements `TryFrom<savvy::Sxp>`
+* The function's return value must be either
+    * `savvy::Result<savvy::SEXP>` for the case of some return value
+    * `savvy::Result<()>` for the case of no actual return value
 
 ### How to read the values from input R objects
 
@@ -172,7 +173,7 @@ another_function_takes_slice(v.as_slice());
 You can think of copying cost as "import tax" on crossing the FFI boundary. If
 you think it's worth, you should pay, and if not, you should not.
 
-### How to prepare output R object
+### How to prepare an output R object
 
 #### 1. `new()`
 
@@ -185,13 +186,13 @@ the input `SEXP`.
 when the vector is too large. If you are sure it won't happen, you can simply
 `unwrap()` it. If you use `new()` directly in the function marked with
 `#[savvy]`, it's as easy as just adding `?` because the return type is always
-`savvy::Result<SEXP>`.
+`Result`.
 
 ```no_run
 let mut out = OwnedStringSxp::new(x.len())?;
 ```
 
-Values can be written on it by `set_elt()` one by one.
+Use `set_elt()` to put set the values one by one.
 
 ```no_run
 for (i, e) in x.iter().enumerate() {
@@ -214,7 +215,8 @@ object at the end the function. This is fallible because this too uses the
 fallible `new()`.
 
 Note that, while this is convenient, this might not be good in terms of
-efficiency in that this requires double size of memory.
+efficiency in that this requires double size of memory. For the details, see
+`TryFrom<&[T]>` section later.
 
 ```no_run
 #[savvy]
@@ -230,10 +232,7 @@ fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
 }
 ```
 
-Note that, the efficiency of copying differs depending on the types. For the
-details, see `TryFrom<&[T]>` section later.
-
-For convenience, savvy also provides `TryFrom` for scalar types. This might be
+For convenience, savvy also provides `TryFrom<T>` for scalar types. This might be
 useful in some cases.
 
 ```no_run
@@ -305,7 +304,7 @@ fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
 If the type of the input is scalar, `NA` is always rejected. This is
 inconsistent with the rule for vector input, but, this is my design decision in
 the assumption that a scalar missing value is rarely found useful on Rust's
-side. In this case, `bool` is also `NA`-aware.
+side.
 
 ```no_run
 #[savvy]
@@ -324,7 +323,7 @@ Error in identity_logical_single(NA) :
 
 ### No implicit conversion
 
-savvy doesn't provide conversion between types. For example, you cannot supply a
+Savvy doesn't provide conversion between types. For example, you cannot supply a
 numeric vector to a function with a `IntegerSxp` argument.
 
 ```no_run
