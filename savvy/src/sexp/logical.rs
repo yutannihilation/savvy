@@ -108,6 +108,8 @@ impl Drop for OwnedLogicalSexp {
     }
 }
 
+// conversions from/to LogicalSexp ***************
+
 impl TryFrom<Sexp> for LogicalSexp {
     type Error = crate::error::Error;
 
@@ -126,6 +128,14 @@ impl From<LogicalSexp> for Sexp {
         Self(value.inner())
     }
 }
+
+impl From<LogicalSexp> for crate::error::Result<Sexp> {
+    fn from(value: LogicalSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedLogicalSexp ***************
 
 impl TryFrom<&[bool]> for OwnedLogicalSexp {
     type Error = crate::error::Error;
@@ -178,16 +188,13 @@ impl From<OwnedLogicalSexp> for Sexp {
     }
 }
 
-// I learned implementing the Index trait is wrong; the Index is to provide a
-// view of some exisitng object. SEXP can be an ALTREP, which doesn't allocate
-// all the values yet.
-//
-//     impl Index<usize> for LogicalSexp {
-//         type Output = i32;
-//         fn index(&self, index: usize) -> &Self::Output {
-//             &self.elt(index).clone()
-//         }
-//     }
+impl From<OwnedLogicalSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedLogicalSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// Index for OwnedIntegerSexp ***************
 
 pub struct LogicalSexpIter<'a> {
     iter_raw: std::slice::Iter<'a, i32>,

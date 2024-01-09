@@ -114,6 +114,8 @@ impl Drop for OwnedStringSexp {
     }
 }
 
+// conversions from/to StringSexp ***************
+
 impl TryFrom<Sexp> for StringSexp {
     type Error = crate::error::Error;
 
@@ -132,6 +134,14 @@ impl From<StringSexp> for Sexp {
         Self(value.inner())
     }
 }
+
+impl From<StringSexp> for crate::error::Result<Sexp> {
+    fn from(value: StringSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to StringSexp ***************
 
 impl<T> TryFrom<&[T]> for OwnedStringSexp
 where
@@ -192,6 +202,12 @@ impl From<OwnedStringSexp> for Sexp {
     }
 }
 
+impl From<OwnedStringSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedStringSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
 macro_rules! impl_try_from_rust_strings {
     ($ty: ty) => {
         impl TryFrom<$ty> for Sexp {
@@ -210,6 +226,8 @@ impl_try_from_rust_strings!(Vec<&str>);
 impl_try_from_rust_strings!(Vec<String>);
 impl_try_from_rust_strings!(&str);
 impl_try_from_rust_strings!(String);
+
+// Iterator for StringSexp ***************
 
 pub struct StringSexpIter<'a> {
     pub sexp: &'a SEXP,

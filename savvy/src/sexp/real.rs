@@ -119,6 +119,8 @@ impl Drop for OwnedRealSexp {
     }
 }
 
+// conversions from/to RealSexp ***************
+
 impl TryFrom<Sexp> for RealSexp {
     type Error = crate::error::Error;
 
@@ -137,6 +139,14 @@ impl From<RealSexp> for Sexp {
         Self(value.inner())
     }
 }
+
+impl From<RealSexp> for crate::error::Result<Sexp> {
+    fn from(value: RealSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedRealSexp ***************
 
 impl TryFrom<&[f64]> for OwnedRealSexp {
     type Error = crate::error::Error;
@@ -171,6 +181,12 @@ impl From<OwnedRealSexp> for Sexp {
     }
 }
 
+impl From<OwnedRealSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedRealSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
 macro_rules! impl_try_from_rust_reals {
     ($ty: ty) => {
         impl TryFrom<$ty> for Sexp {
@@ -186,6 +202,8 @@ macro_rules! impl_try_from_rust_reals {
 impl_try_from_rust_reals!(&[f64]);
 impl_try_from_rust_reals!(Vec<f64>);
 impl_try_from_rust_reals!(f64);
+
+// Index for OwnedRealSexp ***************
 
 impl Index<usize> for OwnedRealSexp {
     type Output = f64;

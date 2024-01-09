@@ -131,6 +131,8 @@ impl Drop for OwnedIntegerSexp {
     }
 }
 
+// conversions from/to IntegerSexp ***************
+
 impl TryFrom<Sexp> for IntegerSexp {
     type Error = crate::error::Error;
 
@@ -149,6 +151,14 @@ impl From<IntegerSexp> for Sexp {
         Self(value.inner())
     }
 }
+
+impl From<IntegerSexp> for crate::error::Result<Sexp> {
+    fn from(value: IntegerSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedIntegerSexp ***************
 
 impl TryFrom<&[i32]> for OwnedIntegerSexp {
     type Error = crate::error::Error;
@@ -183,6 +193,12 @@ impl From<OwnedIntegerSexp> for Sexp {
     }
 }
 
+impl From<OwnedIntegerSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedIntegerSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
 macro_rules! impl_try_from_rust_integers {
     ($ty: ty) => {
         impl TryFrom<$ty> for Sexp {
@@ -198,6 +214,8 @@ macro_rules! impl_try_from_rust_integers {
 impl_try_from_rust_integers!(&[i32]);
 impl_try_from_rust_integers!(Vec<i32>);
 impl_try_from_rust_integers!(i32);
+
+// Index for OwnedIntegerSexp ***************
 
 impl Index<usize> for OwnedIntegerSexp {
     type Output = i32;

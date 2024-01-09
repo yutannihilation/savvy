@@ -37,7 +37,7 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, &e_upper)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Add suffix
@@ -59,7 +59,7 @@ fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, &format!("{e}_{y}"))?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Two
@@ -79,7 +79,7 @@ fn times_two_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Another Input
@@ -100,7 +100,7 @@ fn times_any_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Two
@@ -120,7 +120,7 @@ fn times_two_numeric(x: RealSexp) -> savvy::Result<savvy::Sexp> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Multiply Input By Another Input
@@ -141,7 +141,7 @@ fn times_any_numeric(x: RealSexp, y: f64) -> savvy::Result<savvy::Sexp> {
         }
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Flip Input
@@ -157,7 +157,7 @@ fn flip_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, !e)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Or operation
@@ -174,7 +174,7 @@ fn or_logical(x: LogicalSexp, y: bool) -> savvy::Result<savvy::Sexp> {
         out.set_elt(i, e || y)?;
     }
 
-    Ok(out.into())
+    out.into()
 }
 
 /// Print the content of list

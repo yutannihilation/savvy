@@ -178,6 +178,8 @@ impl Drop for OwnedListSexp {
     }
 }
 
+// conversions from/to ListSexp ***************
+
 impl TryFrom<Sexp> for ListSexp {
     type Error = crate::error::Error;
 
@@ -191,18 +193,33 @@ impl TryFrom<Sexp> for ListSexp {
     }
 }
 
-// Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<ListSexp> for Sexp {
     fn from(value: ListSexp) -> Self {
         Self(value.inner())
     }
 }
 
+impl From<ListSexp> for crate::error::Result<Sexp> {
+    fn from(value: ListSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedListSexp ***************
+
 impl From<OwnedListSexp> for Sexp {
     fn from(value: OwnedListSexp) -> Self {
         Self(value.inner())
     }
 }
+
+impl From<OwnedListSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedListSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// Iterator for ListSexp ***************
 
 pub struct ListSexpValueIter<'a> {
     pub sexp: &'a ListSexp,
