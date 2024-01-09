@@ -13,11 +13,11 @@ is read-only, and the latter, owned SEXP, is writable. Here's the list:
 
 | R type               | Read-only version | Writable version     |
 |:---------------------|:------------------|:---------------------|
-| `INTSXP` (integer)   | [`IntegerSxp`]    | [`OwnedIntegerSxp`]  |
-| `REALSXP` (numeric)  | [`RealSxp`]       | [`OwnedRealSxp`]     |
-| `LGLSXP` (logical)   | [`LogicalSxp`]    | [`OwnedLogicalSxp`]  |
-| `STRSXP` (character) | [`StringSxp`]     | [`OwnedStringSxp`]   |
-| `VECSXP` (list)      | [`ListSxp`]       | [`OwnedListSxp`]     |
+| `INTSXP` (integer)   | [`IntegerSexp`]    | [`OwnedIntegerSexp`]  |
+| `REALSXP` (numeric)  | [`RealSexp`]       | [`OwnedRealSexp`]     |
+| `LGLSXP` (logical)   | [`LogicalSexp`]    | [`OwnedLogicalSexp`]  |
+| `STRSXP` (character) | [`StringSexp`]     | [`OwnedStringSexp`]   |
+| `VECSXP` (list)      | [`ListSexp`]       | [`OwnedListSexp`]     |
 
 You might wonder why this is needed when we can just use `mut` to distinguish
 the difference of mutability. I mainly had two motivations for this:
@@ -43,8 +43,8 @@ character vector. `#[savvy]` macro turns this into an R function.
 
 ```no_run
 #[savvy]
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedStringSxp::new(x.len())?;
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
@@ -90,8 +90,8 @@ pub unsafe extern "C" fn add_suffix(x: savvy::SEXP, y: savvy::SEXP) -> savvy::SE
 }
 
 unsafe fn savvy_add_suffix_inner(x: savvy::SEXP, y: savvy::SEXP) -> savvy::Result<savvy::SEXP> {
-    let x = <savvy::RealSxp>::try_from(savvy::Sxp(x))?;
-    let y = <&str>::try_from(savvy::Sxp(y))?;
+    let x = <savvy::RealSexp>::try_from(savvy::Sexp(x))?;
+    let y = <&str>::try_from(savvy::Sexp(y))?;
     
     // ...original body...
 
@@ -126,29 +126,29 @@ add_suffix <- function(x, y) {
 The example function above has this signature.
 
 ```no_run
-fn add_suffix(x: StringSxp, y: &str) -> savvy::Result<savvy::SEXP>
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::SEXP>
 ```
 
 As you can guess, `#[savvy]` macro cannot be applied to arbitrary functions. The
 function must satisfy the following conditions:
 
 * The function's inputs can be
-    * non-owned savvy types (e.g., [`IntegerSxp`] and [`RealSxp`])
+    * non-owned savvy types (e.g., [`IntegerSexp`] and [`RealSexp`])
     * corresponding Rust types for scalar (e.g., `i32` and `f64`)
-    * arbitrary custom type that implements `TryFrom<savvy::Sxp>`
+    * arbitrary custom type that implements `TryFrom<savvy::Sexp>`
 * The function's return value must be either
     * `savvy::Result<savvy::SEXP>` for the case of some return value
     * `savvy::Result<()>` for the case of no actual return value
 
 ### How to read the values from input R objects
 
-Basically, there are two ways to access the values. [`IntegerSxp`] and
-[`RealSxp`] have more convenient way, and [`ListSxp`]'s interface is a bit
+Basically, there are two ways to access the values. [`IntegerSexp`] and
+[`RealSexp`] have more convenient way, and [`ListSexp`]'s interface is a bit
 different. But, let's talk about it later, not here.
 
 #### 1. `iter()`
 
-[`IntegerSxp`], [`RealSxp`], [`LogicalSxp`], and [`StringSxp`] provide `iter()`
+[`IntegerSexp`], [`RealSexp`], [`LogicalSexp`], and [`StringSexp`] provide `iter()`
 method so that you can access to the value one by one. This can be efficient
 when the data is too large to copy.
 
@@ -178,7 +178,7 @@ you think it's worth, you should pay, and if not, you should not.
 #### 1. `new()`
 
 As you saw above, an owned SEXP can be allocated by using
-`Owned{type}Sxp::new()`. `new()` takes the length of the vector as the argument.
+`Owned{type}Sexp::new()`. `new()` takes the length of the vector as the argument.
 If you need the same length of vector as the input, you can pass the `len()` of
 the input `SEXP`.
 
@@ -189,7 +189,7 @@ when the vector is too large. If you are sure it won't happen, you can simply
 `Result`.
 
 ```no_run
-let mut out = OwnedStringSxp::new(x.len())?;
+let mut out = OwnedStringSexp::new(x.len())?;
 ```
 
 Use `set_elt()` to put set the values one by one.
@@ -220,14 +220,14 @@ efficiency in that this requires double size of memory. For the details, see
 
 ```no_run
 #[savvy]
-fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
+fn times_two(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
     let mut out: Vec<i32> = Vec::with_capacity(x.len());
 
     for &v in x.iter() {
         out.push(v * 2);
     }
 
-    let out_sxp: OwnedIntegerSxp = out.as_slice().try_into()?;
+    let out_sxp: OwnedIntegerSexp = out.as_slice().try_into()?;
     Ok(out_sxp.into())
 }
 ```
@@ -237,8 +237,8 @@ useful in some cases.
 
 ```no_run
 #[savvy]
-fn sum_real(x: RealSxp) -> savvy::Result<savvy::SEXP> {
-    let sum: OwnedRealSxp = x.as_slice().iter().sum::<f64>().try_into()?;
+fn sum_real(x: RealSexp) -> savvy::Result<savvy::SEXP> {
+    let sum: OwnedRealSexp = x.as_slice().iter().sum::<f64>().try_into()?;
     Ok(sum.into())
 }
 ```
@@ -283,8 +283,8 @@ function is not an identity function.
 
 ```no_run
 #[savvy]
-fn identity_logical(x: LogicalSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(x.len())?;
+fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, e)?;
@@ -309,7 +309,7 @@ side.
 ```no_run
 #[savvy]
 fn identity_logical_single(x: bool) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedLogicalSxp::new(1)?;
+    let mut out = OwnedLogicalSexp::new(1)?;
     out.set_elt(0, x)?;
     Ok(out.into())
 }
@@ -324,12 +324,12 @@ Error in identity_logical_single(NA) :
 ### No implicit conversion
 
 Savvy doesn't provide conversion between types. For example, you cannot supply a
-numeric vector to a function with a `IntegerSxp` argument.
+numeric vector to a function with a `IntegerSexp` argument.
 
 ```no_run
 #[savvy]
-fn identity_int(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len())?;
+fn identity_int(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
         out[i] = v;
@@ -367,8 +367,8 @@ identity_int_wrapper <- function(x) {
 
 ## Integer and real
 
-In cases of integer (`IntegerSxp`, `OwnedIntegerSxp`) and real (`RealSxp`,
-`OwnedRealSxp`), the internal representation of the SEXPs match with the Rust
+In cases of integer (`IntegerSexp`, `OwnedIntegerSexp`) and real (`RealSexp`,
+`OwnedRealSexp`), the internal representation of the SEXPs match with the Rust
 type we expect, i.e., `i32` and `f64`. By taking this advantage, these types has
 more methods than other types:
 
@@ -385,7 +385,7 @@ requires slice.
 
 ```no_run
 #[savvy]
-fn foo(x: IntegerSxp) -> savvy::Result<()> {
+fn foo(x: IntegerSexp) -> savvy::Result<()> {
     some_function_takes_slice(x.as_slice());
     Ok(())
 }
@@ -399,8 +399,8 @@ below instead of `set_elt()`.
 
 ```no_run
 #[savvy]
-fn times_two(x: IntegerSxp) -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedIntegerSxp::new(x.len())?;
+fn times_two(x: IntegerSexp) -> savvy::Result<savvy::SEXP> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
         out[i] = v * 2;
@@ -442,14 +442,14 @@ wrapper_of_some_savvy_fun <- function(x) {
 }
 ```
 
-If you really want to handle the 3 states, use `IntegerSxp` as the argument type
+If you really want to handle the 3 states, use `IntegerSexp` as the argument type
 and convert the logical into an integer before calling the savvy function. To
 represent 3-state, the internal representation of `LGLSXP` is int, which is the
 same as `INTSXP`. So, the conversion should be cheap.
 
 ```no_run
 #[savvy]
-fn some_savvy_fun(logical: IntegerSxp) -> savvy::Result<()> {
+fn some_savvy_fun(logical: IntegerSexp) -> savvy::Result<()> {
     for l in logical.iter() {
         if l.is_na() {
             r_print("NA\n");
@@ -486,7 +486,7 @@ Similarly, to set a `&str`
 2. `SET_STRING_ELT()` to put the `CHARSXP` to the `STRSXP`
 
 This is a bit costly. So, if the strings need to be referenced and updated
-frequently, probably you should avoid using `OwnedStringSxp` as a substitute of
+frequently, probably you should avoid using `OwnedStringSexp` as a substitute of
 `Vec<String>`.
 
 ### Encoding and `'static` lifetime
@@ -541,7 +541,7 @@ possible because it's too complex.
 
 ```no_run
 #[savvy]
-fn print_list_names(x: ListSxp) -> savvy::Result<()> {
+fn print_list_names(x: ListSexp) -> savvy::Result<()> {
     for k in x.names_iter() {
         if k.is_empty() {
             r_print("(no name)")?;
@@ -569,7 +569,7 @@ to extract the inner data.
 
 ```no_run
 #[savvy]
-fn print_list_values_if_int(x: ListSxp) -> savvy::Result<()>  {
+fn print_list_values_if_int(x: ListSexp) -> savvy::Result<()>  {
     for v in x.values_iter() {
         match v {
             ListElement::Integer(i) => r_print(&format!("int {}\n", i.as_slice()[0]))?,
@@ -595,7 +595,7 @@ If you want pairs of name and value, you can use `iter()`. This is basically a
 
 ```no_run
 #[savvy]
-fn print_list(x: ListSxp)  -> savvy::Result<()> {
+fn print_list(x: ListSexp)  -> savvy::Result<()> {
     for (k, v) in x.iter() {
         // ...snip...
     }
@@ -608,7 +608,7 @@ fn print_list(x: ListSxp)  -> savvy::Result<()> {
 
 #### `new()`
 
-[`OwnedListSxp`]'s `new()` is different than other types; the second argument
+[`OwnedListSexp`]'s `new()` is different than other types; the second argument
 (`named`) indicates whether the list is named or unnamed. If `false`, the list
 doesn't have name and all operations on name like `set_name()` are simply
 ignored.
@@ -620,7 +620,7 @@ ignored.
 ```no_run
 #[savvy]
 fn list_with_no_values() -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedListSxp::new(2, true)?;
+    let mut out = OwnedListSexp::new(2, true)?;
 
     out.set_name(0, "foo");
     out.set_name(1, "bar");
@@ -641,18 +641,18 @@ NULL
 #### `set_value()`
 
 `set_value()` sets a value at the specified position. "Value" is an arbitrary
-type that implmenents `Into<ListElement>` trait. Since all `{type}Sxp` types
+type that implmenents `Into<ListElement>` trait. Since all `{type}Sexp` types
 implements it, you can simply pass it like below.
 
 ```no_run
 #[savvy]
 fn list_with_no_names() -> savvy::Result<savvy::SEXP> {
-    let mut out = OwnedListSxp::new(2, false)?;
+    let mut out = OwnedListSexp::new(2, false)?;
 
-    let mut e1 = OwnedIntegerSxp::new(1)?;
+    let mut e1 = OwnedIntegerSexp::new(1)?;
     e1[0] = 100;
     
-    let mut e2 = OwnedStringSxp::new(1)?;
+    let mut e2 = OwnedStringSexp::new(1)?;
     e2.set_elt(0, "cool")?;
 
     out.set_value(0, e1);
@@ -699,7 +699,7 @@ impl Person {
     }
 
     fn name(&self) -> savvy::Result<savvy::SEXP> {
-        let mut out = OwnedStringSxp::new(1)?;
+        let mut out = OwnedStringSexp::new(1)?;
         out.set_elt(0, &self.name)?;
         Ok(out.into())
     }
@@ -767,7 +767,7 @@ you should never define such a struct like this:
 
 ```no_run
 struct Foo {
-    a: IntegerSxp
+    a: IntegerSexp
 }
 ```
 
@@ -775,7 +775,7 @@ Instead, you should write
 
 ```no_run
 struct Foo {
-    a: OwnedIntegerSxp
+    a: OwnedIntegerSexp
 }
 ```
 

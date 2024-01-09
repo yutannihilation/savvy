@@ -1,15 +1,15 @@
 use savvy_ffi::LOGICAL_ELT;
 
-use crate::{IntegerSxp, LogicalSxp, RealSxp, StringSxp, Sxp};
+use crate::{IntegerSexp, LogicalSexp, RealSexp, Sexp, StringSexp};
 
 use super::na::NotAvailableValue;
 
 macro_rules! impl_try_from_scalar {
     ($scalar_ty: ty, $sexp_ty: ty) => {
-        impl TryFrom<Sxp> for $scalar_ty {
+        impl TryFrom<Sexp> for $scalar_ty {
             type Error = crate::error::Error;
 
-            fn try_from(value: Sxp) -> crate::error::Result<Self> {
+            fn try_from(value: Sexp) -> crate::error::Result<Self> {
                 let value = <$sexp_ty>::try_from(value)?;
                 if value.len() != 1 {
                     return Err(crate::error::Error::NotScalar);
@@ -27,16 +27,16 @@ macro_rules! impl_try_from_scalar {
     };
 }
 
-impl_try_from_scalar!(i32, IntegerSxp);
-impl_try_from_scalar!(f64, RealSxp);
-impl_try_from_scalar!(&str, StringSxp);
+impl_try_from_scalar!(i32, IntegerSexp);
+impl_try_from_scalar!(f64, RealSexp);
+impl_try_from_scalar!(&str, StringSexp);
 
 // bool doesn't have na() method, so define manually.
-impl TryFrom<Sxp> for bool {
+impl TryFrom<Sexp> for bool {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
-        let value = <LogicalSxp>::try_from(value)?;
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
+        let value = <LogicalSexp>::try_from(value)?;
         if value.len() != 1 {
             return Err(crate::error::Error::NotScalar);
         }

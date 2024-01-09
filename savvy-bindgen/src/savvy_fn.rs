@@ -190,7 +190,7 @@ impl SavvyFn {
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
-                        let #pat = <#ty_ident>::try_from(savvy::Sxp(#pat))?;
+                        let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
                     });
 
                     Some(Ok(SavvyFnArg { pat, ty }))
@@ -223,9 +223,9 @@ impl SavvyFn {
 }
 
 // Allowed return types are the followings. Note that, `Self` is converted to
-// `EXTPTRSXP`, so the same as `savvy::Result<savvy::Sxp>`.
+// `EXTPTRSXP`, so the same as `savvy::Result<savvy::Sexp>`.
 //
-// - `savvy::Result<savvy::Sxp>`
+// - `savvy::Result<savvy::Sexp>`
 // - `savvy::Result<()>`
 // - `Self`
 fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnReturnType> {
@@ -237,7 +237,7 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
         syn::ReturnType::Type(_, ty) => {
             let e = Err(syn::Error::new_spanned(
                 return_type.clone(),
-                "the return type must be either syn::Result<Sxp> or syn::Result<()>",
+                "the return type must be either syn::Result<Sexp> or syn::Result<()>",
             ));
 
             // Check if the type path is savvy::Result<..> or Result<..> and get
@@ -253,7 +253,7 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
                         "Result" => {}
                         "Self" => {
                             let ret_ty: syn::ReturnType =
-                                parse_quote!(-> savvy::Result<savvy::Sxp>);
+                                parse_quote!(-> savvy::Result<savvy::Sexp>);
                             return Ok(SavvyFnReturnType::ResultSexp(ret_ty));
                         }
                         _ => return e,
@@ -263,7 +263,7 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
                 _ => return e,
             };
 
-            // Check if the args inside < > is either savvy::Sxp, Sxp, or ()
+            // Check if the args inside < > is either savvy::Sexp, Sexp, or ()
             match path_args {
                 syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
                     args,
@@ -287,7 +287,7 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
                                 }
 
                                 let last_path_seg = type_path.path.segments.last().unwrap();
-                                if &last_path_seg.ident.to_string() != "Sxp" {
+                                if &last_path_seg.ident.to_string() != "Sexp" {
                                     return e;
                                 }
 
@@ -328,9 +328,9 @@ mod tests {
     #[test]
     fn test_detect_return_type() {
         let ok_cases1: &[syn::ReturnType] = &[
-            parse_quote!(-> Result<Sxp>),
-            parse_quote!(-> savvy::Result<Sxp>),
-            parse_quote!(-> savvy::Result<savvy::Sxp>),
+            parse_quote!(-> Result<Sexp>),
+            parse_quote!(-> savvy::Result<Sexp>),
+            parse_quote!(-> savvy::Result<savvy::Sexp>),
             parse_quote!(-> Self),
         ];
 
@@ -355,7 +355,7 @@ mod tests {
             parse_quote!(-> FOO),
             parse_quote!(-> savvy::Result<FOO>),
             parse_quote!(-> savvy::Result<(T, T)>),
-            parse_quote!(-> foo::Result<Sxp>),
+            parse_quote!(-> foo::Result<Sexp>),
             parse_quote!(),
         ];
 

@@ -39,9 +39,9 @@ documentation](https://yutannihilation.github.io/savvy/savvy/index.html).
 /// @param x A character vector.
 /// @export
 #[savvy]
-fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
-    // Use `Owned{type}Sxp` to allocate an R vector for output.
-    let mut out = OwnedStringSxp::new(x.len())?;
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::SEXP> {
+    // Use `Owned{type}Sexp` to allocate an R vector for output.
+    let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
         // To Rust, missing value is an ordinary value. In `&str`'s case, it's just "NA".
@@ -56,7 +56,7 @@ fn to_upper(x: StringSxp) -> savvy::Result<savvy::SEXP> {
         out.set_elt(i, e_upper.as_str())?;
     }
 
-    // `Owned{type}Sxp` type implements `From` trait for `SEXP`, so you can use `into()`.
+    // `Owned{type}Sexp` type implements `From` trait for `SEXP`, so you can use `into()`.
     Ok(out.into())
 }
 ```
@@ -229,53 +229,37 @@ x$name()
 
 ## Rust API
 
-<table style="width:98%;">
+<table>
 <colgroup>
 <col style="width: 19%" />
-<col style="width: 24%" />
-<col style="width: 24%" />
-<col style="width: 30%" />
+<col style="width: 80%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th>R type</th>
-<th>Read-only version</th>
-<th>Writable version</th>
-<th>Note</th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
-<td><code>INTSXP</code></td>
-<td><code>IntegerSxp</code></td>
-<td><code>OwnedIntegerSxp</code></td>
-<td></td>
+<td rowspan="2"><h1 id="r-type">R type</h1>
+<p><code>INTSXP</code></p></td>
+<td rowspan="2">Read-only version | Writable version | Note |
+===================+===================+========================+
+<code>IntegerSexp</code> | <code>OwnedIntegerSexp</code> |</td>
 </tr>
 <tr class="even">
+</tr>
+<tr class="odd">
 <td><code>REALSXP</code></td>
-<td><code>RealSxp</code></td>
-<td><code>OwnedRealSxp</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>LGLSXP</code></td>
-<td><code>LogicalSxp</code></td>
-<td><code>OwnedLogicalSxp</code></td>
-<td><ul>
-<li>cannot handle <code>NA</code></li>
-</ul></td>
+<td><code>RealSexp</code> | <code>OwnedRealSexp</code> |</td>
 </tr>
 <tr class="even">
-<td><code>STRSXP</code></td>
-<td><code>StringSxp</code></td>
-<td><code>OwnedStringSxp</code></td>
-<td></td>
+<td><code>LGLSXP</code></td>
+<td><code>LogicalSexp</code> | <code>OwnedLogicalSexp</code> | - cannot
+handle <code>NA</code></td>
 </tr>
 <tr class="odd">
+<td><code>STRSXP</code></td>
+<td><code>StringSexp</code> | <code>OwnedStringSexp</code> |</td>
+</tr>
+<tr class="even">
 <td><code>VECSXP</code></td>
-<td><code>ListSxp</code></td>
-<td><code>OwnedListSxp</code></td>
-<td></td>
+<td><code>ListSexp</code> | <code>OwnedListSexp</code> |</td>
 </tr>
 </tbody>
 </table>

@@ -2,26 +2,26 @@ use std::ops::{Index, IndexMut};
 
 use savvy_ffi::{Rf_xlength, INTEGER, INTSXP, SEXP};
 
-use super::Sxp;
+use super::Sexp;
 use crate::protect;
 
 // This is based on the idea of cpp11's `writable`.
 //
-// `IntegerSxp` is a read-only wrapper for SEXPs provided from outside of Rust;
+// `IntegerSexp` is a read-only wrapper for SEXPs provided from outside of Rust;
 // since it's the caller's responsibility to PROTECT it, we don't protect it on
 // Rust's side.
 //
-// `OwnedIntegerSxp` is a writable wrapper for SEXPs newly allocated on Rust's
+// `OwnedIntegerSexp` is a writable wrapper for SEXPs newly allocated on Rust's
 // side. Since it's us who produce it, we protect it and drop it.
-pub struct IntegerSxp(pub SEXP);
-pub struct OwnedIntegerSxp {
+pub struct IntegerSexp(pub SEXP);
+pub struct OwnedIntegerSexp {
     inner: SEXP,
     token: SEXP,
     len: usize,
     raw: *mut i32,
 }
 
-impl IntegerSxp {
+impl IntegerSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -53,7 +53,7 @@ impl IntegerSxp {
     }
 }
 
-impl OwnedIntegerSxp {
+impl OwnedIntegerSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -62,8 +62,8 @@ impl OwnedIntegerSxp {
         self.len == 0
     }
 
-    pub fn as_read_only(&self) -> IntegerSxp {
-        IntegerSxp(self.inner)
+    pub fn as_read_only(&self) -> IntegerSexp {
+        IntegerSexp(self.inner)
     }
 
     pub fn as_slice(&self) -> &[i32] {
@@ -125,16 +125,16 @@ impl OwnedIntegerSxp {
     }
 }
 
-impl Drop for OwnedIntegerSxp {
+impl Drop for OwnedIntegerSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for IntegerSxp {
+impl TryFrom<Sexp> for IntegerSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_integer() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to integer");
@@ -144,7 +144,7 @@ impl TryFrom<Sxp> for IntegerSxp {
     }
 }
 
-impl TryFrom<&[i32]> for OwnedIntegerSxp {
+impl TryFrom<&[i32]> for OwnedIntegerSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[i32]) -> crate::error::Result<Self> {
@@ -154,7 +154,7 @@ impl TryFrom<&[i32]> for OwnedIntegerSxp {
     }
 }
 
-impl TryFrom<i32> for OwnedIntegerSxp {
+impl TryFrom<i32> for OwnedIntegerSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: i32) -> crate::error::Result<Self> {
@@ -164,19 +164,19 @@ impl TryFrom<i32> for OwnedIntegerSxp {
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<IntegerSxp> for Sxp {
-    fn from(value: IntegerSxp) -> Self {
+impl From<IntegerSexp> for Sexp {
+    fn from(value: IntegerSexp) -> Self {
         Self(value.inner())
     }
 }
 
-impl From<OwnedIntegerSxp> for Sxp {
-    fn from(value: OwnedIntegerSxp) -> Self {
+impl From<OwnedIntegerSexp> for Sexp {
+    fn from(value: OwnedIntegerSexp) -> Self {
         Self(value.inner())
     }
 }
 
-impl Index<usize> for OwnedIntegerSxp {
+impl Index<usize> for OwnedIntegerSexp {
     type Output = i32;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -190,7 +190,7 @@ impl Index<usize> for OwnedIntegerSxp {
     }
 }
 
-impl IndexMut<usize> for OwnedIntegerSxp {
+impl IndexMut<usize> for OwnedIntegerSexp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         if index >= self.len {
             panic!(

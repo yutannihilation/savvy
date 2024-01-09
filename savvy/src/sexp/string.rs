@@ -5,17 +5,17 @@ use savvy_ffi::{
 };
 
 use super::na::NotAvailableValue;
-use super::Sxp;
+use super::Sexp;
 use crate::protect;
 
-pub struct StringSxp(pub SEXP);
-pub struct OwnedStringSxp {
+pub struct StringSexp(pub SEXP);
+pub struct OwnedStringSexp {
     inner: SEXP,
     token: SEXP,
     len: usize,
 }
 
-impl StringSxp {
+impl StringSexp {
     pub fn len(&self) -> usize {
         unsafe { Rf_xlength(self.0) as _ }
     }
@@ -24,8 +24,8 @@ impl StringSxp {
         self.len() == 0
     }
 
-    pub fn iter(&self) -> StringSxpIter {
-        StringSxpIter {
+    pub fn iter(&self) -> StringSexpIter {
+        StringSexpIter {
             sexp: &self.0,
             i: 0,
             len: self.len(),
@@ -41,7 +41,7 @@ impl StringSxp {
     }
 }
 
-impl OwnedStringSxp {
+impl OwnedStringSexp {
     pub fn len(&self) -> usize {
         self.len
     }
@@ -50,12 +50,12 @@ impl OwnedStringSxp {
         self.len == 0
     }
 
-    pub fn as_read_only(&self) -> StringSxp {
-        StringSxp(self.inner)
+    pub fn as_read_only(&self) -> StringSexp {
+        StringSexp(self.inner)
     }
 
-    pub fn iter(&self) -> StringSxpIter {
-        StringSxpIter {
+    pub fn iter(&self) -> StringSexpIter {
+        StringSexpIter {
             sexp: &self.inner,
             i: 0,
             len: self.len,
@@ -108,16 +108,16 @@ unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
     }
 }
 
-impl Drop for OwnedStringSxp {
+impl Drop for OwnedStringSexp {
     fn drop(&mut self) {
         protect::release_from_preserved_list(self.token);
     }
 }
 
-impl TryFrom<Sxp> for StringSxp {
+impl TryFrom<Sexp> for StringSexp {
     type Error = crate::error::Error;
 
-    fn try_from(value: Sxp) -> crate::error::Result<Self> {
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
         if !value.is_string() {
             let type_name = value.get_human_readable_type_name();
             let msg = format!("Cannot convert {type_name} to string");
@@ -127,7 +127,7 @@ impl TryFrom<Sxp> for StringSxp {
     }
 }
 
-impl<T> TryFrom<&[T]> for OwnedStringSxp
+impl<T> TryFrom<&[T]> for OwnedStringSexp
 where
     T: AsRef<str>, // This works both for &str and String
 {
@@ -142,7 +142,7 @@ where
     }
 }
 
-impl TryFrom<&str> for OwnedStringSxp {
+impl TryFrom<&str> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &str) -> crate::error::Result<Self> {
@@ -161,34 +161,34 @@ impl TryFrom<&str> for OwnedStringSxp {
 
 // TODO: if I turn this to `impl<T: AsRef<str>> TryFrom<T>`, the compiler warns
 // this is a conflicting implementation. Why...?
-impl TryFrom<String> for OwnedStringSxp {
+impl TryFrom<String> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: String) -> crate::error::Result<Self> {
-        OwnedStringSxp::try_from(value.as_str())
+        OwnedStringSexp::try_from(value.as_str())
     }
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<StringSxp> for Sxp {
-    fn from(value: StringSxp) -> Self {
+impl From<StringSexp> for Sexp {
+    fn from(value: StringSexp) -> Self {
         Self(value.inner())
     }
 }
 
-impl From<OwnedStringSxp> for Sxp {
-    fn from(value: OwnedStringSxp) -> Self {
+impl From<OwnedStringSexp> for Sexp {
+    fn from(value: OwnedStringSexp) -> Self {
         Self(value.inner())
     }
 }
 
-pub struct StringSxpIter<'a> {
+pub struct StringSexpIter<'a> {
     pub sexp: &'a SEXP,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for StringSxpIter<'a> {
+impl<'a> Iterator for StringSexpIter<'a> {
     // The lifetime here is 'static, not 'a, in the assumption that strings in
     // `R_StringHash`, the global `CHARSXP` cache, won't be deleted during the R
     // session.
@@ -239,7 +239,7 @@ impl<'a> Iterator for StringSxpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StringSxpIter<'a> {
+impl<'a> ExactSizeIterator for StringSexpIter<'a> {
     fn len(&self) -> usize {
         self.len
     }

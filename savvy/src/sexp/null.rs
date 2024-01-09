@@ -1,21 +1,21 @@
 use savvy_ffi::SEXP;
 
-use crate::Sxp;
+use crate::Sexp;
 
 /// This is a dummy struct solely for providing `NULL` [Result].
-pub struct NullSxp;
+pub struct NullSexp;
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<NullSxp> for Sxp {
-    fn from(_value: NullSxp) -> Self {
+impl From<NullSexp> for Sexp {
+    fn from(_value: NullSexp) -> Self {
         Self(unsafe { savvy_ffi::R_NilValue })
     }
 }
 
 // Conversion into SEXP is infallible as it's just extract the inner one.
-impl From<NullSxp> for SEXP {
-    fn from(value: NullSxp) -> Self {
-        <Sxp>::from(value).0
+impl From<NullSexp> for SEXP {
+    fn from(value: NullSexp) -> Self {
+        <Sexp>::from(value).0
     }
 }
 
