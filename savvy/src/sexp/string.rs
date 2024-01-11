@@ -5,7 +5,7 @@ use savvy_ffi::{
 };
 
 use super::na::NotAvailableValue;
-use super::Sexp;
+use super::{impl_common_sexp_ops, Sexp};
 use crate::protect;
 
 pub struct StringSexp(pub SEXP);
@@ -15,15 +15,9 @@ pub struct OwnedStringSexp {
     len: usize,
 }
 
+impl_common_sexp_ops!(StringSexp);
+
 impl StringSexp {
-    pub fn len(&self) -> usize {
-        unsafe { Rf_xlength(self.0) as _ }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-
     pub fn iter(&self) -> StringSexpIter {
         StringSexpIter {
             sexp: &self.0,
@@ -34,10 +28,6 @@ impl StringSexp {
 
     pub fn to_vec(&self) -> Vec<&'static str> {
         self.iter().collect()
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.0
     }
 }
 

@@ -1,8 +1,8 @@
 use std::ops::{Index, IndexMut};
 
-use savvy_ffi::{Rf_xlength, INTEGER, INTSXP, SEXP};
+use savvy_ffi::{INTEGER, INTSXP, SEXP};
 
-use super::Sexp;
+use super::{impl_common_sexp_ops, Sexp};
 use crate::protect;
 
 // This is based on the idea of cpp11's `writable`.
@@ -21,15 +21,9 @@ pub struct OwnedIntegerSexp {
     raw: *mut i32,
 }
 
+impl_common_sexp_ops!(IntegerSexp);
+
 impl IntegerSexp {
-    pub fn len(&self) -> usize {
-        unsafe { Rf_xlength(self.0) as _ }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-
     pub fn as_slice(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
     }
@@ -46,10 +40,6 @@ impl IntegerSexp {
         let mut out = Vec::with_capacity(self.len());
         out.copy_from_slice(self.as_slice());
         out
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.0
     }
 }
 

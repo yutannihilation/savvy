@@ -132,3 +132,53 @@ impl Sexp {
         }
     }
 }
+
+macro_rules! impl_common_sexp_ops {
+    ($ty: ty) => {
+        impl $ty {
+            pub fn inner(&self) -> savvy_ffi::SEXP {
+                self.0
+            }
+
+            pub fn len(&self) -> usize {
+                unsafe { savvy_ffi::Rf_xlength(self.inner()) as _ }
+            }
+
+            pub fn is_empty(&self) -> bool {
+                self.len() == 0
+            }
+
+            pub fn names(&self) -> Vec<&'static str> {
+                let names_sexp =
+                    unsafe { savvy_ffi::Rf_getAttrib(self.inner(), savvy_ffi::R_NamesSymbol) };
+
+                if names_sexp == unsafe { savvy_ffi::R_NilValue } {
+                    std::iter::repeat("").take(self.len()).collect()
+                } else {
+                    crate::StringSexp(names_sexp).iter().collect()
+                }
+            }
+        }
+    };
+}
+
+macro_rules! impl_common_sexp_ops_owned {
+    ($ty: ty) => {
+        impl $ty {
+            pub fn inner(&self) -> SEXP {
+                self.inner
+            }
+
+            pub fn len(&self) -> usize {
+                self.len
+            }
+
+            pub fn is_empty(&self) -> bool {
+                self.len == 0
+            }
+        }
+    };
+}
+
+pub(crate) use impl_common_sexp_ops;
+pub(crate) use impl_common_sexp_ops_owned;

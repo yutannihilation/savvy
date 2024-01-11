@@ -1,11 +1,8 @@
-use savvy_ffi::{
-    R_NamesSymbol, R_NilValue, Rf_getAttrib, Rf_setAttrib, Rf_xlength, SET_VECTOR_ELT, SEXP,
-    VECSXP, VECTOR_ELT,
-};
+use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTOR_ELT};
 
-use crate::{protect, OwnedStringSexp, StringSexp};
+use crate::{protect, OwnedStringSexp};
 
-use super::{Sexp, TypedSexp};
+use super::{impl_common_sexp_ops, Sexp, TypedSexp};
 
 pub struct ListSexp(pub SEXP);
 pub struct OwnedListSexp {
@@ -15,15 +12,9 @@ pub struct OwnedListSexp {
     len: usize,
 }
 
+impl_common_sexp_ops!(ListSexp);
+
 impl ListSexp {
-    pub fn len(&self) -> usize {
-        unsafe { Rf_xlength(self.0) as _ }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-
     pub fn get(&self, k: &str) -> Option<TypedSexp> {
         let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
@@ -52,16 +43,8 @@ impl ListSexp {
         }
     }
 
-    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
-        let names_sexp = unsafe { Rf_getAttrib(self.inner(), R_NamesSymbol) };
-
-        let names: Vec<&'static str> = if names_sexp == unsafe { R_NilValue } {
-            std::iter::repeat("").take(self.len()).collect()
-        } else {
-            StringSexp(names_sexp).iter().collect()
-        };
-
-        names.into_iter()
+    fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+        self.names().into_iter()
     }
 
     pub fn iter(&self) -> ListSexpIter {
@@ -69,10 +52,6 @@ impl ListSexp {
         let values = self.values_iter();
 
         std::iter::zip(names, values)
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.0
     }
 }
 
