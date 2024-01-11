@@ -45,7 +45,7 @@ impl ListSexp {
     }
 
     fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
-        self.names().into_iter()
+        self.get_names().into_iter()
     }
 
     pub fn iter(&self) -> ListSexpIter {

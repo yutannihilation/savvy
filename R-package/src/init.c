@@ -32,6 +32,21 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
+SEXP get_class_int__impl(SEXP x) {
+    SEXP res = get_class_int(x);
+    return handle_result(res);
+}
+
+SEXP get_names_int__impl(SEXP x) {
+    SEXP res = get_names_int(x);
+    return handle_result(res);
+}
+
+SEXP get_dim_int__impl(SEXP x) {
+    SEXP res = get_dim_int(x);
+    return handle_result(res);
+}
+
 SEXP scalar_input_int__impl(SEXP x) {
     SEXP res = scalar_input_int(x);
     return handle_result(res);
@@ -204,6 +219,9 @@ SEXP my_integer__impl(SEXP x) {
 
 
 static const R_CallMethodDef CallEntries[] = {
+    {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
+    {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
+    {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
     {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
     {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},

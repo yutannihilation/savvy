@@ -3,6 +3,21 @@
 NULL
 
 
+get_class_int <- function(x) {
+  .Call(get_class_int__impl, x)
+}
+
+
+get_names_int <- function(x) {
+  .Call(get_names_int__impl, x)
+}
+
+
+get_dim_int <- function(x) {
+  .Call(get_dim_int__impl, x)
+}
+
+
 scalar_input_int <- function(x) {
   invisible(.Call(scalar_input_int__impl, x))
 }

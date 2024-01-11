@@ -148,14 +148,45 @@ macro_rules! impl_common_sexp_ops {
                 self.len() == 0
             }
 
-            pub fn names(&self) -> Vec<&'static str> {
+            pub fn get_names(&self) -> Vec<&'static str> {
                 let names_sexp =
                     unsafe { savvy_ffi::Rf_getAttrib(self.inner(), savvy_ffi::R_NamesSymbol) };
 
                 if names_sexp == unsafe { savvy_ffi::R_NilValue } {
                     std::iter::repeat("").take(self.len()).collect()
+                // Bravely assume the "name" attribute is always a valid STRSXP.
                 } else {
                     crate::StringSexp(names_sexp).iter().collect()
+                }
+            }
+
+            pub fn get_class(&self) -> Option<Vec<&'static str>> {
+                let class_sexp =
+                    unsafe { savvy_ffi::Rf_getAttrib(self.inner(), savvy_ffi::R_ClassSymbol) };
+
+                if class_sexp == unsafe { savvy_ffi::R_NilValue } {
+                    None
+                // Bravely assume the "class" attribute is always a valid STRSXP.
+                } else {
+                    Some(crate::StringSexp(class_sexp).iter().collect())
+                }
+            }
+
+            pub fn get_dim(&self) -> Option<Vec<usize>> {
+                let dim_sexp =
+                    unsafe { savvy_ffi::Rf_getAttrib(self.inner(), savvy_ffi::R_DimSymbol) };
+
+                if dim_sexp == unsafe { savvy_ffi::R_NilValue } {
+                    None
+                // Bravely assume the "dim" attribute is always a valid INTSXP.
+                } else {
+                    Some(
+                        crate::IntegerSexp(dim_sexp)
+                            .as_slice()
+                            .iter()
+                            .map(|i| *i as _)
+                            .collect(),
+                    )
                 }
             }
         }
