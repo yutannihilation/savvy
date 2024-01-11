@@ -31,23 +31,25 @@ use savvy_ffi::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rpri
 use std::ffi::CString;
 
 // TODO: make this r_println! macro
-pub fn r_print(msg: &str) -> crate::error::Result<SEXP> {
+pub fn r_print(msg: &str) -> crate::error::Result<Sexp> {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             Rprintf(msg_c_string.as_ptr());
             savvy_ffi::R_NilValue
         })
+        .map(|x| Sexp(x))
     }
 }
 
-pub fn r_eprint(msg: &str) -> crate::error::Result<SEXP> {
+pub fn r_eprint(msg: &str) -> crate::error::Result<Sexp> {
     unsafe {
         let msg_c_string = CString::new(msg).unwrap();
         unwind_protect(|| {
             REprintf(msg_c_string.as_ptr());
             savvy_ffi::R_NilValue
         })
+        .map(|x| Sexp(x))
     }
 }
 

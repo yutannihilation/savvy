@@ -1,5 +1,8 @@
 #![allow(unused_variables)]
 
+mod attributes;
+pub use attributes::*;
+
 mod convert_from_rust_types;
 pub use convert_from_rust_types::*;
 

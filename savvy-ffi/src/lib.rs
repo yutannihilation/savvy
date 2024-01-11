@@ -46,6 +46,7 @@ pub const OBJSXP: u32 = 25;
 extern "C" {
     pub static mut R_NamesSymbol: SEXP;
     pub static mut R_ClassSymbol: SEXP;
+    pub static mut R_DimSymbol: SEXP;
 }
 
 // NULL

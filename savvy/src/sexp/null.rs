@@ -22,3 +22,19 @@ impl From<NullSexp> for SEXP {
 pub fn null() -> SEXP {
     unsafe { savvy_ffi::R_NilValue }
 }
+
+impl TryFrom<()> for NullSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(_: ()) -> crate::error::Result<Self> {
+        Ok(NullSexp)
+    }
+}
+
+impl TryFrom<()> for Sexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: ()) -> crate::error::Result<Self> {
+        <NullSexp>::try_from(value).map(|x| x.into())
+    }
+}

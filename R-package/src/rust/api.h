@@ -1,3 +1,6 @@
+SEXP get_class_int(SEXP x);
+SEXP get_names_int(SEXP x);
+SEXP get_dim_int(SEXP x);
 SEXP scalar_input_int(SEXP x);
 SEXP scalar_input_real(SEXP x);
 SEXP scalar_input_logical(SEXP x);
