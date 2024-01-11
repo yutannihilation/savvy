@@ -1,6 +1,6 @@
 use savvy_ffi::{LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
-use super::{impl_common_sexp_ops, Sexp};
+use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
 pub struct LogicalSexp(pub SEXP);
@@ -11,7 +11,9 @@ pub struct OwnedLogicalSexp {
     raw: *mut i32,
 }
 
+// implement inner(), len(), empty(), and name()
 impl_common_sexp_ops!(LogicalSexp);
+impl_common_sexp_ops_owned!(OwnedLogicalSexp);
 
 impl LogicalSexp {
     fn as_slice_raw(&self) -> &[i32] {
@@ -30,14 +32,6 @@ impl LogicalSexp {
 }
 
 impl OwnedLogicalSexp {
-    pub fn len(&self) -> usize {
-        self.len
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len == 0
-    }
-
     pub fn as_read_only(&self) -> LogicalSexp {
         LogicalSexp(self.inner)
     }
@@ -54,10 +48,6 @@ impl OwnedLogicalSexp {
 
     pub fn to_vec(&self) -> Vec<bool> {
         self.iter().collect()
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.inner
     }
 
     pub fn set_elt(&mut self, i: usize, v: bool) -> crate::error::Result<()> {

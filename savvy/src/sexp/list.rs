@@ -12,6 +12,7 @@ pub struct OwnedListSexp {
     len: usize,
 }
 
+// implement inner(), len(), empty(), and name()
 impl_common_sexp_ops!(ListSexp);
 
 impl ListSexp {

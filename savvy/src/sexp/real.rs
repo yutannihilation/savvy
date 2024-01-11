@@ -2,7 +2,7 @@ use std::ops::{Index, IndexMut};
 
 use savvy_ffi::{REAL, REALSXP, SEXP};
 
-use super::{impl_common_sexp_ops, Sexp};
+use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
 pub struct RealSexp(pub SEXP);
@@ -13,7 +13,9 @@ pub struct OwnedRealSexp {
     raw: *mut f64,
 }
 
+// implement inner(), len(), empty(), and name()
 impl_common_sexp_ops!(RealSexp);
+impl_common_sexp_ops_owned!(OwnedRealSexp);
 
 impl RealSexp {
     pub fn as_slice(&self) -> &[f64] {
@@ -32,14 +34,6 @@ impl RealSexp {
 }
 
 impl OwnedRealSexp {
-    pub fn len(&self) -> usize {
-        self.len
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len == 0
-    }
-
     pub fn as_read_only(&self) -> RealSexp {
         RealSexp(self.inner)
     }
@@ -64,10 +58,6 @@ impl OwnedRealSexp {
         let mut out = Vec::with_capacity(self.len);
         out.copy_from_slice(self.as_slice());
         out
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.inner
     }
 
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {
