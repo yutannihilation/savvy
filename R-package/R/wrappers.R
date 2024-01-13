@@ -23,6 +23,11 @@ scalar_input_int <- function(x) {
 }
 
 
+scalar_input_usize <- function(x) {
+  invisible(.Call(scalar_input_usize__impl, x))
+}
+
+
 scalar_input_real <- function(x) {
   invisible(.Call(scalar_input_real__impl, x))
 }
@@ -115,6 +120,21 @@ safe_stop <- function() {
 
 raise_error <- function() {
   .Call(raise_error__impl)
+}
+
+
+new_int <- function(size) {
+  .Call(new_int__impl, size)
+}
+
+
+new_real <- function(size) {
+  .Call(new_real__impl, size)
+}
+
+
+new_bool <- function(size) {
+  .Call(new_bool__impl, size)
 }
 
 #' Convert Input To Upper-Case

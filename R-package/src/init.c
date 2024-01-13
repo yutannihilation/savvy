@@ -52,6 +52,11 @@ SEXP scalar_input_int__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP scalar_input_usize__impl(SEXP x) {
+    SEXP res = scalar_input_usize(x);
+    return handle_result(res);
+}
+
 SEXP scalar_input_real__impl(SEXP x) {
     SEXP res = scalar_input_real(x);
     return handle_result(res);
@@ -147,6 +152,21 @@ SEXP raise_error__impl(void) {
     return handle_result(res);
 }
 
+SEXP new_int__impl(SEXP size) {
+    SEXP res = new_int(size);
+    return handle_result(res);
+}
+
+SEXP new_real__impl(SEXP size) {
+    SEXP res = new_real(size);
+    return handle_result(res);
+}
+
+SEXP new_bool__impl(SEXP size) {
+    SEXP res = new_bool(size);
+    return handle_result(res);
+}
+
 SEXP to_upper__impl(SEXP x) {
     SEXP res = to_upper(x);
     return handle_result(res);
@@ -223,6 +243,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
     {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
     {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
+    {"scalar_input_usize__impl", (DL_FUNC) &scalar_input_usize__impl, 1},
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
     {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
     {"scalar_input_string__impl", (DL_FUNC) &scalar_input_string__impl, 1},
@@ -242,6 +263,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"rep_str_slice__impl", (DL_FUNC) &rep_str_slice__impl, 1},
     {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
     {"raise_error__impl", (DL_FUNC) &raise_error__impl, 0},
+    {"new_int__impl", (DL_FUNC) &new_int__impl, 1},
+    {"new_real__impl", (DL_FUNC) &new_real__impl, 1},
+    {"new_bool__impl", (DL_FUNC) &new_bool__impl, 1},
     {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
     {"add_suffix__impl", (DL_FUNC) &add_suffix__impl, 2},
     {"times_two_int__impl", (DL_FUNC) &times_two_int__impl, 1},
