@@ -223,6 +223,21 @@ print_list <- function(x) {
 }
 
 
+list_with_no_values <- function() {
+  .Call(list_with_no_values__impl)
+}
+
+
+list_with_no_names <- function() {
+  .Call(list_with_no_names__impl)
+}
+
+
+list_with_names_and_values <- function() {
+  .Call(list_with_names_and_values__impl)
+}
+
+
 my_integer <- function(x) {
   invisible(.Call(my_integer__impl, x))
 }

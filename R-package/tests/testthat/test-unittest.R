@@ -53,6 +53,21 @@ test_that("functions work", {
     or_logical(c(TRUE, FALSE), FALSE),
     c(TRUE, FALSE)
   )
+
+  expect_equal(
+    list_with_no_values(),
+    list(foo = NULL, bar = NULL)
+  )
+
+  expect_equal(
+    list_with_no_names(),
+    list(100L, "cool")
+  )
+
+  expect_equal(
+    list_with_names_and_values(),
+    list(foo = 100L, bar = "cool")
+  )
 })
 
 test_that("functions can handle ALTREP", {

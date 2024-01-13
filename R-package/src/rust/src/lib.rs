@@ -15,7 +15,7 @@ pub use try_from::*;
 mod init_vectors;
 pub use init_vectors::*;
 
-use savvy::{r_print, savvy};
+use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{
     IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
@@ -233,6 +233,48 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
     }
 
     Ok(())
+}
+
+#[savvy]
+fn list_with_no_values() -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedListSexp::new(2, true)?;
+
+    out.set_name(0, "foo")?;
+    out.set_name(1, "bar")?;
+
+    out.into()
+}
+
+#[savvy]
+fn list_with_no_names() -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedListSexp::new(2, false)?;
+
+    let mut e1 = OwnedIntegerSexp::new(1)?;
+    e1[0] = 100;
+
+    let mut e2 = OwnedStringSexp::new(1)?;
+    e2.set_elt(0, "cool")?;
+
+    out.set_value(0, e1)?;
+    out.set_value(1, e2)?;
+
+    out.into()
+}
+
+#[savvy]
+fn list_with_names_and_values() -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedListSexp::new(2, true)?;
+
+    let mut e1 = OwnedIntegerSexp::new(1)?;
+    e1[0] = 100;
+
+    let mut e2 = OwnedStringSexp::new(1)?;
+    e2.set_elt(0, "cool")?;
+
+    out.set_name_and_value(0, "foo", e1)?;
+    out.set_name_and_value(1, "bar", e2)?;
+
+    out.into()
 }
 
 struct Person {

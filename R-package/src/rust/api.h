@@ -34,6 +34,9 @@ SEXP times_any_numeric(SEXP x, SEXP y);
 SEXP flip_logical(SEXP x);
 SEXP or_logical(SEXP x, SEXP y);
 SEXP print_list(SEXP x);
+SEXP list_with_no_values(void);
+SEXP list_with_no_names(void);
+SEXP list_with_names_and_values(void);
 SEXP my_integer(SEXP x);
 
 // methods and associated functions for Person
