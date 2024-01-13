@@ -1,12 +1,15 @@
 test_that("scalar functions reject non-scalar values and missing values", {
   # no error
   expect_output(scalar_input_int(1L), "1")
+  expect_output(scalar_input_usize(1L), "1")
+  expect_output(scalar_input_usize(0L), "0")
   expect_output(scalar_input_real(1.3), "1.3")
   expect_output(scalar_input_logical(FALSE), "false")
   expect_output(scalar_input_string("foo"), "foo")
 
   # error
   expect_error(scalar_input_int(1:10))
+  expect_error(scalar_input_usize(-1L))
   expect_error(scalar_input_real(c(1, 2)))
   expect_error(scalar_input_logical(c(TRUE, FALSE)))
   expect_error(scalar_input_str(c("foo", "bar")))
