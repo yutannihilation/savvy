@@ -135,6 +135,14 @@ impl OwnedListSexp {
         let out = crate::alloc_vector(VECSXP, len as _)?;
         let token = protect::insert_to_preserved_list(out);
 
+        // Note: `R_allocVector()` initializes lists, so we don't need to do it
+        // by ourselves. R-exts (5.9.2 Allocating storage) says:
+        //
+        // >  One distinction is that whereas the R functions always initialize
+        // >  the elements of the vector, allocVector only does so for lists,
+        // >  expressions and character vectors (the cases where the elements
+        // >  are themselves R objects).
+
         let names = if named {
             let names = OwnedStringSexp::new(len)?;
             unsafe { Rf_setAttrib(out, R_NamesSymbol, names.inner()) };

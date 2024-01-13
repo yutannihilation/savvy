@@ -89,12 +89,30 @@ impl OwnedIntegerSexp {
 
     pub fn new(len: usize) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(INTSXP, len as _)?;
-        Self::new_from_raw_sexp(inner, len)
+        Self::new_from_raw_sexp(inner, len, true)
     }
 
-    fn new_from_raw_sexp(inner: SEXP, len: usize) -> crate::error::Result<Self> {
+    /// # Safety
+    ///
+    /// This is an expert-only version of `new()` in case the user needs to skip
+    /// the initialization for some great purpose.
+    pub unsafe fn new_without_init(len: usize) -> crate::error::Result<Self> {
+        let inner = crate::alloc_vector(INTSXP, len as _)?;
+        Self::new_from_raw_sexp(inner, len, false)
+    }
+
+    fn new_from_raw_sexp(inner: SEXP, len: usize, init: bool) -> crate::error::Result<Self> {
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { INTEGER(inner) };
+
+        // Fill the vector with default values
+        if init {
+            for i in 0..len {
+                unsafe {
+                    *(raw.add(i)) = i32::default();
+                }
+            }
+        }
 
         Ok(Self {
             inner,
@@ -163,7 +181,7 @@ impl TryFrom<i32> for OwnedIntegerSexp {
 
     fn try_from(value: i32) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
-        Self::new_from_raw_sexp(sexp, 1)
+        Self::new_from_raw_sexp(sexp, 1, false)
     }
 }
 
