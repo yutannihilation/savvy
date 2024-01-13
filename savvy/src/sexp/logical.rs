@@ -65,9 +65,21 @@ impl OwnedLogicalSexp {
         Ok(())
     }
 
-    pub fn new(len: usize) -> crate::error::Result<Self> {
+    fn new_inner(len: usize, init: bool) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(LGLSXP, len as _)?;
-        Self::new_from_raw_sexp(inner, len, true)
+
+        // Fill the vector with default values
+        if init {
+            unsafe {
+                std::ptr::write_bytes(LOGICAL(inner), 0, len);
+            }
+        }
+
+        Self::new_from_raw_sexp(inner, len)
+    }
+
+    pub fn new(len: usize) -> crate::error::Result<Self> {
+        Self::new_inner(len, true)
     }
 
     /// # Safety
@@ -75,20 +87,12 @@ impl OwnedLogicalSexp {
     /// This is an expert-only version of `new()` in case the user needs to skip
     /// the initialization for some great purpose.
     pub unsafe fn new_without_init(len: usize) -> crate::error::Result<Self> {
-        let inner = crate::alloc_vector(LGLSXP, len as _)?;
-        Self::new_from_raw_sexp(inner, len, false)
+        Self::new_inner(len, true)
     }
 
-    fn new_from_raw_sexp(inner: SEXP, len: usize, init: bool) -> crate::error::Result<Self> {
+    fn new_from_raw_sexp(inner: SEXP, len: usize) -> crate::error::Result<Self> {
         let token = protect::insert_to_preserved_list(inner);
         let raw = unsafe { LOGICAL(inner) };
-
-        // Fill the vector with default values
-        if init {
-            unsafe {
-                std::ptr::write_bytes(raw, 0, len);
-            }
-        }
 
         Ok(Self {
             inner,
@@ -159,7 +163,7 @@ impl TryFrom<bool> for OwnedLogicalSexp {
 
     fn try_from(value: bool) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarLogical(value as i32))? };
-        Self::new_from_raw_sexp(sexp, 1, false)
+        Self::new_from_raw_sexp(sexp, 1)
     }
 }
 
