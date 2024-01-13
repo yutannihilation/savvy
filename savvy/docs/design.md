@@ -617,8 +617,8 @@ ignored.
 fn list_with_no_values() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, true)?;
 
-    out.set_name(0, "foo");
-    out.set_name(1, "bar");
+    out.set_name(0, "foo")?;
+    out.set_name(1, "bar")?;
 
     out.into()
 }
@@ -650,8 +650,8 @@ fn list_with_no_names() -> savvy::Result<savvy::Sexp> {
     let mut e2 = OwnedStringSexp::new(1)?;
     e2.set_elt(0, "cool")?;
 
-    out.set_value(0, e1);
-    out.set_value(1, e2);
+    out.set_value(0, e1)?;
+    out.set_value(1, e2)?;
 
     out.into()
 }
@@ -792,6 +792,9 @@ fn raise_error() -> savvy::Result<savvy::Sexp> {
 > raise_error()
 Error: This is my custom error
 ```
+
+For the implementation details of the internals, please refer to [my blog
+post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/#implementation).
 
 ### Testing
 
