@@ -107,10 +107,8 @@ impl OwnedIntegerSexp {
 
         // Fill the vector with default values
         if init {
-            for i in 0..len {
-                unsafe {
-                    *(raw.add(i)) = i32::default();
-                }
+            unsafe {
+                std::ptr::write_bytes(raw, 0, len);
             }
         }
 

@@ -95,10 +95,8 @@ impl OwnedRealSexp {
 
         // Fill the vector with default values
         if init {
-            for i in 0..len {
-                unsafe {
-                    *(raw.add(i)) = f64::default();
-                }
+            unsafe {
+                std::ptr::write_bytes(raw, 0, len);
             }
         }
 
