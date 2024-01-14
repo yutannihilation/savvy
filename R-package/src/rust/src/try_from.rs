@@ -14,6 +14,6 @@ impl TryFrom<savvy::Sexp> for MyInteger {
 
 #[savvy]
 fn my_integer(x: MyInteger) -> savvy::Result<()> {
-    savvy::r_print(&format!("{:?}\n", x))?;
+    savvy::r_println!("{x:?}");
     Ok(())
 }

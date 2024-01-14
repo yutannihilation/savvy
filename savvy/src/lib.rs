@@ -5,6 +5,7 @@
 
 pub mod error;
 pub mod ffi;
+pub mod io;
 pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
@@ -26,32 +27,7 @@ pub use unwind_protect::unwind_protect;
 pub use savvy_macro::savvy;
 
 use ffi::SEXP;
-use savvy_ffi::{cetype_t_CE_UTF8, REprintf, Rf_allocVector, Rf_mkCharLenCE, Rprintf};
-
-use std::ffi::CString;
-
-// TODO: make this r_println! macro
-pub fn r_print(msg: &str) -> crate::error::Result<Sexp> {
-    unsafe {
-        let msg_c_string = CString::new(msg).unwrap();
-        unwind_protect(|| {
-            Rprintf(msg_c_string.as_ptr());
-            savvy_ffi::R_NilValue
-        })
-        .map(Sexp)
-    }
-}
-
-pub fn r_eprint(msg: &str) -> crate::error::Result<Sexp> {
-    unsafe {
-        let msg_c_string = CString::new(msg).unwrap();
-        unwind_protect(|| {
-            REprintf(msg_c_string.as_ptr());
-            savvy_ffi::R_NilValue
-        })
-        .map(Sexp)
-    }
-}
+use savvy_ffi::{cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE};
 
 fn alloc_vector(arg1: u32, arg2: isize) -> crate::error::Result<SEXP> {
     unsafe { unwind_protect(|| Rf_allocVector(arg1, arg2)) }
@@ -80,4 +56,28 @@ pub fn handle_error(e: crate::error::Error) -> SEXP {
             (r_error as usize | 1) as SEXP
         },
     }
+}
+
+#[macro_export]
+macro_rules! r_print {
+    () => {};
+    ($($arg:tt)*) => { savvy::io::r_print(&format!($($arg)*), false); };
+}
+
+#[macro_export]
+macro_rules! r_eprint {
+    () => {};
+    ($($arg:tt)*) => { savvy::io::r_eprint(&format!($($arg)*), false); };
+}
+
+#[macro_export]
+macro_rules! r_println {
+    () => {};
+    ($($arg:tt)*) => { savvy::io::r_print(&format!($($arg)*), true); };
+}
+
+#[macro_export]
+macro_rules! r_eprintln {
+    () => {};
+    ($($arg:tt)*) => { savvy::io::r_eprint(&format!($($arg)*), true); };
 }

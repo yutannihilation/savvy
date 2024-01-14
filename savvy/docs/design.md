@@ -447,11 +447,11 @@ same as `INTSXP`. So, the conversion should be cheap.
 fn some_savvy_fun(logical: IntegerSexp) -> savvy::Result<()> {
     for l in logical.iter() {
         if l.is_na() {
-            r_print("NA\n");
+            r_print!("NA\n");
         } else if *l == 1 {
-            r_print("TRUE\n");
+            r_print!("TRUE\n");
         } else {
-            r_print("FALSE\n");
+            r_print!("FALSE\n");
         }
     }
 
@@ -539,11 +539,11 @@ possible because it's too complex.
 fn print_list_names(x: ListSexp) -> savvy::Result<()> {
     for k in x.names_iter() {
         if k.is_empty() {
-            r_print("(no name)")?;
+            r_println!("(no name)");
         } else {
-            r_print(k)?;
+            r_println!(k);
         }
-        r_print("\n")?;
+        r_println!("");
     }
 
     Ok(())
@@ -567,8 +567,8 @@ to extract the inner data.
 fn print_list_values_if_int(x: ListSexp) -> savvy::Result<()>  {
     for v in x.values_iter() {
         match v {
-            TypedSexp::Integer(i) => r_print(&format!("int {}\n", i.as_slice()[0]))?,
-            _ => r_print("not int\n")?
+            TypedSexp::Integer(i) => r_println!("int {}\n", i.as_slice()[0]),
+            _ => r_println("not int")
         }
     }
 
