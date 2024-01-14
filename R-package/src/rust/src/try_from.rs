@@ -1,4 +1,4 @@
-use savvy::savvy;
+use savvy::{savvy, IntegerSexp};
 
 #[derive(Debug)]
 struct MyInteger(i32);
@@ -14,6 +14,6 @@ impl TryFrom<savvy::Sexp> for MyInteger {
 
 #[savvy]
 fn my_integer(x: MyInteger) -> savvy::Result<()> {
-    savvy::r_print!("{:?}\n", x);
+    savvy::r_println!("{x:?}");
     Ok(())
 }
