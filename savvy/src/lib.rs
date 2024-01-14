@@ -61,23 +61,23 @@ pub fn handle_error(e: crate::error::Error) -> SEXP {
 #[macro_export]
 macro_rules! r_print {
     () => {};
-    ($($rest: tt)*) => { savvy::io::r_print(&format!($($rest)*), false); };
+    ($($arg:tt)*) => { savvy::io::r_print(&format!($($arg)*), false); };
 }
 
 #[macro_export]
 macro_rules! r_eprint {
     () => {};
-    ($($rest: tt)*) => { savvy::io::r_eprint(&format!($($rest)*), false); };
+    ($($arg:tt)*) => { savvy::io::r_eprint(&format!($($arg)*), false); };
 }
 
 #[macro_export]
 macro_rules! r_println {
     () => {};
-    ($($rest: tt)*) => { savvy::io::r_print(&format!($($rest)*), true); };
+    ($($arg:tt)*) => { savvy::io::r_print(&format!($($arg)*), true); };
 }
 
 #[macro_export]
 macro_rules! r_eprintln {
     () => {};
-    ($($rest: tt)*) => { savvy::io::r_eprint(&format!($($rest)*), true); };
+    ($($arg:tt)*) => { savvy::io::r_eprint(&format!($($arg)*), true); };
 }
