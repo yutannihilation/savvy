@@ -1,6 +1,11 @@
 SEXP get_class_int(SEXP x);
 SEXP get_names_int(SEXP x);
 SEXP get_dim_int(SEXP x);
+SEXP get_attr_int(SEXP x, SEXP attr);
+SEXP set_class_int(void);
+SEXP set_names_int(void);
+SEXP set_dim_int(void);
+SEXP set_attr_int(SEXP attr, SEXP value);
 SEXP scalar_input_int(SEXP x);
 SEXP scalar_input_usize(SEXP x);
 SEXP scalar_input_real(SEXP x);
