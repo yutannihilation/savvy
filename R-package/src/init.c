@@ -47,6 +47,31 @@ SEXP get_dim_int__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP get_attr_int__impl(SEXP x, SEXP attr) {
+    SEXP res = get_attr_int(x, attr);
+    return handle_result(res);
+}
+
+SEXP set_class_int__impl(void) {
+    SEXP res = set_class_int();
+    return handle_result(res);
+}
+
+SEXP set_names_int__impl(void) {
+    SEXP res = set_names_int();
+    return handle_result(res);
+}
+
+SEXP set_dim_int__impl(void) {
+    SEXP res = set_dim_int();
+    return handle_result(res);
+}
+
+SEXP set_attr_int__impl(SEXP attr, SEXP value) {
+    SEXP res = set_attr_int(attr, value);
+    return handle_result(res);
+}
+
 SEXP scalar_input_int__impl(SEXP x) {
     SEXP res = scalar_input_int(x);
     return handle_result(res);
@@ -257,6 +282,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
     {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
     {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
+    {"get_attr_int__impl", (DL_FUNC) &get_attr_int__impl, 2},
+    {"set_class_int__impl", (DL_FUNC) &set_class_int__impl, 0},
+    {"set_names_int__impl", (DL_FUNC) &set_names_int__impl, 0},
+    {"set_dim_int__impl", (DL_FUNC) &set_dim_int__impl, 0},
+    {"set_attr_int__impl", (DL_FUNC) &set_attr_int__impl, 2},
     {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
     {"scalar_input_usize__impl", (DL_FUNC) &scalar_input_usize__impl, 1},
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},

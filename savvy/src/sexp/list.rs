@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::{impl_common_sexp_ops, Sexp, TypedSexp};
+use super::{Sexp, TypedSexp};
 
 pub struct ListSexp(pub SEXP);
 pub struct OwnedListSexp {
@@ -12,10 +12,21 @@ pub struct OwnedListSexp {
     len: usize,
 }
 
-// implement inner(), len(), empty(), and name()
-impl_common_sexp_ops!(ListSexp);
-
 impl ListSexp {
+    #[inline]
+    pub fn inner(&self) -> savvy_ffi::SEXP {
+        self.0
+    }
+
+    pub fn len(&self) -> usize {
+        unsafe { savvy_ffi::Rf_xlength(self.inner()) as _ }
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn get(&self, k: &str) -> Option<TypedSexp> {
         let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
@@ -45,7 +56,20 @@ impl ListSexp {
     }
 
     fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
-        self.get_names().into_iter()
+        let names = match crate::Sexp(self.inner()).get_names() {
+            Some(names) => names,
+            None => std::iter::repeat("").take(self.len()).collect(),
+        };
+
+        names.into_iter()
+    }
+
+    pub fn get_attrib(&self, attr: &str) -> crate::error::Result<Option<Sexp>> {
+        crate::Sexp(self.inner()).get_attrib(attr)
+    }
+
+    pub fn get_class(&self) -> Option<Vec<&'static str>> {
+        crate::Sexp(self.inner()).get_class()
     }
 
     pub fn iter(&self) -> ListSexpIter {
@@ -57,12 +81,19 @@ impl ListSexp {
 }
 
 impl OwnedListSexp {
+    #[inline]
+    pub fn inner(&self) -> SEXP {
+        self.values.inner()
+    }
+
+    #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
 
+    #[inline]
     pub fn is_empty(&self) -> bool {
-        self.values.is_empty()
+        self.len == 0
     }
 
     pub fn get(&self, k: &str) -> Option<TypedSexp> {
@@ -83,10 +114,6 @@ impl OwnedListSexp {
 
     pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
         self.values.names_iter()
-    }
-
-    pub fn inner(&self) -> SEXP {
-        self.values.inner()
     }
 
     pub fn iter(&self) -> ListSexpIter {
@@ -129,6 +156,22 @@ impl OwnedListSexp {
         self.set_name(i, k)?;
         self.set_value(i, v)?;
         Ok(())
+    }
+
+    pub fn get_attrib(&self, attr: &str) -> crate::error::Result<Option<Sexp>> {
+        crate::Sexp(self.inner()).get_attrib(attr)
+    }
+
+    pub fn get_class(&self) -> Option<Vec<&'static str>> {
+        crate::Sexp(self.inner()).get_class()
+    }
+
+    pub fn set_attrib(&mut self, attr: &str, value: Sexp) -> crate::error::Result<()> {
+        crate::Sexp(self.inner()).set_attrib(attr, value)
+    }
+
+    pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
+        crate::Sexp(self.inner()).set_class(classes)
     }
 
     pub fn new(len: usize, named: bool) -> crate::error::Result<Self> {

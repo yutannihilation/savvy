@@ -18,6 +18,31 @@ get_dim_int <- function(x) {
 }
 
 
+get_attr_int <- function(x, attr) {
+  .Call(get_attr_int__impl, x, attr)
+}
+
+
+set_class_int <- function() {
+  .Call(set_class_int__impl)
+}
+
+
+set_names_int <- function() {
+  .Call(set_names_int__impl)
+}
+
+
+set_dim_int <- function() {
+  .Call(set_dim_int__impl)
+}
+
+
+set_attr_int <- function(attr, value) {
+  .Call(set_attr_int__impl, attr, value)
+}
+
+
 scalar_input_int <- function(x) {
   invisible(.Call(scalar_input_int__impl, x))
 }

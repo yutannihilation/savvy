@@ -32,3 +32,9 @@ impl std::error::Error for Error {
         None
     }
 }
+
+impl From<std::convert::Infallible> for Error {
+    fn from(value: std::convert::Infallible) -> Self {
+        Error::new(&value.to_string())
+    }
+}

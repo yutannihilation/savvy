@@ -73,6 +73,7 @@ fn show() -> Result<(), DynError> {
         // pre-defined symbols
         .allowlist_var("R_NamesSymbol")
         .allowlist_var("R_ClassSymbol")
+        .allowlist_var("R_DimSymbol")
         // NULL-related
         .allowlist_var("R_NilValue")
         // Missing values
@@ -84,6 +85,7 @@ fn show() -> Result<(), DynError> {
         // Allocation and attributes
         .allowlist_function("Rf_xlength")
         .allowlist_function("Rf_allocVector")
+        .allowlist_function("Rf_install")
         .allowlist_function("Rf_getAttrib")
         .allowlist_function("Rf_setAttrib")
         // Integer

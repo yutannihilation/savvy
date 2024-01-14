@@ -11,8 +11,11 @@
 ### New features
 
 * Support scalar `usize` input.
-* Add some methods to access the attributes of an input SEXP: `get_names()`,
-  `get_class()`, and `get_dim()`.
+* Add methods to access and modify attributes:
+  * `get_attrib()` / `set_attrib()`
+  * `get_names()` / `set_names()`
+  * `get_class()` / `set_class()`
+  * `get_dim()` / `set_dim()`
 * A struct marked with `#[savvy]` now has `try_from()` for `Sexp`.
 
 ### Fixed bugs
@@ -20,3 +23,4 @@
 * Newly-created R vectors (`Owned*Sexp`) are now properly initialized. If you
   really want to skip the initialization for some great reason, you can use
   `new_without_init()` instead of `new()`.
+* `#[savvy]` now accepts `savvy::Sexp` as input.
