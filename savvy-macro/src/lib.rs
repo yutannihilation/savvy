@@ -55,10 +55,10 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
         impl savvy::IntoExtPtrSexp for #ty {}
 
-        impl TryFrom<$ty> for Sexp {
+        impl TryFrom<#ty> for Sexp {
             type Error = crate::error::Error;
 
-            fn try_from(value: $ty) -> crate::error::Result<Self> {
+            fn try_from(value: #ty) -> crate::error::Result<Self> {
                 Ok(value.into_external_pointer())
             }
         }
