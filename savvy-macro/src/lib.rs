@@ -55,7 +55,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
         impl savvy::IntoExtPtrSexp for #ty {}
 
-        impl TryFrom<#ty> for Sexp {
+        impl TryFrom<#ty> for savvy::Sexp {
             type Error = savvy::Error;
 
             fn try_from(value: #ty) -> savvy::Result<Self> {
