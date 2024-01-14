@@ -131,6 +131,17 @@ impl Sexp {
             _ => TypedSexp::Other(self.0),
         }
     }
+
+    pub fn get_class(&self) -> Option<Vec<&'static str>> {
+        let class_sexp = unsafe { savvy_ffi::Rf_getAttrib(self.0, savvy_ffi::R_ClassSymbol) };
+
+        if class_sexp == unsafe { savvy_ffi::R_NilValue } {
+            None
+        // Bravely assume the "class" attribute is always a valid STRSXP.
+        } else {
+            Some(crate::StringSexp(class_sexp).iter().collect())
+        }
+    }
 }
 
 macro_rules! impl_common_sexp_ops {
@@ -161,15 +172,7 @@ macro_rules! impl_common_sexp_ops {
             }
 
             pub fn get_class(&self) -> Option<Vec<&'static str>> {
-                let class_sexp =
-                    unsafe { savvy_ffi::Rf_getAttrib(self.inner(), savvy_ffi::R_ClassSymbol) };
-
-                if class_sexp == unsafe { savvy_ffi::R_NilValue } {
-                    None
-                // Bravely assume the "class" attribute is always a valid STRSXP.
-                } else {
-                    Some(crate::StringSexp(class_sexp).iter().collect())
-                }
+                crate::Sexp(self.0).get_class()
             }
 
             pub fn get_dim(&self) -> Option<Vec<usize>> {
