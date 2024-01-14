@@ -56,7 +56,12 @@ impl ListSexp {
     }
 
     fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
-        crate::sexp::get_names_from_sexp(self.inner(), self.len()).into_iter()
+        let names = match crate::Sexp(self.inner()).get_names() {
+            Some(names) => names,
+            None => std::iter::repeat("").take(self.len()).collect(),
+        };
+
+        names.into_iter()
     }
 
     pub fn get_attrib(&self, attr: &str) -> crate::error::Result<Option<Sexp>> {

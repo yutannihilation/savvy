@@ -151,15 +151,23 @@ impl Sexp {
         }
     }
 
-    pub fn get_class(&self) -> Option<Vec<&'static str>> {
-        let class_sexp = unsafe { savvy_ffi::Rf_getAttrib(self.0, savvy_ffi::R_ClassSymbol) };
+    unsafe fn get_string_attrib_by_symbol(&self, attr: SEXP) -> Option<Vec<&'static str>> {
+        let sexp = savvy_ffi::Rf_getAttrib(self.0, attr);
 
-        if class_sexp == unsafe { savvy_ffi::R_NilValue } {
+        if sexp == unsafe { savvy_ffi::R_NilValue } {
             None
         // Bravely assume the "class" attribute is always a valid STRSXP.
         } else {
-            Some(crate::StringSexp(class_sexp).iter().collect())
+            Some(crate::StringSexp(sexp).iter().collect())
         }
+    }
+
+    pub fn get_class(&self) -> Option<Vec<&'static str>> {
+        unsafe { self.get_string_attrib_by_symbol(savvy_ffi::R_ClassSymbol) }
+    }
+
+    pub fn get_names(&self) -> Option<Vec<&'static str>> {
+        unsafe { self.get_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol) }
     }
 
     pub fn set_attrib(&mut self, attr: &str, value: Sexp) -> crate::error::Result<()> {
@@ -176,26 +184,23 @@ impl Sexp {
         Ok(())
     }
 
-    pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
-        let classes_sexp: Sexp = classes.try_into()?;
-        unsafe {
-            crate::unwind_protect(|| {
-                savvy_ffi::Rf_setAttrib(self.0, savvy_ffi::R_ClassSymbol, classes_sexp.0)
-            })?
-        };
+    unsafe fn set_string_attrib_by_symbol(
+        &mut self,
+        attr: SEXP,
+        values: &[&str],
+    ) -> crate::error::Result<()> {
+        let values_sexp: Sexp = values.try_into()?;
+        unsafe { crate::unwind_protect(|| savvy_ffi::Rf_setAttrib(self.0, attr, values_sexp.0))? };
 
         Ok(())
     }
-}
 
-pub(crate) fn get_names_from_sexp(value: SEXP, len: usize) -> Vec<&'static str> {
-    let names_sexp = unsafe { savvy_ffi::Rf_getAttrib(value, savvy_ffi::R_NamesSymbol) };
+    pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
+        unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_ClassSymbol, classes) }
+    }
 
-    if names_sexp == unsafe { savvy_ffi::R_NilValue } {
-        std::iter::repeat("").take(len).collect()
-    // Bravely assume the "names" attribute is always a valid STRSXP.
-    } else {
-        crate::StringSexp(names_sexp).iter().collect()
+    pub fn set_names(&mut self, names: &[&str]) -> crate::error::Result<()> {
+        unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol, names) }
     }
 }
 
@@ -214,6 +219,16 @@ pub(crate) fn get_dim_from_sexp(value: SEXP) -> Option<Vec<usize>> {
                 .collect(),
         )
     }
+}
+
+pub(crate) fn set_dim_to_sexp(value: SEXP, dim: &[usize]) -> crate::error::Result<()> {
+    let dim_sexp: Sexp = dim
+        .iter()
+        .map(|v| *v as i32)
+        .collect::<Vec<i32>>()
+        .try_into()?;
+    unsafe { savvy_ffi::Rf_setAttrib(value, savvy_ffi::R_DimSymbol, dim_sexp.0) };
+    Ok(())
 }
 
 macro_rules! impl_common_sexp_ops {
@@ -237,8 +252,8 @@ macro_rules! impl_common_sexp_ops {
                 crate::Sexp(self.inner()).get_attrib(attr)
             }
 
-            pub fn get_names(&self) -> Vec<&'static str> {
-                crate::sexp::get_names_from_sexp(self.inner(), self.len())
+            pub fn get_names(&self) -> Option<Vec<&'static str>> {
+                crate::Sexp(self.inner()).get_names()
             }
 
             pub fn get_class(&self) -> Option<Vec<&'static str>> {
@@ -274,8 +289,8 @@ macro_rules! impl_common_sexp_ops_owned {
                 crate::Sexp(self.inner()).get_attrib(attr)
             }
 
-            pub fn get_names(&self) -> Vec<&'static str> {
-                crate::sexp::get_names_from_sexp(self.inner(), self.len())
+            pub fn get_names(&self) -> Option<Vec<&'static str>> {
+                crate::Sexp(self.inner()).get_names()
             }
 
             pub fn get_class(&self) -> Option<Vec<&'static str>> {
@@ -292,6 +307,14 @@ macro_rules! impl_common_sexp_ops_owned {
 
             pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
                 crate::Sexp(self.inner()).set_class(classes)
+            }
+
+            pub fn set_names(&mut self, names: &[&str]) -> crate::error::Result<()> {
+                crate::Sexp(self.inner()).set_names(names)
+            }
+
+            pub fn set_dim(&mut self, dim: &[usize]) -> crate::error::Result<()> {
+                crate::sexp::set_dim_to_sexp(self.inner(), dim)
             }
         }
     };
