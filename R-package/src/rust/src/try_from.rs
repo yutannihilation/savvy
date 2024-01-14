@@ -1,4 +1,4 @@
-use savvy::{savvy, IntegerSexp};
+use savvy::savvy;
 
 #[derive(Debug)]
 struct MyInteger(i32);
