@@ -59,6 +59,8 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
             type Error = savvy::Error;
 
             fn try_from(value: #ty) -> savvy::Result<Self> {
+                use savvy::IntoExtPtrSexp;
+
                 Ok(value.into_external_pointer())
             }
         }
