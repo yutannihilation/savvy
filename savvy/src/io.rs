@@ -1,29 +1,32 @@
 use savvy_ffi::{REprintf, Rprintf};
 
+use once_cell::sync::Lazy;
 use std::ffi::CString;
 
-use crate::unwind_protect;
+pub(crate) static LINEBREAK: Lazy<CString> = Lazy::new(|| CString::new("\n").unwrap());
 
-pub fn r_print(msg: &str) -> crate::error::Result<()> {
+pub fn r_print(msg: &str, linebreak: bool) {
     unsafe {
-        let msg_c_string = CString::new(msg).unwrap();
-        unwind_protect(|| {
+        if !msg.is_empty() {
+            let msg_c_string = CString::new(msg).unwrap();
             Rprintf(msg_c_string.as_ptr());
-            savvy_ffi::R_NilValue
-        })?;
+        }
 
-        Ok(())
+        if linebreak {
+            Rprintf(LINEBREAK.as_ptr());
+        }
     }
 }
 
-pub fn r_eprint(msg: &str) -> crate::error::Result<()> {
+pub fn r_eprint(msg: &str, linebreak: bool) {
     unsafe {
-        let msg_c_string = CString::new(msg).unwrap();
-        unwind_protect(|| {
+        if !msg.is_empty() {
+            let msg_c_string = CString::new(msg).unwrap();
             REprintf(msg_c_string.as_ptr());
-            savvy_ffi::R_NilValue
-        })?;
+        }
 
-        Ok(())
+        if linebreak {
+            REprintf(LINEBREAK.as_ptr());
+        }
     }
 }

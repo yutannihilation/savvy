@@ -229,7 +229,7 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
 
         let name = if k.is_empty() { "(no name)" } else { k };
 
-        r_print(format!("{name}: {content}\n").as_str())?;
+        r_print!("{name}: {content}\n");
     }
 
     Ok(())

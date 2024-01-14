@@ -4,31 +4,31 @@ use savvy::{savvy, IntegerSexp, RealSexp};
 
 #[savvy]
 fn scalar_input_int(x: i32) -> savvy::Result<()> {
-    savvy::r_print(&format!("{}\n", x))?;
+    savvy::r_println!("{}", x);
     Ok(())
 }
 
 #[savvy]
 fn scalar_input_usize(x: usize) -> savvy::Result<()> {
-    savvy::r_print(&format!("{}\n", x))?;
+    savvy::r_println!("{}", x);
     Ok(())
 }
 
 #[savvy]
 fn scalar_input_real(x: f64) -> savvy::Result<()> {
-    savvy::r_print(&format!("{}\n", x))?;
+    savvy::r_println!("{}", x);
     Ok(())
 }
 
 #[savvy]
 fn scalar_input_logical(x: bool) -> savvy::Result<()> {
-    savvy::r_print(&format!("{}\n", x))?;
+    savvy::r_println!("{}", x);
     Ok(())
 }
 
 #[savvy]
 fn scalar_input_string(x: &str) -> savvy::Result<()> {
-    savvy::r_print(&format!("{}\n", x))?;
+    savvy::r_println!("{}", x);
     Ok(())
 }
 
