@@ -57,7 +57,7 @@ impl SavvyFn {
 
                     #(#stmts_additional)*
                     let x = #ty::#fn_name_orig(#(#args_pat),*);
-                    Ok(x.into_external_pointer())
+                    x.try_into()
                 }
             ),
         };
