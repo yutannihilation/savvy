@@ -13,6 +13,7 @@
 * Support scalar `usize` input.
 * Add some methods to access the attributes of an input SEXP: `get_names()`,
   `get_class()`, and `get_dim()`.
+* A struct marked with `#[savvy]` now has `try_from()` for `Sexp`.
 
 ### Fixed bugs
 
