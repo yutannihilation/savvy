@@ -1,8 +1,9 @@
 # Changelog
 
-## [Unreleased]
+<!-- next-header -->
+## [Unreleased] (ReleaseDate)
 
-## v0.2.2 (2024-01-15)
+## [v0.2.2] (2024-01-15)
 
 ### Breaking changes
 
@@ -26,3 +27,7 @@
   really want to skip the initialization for some great reason, you can use
   `new_without_init()` instead of `new()`.
 * `#[savvy]` now accepts `savvy::Sexp` as input.
+
+<!-- next-url -->
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.2...HEAD
+[v0.2.2]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.1...savvy-v0.2.2
