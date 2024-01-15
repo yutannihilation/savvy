@@ -164,7 +164,7 @@ impl TryFrom<&[i32]> for OwnedIntegerSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[i32]) -> crate::error::Result<Self> {
-        let mut out = Self::new(value.len())?;
+        let mut out = unsafe { Self::new_without_init(value.len())? };
         out.as_mut_slice().copy_from_slice(value);
         Ok(out)
     }

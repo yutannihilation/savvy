@@ -152,7 +152,7 @@ impl TryFrom<&[f64]> for OwnedRealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[f64]) -> crate::error::Result<Self> {
-        let mut out = Self::new(value.len())?;
+        let mut out = unsafe { Self::new_without_init(value.len())? };
         out.as_mut_slice().copy_from_slice(value);
         Ok(out)
     }

@@ -142,7 +142,7 @@ impl TryFrom<&[bool]> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[bool]) -> crate::error::Result<Self> {
-        let mut out = Self::new(value.len())?;
+        let mut out = unsafe { Self::new_without_init(value.len())? };
         for (i, v) in value.iter().enumerate() {
             out.set_elt(i, *v)?;
         }
