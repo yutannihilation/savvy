@@ -57,11 +57,8 @@ jobs:
           crate-type = ["staticlib"]
 
           [dependencies]
-          savvy = { path = "./savvy" }
-          savvy-ffi = { path = "./savvy/savvy-ffi" }
-
-          [workspace]
-          members = ["savvy"]
+          savvy = { path = "../savvy" }
+          savvy-ffi = { path = "../savvy/savvy-ffi" }
 
           [workspace.package]
           version = "0.1.0"
@@ -71,11 +68,11 @@ jobs:
           repository = "https://github.com/yutannihilation/savvy/"
           EOF
 
-          mkdir ./R-package/src/rust/savvy
-          mv src/ Cargo.toml build.rs ./R-package/src/rust/savvy/
-          mv savvy-macro/ ./R-package/src/rust/savvy/
-          mv savvy-bindgen/ ./R-package/src/rust/savvy/
-          mv savvy-ffi/ ./R-package/src/rust/savvy/
+          mkdir ./R-package/src/savvy
+          mv src/ Cargo.toml build.rs ./R-package/src/savvy/
+          mv savvy-macro/ ./R-package/src/savvy/
+          mv savvy-bindgen/ ./R-package/src/savvy/
+          mv savvy-ffi/ ./R-package/src/savvy/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
