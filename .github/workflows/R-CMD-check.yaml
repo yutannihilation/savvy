@@ -58,10 +58,10 @@ jobs:
 
           [dependencies]
           savvy = { path = "./savvy" }
-          savvy-ffi = { path = "./savvy-ffi" }
+          savvy-ffi = { path = "./savvy/savvy-ffi" }
 
           [workspace]
-          members = ["savvy", "savvy-macro", "savvy-bindgen", "savvy-ffi"]
+          members = ["savvy"]
 
           [workspace.package]
           version = "0.1.0"
@@ -71,10 +71,11 @@ jobs:
           repository = "https://github.com/yutannihilation/savvy/"
           EOF
 
-          mv savvy/ ./R-package/src/rust/
-          mv savvy-macro/ ./R-package/src/rust/
-          mv savvy-bindgen/ ./R-package/src/rust/
-          mv savvy-ffi/ ./R-package/src/rust/
+          mkdir ./R-package/src/rust/savvy
+          mv src/ Cargo.toml build.rs ./R-package/src/rust/savvy/
+          mv savvy-macro/ ./R-package/src/rust/savvy/
+          mv savvy-bindgen/ ./R-package/src/rust/savvy/
+          mv savvy-ffi/ ./R-package/src/rust/savvy/
         shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
