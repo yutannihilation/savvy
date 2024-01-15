@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-savvy = { path = "../../../savvy" }
+savvy = { path = "../../../" }
 savvy-ffi = { path = "../../../savvy-ffi" }
 
 [workspace]
