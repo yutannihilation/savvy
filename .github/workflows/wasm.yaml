@@ -34,11 +34,8 @@ jobs:
           crate-type = ["staticlib"]
 
           [dependencies]
-          savvy = { path = "./savvy" }
-          savvy-ffi = { path = "./savvy-ffi" }
-
-          [workspace]
-          members = ["savvy", "savvy-macro", "savvy-bindgen", "savvy-ffi"]
+          savvy = { path = "../savvy" }
+          savvy-ffi = { path = "../savvy/savvy-ffi" }
 
           [workspace.package]
           version = "0.1.0"
@@ -48,10 +45,11 @@ jobs:
           repository = "https://github.com/yutannihilation/savvy/"
           EOF
 
-          mv savvy/ ./R-package/src/rust/
-          mv savvy-macro/ ./R-package/src/rust/
-          mv savvy-bindgen/ ./R-package/src/rust/
-          mv savvy-ffi/ ./R-package/src/rust/
+          mkdir ./R-package/src/savvy
+          mv src/ docs/ Cargo.toml build.rs ./R-package/src/savvy/
+          mv savvy-macro/ ./R-package/src/savvy/
+          mv savvy-bindgen/ ./R-package/src/savvy/
+          mv savvy-ffi/ ./R-package/src/savvy/
         shell: bash
 
       # TODO: The existence of Makevars.webr make R CMD check fail, so it's currently ignored by .Rbuildignore
