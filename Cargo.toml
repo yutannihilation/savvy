@@ -25,7 +25,7 @@ members = ["savvy-macro", "savvy-bindgen", "savvy-cli", "savvy-ffi", "xtask"]
 resolver = "2"
 
 [workspace.package]
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 authors = ["Hiroaki Yutani"]
 license = "MIT"
