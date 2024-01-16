@@ -8,6 +8,10 @@
 * `ListSexp` now returns an `Sexp` instead of  a`TypedSexp`. Use `.into_typed()`
   to convert an `Sexp` to a `TypedSexp`.
 
+### New features
+
+* Add `is_null()`.
+
 ## [v0.2.4] (2024-01-15)
 
 ## [v0.2.2] (2024-01-15)
