@@ -33,6 +33,24 @@ impl std::error::Error for Error {
     }
 }
 
+impl From<Box<dyn std::error::Error>> for Error {
+    fn from(e: Box<dyn std::error::Error>) -> Error {
+        Error::new(&e.to_string())
+    }
+}
+
+impl From<&str> for Error {
+    fn from(msg: &str) -> Error {
+        Error::new(msg)
+    }
+}
+
+impl From<String> for Error {
+    fn from(msg: String) -> Error {
+        Error::new(&msg)
+    }
+}
+
 impl From<std::convert::Infallible> for Error {
     fn from(value: std::convert::Infallible) -> Self {
         Error::new(&value.to_string())
