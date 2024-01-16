@@ -559,14 +559,14 @@ c
 
 #### `values_iter()`
 
-`values_iter()` returns an iterator of [`TypedSexp`] enum. You can use `match`
-to extract the inner data.
+`values_iter()` returns an iterator of [`Sexp`] enum. You can convert `Sexp` to
+[`TypedSexp`] by `.into_typed()` and then use `match` to extract the inner data.
 
 ```no_run
 #[savvy]
 fn print_list_values_if_int(x: ListSexp) -> savvy::Result<()>  {
     for v in x.values_iter() {
-        match v {
+        match v.into_typed() {
             TypedSexp::Integer(i) => r_println!("int {}\n", i.as_slice()[0]),
             _ => r_println("not int")
         }
@@ -636,7 +636,7 @@ NULL
 #### `set_value()`
 
 `set_value()` sets a value at the specified position. "Value" is an arbitrary
-type that implmenents `Into<TypedSexp>` trait. Since all `{type}Sexp` types
+type that implmenents `Into<Sexp>` trait. Since all `{type}Sexp` types
 implements it, you can simply pass it like below.
 
 ```no_run
