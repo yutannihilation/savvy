@@ -191,7 +191,7 @@ fn or_logical(x: LogicalSexp, y: bool) -> savvy::Result<savvy::Sexp> {
 #[savvy]
 fn print_list(x: ListSexp) -> savvy::Result<()> {
     for (k, v) in x.iter() {
-        let content = match v {
+        let content = match v.into_typed() {
             TypedSexp::Integer(x) => {
                 format!(
                     "integer [{}]",

@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::{Sexp, TypedSexp};
+use super::Sexp;
 
 /// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
@@ -30,12 +30,12 @@ impl ListSexp {
         self.len() == 0
     }
 
-    pub fn get(&self, k: &str) -> Option<TypedSexp> {
+    pub fn get(&self, k: &str) -> Option<Sexp> {
         let index = self.names_iter().position(|e| e == k);
         Some(self.get_by_index_unchecked(index?))
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<TypedSexp> {
+    pub fn get_by_index(&self, i: usize) -> Option<Sexp> {
         if i >= self.len() {
             return None;
         }
@@ -43,10 +43,10 @@ impl ListSexp {
         Some(self.get_by_index_unchecked(i))
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSexp {
+    pub fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
-            Sexp(e).into_typed()
+            Sexp(e)
         }
     }
 
@@ -99,15 +99,15 @@ impl OwnedListSexp {
         self.len == 0
     }
 
-    pub fn get(&self, k: &str) -> Option<TypedSexp> {
+    pub fn get(&self, k: &str) -> Option<Sexp> {
         self.values.get(k)
     }
 
-    pub fn get_by_index(&self, i: usize) -> Option<TypedSexp> {
+    pub fn get_by_index(&self, i: usize) -> Option<Sexp> {
         self.values.get_by_index(i)
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> TypedSexp {
+    pub fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         self.values.get_by_index_unchecked(i)
     }
 
@@ -123,7 +123,7 @@ impl OwnedListSexp {
         self.values.iter()
     }
 
-    pub fn set_value<T: Into<TypedSexp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
+    pub fn set_value<T: Into<Sexp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
         if i >= self.len {
             return Err(crate::error::Error::new(&format!(
                 "index out of bounds: the length is {} but the index is {}",
@@ -131,10 +131,10 @@ impl OwnedListSexp {
             )));
         }
 
-        let v: TypedSexp = v.into();
+        let v: Sexp = v.into();
 
         unsafe {
-            SET_VECTOR_ELT(self.values.inner(), i as _, v.into());
+            SET_VECTOR_ELT(self.values.inner(), i as _, v.0);
         }
 
         Ok(())
@@ -150,7 +150,7 @@ impl OwnedListSexp {
         Ok(())
     }
 
-    pub fn set_name_and_value<T: Into<TypedSexp>>(
+    pub fn set_name_and_value<T: Into<Sexp>>(
         &mut self,
         i: usize,
         k: &str,
@@ -263,7 +263,7 @@ pub struct ListSexpValueIter<'a> {
 }
 
 impl<'a> Iterator for ListSexpValueIter<'a> {
-    type Item = TypedSexp;
+    type Item = Sexp;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.i;
