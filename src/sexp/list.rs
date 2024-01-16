@@ -173,7 +173,7 @@ impl OwnedListSexp {
         crate::Sexp(self.inner()).set_attrib(attr, value)
     }
 
-    pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
+    pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
         crate::Sexp(self.inner()).set_class(classes)
     }
 

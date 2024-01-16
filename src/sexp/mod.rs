@@ -203,24 +203,26 @@ impl Sexp {
         Ok(())
     }
 
-    unsafe fn set_string_attrib_by_symbol(
+    unsafe fn set_string_attrib_by_symbol<T: AsRef<str>>(
         &mut self,
         attr: SEXP,
-        values: &[&str],
+        values: &[T],
     ) -> crate::error::Result<()> {
-        let values_sexp: Sexp = values.try_into()?;
-        unsafe { crate::unwind_protect(|| savvy_ffi::Rf_setAttrib(self.0, attr, values_sexp.0))? };
+        let values_sexp: OwnedStringSexp = values.try_into()?;
+        unsafe {
+            crate::unwind_protect(|| savvy_ffi::Rf_setAttrib(self.0, attr, values_sexp.inner()))?
+        };
 
         Ok(())
     }
 
     /// Set the S3 class.
-    pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
+    pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
         unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_ClassSymbol, classes) }
     }
 
     /// Set the names.
-    pub fn set_names(&mut self, names: &[&str]) -> crate::error::Result<()> {
+    pub fn set_names<T: AsRef<str>>(&mut self, names: &[T]) -> crate::error::Result<()> {
         unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol, names) }
     }
 }
@@ -342,12 +344,12 @@ macro_rules! impl_common_sexp_ops_owned {
             }
 
             /// Set the S3 class.
-            pub fn set_class(&mut self, classes: &[&str]) -> crate::error::Result<()> {
+            pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
                 crate::Sexp(self.inner()).set_class(classes)
             }
 
             /// Set the names.
-            pub fn set_names(&mut self, names: &[&str]) -> crate::error::Result<()> {
+            pub fn set_names<T: AsRef<str>>(&mut self, names: &[T]) -> crate::error::Result<()> {
                 crate::Sexp(self.inner()).set_names(names)
             }
 
