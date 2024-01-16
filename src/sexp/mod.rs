@@ -1,8 +1,8 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_type2char, EXTPTRSXP, SEXP, TYPEOF,
-    VECSXP,
+    R_NilValue, Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString, Rf_type2char, EXTPTRSXP, SEXP,
+    TYPEOF, VECSXP,
 };
 
 use crate::{
@@ -24,6 +24,11 @@ pub mod string;
 pub struct Sexp(pub SEXP);
 
 impl Sexp {
+    /// Returns `true` if the SEXP is NULL.
+    pub fn is_null(&self) -> bool {
+        unsafe { self.0 == R_NilValue }
+    }
+
     /// Returns `true` if the SEXP is a character vector.
     pub fn is_string(&self) -> bool {
         // There are two versions of `Rf_isString()``, but anyway this should be cheap.
