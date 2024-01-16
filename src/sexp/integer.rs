@@ -5,15 +5,10 @@ use savvy_ffi::{INTEGER, INTSXP, SEXP};
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
-// This is based on the idea of cpp11's `writable`.
-//
-// `IntegerSexp` is a read-only wrapper for SEXPs provided from outside of Rust;
-// since it's the caller's responsibility to PROTECT it, we don't protect it on
-// Rust's side.
-//
-// `OwnedIntegerSexp` is a writable wrapper for SEXPs newly allocated on Rust's
-// side. Since it's us who produce it, we protect it and drop it.
+/// An external SEXP of an integer vector.
 pub struct IntegerSexp(pub SEXP);
+
+/// A newly-created SEXP of an integer vector
 pub struct OwnedIntegerSexp {
     inner: SEXP,
     token: SEXP,

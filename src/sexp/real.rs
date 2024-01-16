@@ -5,7 +5,10 @@ use savvy_ffi::{REAL, REALSXP, SEXP};
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
+/// An external SEXP of a real vector.
 pub struct RealSexp(pub SEXP);
+
+/// A newly-created SEXP of a real vector.
 pub struct OwnedRealSexp {
     inner: SEXP,
     token: SEXP,

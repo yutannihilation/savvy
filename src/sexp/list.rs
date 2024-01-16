@@ -4,7 +4,10 @@ use crate::{protect, OwnedStringSexp};
 
 use super::{Sexp, TypedSexp};
 
+/// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
+
+/// A newly-created SEXP of a list.
 pub struct OwnedListSexp {
     values: ListSexp,
     names: Option<OwnedStringSexp>,
