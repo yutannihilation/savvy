@@ -174,6 +174,7 @@ impl OwnedListSexp {
         crate::Sexp(self.inner()).set_class(classes)
     }
 
+    /// Constructs a new list.
     pub fn new(len: usize, named: bool) -> crate::error::Result<Self> {
         let out = crate::alloc_vector(VECSXP, len as _)?;
         let token = protect::insert_to_preserved_list(out);

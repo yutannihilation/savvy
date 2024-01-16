@@ -88,14 +88,42 @@ impl OwnedRealSexp {
         Self::new_from_raw_sexp(inner, len)
     }
 
+    /// Constructs a new, initialized real vector.
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }
 
+    /// Constructs a new, **uninitialized** real vector.
+    ///
+    /// This is an expert-only version of `new()`, which can be found useful
+    /// when you want to skip initialization and you are confident that the
+    /// vector will be filled with values later.
+    ///
+    /// For example, you can use this in `TryFrom` implementation.
+    ///
+    /// ``` no_run
+    /// struct Pair {
+    ///     x: f64,
+    ///     y: f64
+    /// }
+    ///
+    /// impl TryFrom<Pair> for Sexp {
+    ///     type Error = savvy::Error;
+    ///
+    ///     fn try_from(value: Pair) -> savvy::Result<Self> {
+    ///         let mut out = unsafe { OwnedRealSexp::new_without_init(2)? };
+    ///         out[0] = value.x;
+    ///         out[1] = value.y;
+    ///         
+    ///         out.into()
+    ///     }
+    /// }
+    /// ````
+    ///
     /// # Safety
     ///
-    /// This is an expert-only version of `new()` in case the user needs to skip
-    /// the initialization for some great purpose.
+    /// As the memory is uninitialized, all elements must be filled values
+    /// before return.
     pub unsafe fn new_without_init(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }

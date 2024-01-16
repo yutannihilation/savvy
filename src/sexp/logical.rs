@@ -78,14 +78,42 @@ impl OwnedLogicalSexp {
         Self::new_from_raw_sexp(inner, len)
     }
 
+    /// Constructs a new, initialized logical vector.
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }
 
+    /// Constructs a new, **uninitialized** logical vector.
+    ///
+    /// This is an expert-only version of `new()`, which can be found useful
+    /// when you want to skip initialization and you are confident that the
+    /// vector will be filled with values later.
+    ///
+    /// For example, you can use this in `TryFrom` implementation.
+    ///
+    /// ``` no_run
+    /// struct Pair {
+    ///     x: bool,
+    ///     y: bool
+    /// }
+    ///
+    /// impl TryFrom<Pair> for Sexp {
+    ///     type Error = savvy::Error;
+    ///
+    ///     fn try_from(value: Pair) -> savvy::Result<Self> {
+    ///         let mut out = unsafe { OwnedLogicalSexp::new_without_init(2)? };
+    ///         out.set_elt(0, value.x)?;
+    ///         out.set_elt(1, value.x)?;
+    ///         
+    ///         out.into()
+    ///     }
+    /// }
+    /// ````
+    ///
     /// # Safety
     ///
-    /// This is an expert-only version of `new()` in case the user needs to skip
-    /// the initialization for some great purpose.
+    /// As the memory is uninitialized, all elements must be filled values
+    /// before return.
     pub unsafe fn new_without_init(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }

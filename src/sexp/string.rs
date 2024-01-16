@@ -64,6 +64,7 @@ impl OwnedStringSexp {
         Ok(())
     }
 
+    /// Constructs a new string vector.
     pub fn new(len: usize) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(STRSXP, len as _)?;
         Self::new_from_raw_sexp(inner, len)
