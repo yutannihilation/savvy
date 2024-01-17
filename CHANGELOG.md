@@ -5,7 +5,7 @@
 
 ### Breaking changes
 
-* `ListSexp` now returns an `Sexp` instead of  a`TypedSexp`. Use `.into_typed()`
+* `ListSexp` now returns an `Sexp` instead of a `TypedSexp`. Use `.into_typed()`
   to convert an `Sexp` to a `TypedSexp`.
 
 ### New features
