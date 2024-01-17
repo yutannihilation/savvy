@@ -11,6 +11,7 @@
 ### New features
 
 * Add `is_null()`.
+* Add `as_read_only()` to `OwnedListSexp` as well.
 
 ## [v0.2.4] (2024-01-15)
 

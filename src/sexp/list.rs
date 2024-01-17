@@ -99,6 +99,10 @@ impl OwnedListSexp {
         self.len == 0
     }
 
+    pub fn as_read_only(&self) -> ListSexp {
+        ListSexp(self.inner())
+    }
+
     pub fn get(&self, k: &str) -> Option<Sexp> {
         self.values.get(k)
     }
