@@ -19,7 +19,7 @@ pub use sexp::real::{OwnedRealSexp, RealSexp};
 pub use sexp::string::{OwnedStringSexp, StringSexp};
 pub use sexp::{Sexp, TypedSexp};
 
-pub use sexp::external_pointer::{get_external_pointer_addr, IntoExtPtrSexp};
+pub use sexp::external_pointer::{get_external_pointer_addr, ExternalPointerSexp, IntoExtPtrSexp};
 
 pub use unwind_protect::unwind_protect;
 
