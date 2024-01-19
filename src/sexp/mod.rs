@@ -6,8 +6,8 @@ use savvy_ffi::{
 };
 
 use crate::{
-    IntegerSexp, ListSexp, LogicalSexp, NullSexp, OwnedIntegerSexp, OwnedLogicalSexp,
-    OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
+    ExternalPointerSexp, IntegerSexp, ListSexp, LogicalSexp, NullSexp, OwnedIntegerSexp,
+    OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
 };
 
 pub mod external_pointer;
@@ -83,6 +83,7 @@ pub enum TypedSexp {
     Logical(LogicalSexp),
     List(ListSexp),
     Null(NullSexp),
+    ExternalPointer(ExternalPointerSexp),
     Other(SEXP),
 }
 
@@ -101,6 +102,7 @@ into_typed_sxp!(RealSexp, Real);
 into_typed_sxp!(StringSexp, String);
 into_typed_sxp!(LogicalSexp, Logical);
 into_typed_sxp!(ListSexp, List);
+into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
 into_typed_sxp!(NullSexp, Null);
 
 macro_rules! into_typed_sxp_owned {
@@ -127,6 +129,7 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::String(sxp) => sxp.inner(),
             TypedSexp::Logical(sxp) => sxp.inner(),
             TypedSexp::List(sxp) => sxp.inner(),
+            TypedSexp::ExternalPointer(sxp) => sxp.inner(),
             TypedSexp::Other(sxp) => sxp,
         }
     }
@@ -142,6 +145,7 @@ impl Sexp {
             savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
             savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
             savvy_ffi::VECSXP => TypedSexp::List(ListSexp(self.0)),
+            savvy_ffi::EXTPTRSXP => TypedSexp::ExternalPointer(ExternalPointerSexp(self.0)),
             savvy_ffi::NILSXP => TypedSexp::Null(NullSexp),
             _ => TypedSexp::Other(self.0),
         }

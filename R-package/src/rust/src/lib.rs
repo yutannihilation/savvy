@@ -224,6 +224,7 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
             }
             TypedSexp::List(_) => "list".to_string(),
             TypedSexp::Null(_) => "NULL".to_string(),
+            TypedSexp::ExternalPointer(_) => "external pointer".to_string(),
             TypedSexp::Other(_) => "Unsupported".to_string(),
         };
 

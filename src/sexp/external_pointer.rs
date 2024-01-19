@@ -76,3 +76,37 @@ pub trait IntoExtPtrSexp: Sized {
 pub unsafe fn get_external_pointer_addr(x: SEXP) -> *mut std::os::raw::c_void {
     R_ExternalPtrAddr(x)
 }
+
+/// An **external** external pointer.
+///
+/// This exists solely for downcasting a EXTPTRSXP into the underlying type.
+pub struct ExternalPointerSexp(pub SEXP);
+
+impl ExternalPointerSexp {
+    pub fn inner(&self) -> SEXP {
+        self.0
+    }
+
+    /// Downcast the SEXP to a concrete type of pointer.
+    ///
+    /// # Safety
+    ///
+    /// This function is highly unsafe in that there's no mechanism to verify
+    /// the destination type is the correct one.
+    pub unsafe fn downcast<T>(&self) -> &T {
+        &*(savvy_ffi::R_ExternalPtrAddr(self.0) as *mut T)
+    }
+}
+
+impl TryFrom<Sexp> for ExternalPointerSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
+        if !value.is_external_pointer() {
+            let type_name = value.get_human_readable_type_name();
+            let msg = format!("Expected an external pointer, got {type_name}s");
+            return Err(crate::error::Error::UnexpectedType(msg));
+        }
+        Ok(Self(value.0))
+    }
+}
