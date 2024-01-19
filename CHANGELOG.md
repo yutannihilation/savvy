@@ -12,8 +12,9 @@
 
 * Add `is_null()`.
 * Add `as_read_only()` to `OwnedListSexp` as well.
-* Add `downcast()` for casting an external pointer to a concrete type. Note that
-  this is only needed for "external" external pointers.
+* Add `cast_unchecked()` and `cast_mut_unchecked()` for casting an external
+  pointer to a concrete type. Note that this is only needed for "external"
+  external pointers.
 
 ## [v0.2.4] (2024-01-15)
 

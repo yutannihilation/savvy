@@ -79,7 +79,7 @@ pub unsafe fn get_external_pointer_addr(x: SEXP) -> *mut std::os::raw::c_void {
 
 /// An **external** external pointer.
 ///
-/// This exists solely for downcasting a EXTPTRSXP into the underlying type.
+/// This exists solely for casting a EXTPTRSXP into the underlying type.
 pub struct ExternalPointerSexp(pub SEXP);
 
 impl ExternalPointerSexp {
@@ -87,14 +87,24 @@ impl ExternalPointerSexp {
         self.0
     }
 
-    /// Downcast the SEXP to a concrete type of pointer.
+    /// Cast the SEXP to a concrete type of pointer.
     ///
     /// # Safety
     ///
     /// This function is highly unsafe in that there's no mechanism to verify
     /// the destination type is the correct one.
-    pub unsafe fn downcast<T>(&self) -> &T {
-        &*(savvy_ffi::R_ExternalPtrAddr(self.0) as *mut T)
+    pub unsafe fn cast_unchecked<T>(&self) -> *const T {
+        savvy_ffi::R_ExternalPtrAddr(self.0) as _
+    }
+
+    /// Cast the SEXP to a concrete type of pointer.
+    ///
+    /// # Safety
+    ///
+    /// This function is highly unsafe in that there's no mechanism to verify
+    /// the destination type is the correct one.
+    pub unsafe fn cast_mut_unchecked<T>(&self) -> *mut T {
+        savvy_ffi::R_ExternalPtrAddr(self.0) as _
     }
 }
 
