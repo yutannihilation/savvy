@@ -11,13 +11,14 @@ before diving into the details is that savvy uses separate types for SEXP passed
 from outside and that created within Rust function. The former, external SEXP,
 is read-only, and the latter, owned SEXP, is writable. Here's the list:
 
-| R type               | Read-only version | Writable version     |
-|:---------------------|:------------------|:---------------------|
-| `INTSXP` (integer)   | [`IntegerSexp`]    | [`OwnedIntegerSexp`]  |
-| `REALSXP` (numeric)  | [`RealSexp`]       | [`OwnedRealSexp`]     |
-| `LGLSXP` (logical)   | [`LogicalSexp`]    | [`OwnedLogicalSexp`]  |
-| `STRSXP` (character) | [`StringSexp`]     | [`OwnedStringSexp`]   |
-| `VECSXP` (list)      | [`ListSexp`]       | [`OwnedListSexp`]     |
+| R type                          | Read-only version       | Writable version     |
+|:--------------------------------|:------------------------|:---------------------|
+| `INTSXP` (integer)              | [`IntegerSexp`]         | [`OwnedIntegerSexp`] |
+| `REALSXP` (numeric)             | [`RealSexp`]            | [`OwnedRealSexp`]    |
+| `LGLSXP` (logical)              | [`LogicalSexp`]         | [`OwnedLogicalSexp`] |
+| `STRSXP` (character)            | [`StringSexp`]          | [`OwnedStringSexp`]  |
+| `VECSXP` (list)                 | [`ListSexp`]            | [`OwnedListSexp`]    |
+| `EXTPTRSXP` (external pointer)  | [`ExternalPointerSexp`] | n/a                  |
 
 You might wonder why this is needed when we can just use `mut` to distinguish
 the difference of mutability. I mainly had two motivations for this:
@@ -784,7 +785,7 @@ create an error with a custom error message.
 ```no_run
 #[savvy]
 fn raise_error() -> savvy::Result<savvy::Sexp> {
-    Err(savvy::Error::new("This is my custom error"))
+    Err("This is my custom error".into())
 }
 ```
 
@@ -795,6 +796,22 @@ Error: This is my custom error
 
 For the implementation details of the internals, please refer to [my blog
 post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/#implementation).
+
+### "External" external pointers
+
+As described in Struct section, a struct marked with `#[savvy]`` is
+transparently converted from and into an SEXP of an external pointer. So,
+usually, you don't need to think about external pointers.
+
+However, in some cases, you might need to deal with an external pointer created
+by another R package. For example, you might want to access an Apache Arrow data
+created by nanoarrow R package. In such caes, you can use unsafe methods
+`.cast_unchecked()` or `.cast_mut_unchecked()`.
+
+```no_run
+let foo: &Foo = unsafe { &*ext_ptr_sexp.cast_unchecked::<Foo>() };
+```
+
 
 ### Testing
 
