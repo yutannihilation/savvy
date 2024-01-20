@@ -17,6 +17,9 @@ savvy-macro = { version = "0", path = "./savvy-macro" }
 [build-dependencies]
 cc = "1"
 
+[package.metadata.release]
+release = true
+
 [package.metadata.dist]
 dist = false
 
