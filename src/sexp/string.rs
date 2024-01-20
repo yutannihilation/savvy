@@ -1,4 +1,5 @@
 use std::ffi::CStr;
+use std::os::raw::c_char;
 
 use savvy_ffi::{
     cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
@@ -96,7 +97,11 @@ unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
         Ok(savvy_ffi::R_NaString)
     } else {
         crate::unwind_protect(|| {
-            Rf_mkCharLenCE(v.as_ptr() as *const i8, v.len() as i32, cetype_t_CE_UTF8)
+            Rf_mkCharLenCE(
+                v.as_ptr() as *const c_char,
+                v.len() as i32,
+                cetype_t_CE_UTF8,
+            )
         })
     }
 }

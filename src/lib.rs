@@ -10,6 +10,8 @@ pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
 
+use std::os::raw::c_char;
+
 pub use error::{Error, Result};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
 pub use sexp::list::{ListSexp, OwnedListSexp};
@@ -47,7 +49,7 @@ pub fn handle_error(e: crate::error::Error) -> SEXP {
         e => unsafe {
             let msg = e.to_string();
             let r_error = Rf_mkCharLenCE(
-                msg.as_ptr() as *const i8,
+                msg.as_ptr() as *const c_char,
                 msg.len() as i32,
                 cetype_t_CE_UTF8,
             );
