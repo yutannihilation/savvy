@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Fixed bugs
+
+* Fix misuses of `Rf_mkCharLenCE()` which caused compilation error on ARM64
+  Linux.
+
 ## [v0.2.5] (2024-01-20)
 
 ### Breaking changes
