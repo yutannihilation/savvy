@@ -1,5 +1,3 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
     branches: [main, master]
@@ -62,3 +60,16 @@ jobs:
         uses: yutannihilation/r-wasm-actions/build-rwasm@main
         with:
           packages: "local::./R-package"
+
+  # check at least it can build
+  build-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+  
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+
+      - name: Build
+        run: cargo build --target aarch64-unknown-linux-gnu
