@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.5] (2024-01-20)
+
 ### Breaking changes
 
 * `ListSexp` now returns an `Sexp` instead of a `TypedSexp`. Use `.into_typed()`
@@ -44,6 +46,7 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.5...HEAD
+[v0.2.5]: https://github.com/yutannihilation/savvy/compare/v0.2.4...v0.2.5
 [v0.2.4]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.2...v0.2.4
 [v0.2.2]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.1...savvy-v0.2.2
