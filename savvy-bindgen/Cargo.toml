@@ -13,8 +13,5 @@ proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
 
-[package.metadata.release]
-release = true
-
 [package.metadata.dist]
 dist = false

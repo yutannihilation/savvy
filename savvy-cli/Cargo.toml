@@ -15,8 +15,5 @@ clap = { version = "4", features = ["derive"] }
 savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
 walkdir = "2"
 
-[package.metadata.release]
-release = true
-
 [package.metadata.dist]
 dist = true
