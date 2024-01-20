@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.6] (2024-01-20)
+
 ### Fixed bugs
 
 * Fix misuses of `Rf_mkCharLenCE()` which caused compilation error on ARM64
@@ -51,7 +53,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.6...HEAD
+[v0.2.6]: https://github.com/yutannihilation/savvy/compare/v0.2.5...v0.2.6
 [v0.2.5]: https://github.com/yutannihilation/savvy/compare/v0.2.4...v0.2.5
 [v0.2.4]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.2...v0.2.4
 [v0.2.2]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.1...savvy-v0.2.2
