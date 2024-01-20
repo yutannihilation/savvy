@@ -1,0 +1,35 @@
+name: Release savvy-cli for aarch64-linux
+
+on:
+  push:
+    # branches: [main, master]
+    branches: "*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "aarch64-unknown-linux-gnu"
+      
+      - name: Setup GCC toolchain for Arm64 Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-aarch64-linux-gnu -y
+
+      - name: Build
+        run: cargo build --release --target aarch64-unknown-linux-gnu --package savvy-cli
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: "aarch64-linux-gnu-gcc"
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        # if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            targets/aarch64-linux-gnu-gcc/release/savvy-cli
