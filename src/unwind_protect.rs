@@ -1,5 +1,6 @@
 use savvy_ffi::SEXP;
 
+#[cfg(not(target_arch = "wasm32"))]
 extern "C" {
     fn unwind_protect_impl(
         fun: ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void) -> SEXP>,
@@ -7,6 +8,7 @@ extern "C" {
     ) -> SEXP;
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 /// # Safety
 ///
 /// This function wraps around `R_UnwindProtect()` API, which is very unsafe in
@@ -34,4 +36,13 @@ where
     }
 
     Ok(res)
+}
+
+// do not handle longjmp on wasm
+#[cfg(target_arch = "wasm32")]
+pub unsafe fn unwind_protect<F>(f: F) -> crate::error::Result<SEXP>
+where
+    F: FnOnce() -> SEXP + Copy,
+{
+    Ok(f())
 }
