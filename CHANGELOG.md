@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* (Experimentally) support WebR by not using `R_UnwindProtect()`.
+
+
 ## [v0.2.6] (2024-01-20)
 
 ### Fixed bugs
