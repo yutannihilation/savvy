@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.7] (2024-01-25)
+
 ### New features
 
 * (Experimentally) support WebR by not using `R_UnwindProtect()`.
@@ -58,7 +60,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.7...HEAD
+[v0.2.7]: https://github.com/yutannihilation/savvy/compare/v0.2.6...v0.2.7
 [v0.2.6]: https://github.com/yutannihilation/savvy/compare/v0.2.5...v0.2.6
 [v0.2.5]: https://github.com/yutannihilation/savvy/compare/v0.2.4...v0.2.5
 [v0.2.4]: https://github.com/yutannihilation/savvy/compare/savvy-v0.2.2...v0.2.4
