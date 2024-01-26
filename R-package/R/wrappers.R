@@ -148,8 +148,13 @@ raise_error <- function() {
 }
 
 
-do_call <- function(fun, env) {
-  .Call(do_call__impl, fun, env)
+do_call <- function(fun, args, env) {
+  .Call(do_call__impl, fun, args, env)
+}
+
+
+call_with_args <- function(fun, env) {
+  .Call(call_with_args__impl, fun, env)
 }
 
 
