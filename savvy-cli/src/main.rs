@@ -128,12 +128,17 @@ fn write_file(path: &Path, contents: &str) {
     std::fs::write(path, contents).unwrap_or_else(|_| panic!("Failed to write to {}", path_str));
 }
 
+// TODO: how can this be done on Windows?
 #[cfg(unix)]
 fn set_executable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = std::fs::metadata(path).unwrap().permissions();
-    permissions.set_mode(0o755);
+    let path_str = path.to_string_lossy();
+    println!("Setting {} as executable", path_str);
+
+    let mut perm = std::fs::metadata(path).unwrap().permissions();
+    perm.set_mode(0o755);
+    std::fs::set_permissions(path, perm).unwrap();
 }
 
 fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
