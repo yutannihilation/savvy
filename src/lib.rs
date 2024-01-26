@@ -13,6 +13,8 @@ pub mod unwind_protect;
 use std::os::raw::c_char;
 
 pub use error::{Error, Result};
+pub use sexp::environment::EnvironmentSexp;
+pub use sexp::external_pointer::{get_external_pointer_addr, ExternalPointerSexp, IntoExtPtrSexp};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
 pub use sexp::list::{ListSexp, OwnedListSexp};
 pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};
@@ -20,8 +22,6 @@ pub use sexp::null::NullSexp;
 pub use sexp::real::{OwnedRealSexp, RealSexp};
 pub use sexp::string::{OwnedStringSexp, StringSexp};
 pub use sexp::{Sexp, TypedSexp};
-
-pub use sexp::external_pointer::{get_external_pointer_addr, ExternalPointerSexp, IntoExtPtrSexp};
 
 pub use unwind_protect::unwind_protect;
 
