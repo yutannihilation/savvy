@@ -11,6 +11,10 @@
   package (i.e., I recommend running `savvy::savvy_init()` on an R session
   rather than using the CLI directly).
 
+### New features
+
+* Add an experimental support for function and environment.
+
 ## [v0.2.7] (2024-01-25)
 
 ### New features

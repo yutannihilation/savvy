@@ -150,6 +150,13 @@ extern "C" {
     pub fn SET_TAG(x: SEXP, y: SEXP);
 }
 
+// Function and environment
+extern "C" {
+    pub fn Rf_isFunction(arg1: SEXP) -> Rboolean;
+    pub fn Rf_isEnvironment(arg1: SEXP) -> Rboolean;
+    pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP;
+}
+
 // protection
 extern "C" {
     pub fn Rf_protect(arg1: SEXP) -> SEXP;

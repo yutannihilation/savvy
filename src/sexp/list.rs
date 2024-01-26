@@ -58,7 +58,7 @@ impl ListSexp {
         }
     }
 
-    fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
+    pub fn names_iter(&self) -> std::vec::IntoIter<&'static str> {
         let names = match crate::Sexp(self.inner()).get_names() {
             Some(names) => names,
             None => std::iter::repeat("").take(self.len()).collect(),
@@ -279,6 +279,12 @@ impl<'a> Iterator for ListSexpValueIter<'a> {
 
         Some(self.sexp.get_by_index_unchecked(i))
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
 }
+
+impl<'a> ExactSizeIterator for ListSexpValueIter<'a> {}
 
 type ListSexpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSexpValueIter<'a>>;
