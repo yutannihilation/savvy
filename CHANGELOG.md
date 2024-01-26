@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.8] (2024-01-26)
+
 ### Breaking changes
 
 * `savvy-cli init` now produces `Makevars.in` and `configure` instead of
@@ -71,7 +73,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.8...HEAD
+[v0.2.8]: https://github.com/yutannihilation/savvy/compare/v0.2.7...v0.2.8
 [v0.2.7]: https://github.com/yutannihilation/savvy/compare/v0.2.6...v0.2.7
 [v0.2.6]: https://github.com/yutannihilation/savvy/compare/v0.2.5...v0.2.6
 [v0.2.5]: https://github.com/yutannihilation/savvy/compare/v0.2.4...v0.2.5
