@@ -1,8 +1,9 @@
 use clap::{Parser, Subcommand};
 use savvy_bindgen::generate_cargo_toml;
+use savvy_bindgen::generate_configure;
 use savvy_bindgen::generate_example_lib_rs;
 use savvy_bindgen::generate_gitignore;
-use savvy_bindgen::generate_makevars;
+use savvy_bindgen::generate_makevars_in;
 use savvy_bindgen::generate_makevars_win;
 use savvy_bindgen::ParsedResult;
 use std::path::Path;
@@ -42,11 +43,14 @@ enum Commands {
         file: PathBuf,
     },
 
-    /// Generate Makevars
-    Makevars {
+    /// Generate Makevars.in
+    MakevarsIn {
         /// package name
         crate_name: String,
     },
+
+    /// Generate configure
+    Configure {},
 
     /// Generate Makevars.win
     MakevarsWin {
@@ -91,7 +95,8 @@ const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_SRC_DIR: &str = "src/rust/src";
 const PATH_CARGO_TOML: &str = "src/rust/Cargo.toml";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
-const PATH_MAKEVARS: &str = "src/Makevars";
+const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
+const PATH_CONFIGURE: &str = "configure";
 const PATH_MAKEVARS_WIN: &str = "src/Makevars.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
 const PATH_C_HEADER: &str = "src/rust/api.h";
@@ -121,6 +126,19 @@ fn write_file(path: &Path, contents: &str) {
     let path_str = path.to_string_lossy();
     println!("Writing {}", path_str);
     std::fs::write(path, contents).unwrap_or_else(|_| panic!("Failed to write to {}", path_str));
+}
+
+// TODO: how can this be done on Windows?
+#[cfg(unix)]
+fn set_executable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let path_str = path.to_string_lossy();
+    println!("Setting {} as executable", path_str);
+
+    let mut perm = std::fs::metadata(path).unwrap().permissions();
+    perm.set_mode(0o755);
+    std::fs::set_permissions(path, perm).unwrap();
 }
 
 fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
@@ -173,7 +191,13 @@ fn init(path: &Path) {
 
     write_file(&path.join(PATH_CARGO_TOML), &generate_cargo_toml(&pkg_name));
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
-    write_file(&path.join(PATH_MAKEVARS), &generate_makevars(&pkg_name));
+    write_file(
+        &path.join(PATH_MAKEVARS_IN),
+        &generate_makevars_in(&pkg_name),
+    );
+    write_file(&path.join(PATH_CONFIGURE), &generate_configure());
+    #[cfg(unix)]
+    set_executable(&path.join(PATH_CONFIGURE));
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
         &generate_makevars_win(&pkg_name),
@@ -205,8 +229,11 @@ fn main() {
                 generate_r_impl_file(&[parsed_result], "%%PACKAGE_NAME%%")
             );
         }
-        Commands::Makevars { crate_name } => {
-            println!("{}", generate_makevars(&crate_name))
+        Commands::MakevarsIn { crate_name } => {
+            println!("{}", generate_makevars_in(&crate_name))
+        }
+        Commands::Configure {} => {
+            println!("{}", generate_configure())
         }
         Commands::MakevarsWin { crate_name } => {
             println!("{}", generate_makevars_win(&crate_name))
