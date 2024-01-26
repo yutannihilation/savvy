@@ -128,6 +128,10 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("SETCAR")
         .allowlist_function("SETCDR")
         .allowlist_function("SET_TAG")
+        // Function and Environment
+        .allowlist_function("Rf_isFunction")
+        .allowlist_function("Rf_isEnvironment")
+        .allowlist_function("Rf_eval")
         // protection
         .allowlist_function("Rf_protect")
         .allowlist_function("Rf_unprotect")

@@ -177,6 +177,11 @@ SEXP raise_error__impl(void) {
     return handle_result(res);
 }
 
+SEXP do_call__impl(SEXP fun, SEXP env) {
+    SEXP res = do_call(fun, env);
+    return handle_result(res);
+}
+
 SEXP new_int__impl(SEXP size) {
     SEXP res = new_int(size);
     return handle_result(res);
@@ -308,6 +313,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"rep_str_slice__impl", (DL_FUNC) &rep_str_slice__impl, 1},
     {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
     {"raise_error__impl", (DL_FUNC) &raise_error__impl, 0},
+    {"do_call__impl", (DL_FUNC) &do_call__impl, 2},
     {"new_int__impl", (DL_FUNC) &new_int__impl, 1},
     {"new_real__impl", (DL_FUNC) &new_real__impl, 1},
     {"new_bool__impl", (DL_FUNC) &new_bool__impl, 1},
