@@ -4,7 +4,38 @@ See [Getting Started section of README][getting-started].
 
 [getting-started]: https://crates.io/crates/savvy#getting-started
 
-## Treating External SEXP and owned SEXP differently
+## Example savvy code
+
+This is an example of what savvy-powered function would look like:
+
+``` rust
+/// Convert to Upper-case
+/// 
+/// @param x A character vector.
+/// @export
+#[savvy]
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
+    // Use `Owned{type}Sexp` to allocate an R vector for output.
+    let mut out = OwnedStringSexp::new(x.len())?;
+
+    for (i, e) in x.iter().enumerate() {
+        // To Rust, missing value is an ordinary value. In `&str`'s case, it's just "NA".
+        // You have to use `.is_na()` method to distinguish the missing value.
+        if e.is_na() {
+            // Values need to be set by `set_elt()` one by one.
+            out.set_elt(i, <&str>::na())?;
+            continue;
+        }
+
+        let e_upper = e.to_uppercase();
+        out.set_elt(i, e_upper.as_str())?;
+    }
+
+    out.into()
+}
+```
+
+## Treating external SEXP and owned SEXP differently
 
 Savvy is opinionated in many points. One thing I think should be explained
 before diving into the details is that savvy uses separate types for SEXP passed
@@ -779,8 +810,8 @@ struct Foo {
 
 ### Error handling
 
-To propagate your errors to the R session, you can use `savvy::Error::new()` to
-create an error with a custom error message.
+To propagate your errors to the R session, you can return a `savvy::Error`. You
+can easily create it by using `.into()` on a string of the error message.
 
 ```no_run
 #[savvy]
@@ -796,6 +827,10 @@ Error: This is my custom error
 
 For the implementation details of the internals, please refer to [my blog
 post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/#implementation).
+
+### Execute an R function
+
+TBD
 
 ### "External" external pointers
 
