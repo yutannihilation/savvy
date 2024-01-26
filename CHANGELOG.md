@@ -9,7 +9,7 @@
   `Makevars` in order to support WebR transparently. One limitation on Windows
   is that `configure` is not set executable. This will be cared by the helper R
   package (i.e., I recommend running `savvy::savvy_init()` on an R session
-  rather than use the CLI directly).
+  rather than using the CLI directly).
 
 ## [v0.2.7] (2024-01-25)
 
