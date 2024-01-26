@@ -1,5 +1,12 @@
-pub fn generate_makevars(crate_name: &str) -> String {
-    format!(include_str!("./templates/Makevars"), crate_name, crate_name)
+pub fn generate_makevars_in(crate_name: &str) -> String {
+    format!(
+        include_str!("./templates/Makevars.in"),
+        crate_name, crate_name
+    )
+}
+
+pub fn generate_configure() -> String {
+    include_str!("./templates/configure").to_string()
 }
 
 pub fn generate_makevars_win(crate_name: &str) -> String {
