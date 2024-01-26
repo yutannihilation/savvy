@@ -3,12 +3,19 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `savvy-cli init` now produces `Makevars.in` and `configure` instead of
+  `Makevars` in order to support WebR transparently. One limitation on Windows
+  is that `configure` is not set executable. This will be cared by the helper R
+  package (i.e., I recommend running `savvy::savvy_init()` on an R session
+  rather than use the CLI directly).
+
 ## [v0.2.7] (2024-01-25)
 
 ### New features
 
 * (Experimentally) support WebR by not using `R_UnwindProtect()`.
-
 
 ## [v0.2.6] (2024-01-20)
 
