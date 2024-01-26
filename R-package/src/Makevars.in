@@ -1,7 +1,11 @@
+TARGET = @TARGET@
+
 TARGET_DIR = ./rust/target
-LIBDIR = $(TARGET_DIR)/release
+LIBDIR = $(TARGET_DIR)/$(TARGET)/release
 STATLIB = $(LIBDIR)/libsimple_savvy.a
 PKG_LIBS = -L$(LIBDIR) -lsimple_savvy
+
+CARGO_BUILD_ARGS = --lib --release --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 all: C_clean
 
@@ -12,7 +16,14 @@ $(STATLIB):
 	# to set it here to ensure cargo can be invoked. It is appended to PATH and
 	# therefore is only used if cargo is absent from the user's PATH.
 	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
-		cargo build --lib --release --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
+	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
+	    cargo build $(CARGO_BUILD_ARGS); \
+	  else \
+	    export CC="$(CC)" && \
+	    export CFLAGS="$(CFLAGS)" && \
+	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
+	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
+	  fi
 
 C_clean:
 	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS)
