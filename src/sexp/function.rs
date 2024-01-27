@@ -1,11 +1,11 @@
 use std::ffi::CString;
 
 use savvy_ffi::{
-    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, Rf_protect, Rf_unprotect, CDR, LANGSXP,
-    SETCAR, SETCDR, SET_TAG, SEXP,
+    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, Rf_protect, Rf_unprotect, CDR, SETCAR,
+    SETCDR, SET_TAG, SEXP,
 };
 
-use crate::{alloc_vector, protect, unwind_protect, ListSexp};
+use crate::{protect, unwind_protect, ListSexp};
 
 use super::Sexp;
 
@@ -158,6 +158,7 @@ impl FunctionSexp {
             // releated environments, itself.
             let res = unwind_protect(|| Rf_eval(call, savvy_ffi::R_GlobalEnv))?;
             let token = protect::insert_to_preserved_list(res);
+
             Rf_unprotect(1);
 
             Ok(FunctionCallResult { inner: res, token })
