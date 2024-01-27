@@ -3,6 +3,13 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `Function.call()` now uses `FunctionArgs` to represent function arguments.
+  This is necessary change in order to protect function arguments from GC-ed
+  unexpectedly. The previous interface requires users to pass `Sexp`, which is
+  unprotected.
+
 ## [v0.2.8] (2024-01-26)
 
 ### Breaking changes
