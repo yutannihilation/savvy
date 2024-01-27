@@ -144,11 +144,8 @@ impl FunctionSexp {
         self.0
     }
 
-    pub fn call(
-        &self,
-        args: FunctionArgs,
-        env: &EnvironmentSexp,
-    ) -> crate::error::Result<FunctionCallResult> {
+    /// Execute an R function
+    pub fn call(&self, args: FunctionArgs) -> crate::error::Result<FunctionCallResult> {
         unsafe {
             let call = Rf_protect(alloc_vector(LANGSXP, args.len() + 1)?);
             SETCAR(call, self.inner());
@@ -157,7 +154,10 @@ impl FunctionSexp {
                 SETCDR(call, args.inner());
             }
 
-            let res = unwind_protect(|| Rf_eval(call, env.inner()))?;
+            // Note: here, probably the environment doesn't matter at all
+            // because the first argument is the function, which preserves the
+            // releated environments, itself.
+            let res = unwind_protect(|| Rf_eval(call, savvy_ffi::R_GlobalEnv))?;
             let token = protect::insert_to_preserved_list(res);
             Rf_unprotect(1);
 
