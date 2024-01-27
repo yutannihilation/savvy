@@ -3,6 +3,9 @@ test_that("functions works", {
   expect_equal(do_call(list, x, .GlobalEnv), x)
   expect_equal(do_call(function(...) list(...), x, .GlobalEnv), x)
 
+  # handle 0-length argument
+  expect_equal(do_call(list, list(), .GlobalEnv), list())
+
   expect_equal(call_with_args(list, .GlobalEnv), x)
   expect_equal(call_with_args(function(...) list(...), .GlobalEnv), x)
 })

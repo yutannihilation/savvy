@@ -15,6 +15,7 @@ use std::os::raw::c_char;
 pub use error::{Error, Result};
 pub use sexp::environment::EnvironmentSexp;
 pub use sexp::external_pointer::{get_external_pointer_addr, ExternalPointerSexp, IntoExtPtrSexp};
+pub use sexp::function::{FunctionArgs, FunctionCallResult, FunctionSexp};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
 pub use sexp::list::{ListSexp, OwnedListSexp};
 pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};

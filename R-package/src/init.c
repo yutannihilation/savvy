@@ -187,6 +187,11 @@ SEXP call_with_args__impl(SEXP fun, SEXP env) {
     return handle_result(res);
 }
 
+SEXP get_args__impl(SEXP args) {
+    SEXP res = get_args(args);
+    return handle_result(res);
+}
+
 SEXP new_int__impl(SEXP size) {
     SEXP res = new_int(size);
     return handle_result(res);
@@ -320,6 +325,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"raise_error__impl", (DL_FUNC) &raise_error__impl, 0},
     {"do_call__impl", (DL_FUNC) &do_call__impl, 3},
     {"call_with_args__impl", (DL_FUNC) &call_with_args__impl, 2},
+    {"get_args__impl", (DL_FUNC) &get_args__impl, 1},
     {"new_int__impl", (DL_FUNC) &new_int__impl, 1},
     {"new_real__impl", (DL_FUNC) &new_real__impl, 1},
     {"new_bool__impl", (DL_FUNC) &new_bool__impl, 1},
