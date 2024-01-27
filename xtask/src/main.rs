@@ -132,6 +132,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_isFunction")
         .allowlist_function("Rf_isEnvironment")
         .allowlist_function("Rf_eval")
+        .allowlist_var("R_GlobalEnv")
         // protection
         .allowlist_function("Rf_protect")
         .allowlist_function("Rf_unprotect")

@@ -155,6 +155,8 @@ extern "C" {
     pub fn Rf_isFunction(arg1: SEXP) -> Rboolean;
     pub fn Rf_isEnvironment(arg1: SEXP) -> Rboolean;
     pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP;
+
+    pub static mut R_GlobalEnv: SEXP;
 }
 
 // protection

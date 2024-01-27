@@ -9,6 +9,8 @@
   This is necessary change in order to protect function arguments from GC-ed
   unexpectedly. The previous interface requires users to pass `Sexp`, which is
   unprotected.
+* `Function.call()` now doesn't require the environment to be executed because
+  it's rarely matters. Accordingly, `Environment` is removed from the API.
 
 ## [v0.2.8] (2024-01-26)
 

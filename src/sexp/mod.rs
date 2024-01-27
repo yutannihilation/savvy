@@ -10,7 +10,6 @@ use crate::{
     OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
 };
 
-pub mod environment;
 pub mod external_pointer;
 pub mod function;
 pub mod integer;
@@ -96,7 +95,6 @@ pub enum TypedSexp {
     List(ListSexp),
     Null(NullSexp),
     ExternalPointer(ExternalPointerSexp),
-    Environment(EnvironmentSexp),
     Function(FunctionSexp),
     Other(SEXP),
 }
@@ -117,7 +115,6 @@ into_typed_sxp!(StringSexp, String);
 into_typed_sxp!(LogicalSexp, Logical);
 into_typed_sxp!(ListSexp, List);
 into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
-into_typed_sxp!(EnvironmentSexp, Environment);
 into_typed_sxp!(FunctionSexp, Function);
 into_typed_sxp!(NullSexp, Null);
 
@@ -146,7 +143,6 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::Logical(sxp) => sxp.inner(),
             TypedSexp::List(sxp) => sxp.inner(),
             TypedSexp::ExternalPointer(sxp) => sxp.inner(),
-            TypedSexp::Environment(sxp) => sxp.inner(),
             TypedSexp::Function(sxp) => sxp.inner(),
             TypedSexp::Other(sxp) => sxp,
         }
@@ -164,7 +160,6 @@ impl Sexp {
             savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
             savvy_ffi::VECSXP => TypedSexp::List(ListSexp(self.0)),
             savvy_ffi::EXTPTRSXP => TypedSexp::ExternalPointer(ExternalPointerSexp(self.0)),
-            savvy_ffi::ENVSXP => TypedSexp::Environment(EnvironmentSexp(self.0)),
             // cf. https://github.com/wch/r-source/blob/95ac44a87065d5b42579b621d278adc44641dcf0/src/include/Rinlinedfuns.h#L810-L815
             savvy_ffi::CLOSXP | savvy_ffi::BUILTINSXP | savvy_ffi::SPECIALSXP => {
                 TypedSexp::Function(FunctionSexp(self.0))
@@ -391,4 +386,4 @@ macro_rules! impl_common_sexp_ops_owned {
 pub(crate) use impl_common_sexp_ops;
 pub(crate) use impl_common_sexp_ops_owned;
 
-use self::{environment::EnvironmentSexp, function::FunctionSexp};
+use self::function::FunctionSexp;
