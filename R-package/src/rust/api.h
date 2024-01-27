@@ -29,6 +29,7 @@ SEXP safe_stop(void);
 SEXP raise_error(void);
 SEXP do_call(SEXP fun, SEXP args, SEXP env);
 SEXP call_with_args(SEXP fun, SEXP env);
+SEXP get_args(SEXP args);
 SEXP new_int(SEXP size);
 SEXP new_real(SEXP size);
 SEXP new_bool(SEXP size);

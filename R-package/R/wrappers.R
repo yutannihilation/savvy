@@ -158,6 +158,11 @@ call_with_args <- function(fun, env) {
 }
 
 
+get_args <- function(args) {
+  .Call(get_args__impl, args)
+}
+
+
 new_int <- function(size) {
   .Call(new_int__impl, size)
 }

@@ -258,6 +258,12 @@ impl From<OwnedListSexp> for crate::error::Result<Sexp> {
     }
 }
 
+impl From<OwnedListSexp> for ListSexp {
+    fn from(value: OwnedListSexp) -> Self {
+        value.as_read_only()
+    }
+}
+
 // Iterator for ListSexp ***************
 
 pub struct ListSexpValueIter<'a> {
