@@ -1,8 +1,8 @@
 use std::ffi::CString;
 
 use savvy_ffi::{
-    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_protect, Rf_unprotect, CDR, LANGSXP, SETCAR,
-    SETCDR, SET_TAG, SEXP,
+    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, Rf_protect, Rf_unprotect, CDR, LANGSXP,
+    SETCAR, SETCDR, SET_TAG, SEXP,
 };
 
 use crate::{alloc_vector, protect, unwind_protect, ListSexp};
@@ -147,12 +147,11 @@ impl FunctionSexp {
     /// Execute an R function
     pub fn call(&self, args: FunctionArgs) -> crate::error::Result<FunctionCallResult> {
         unsafe {
-            let call = Rf_protect(alloc_vector(LANGSXP, args.len() + 1)?);
-            SETCAR(call, self.inner());
-
-            if !args.is_empty() {
-                SETCDR(call, args.inner());
-            }
+            let call = if args.is_empty() {
+                Rf_protect(Rf_lcons(self.inner(), R_NilValue))
+            } else {
+                Rf_protect(Rf_lcons(self.inner(), args.inner()))
+            };
 
             // Note: here, probably the environment doesn't matter at all
             // because the first argument is the function, which preserves the

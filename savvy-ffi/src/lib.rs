@@ -143,6 +143,7 @@ extern "C" {
 // Pairlist
 extern "C" {
     pub fn Rf_cons(arg1: SEXP, arg2: SEXP) -> SEXP;
+    pub fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn CAR(e: SEXP) -> SEXP;
     pub fn CDR(e: SEXP) -> SEXP;
     pub fn SETCAR(x: SEXP, y: SEXP) -> SEXP;

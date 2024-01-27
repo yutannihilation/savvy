@@ -123,6 +123,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_RegisterCFinalizerEx")
         // Pairlist
         .allowlist_function("Rf_cons")
+        .allowlist_function("Rf_lcons")
         .allowlist_function("CAR")
         .allowlist_function("CDR")
         .allowlist_function("SETCAR")
