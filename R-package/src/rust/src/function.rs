@@ -1,4 +1,4 @@
-use savvy::{savvy, EnvironmentSexp, FunctionArgs, FunctionSexp, ListSexp};
+use savvy::{savvy, FunctionArgs, FunctionSexp, ListSexp};
 
 #[savvy]
 pub fn do_call(fun: FunctionSexp, args: ListSexp) -> savvy::Result<savvy::Sexp> {

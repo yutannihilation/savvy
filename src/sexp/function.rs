@@ -5,7 +5,7 @@ use savvy_ffi::{
     SETCDR, SET_TAG, SEXP,
 };
 
-use crate::{alloc_vector, protect, unwind_protect, EnvironmentSexp, ListSexp};
+use crate::{alloc_vector, protect, unwind_protect, ListSexp};
 
 use super::Sexp;
 
