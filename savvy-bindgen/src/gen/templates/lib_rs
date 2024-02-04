@@ -2,10 +2,7 @@
 
 use savvy::savvy;
 
-use savvy::{
-    IntegerSexp, ListSexp, LogicalSexp, NullSexp, OwnedIntegerSexp, OwnedLogicalSexp,
-    OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
-};
+use savvy::{IntegerSexp, OwnedIntegerSexp, OwnedStringSexp, StringSexp};
 
 use savvy::sexp::na::NotAvailableValue;
 
@@ -20,12 +17,12 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na());
+            out.set_elt(i, <&str>::na())?;
             continue;
         }
 
         let e_upper = e.to_uppercase();
-        out.set_elt(i, &e_upper);
+        out.set_elt(i, &e_upper)?;
     }
 
     Ok(out.into())
@@ -74,13 +71,13 @@ impl Person {
 
     fn name(&self) -> savvy::Result<savvy::Sexp> {
         let mut out = OwnedStringSexp::new(1)?;
-        out.set_elt(0, &self.name);
+        out.set_elt(0, &self.name)?;
         Ok(out.into())
     }
 
     fn associated_function() -> savvy::Result<savvy::Sexp> {
         let mut out = OwnedStringSexp::new(1)?;
-        out.set_elt(0, "associated_function");
+        out.set_elt(0, "associated_function")?;
         Ok(out.into())
     }
 }
