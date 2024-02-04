@@ -1,8 +1,6 @@
 //! # Savvy - A Simple R Interface
 //!
 
-#![doc = include_str!("../docs/design.md")]
-
 pub mod error;
 pub mod ffi;
 pub mod io;

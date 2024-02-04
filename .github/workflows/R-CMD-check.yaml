@@ -69,7 +69,7 @@ jobs:
           EOF
 
           mkdir ./R-package/src/savvy
-          mv src/ docs/ Cargo.toml build.rs ./R-package/src/savvy/
+          mv src/ Cargo.toml build.rs ./R-package/src/savvy/
           mv savvy-macro/ ./R-package/src/savvy/
           mv savvy-bindgen/ ./R-package/src/savvy/
           mv savvy-ffi/ ./R-package/src/savvy/
