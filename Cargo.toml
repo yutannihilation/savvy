@@ -44,6 +44,7 @@ edition = "2021"
 authors = ["Hiroaki Yutani"]
 license = "MIT"
 repository = "https://github.com/yutannihilation/savvy/"
+homepage = "https://github.com/yutannihilation/savvy/guide/"
 
 # Config for 'cargo dist'
 [workspace.metadata.dist]
