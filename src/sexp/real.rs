@@ -30,9 +30,7 @@ impl RealSexp {
     }
 
     pub fn to_vec(&self) -> Vec<f64> {
-        let mut out = Vec::with_capacity(self.len());
-        out.copy_from_slice(self.as_slice());
-        out
+        self.as_slice().to_vec()
     }
 }
 
@@ -58,9 +56,7 @@ impl OwnedRealSexp {
     }
 
     pub fn to_vec(&self) -> Vec<f64> {
-        let mut out = Vec::with_capacity(self.len);
-        out.copy_from_slice(self.as_slice());
-        out
+        self.as_slice().to_vec()
     }
 
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {

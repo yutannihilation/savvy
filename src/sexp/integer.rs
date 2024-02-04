@@ -34,9 +34,7 @@ impl IntegerSexp {
     }
 
     pub fn to_vec(&self) -> Vec<i32> {
-        let mut out = Vec::with_capacity(self.len());
-        out.copy_from_slice(self.as_slice());
-        out
+        self.as_slice().to_vec()
     }
 }
 
@@ -62,9 +60,7 @@ impl OwnedIntegerSexp {
     }
 
     pub fn to_vec(&self) -> Vec<i32> {
-        let mut out = Vec::with_capacity(self.len());
-        out.copy_from_slice(self.as_slice());
-        out
+        self.as_slice().to_vec()
     }
 
     pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {

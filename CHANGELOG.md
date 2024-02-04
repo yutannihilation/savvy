@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Fixed bugs
+
+* Fix the wrong implementation of `to_vec()`.
+
 ## [v0.2.9] (2024-01-27)
 
 ### Breaking changes
