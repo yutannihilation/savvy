@@ -19,6 +19,7 @@
     - [Struct](./10_struct.md)
 - [Error-handling](./11_error.md)
 - [Handling Attributes](./12_attributes.md)
+    - [Handling Matrices And Arrays](./13_matrix.md)
 - [Calling R Function]()
 - [Testing]()
 - [Advanced Topics](./advanced_topics.md)
