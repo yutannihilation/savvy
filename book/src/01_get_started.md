@@ -36,7 +36,16 @@ savvy::savvy_init()
 devtools::document()
 ```
 
-Now, this package is ready to install!
+Now, this package is ready to install! After installing (e.g. by running
+"Install Package" on RStudio IDE), confirm you can run this example function
+that multiplies the first argument by the second argument.
+
+```r
+library(<your package>)
+
+int_times_int(1:4, 2L)
+#> [1] 2 4 6 8
+```
 
 ### Package structure
 
@@ -66,13 +75,40 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 3. `init.c` and `api.h`: C functions for the corresponding Rust functions
 4. `Cargo.toml` and `lib.rs`: Rust code
 
-## Update wrapper files
+## Write your own function
 
-After modifying or adding some Rust code, you can update the C and R wrapper
-files by running `savvy::savvy_update()` (under the hood, this simply runs
-`savvy-cli update`).
+The most revolutionary point of `savvy::savvy_init()` is that it leaves the most
+important task to you; let's define a typical hello-world function for practice!
+
+### Write some Rust code
+
+Open `src/rust/lib.rs` and add the following lines. `r_println!` is the R
+version of `println!` macro.
+
+```rust
+/// @export
+#[savvy]
+fn hello() -> savvy::Result<()> {
+    savvy::r_println!("Hello world!");
+    Ok(())
+}
+```
+
+### Update wrapper files
+
+Every time you modify or add some Rust code, you need to update the C and R
+wrapper files by running `savvy::savvy_update()` (under the hood, this simply
+runs `savvy-cli update`). Don't forget to run `devtools::document()` as well.
 
 ``` r
 savvy::savvy_update()
 devtools::document()
+```
+
+After re-installing your package, you should be able to run the `hello()`
+function on your R session.
+
+```r
+hello()
+#> Hello world!
 ```
