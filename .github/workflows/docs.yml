@@ -34,25 +34,43 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@nightly
 
-      - name: Docs
+      - name: Build API Reference
         run: cargo doc --no-deps
         env:
           RUSTDOCFLAGS: "--enable-index-page -Zunstable-options"
 
+      - name: Install latest mdbook
+        run: |
+          tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
+          url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          mkdir bin
+          curl -sSL $url | tar -xz --directory=bin
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+
+      - name: Build user guide
+        run: |
+          cd book
+          mdbook build
+
+      - name: Tweak
+        run: |
+          # As of v1.0.9, upload-pages-artifact action rejects files with incorrect permissions.
+          # In Rust doc's case, .lock is such a file.
+          #
+          # cf. https://github.com/actions/deploy-pages/issues/188#issuecomment-1597651901
+          rm -f ./target/doc/.lock
+
+          mkdir _docs
+          mv ./book/book ./_docs/guide
+          mv ./target/doc ./_docs/reference
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-
-      # As of v1.0.9, upload-pages-artifact action rejects files with incorrect permissions.
-      # In Rust doc's case, .lock is such a file.
-      #
-      # cf. https://github.com/actions/deploy-pages/issues/188#issuecomment-1597651901
-      - name: Remove unnecessary files
-        run: rm -f ./target/doc/.lock
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './target/doc'
+          path: './_docs/'
 
       - name: Deploy to GitHub Pages
         id: deployment
