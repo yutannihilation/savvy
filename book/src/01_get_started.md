@@ -38,6 +38,34 @@ devtools::document()
 
 Now, this package is ready to install!
 
+### Package structure
+
+After `savvy::savvy_init()`, the structure of your R package should look like below.
+
+```
+.
+├── DESCRIPTION
+├── NAMESPACE
+├── R
+│   └── wrappers.R      <---(1)
+├── configure           <---(2)
+├── foofoofoofoo.Rproj
+└── src
+    ├── Makevars.in     <---(2)
+    ├── Makevars.win    <---(2)
+    ├── init.c          <---(3)
+    └── rust
+        ├── api.h       <---(3)
+        ├── Cargo.toml  <---(4)
+        └── src
+            └── lib.rs  <---(4)
+```
+
+1. `wrappers.R`: R functions for the corresponding Rust functions
+2. `configure`, `Makevars.in`, and `Makevars.win`: Necessary build settings for compiling Rust code
+3. `init.c` and `api.h`: C functions for the corresponding Rust functions
+4. `Cargo.toml` and `lib.rs`: Rust code
+
 ## Update wrapper files
 
 After modifying or adding some Rust code, you can update the C and R wrapper

@@ -75,11 +75,14 @@ possible to check if a value is `NA` to R in case the type is either `i32`,
 [na_real]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/arithmetic.c#L90-L98
 [na_string]: https://github.com/wch/r-source/blob/ed51d34ec195b89462a8531b9ef30b7b72e47204/src/main/names.c#L1219
 
-You can check if the value is `NA` by `is_na()`, and refer to the sentinel value
-of `NA` by `<T>::na()`. If you care about missing values, you always have to
-have an `if` branch for missing values like below.
+By using `NotAvailableValue` trait, you can check if the value is `NA` by
+`is_na()`, and refer to the sentinel value of `NA` by `<T>::na()`. If you care
+about missing values, you always have to have an `if` branch for missing values
+like below.
 
 ```rust
+use savvy::NotAvailableValue;
+
 #[savvy]
 fn sum(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let mut sum: f64 = 0.0;

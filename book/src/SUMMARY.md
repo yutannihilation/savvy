@@ -4,7 +4,7 @@
 
 # Get Started
 
-[Get started](./01_get_started.md)
+- [Get started](./01_get_started.md)
 
 # User Guide
 
