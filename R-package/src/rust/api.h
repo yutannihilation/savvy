@@ -1,4 +1,3 @@
-SEXP print_array(SEXP x);
 SEXP get_class_int(SEXP x);
 SEXP get_names_int(SEXP x);
 SEXP get_dim_int(SEXP x);
