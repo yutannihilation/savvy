@@ -4,7 +4,7 @@ use savvy::savvy;
 
 use savvy::{IntegerSexp, OwnedIntegerSexp, OwnedStringSexp, StringSexp};
 
-use savvy::sexp::na::NotAvailableValue;
+use savvy::NotAvailableValue;
 
 /// Convert Input To Upper-Case
 ///
