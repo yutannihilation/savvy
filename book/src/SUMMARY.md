@@ -1,6 +1,6 @@
 # Summary
 
-[Introduction](./00_intro.md)
+[Introduction](../../README.md)
 
 # Get Started
 
