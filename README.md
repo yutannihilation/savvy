@@ -67,34 +67,17 @@ to_upper(c("a", "b", "c"))
 A toy example R package can be found in [`R-package/`
 directory](https://github.com/yutannihilation/savvy/tree/master/R-package).
 
-<details>
-<summary>
-extendr?
-</summary>
+## Thanks
 
-## What the hell is this?? Why do you need another framework when there’s extendr?
+Savvy is not quite unique. This project is made possible by heavily
+taking inspiration from other great projects:
 
-[extendr](https://extendr.github.io/) is great and ready to use, but
-it’s not perfect in some points (e.g., [error
-handling](https://github.com/extendr/extendr/issues/278)) and it’s a
-kind of stuck; extendr is too feature-rich and complex that no one can
-introduce a big breaking change easily. So, I needed to create a new,
-simple framework to experiment with. The main goal of savvy is to
-provide a simpler option other than extendr, not to be a complete
-alternative to extendr.
-
-### Pros and cons compared to extendr
-
-Pros:
-
-- You can use `Result` for error handling instead of `panic!`
-- You can compile your package for webR (I hope extendr gets webR-ready
-  soon)
-
-Cos:
-
-- savvy prefers explicitness over ergonomics
-- savvy provides limited amount of APIs and might not fit for complex
-  usages
-
-</details>
+- The basic idea is of course based on
+  [extendr](https://github.com/extendr/extendr/). Savvy would not exist
+  without extendr.
+- [cpp11](https://cpp11.r-lib.org/)’s “writable” concept influenced the
+  design a lot. Also, I learned a lot from the great implementation such
+  as [the protection
+  mechanism](https://cpp11.r-lib.org/articles/internals.html#protection).
+- [PyO3](https://github.com/PyO3/pyo3) made me realize that the FFI
+  crate doesn’t need to be a “sys” crate.

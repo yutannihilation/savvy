@@ -21,3 +21,4 @@
 - [Calling R Function]()
 - [Testing]()
 - [Advanced Topics](./advanced_topics.md)
+- [Comparison with extendr](./extendr.md)

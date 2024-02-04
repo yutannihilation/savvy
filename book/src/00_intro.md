@@ -56,3 +56,17 @@ directory](https://github.com/yutannihilation/savvy/tree/master/R-package).
 * [crates.io](https://crates.io/crates/savvy)
 * [API reference](https://docs.rs/savvy/latest/)
 * [API reference (dev version)](https://yutannihilation.github.io/savvy/reference/savvy/)
+
+## Thanks
+
+Savvy is not quite unique. This project is made possible by heavily taking
+inspiration from other great projects:
+
+* The basic idea is of course based on
+  [extendr](https://github.com/extendr/extendr/). Savvy would not exist without
+  extendr.
+* [cpp11](https://cpp11.r-lib.org/)'s "writable" concept influenced the design a
+  lot. Also, I learned a lot from the great implementation such as [the
+  protection mechanism](https://cpp11.r-lib.org/articles/internals.html#protection).
+* [PyO3](https://github.com/PyO3/pyo3) made me realize that the FFI crate
+  doesn't need to be a "sys" crate.
