@@ -6,4 +6,5 @@ src = "src"
 title = "Savvy - A simple R extension interface using Rust"
 
 [output.html]
-site-url = "/guide/"
+site-url = "/savvy/guide/"
+git-repository-url = "https://github.com/yutannihilation/savvy"
