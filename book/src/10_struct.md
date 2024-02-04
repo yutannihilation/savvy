@@ -1,6 +1,7 @@
 # Struct
 
 You can use `#[savvy]` macro on `impl` for a `struct`. For example, this code
+allows you to use `Person` like below on R sessions.
 
 ```rust
 struct Person {
@@ -28,9 +29,8 @@ impl Person {
 }
 ```
 
-allows you to use `Person` like below on R sessions. One special convention is
-that, if the name of the method is `new`, it's used as the constructor function
-(in this case, `Person()`).
+One special convention is that, if the name of the method is `new`, it's used as
+the constructor function (in this case, `Person()`).
 
 ```r
 x <- Person()
@@ -41,12 +41,11 @@ x$name()
 
 ## External pointer?
 
-Under the hood, the `Person` struct is stored in `EXTPTRSXP`. But, there's no
-corresponding type for `EXTPTRSXP` in savvy. Why? This is because it's stored in
-closure environemnts on creation and never exposed to the user. As it's
+Under the hood, the `Person` struct is stored in `EXTPTRSXP`. But, you don't
+need to care about how to deal with `EXTPTRSXP`. This is because it's stored in
+a closure environemnt on creation and never exposed to the user. As it's
 guaranteed on R's side that `self` is always a `EXTPTRSXP` of `Person`, Rust
 code just restore a `Person` instance from the `EXTPTRSXP` without any checks.
-So, you can forget the details about external pointer.
 
 ```r
 Person <- function() {
@@ -76,8 +75,8 @@ Person_name <- function(self) {
 ## Traps about protection
 
 This is a bit advanced topic. It's okay to have a struct to contain arbitrary
-things, however, if you want to pass an `SEXP` from an R session, **you need to
-take care of the protection on it**.
+things, however, if you want to pass an `SEXP` from an R session, **it's your
+responsibility to take care of the protection on it**.
 
 The `SEXP` passed from outside doesn't need an additional protection at the time
 of the function call because it belongs to some enviroment on R session, which

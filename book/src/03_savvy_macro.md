@@ -45,8 +45,8 @@ function must satisfy the following conditions:
 If you mark a funtion with `#[savvy]` macro, the corresponding implementations are generated:
 
 1. Rust functions
-    a. a wrapper function to handle Rust and R errors gracefully
-    b. a function with the original body and some conversion from raw `SEXP`s to savvy types.
+    1. a wrapper function to handle Rust and R errors gracefully
+    2. a function with the original body and some conversion from raw `SEXP`s to savvy types.
 2. C function signature for the Rust function
 3. C implementation for bridging between R and Rust
 4. R implementation

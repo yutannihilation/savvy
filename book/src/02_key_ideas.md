@@ -2,10 +2,10 @@
 
 ## Treating external SEXP and owned SEXP differently
 
-Savvy is opinionated in many points. One thing I think should be explained
-before diving into the details is that savvy uses separate types for SEXP passed
-from outside and that created within Rust function. The former, external SEXP,
-is read-only, and the latter, owned SEXP, is writable. Here's the list:
+Savvy is opinionated in many points. Among these, one thing I think should be
+explained first is that savvy uses separate types for SEXP passed from outside
+and that created within Rust function. The former, external SEXP, is read-only,
+and the latter, owned SEXP, is writable. Here's the list:
 
 | R type                          | Read-only version       | Writable version     |
 |:--------------------------------|:------------------------|:---------------------|
