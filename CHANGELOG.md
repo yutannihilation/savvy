@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.10] (2024-02-04)
+
 ### Fixed bugs
 
 * Fix the wrong implementation of `to_vec()`.
@@ -88,7 +90,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.10...HEAD
+[v0.2.10]: https://github.com/yutannihilation/savvy/compare/v0.2.9...v0.2.10
 [v0.2.9]: https://github.com/yutannihilation/savvy/compare/v0.2.8...v0.2.9
 [v0.2.8]: https://github.com/yutannihilation/savvy/compare/v0.2.7...v0.2.8
 [v0.2.7]: https://github.com/yutannihilation/savvy/compare/v0.2.6...v0.2.7
