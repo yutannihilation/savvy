@@ -83,6 +83,8 @@ represent 3-state, the internal representation of `LGLSXP` is int, which is the
 same as `INTSXP`. So, the conversion should be cheap.
 
 ```rust
+use savvy::NotAvailableValue;   // for is_na() and na()
+
 #[savvy]
 fn some_savvy_fun(logical: IntegerSexp) -> savvy::Result<()> {
     for l in logical.iter() {

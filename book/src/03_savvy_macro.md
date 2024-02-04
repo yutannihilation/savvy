@@ -4,6 +4,8 @@ This is a simple Rust function to add the specified suffix to the input
 character vector. `#[savvy]` macro turns this into an R function.
 
 ```rust
+use savvy::NotAvailableValue;   // for is_na() and na()
+
 #[savvy]
 fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;

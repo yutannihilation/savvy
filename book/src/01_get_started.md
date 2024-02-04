@@ -1,4 +1,4 @@
-# Getting Started
+# Get Started
 
 ## Prerequisite
 
@@ -77,8 +77,9 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 
 ## Write your own function
 
-The most revolutionary point of `savvy::savvy_init()` is that it leaves the most
-important task to you; let's define a typical hello-world function for practice!
+The most revolutionary point of `savvy::savvy_init()` is that it kindly leaves
+the most important task to you; let's define a typical hello-world function for
+practice!
 
 ### Write some Rust code
 

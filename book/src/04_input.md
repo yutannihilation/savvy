@@ -48,8 +48,7 @@ some_function_takes_vec(v);
 ```
 
 If a function requires a slice and the type is not integer or numeric, you have
-no choice to use `to_vec()` to create a new vector and then convert it to a
-slice.
+no choice but `to_vec()` to create a new vector and then convert it to a slice.
 
 ```rust
 let mut v = x.to_vec();

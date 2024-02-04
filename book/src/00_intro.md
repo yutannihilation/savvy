@@ -11,6 +11,7 @@ This is an example of what savvy-powered function would look like:
 
 ``` rust
 use savvy::savvy;
+use savvy::NotAvailableValue;   // for is_na() and na()
 
 /// Convert to Upper-case
 /// 
