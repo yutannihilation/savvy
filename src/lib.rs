@@ -16,6 +16,7 @@ pub use sexp::function::{FunctionArgs, FunctionCallResult, FunctionSexp};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
 pub use sexp::list::{ListSexp, OwnedListSexp};
 pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};
+pub use sexp::na::NotAvailableValue;
 pub use sexp::null::NullSexp;
 pub use sexp::real::{OwnedRealSexp, RealSexp};
 pub use sexp::string::{OwnedStringSexp, StringSexp};
