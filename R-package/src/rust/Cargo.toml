@@ -9,5 +9,6 @@ crate-type = ["staticlib"]
 [dependencies]
 savvy = { path = "../../../" }
 savvy-ffi = { path = "../../../savvy-ffi" }
+ndarray = "*"
 
 [workspace]

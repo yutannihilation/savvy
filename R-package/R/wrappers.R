@@ -3,6 +3,11 @@
 NULL
 
 
+print_array <- function(x) {
+  invisible(.Call(print_array__impl, x))
+}
+
+
 get_class_int <- function(x) {
   .Call(get_class_int__impl, x)
 }

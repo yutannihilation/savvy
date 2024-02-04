@@ -32,6 +32,11 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
+SEXP print_array__impl(SEXP x) {
+    SEXP res = print_array(x);
+    return handle_result(res);
+}
+
 SEXP get_class_int__impl(SEXP x) {
     SEXP res = get_class_int(x);
     return handle_result(res);
@@ -294,6 +299,7 @@ SEXP my_integer__impl(SEXP x) {
 
 
 static const R_CallMethodDef CallEntries[] = {
+    {"print_array__impl", (DL_FUNC) &print_array__impl, 1},
     {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
     {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
     {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
