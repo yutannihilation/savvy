@@ -65,7 +65,7 @@ chose to convert `NA` to `true` silently, assuming `NA` is not useful on Rust's
 side anyway. So, you have to make sure the input logical vector doesn't contain
 `NA` on R's side. For example,
 
-```text
+```r
 wrapper_of_some_savvy_fun <- function(x) {
   out <- rep(NA, length(x))
   idx <- is.na(x)

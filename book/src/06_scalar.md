@@ -33,8 +33,8 @@ fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
 }
 ```
 
-```text
-> identity_logical_single(NA)
-Error in identity_logical_single(NA) : 
-  Must be length 1 of non-missing value
+```r
+identity_logical_single(NA)
+#> Error in identity_logical_single(NA) : 
+#>   Must be length 1 of non-missing value
 ```

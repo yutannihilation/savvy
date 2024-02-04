@@ -114,7 +114,7 @@ fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
 }
 ```
 
-```text
-> identity_logical(c(TRUE, FALSE, NA))
-[1]  TRUE FALSE  TRUE
+```r
+identity_logical(c(TRUE, FALSE, NA))
+#> [1]  TRUE FALSE  TRUE
 ```
