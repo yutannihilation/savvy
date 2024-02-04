@@ -18,9 +18,9 @@
 from the Japanese word “錆” (pronounced as `sàbí`), which means “Rust”.
 
 With savvy, you can automatically generate R functions from Rust code.
-This is an example of what savvy-powered function would look like.
+This is an example of what savvy-powered function would look like:
 
-**Rust**:
+**Rust**
 
 ``` rust
 use savvy::savvy;
@@ -51,7 +51,7 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 }
 ```
 
-**R**:
+**R**
 
 ``` r
 to_upper(c("a", "b", "c"))
