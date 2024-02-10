@@ -5,6 +5,14 @@
 
 ## [v0.2.11] (2024-02-04)
 
+### New Features
+
+* `savvy-cli init` now adds `SystemRequirements` to the `DESCRIPTION` file.
+
+### Fixed bugs
+
+* `savvy-cli` now works if it's invoked outside of the R package directory.
+
 ## [v0.2.10] (2024-02-04)
 
 ### Fixed bugs
