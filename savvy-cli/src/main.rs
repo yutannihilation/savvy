@@ -1,11 +1,7 @@
+use std::io::Write;
+
 use clap::{Parser, Subcommand};
-use savvy_bindgen::generate_cargo_toml;
-use savvy_bindgen::generate_configure;
-use savvy_bindgen::generate_example_lib_rs;
-use savvy_bindgen::generate_gitignore;
-use savvy_bindgen::generate_makevars_in;
-use savvy_bindgen::generate_makevars_win;
-use savvy_bindgen::ParsedResult;
+
 use std::path::Path;
 use std::path::PathBuf;
 use walkdir::DirEntry;
@@ -13,7 +9,14 @@ use walkdir::WalkDir;
 
 use savvy_bindgen::generate_c_header_file;
 use savvy_bindgen::generate_c_impl_file;
+use savvy_bindgen::generate_cargo_toml;
+use savvy_bindgen::generate_configure;
+use savvy_bindgen::generate_example_lib_rs;
+use savvy_bindgen::generate_gitignore;
+use savvy_bindgen::generate_makevars_in;
+use savvy_bindgen::generate_makevars_win;
 use savvy_bindgen::generate_r_impl_file;
+use savvy_bindgen::ParsedResult;
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -74,21 +77,40 @@ enum Commands {
     },
 }
 
+struct PackageDescription {
+    package_name: String,
+    has_sysreq: bool,
+}
+
 // Parse DESCRIPTION file and get the package name
-fn parse_description(path: &Path) -> Option<String> {
+fn parse_description(path: &Path) -> PackageDescription {
     let content = savvy_bindgen::read_file(path);
+    let mut package_name: String = "".to_string();
+    let mut has_sysreq = false;
+
     for line in content.lines() {
-        if !line.starts_with("Package") {
-            continue;
+        if line.starts_with("Package") {
+            let mut s = line.split(':');
+            s.next();
+            if let Some(rhs) = s.next() {
+                package_name = rhs.trim().to_string();
+            }
         }
-        let mut s = line.split(':');
-        s.next();
-        if let Some(rhs) = s.next() {
-            return Some(rhs.trim().to_string());
+
+        if line.starts_with("SystemRequirements") {
+            has_sysreq = true;
         }
     }
 
-    None
+    if package_name.is_empty() {
+        eprintln!("{} is not an R package root", path.to_string_lossy());
+        std::process::exit(4);
+    }
+
+    PackageDescription {
+        package_name,
+        has_sysreq,
+    }
 }
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
@@ -103,7 +125,7 @@ const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
 const PATH_R_IMPL: &str = "R/wrappers.R";
 
-fn get_pkg_name(path: &Path) -> String {
+fn get_pkg_metadata(path: &Path) -> PackageDescription {
     if !path.exists() {
         eprintln!("{} does not exist", path.to_string_lossy());
         std::process::exit(1);
@@ -114,18 +136,30 @@ fn get_pkg_name(path: &Path) -> String {
         std::process::exit(1);
     }
 
-    if let Some(pkg_name) = parse_description(&path.join(PATH_DESCRIPTION)) {
-        pkg_name
-    } else {
-        eprintln!("{} is not an R package root", path.to_string_lossy());
-        std::process::exit(4);
-    }
+    parse_description(&path.join(PATH_DESCRIPTION))
+}
+
+fn write_file_inner(path: &Path, contents: &str, open_opts: std::fs::OpenOptions) {
+    let path_str = path.to_string_lossy();
+    println!("Writing {}", path_str);
+
+    open_opts
+        .open(path)
+        .unwrap_or_else(|_| panic!("Failed to open {}", path_str))
+        .write_all(contents.as_bytes())
+        .unwrap_or_else(|_| panic!("Failed to write {}", path_str));
 }
 
 fn write_file(path: &Path, contents: &str) {
-    let path_str = path.to_string_lossy();
-    println!("Writing {}", path_str);
-    std::fs::write(path, contents).unwrap_or_else(|_| panic!("Failed to write to {}", path_str));
+    let mut opts = std::fs::OpenOptions::new();
+    opts.create(true).write(true);
+    write_file_inner(path, contents, opts);
+}
+
+fn append_file(path: &Path, contents: &str) {
+    let mut opts = std::fs::OpenOptions::new();
+    opts.append(true);
+    write_file_inner(path, contents, opts);
 }
 
 // TODO: how can this be done on Windows?
@@ -154,10 +188,10 @@ fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
 }
 
 fn update(path: &Path) {
-    let pkg_name = get_pkg_name(path);
+    let pkg_metadata = get_pkg_metadata(path);
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    for e in WalkDir::new(PATH_SRC_DIR)
+    for e in WalkDir::new(path.join(PATH_SRC_DIR))
         .into_iter()
         .filter_map(get_rust_file)
     {
@@ -171,16 +205,16 @@ fn update(path: &Path) {
     );
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(parsed.as_slice(), &pkg_name),
+        &generate_c_impl_file(parsed.as_slice(), &pkg_metadata.package_name),
     );
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(parsed.as_slice(), &pkg_name),
+        &generate_r_impl_file(parsed.as_slice(), &pkg_metadata.package_name),
     );
 }
 
 fn init(path: &Path) {
-    let pkg_name = get_pkg_name(path);
+    let pkg_metadata = get_pkg_metadata(path);
 
     if path.join("src").exists() {
         eprintln!("Aborting because `src` dir already exists.");
@@ -189,20 +223,35 @@ fn init(path: &Path) {
 
     std::fs::create_dir_all(path.join(PATH_SRC_DIR)).expect("Failed to create src dir");
 
-    write_file(&path.join(PATH_CARGO_TOML), &generate_cargo_toml(&pkg_name));
+    write_file(
+        &path.join(PATH_CARGO_TOML),
+        &generate_cargo_toml(&pkg_metadata.package_name),
+    );
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
     write_file(
         &path.join(PATH_MAKEVARS_IN),
-        &generate_makevars_in(&pkg_name),
+        &generate_makevars_in(&pkg_metadata.package_name),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
     #[cfg(unix)]
     set_executable(&path.join(PATH_CONFIGURE));
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
-        &generate_makevars_win(&pkg_name),
+        &generate_makevars_win(&pkg_metadata.package_name),
     );
     write_file(&path.join(PATH_GITIGNORE), &generate_gitignore());
+
+    if pkg_metadata.has_sysreq {
+        eprintln!(
+            r#"Warning: "SystemRequirements" field already exists. Please make sure "Cargo (Rust's package manager), rustc" is included."#
+        )
+    } else {
+        append_file(
+            &path.join(PATH_DESCRIPTION),
+            // cf. https://cran.r-project.org/web/packages/using_rust.html
+            "SystemRequirements: Cargo (Rust's package manager), rustc\n",
+        );
+    }
 
     update(path);
 }
