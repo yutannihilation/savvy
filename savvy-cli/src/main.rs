@@ -139,27 +139,27 @@ fn get_pkg_metadata(path: &Path) -> PackageDescription {
     parse_description(&path.join(PATH_DESCRIPTION))
 }
 
-fn write_file_inner(path: &Path, contents: &str, append: bool) {
+fn write_file_inner(path: &Path, contents: &str, open_opts: std::fs::OpenOptions) {
     let path_str = path.to_string_lossy();
     println!("Writing {}", path_str);
 
-    let file = if append {
-        std::fs::OpenOptions::new().append(true).open(path)
-    } else {
-        std::fs::OpenOptions::new().write(true).open(path)
-    };
-
-    file.unwrap_or_else(|_| panic!("Failed to open {}", path_str))
+    open_opts
+        .open(path)
+        .unwrap_or_else(|_| panic!("Failed to open {}", path_str))
         .write_all(contents.as_bytes())
         .unwrap_or_else(|_| panic!("Failed to write {}", path_str));
 }
 
 fn write_file(path: &Path, contents: &str) {
-    write_file_inner(path, contents, false);
+    let mut opts = std::fs::OpenOptions::new();
+    opts.create(true).write(true);
+    write_file_inner(path, contents, opts);
 }
 
 fn append_file(path: &Path, contents: &str) {
-    write_file_inner(path, contents, true);
+    let mut opts = std::fs::OpenOptions::new();
+    opts.append(true);
+    write_file_inner(path, contents, opts);
 }
 
 // TODO: how can this be done on Windows?
@@ -249,7 +249,7 @@ fn init(path: &Path) {
         append_file(
             &path.join(PATH_DESCRIPTION),
             // cf. https://cran.r-project.org/web/packages/using_rust.html
-            "SystemRequirements: Cargo (Rust's package manager), rustc",
+            "SystemRequirements: Cargo (Rust's package manager), rustc\n",
         );
     }
 
