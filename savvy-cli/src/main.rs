@@ -191,7 +191,7 @@ fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    for e in WalkDir::new(PATH_SRC_DIR)
+    for e in WalkDir::new(path.join(PATH_SRC_DIR))
         .into_iter()
         .filter_map(get_rust_file)
     {
