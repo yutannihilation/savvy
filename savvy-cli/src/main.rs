@@ -142,14 +142,16 @@ fn get_pkg_metadata(path: &Path) -> PackageDescription {
 fn write_file_inner(path: &Path, contents: &str, append: bool) {
     let path_str = path.to_string_lossy();
     println!("Writing {}", path_str);
-    let mut file = std::fs::OpenOptions::new()
-        .write(true)
-        .append(append)
-        .open(path)
-        .unwrap_or_else(|_| panic!("Failed to open {}", path_str));
 
-    file.write_all(contents.as_bytes())
-        .expect("Failed to write");
+    let file = if append {
+        std::fs::OpenOptions::new().append(true).open(path)
+    } else {
+        std::fs::OpenOptions::new().write(true).open(path)
+    };
+
+    file.unwrap_or_else(|_| panic!("Failed to open {}", path_str))
+        .write_all(contents.as_bytes())
+        .unwrap_or_else(|_| panic!("Failed to write {}", path_str));
 }
 
 fn write_file(path: &Path, contents: &str) {
