@@ -3,8 +3,6 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
-## [v0.2.11] (2024-02-04)
-
 ### New Features
 
 * `savvy-cli init` now adds `SystemRequirements` to the `DESCRIPTION` file.
@@ -12,6 +10,8 @@
 ### Fixed bugs
 
 * `savvy-cli` now works if it's invoked outside of the R package directory.
+
+## [v0.2.11] (2024-02-04)
 
 ## [v0.2.10] (2024-02-04)
 
@@ -36,9 +36,12 @@
 
 * `savvy-cli init` now produces `Makevars.in` and `configure` instead of
   `Makevars` in order to support WebR transparently. One limitation on Windows
-  is that `configure` is not set executable. This will be cared by the helper R
-  package (i.e., I recommend running `savvy::savvy_init()` on an R session
-  rather than using the CLI directly).
+  is that `configure` cannot be set executable; you have to run the following
+  command by yourself.
+
+  ```sh
+  git update-index --add --chmod=+x ./configure
+  ```
 
 ### New features
 

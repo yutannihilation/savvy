@@ -175,6 +175,21 @@ fn set_executable(path: &Path) {
     std::fs::set_permissions(path, perm).unwrap();
 }
 
+#[cfg(not(unix))]
+fn set_executable(path: &Path) {
+    let path_str = path.to_string_lossy();
+    eprintln!(
+        "
+### Warning ###################################################################
+
+On Windows, please manually run `git update-index --add --chmod=+x {path_str}`
+to set the configure script as executable
+
+###############################################################################
+"
+    );
+}
+
 fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
     if let Ok(entry) = x {
         if entry.file_name().to_string_lossy().ends_with(".rs") {
@@ -233,7 +248,6 @@ fn init(path: &Path) {
         &generate_makevars_in(&pkg_metadata.package_name),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
-    #[cfg(unix)]
     set_executable(&path.join(PATH_CONFIGURE));
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
@@ -243,7 +257,15 @@ fn init(path: &Path) {
 
     if pkg_metadata.has_sysreq {
         eprintln!(
-            r#"Warning: "SystemRequirements" field already exists. Please make sure "Cargo (Rust's package manager), rustc" is included."#
+            "
+### Warning ###################################################################
+
+\"SystemRequirements\" field already exists.
+Please make sure \"Cargo (Rust's package manager), rustc\" is included.
+
+###############################################################################
+
+"
         )
     } else {
         append_file(
