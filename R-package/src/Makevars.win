@@ -1,12 +1,12 @@
 TARGET = x86_64-pc-windows-gnu
 
-TARGET_DIR = ./rust/target
+TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/release
 STATLIB = $(LIBDIR)/libsimple_savvy.a
 PKG_LIBS = -L$(LIBDIR) -lsimple_savvy -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 
-# Rtools42 doesn't have the linker in the location that cargo expects, so we
-# need to overwrite it via configuration.
+# Rtools doesn't have the linker in the location that cargo expects, so we need
+# to overwrite it via configuration.
 CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
 all: C_clean
@@ -14,8 +14,14 @@ all: C_clean
 $(SHLIB): $(STATLIB)
 
 $(STATLIB):
+	# When the GNU toolchain is used (i.e. on CRAN), -lgcc_eh is specified for
+	# building proc-macro2, but Rtools doesn't contain libgcc_eh. This isn't used
+	# in actual, but we need this tweak to please the compiler.
+	mkdir -p $(LIBDIR)/libgcc_mock && touch $(LIBDIR)/libgcc_mock/libgcc_eh.a
+
 	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
-		cargo build --target=$(TARGET) --lib --release --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
+	  export LIBRARY_PATH="$${LIBRARY_PATH};$(LIBDIR)/libgcc_mock" && \
+	  cargo build --target=$(TARGET) --lib --release --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 C_clean:
 	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS)

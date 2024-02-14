@@ -1,6 +1,6 @@
 TARGET = @TARGET@
 
-TARGET_DIR = ./rust/target
+TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/release
 STATLIB = $(LIBDIR)/libsimple_savvy.a
 PKG_LIBS = -L$(LIBDIR) -lsimple_savvy
