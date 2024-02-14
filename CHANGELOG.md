@@ -3,11 +3,16 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Fixed bugs
+
+* `savvy-cli update` and `savvy-cli init` now correctly overwrite the existing
+  files.
+
 ## [v0.2.13] (2024-02-14)
 
 ### Fixed bugs
 
-* savvy-cli now requires Rust >= 1.74 because this is clap's MSRV.
+* The savvy-cli crate now requires Rust >= 1.74 because this is clap's MSRV.
 
 ## [v0.2.12] (2024-02-14)
 
