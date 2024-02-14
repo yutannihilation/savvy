@@ -152,7 +152,7 @@ fn write_file_inner(path: &Path, contents: &str, open_opts: std::fs::OpenOptions
 
 fn write_file(path: &Path, contents: &str) {
     let mut opts = std::fs::OpenOptions::new();
-    opts.create(true).write(true);
+    opts.create(true).write(true).truncate(true);
     write_file_inner(path, contents, opts);
 }
 
