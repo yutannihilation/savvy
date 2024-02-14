@@ -20,7 +20,7 @@ $(STATLIB):
 	mkdir -p $(LIBDIR)/libgcc_mock && touch $(LIBDIR)/libgcc_mock/libgcc_eh.a
 
 	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
-	  export LIBRARY_PATH="$${LIBRARY_PATH};$(LIBDIR)/libgcc_mock" && \
+	  export LIBRARY_PATH="$${{LIBRARY_PATH}};$(LIBDIR)/libgcc_mock" && \
 	  cargo build --target=$(TARGET) --lib --release --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 C_clean:
