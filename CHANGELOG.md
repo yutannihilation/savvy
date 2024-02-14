@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.13] (2024-02-14)
+
 ### Fixed bugs
 
 * savvy-cli now requires Rust >= 1.74 because this is clap's MSRV.
@@ -111,7 +113,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.12...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.13...HEAD
+[v0.2.13]: https://github.com/yutannihilation/savvy/compare/v0.2.12...v0.2.13
 [v0.2.12]: https://github.com/yutannihilation/savvy/compare/v0.2.11...v0.2.12
 [v0.2.11]: https://github.com/yutannihilation/savvy/compare/v0.2.10...v0.2.11
 [v0.2.10]: https://github.com/yutannihilation/savvy/compare/v0.2.9...v0.2.10
