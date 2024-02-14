@@ -3,11 +3,6 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
-### Fixed bugs
-
-* `savvy-cli init` now generates the build configuration with a workaround for
-  the case of the `gnu` toolchain on Windows.
-
 ### New Features
 
 * `savvy-cli init` now adds `SystemRequirements` to the `DESCRIPTION` file.
@@ -15,6 +10,8 @@
 ### Fixed bugs
 
 * `savvy-cli` now works if it's invoked outside of the R package directory.
+* `savvy-cli init` now generates the build configuration with a workaround for
+  the case of the `gnu` toolchain on Windows.
 
 ## [v0.2.11] (2024-02-04)
 
