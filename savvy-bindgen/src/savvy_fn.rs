@@ -13,8 +13,24 @@ struct SavvyInputType(syn::Type);
 
 #[allow(dead_code)]
 impl SavvyInputType {
-    fn from_type(ty: &syn::Type) -> Self {
-        Self(ty.clone())
+    fn from_type(ty: &syn::Type) -> syn::Result<Self> {
+        if let syn::Type::Path(type_path) = ty {
+            let type_ident = &type_path.path.segments.last().unwrap().ident;
+            let ty_str = type_ident.to_string();
+            match ty_str.as_str() {
+                "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedLogicalSexp" | "OwnedStringSexp"
+                | "OwnedListSexp" => {
+                    let msg = format!(
+                        "`Owned-` types are not allowed here. Did you mean `{}`?",
+                        ty_str.strip_prefix("Owned").unwrap()
+                    );
+                    return Err(syn::Error::new_spanned(type_path, msg));
+                }
+                _ => {}
+            }
+        }
+
+        Ok(Self(ty.clone()))
     }
 
     /// Return the corresponding type for internal function.
@@ -186,7 +202,10 @@ impl SavvyFn {
                         }
                     };
 
-                    let ty = SavvyInputType::from_type(ty.as_ref());
+                    let ty = match SavvyInputType::from_type(ty.as_ref()) {
+                        Ok(ty) => ty,
+                        Err(e) => return Some(Err(e)),
+                    };
                     let ty_ident = ty.to_rust_type_outer();
 
                     stmts_additional.push(parse_quote! {
