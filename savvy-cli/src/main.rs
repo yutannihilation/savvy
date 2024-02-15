@@ -1,3 +1,6 @@
+mod utils;
+use utils::*;
+
 use std::io::Write;
 
 use clap::{Parser, Subcommand};
@@ -85,7 +88,7 @@ struct PackageDescription {
 // Parse DESCRIPTION file and get the package name
 fn parse_description(path: &Path) -> PackageDescription {
     let content = savvy_bindgen::read_file(path);
-    let mut package_name: String = "".to_string();
+    let mut package_name_orig = "";
     let mut has_sysreq = false;
 
     for line in content.lines() {
@@ -93,7 +96,7 @@ fn parse_description(path: &Path) -> PackageDescription {
             let mut s = line.split(':');
             s.next();
             if let Some(rhs) = s.next() {
-                package_name = rhs.trim().to_string();
+                package_name_orig = rhs.trim();
             }
         }
 
@@ -102,13 +105,13 @@ fn parse_description(path: &Path) -> PackageDescription {
         }
     }
 
-    if package_name.is_empty() {
+    if package_name_orig.is_empty() {
         eprintln!("{} is not an R package root", path.to_string_lossy());
         std::process::exit(4);
     }
 
     PackageDescription {
-        package_name,
+        package_name: to_snake_case(package_name_orig),
         has_sysreq,
     }
 }
