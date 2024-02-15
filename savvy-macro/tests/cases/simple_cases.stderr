@@ -12,8 +12,32 @@ error: the return type must be either syn::Result<Sexp> or syn::Result<()>
 7 | fn foo_wrong_return_type(x: i32) -> i32 {}
   |                                  ^^^^^^
 
-error: For safety, a function that takes `self` and returns `Self` is not allowed
-  --> tests/cases/simple_cases.rs:13:5
+error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
+  --> tests/cases/simple_cases.rs:10:32
    |
-13 |     fn foo_self(&self) -> Self {}
+10 | fn foo_wrong_type_owned_int(x: OwnedIntegerSexp) {}
+   |                                ^^^^^^^^^^^^^^^^
+
+error: `Owned-` types are not allowed here. Did you mean `RealSexp`?
+  --> tests/cases/simple_cases.rs:13:33
+   |
+13 | fn foo_wrong_type_owned_real(x: OwnedRealSexp) {}
+   |                                 ^^^^^^^^^^^^^
+
+error: `Owned-` types are not allowed here. Did you mean `LogicalSexp`?
+  --> tests/cases/simple_cases.rs:16:36
+   |
+16 | fn foo_wrong_type_owned_logical(x: OwnedLogicalSexp) {}
+   |                                    ^^^^^^^^^^^^^^^^
+
+error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
+  --> tests/cases/simple_cases.rs:19:35
+   |
+19 | fn foo_wrong_type_owned_string(x: OwnedStringSexp) {}
+   |                                   ^^^^^^^^^^^^^^^
+
+error: For safety, a function that takes `self` and returns `Self` is not allowed
+  --> tests/cases/simple_cases.rs:25:5
+   |
+25 |     fn foo_self(&self) -> Self {}
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
