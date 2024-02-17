@@ -1,5 +1,5 @@
 pub(crate) fn to_snake_case(x: &str) -> String {
-    let mut out = String::with_capacity(x.len());
+    let mut out = String::with_capacity(x.len() + 3);
     for c in x.chars() {
         if c.is_uppercase() {
             // first character doesn't need _
