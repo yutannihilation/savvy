@@ -49,7 +49,7 @@ to_upper(c("a", "b", "c"))
 ## Examples
 
 A toy example R package can be found in [`R-package/`
-directory](https://github.com/yutannihilation/savvy/tree/master/R-package).
+directory](https://github.com/yutannihilation/savvy/tree/main/R-package).
 
 ## Links
 

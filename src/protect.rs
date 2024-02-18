@@ -21,7 +21,7 @@
 // Note that, extendr uses a different mechanism of using HashMap to track the
 // reference counts.
 //
-// https://github.com/extendr/extendr/blob/master/extendr-api/src/ownership.rs
+// https://github.com/extendr/extendr/blob/main/extendr-api/src/ownership.rs
 //
 // I'm not sure why they chose this design, but probably it is because
 //
