@@ -51,7 +51,7 @@ jobs:
         shell: bash
 
       - name: Build wasm packages
-        uses: yutannihilation/r-wasm-actions/build-rwasm@main
+        uses: r-wasm/actions/build-rwasm@main
         with:
           packages: "local::./R-package"
 
