@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 html {
@@ -10,7 +10,8 @@ code {
     font-weight: 400;
 }
 
-.content .header {
+.content .header,
+.content .header code {
     color: #45b2c6 !important;
-    font-weight: 900;
+    font-weight: 800 !important;
 }
