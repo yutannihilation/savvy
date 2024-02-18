@@ -7,4 +7,10 @@ html {
 
 code {
     font-family: "Fira Code", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace !important;
+    font-weight: 400;
+}
+
+.content .header {
+    color: #45b2c6 !important;
+    font-weight: 900;
 }
