@@ -30,7 +30,6 @@ pre-release-replacements = [
     { file = "CHANGELOG.md", search = "<!-- next-url -->", replace = "<!-- next-url -->\n[Unreleased]: https://github.com/yutannihilation/savvy/compare/{{tag_name}}...HEAD", exactly = 1 },
 ]
 
-
 [package.metadata.dist]
 dist = false
 
