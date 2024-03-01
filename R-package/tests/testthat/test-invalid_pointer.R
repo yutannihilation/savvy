@@ -4,7 +4,7 @@ test_that("invalid pointer doesn't clash the session", {
 
   if (file.exists(rds_file)) {
     x <- readRDS(rds_file)
-    expect_error(x$name(), "invalid pointer")
+    expect_error(x$name(), "Invalid external pointer")
   } else {
     x <- Person()
     saveRDS(x, rds_file)
