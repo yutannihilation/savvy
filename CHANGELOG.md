@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Fixed bugs
+
+* Reject invalid external pointers so that the R session doesn't crash.
+
 ## [v0.2.14] (2024-02-14)
 
 ### Fixed bugs
