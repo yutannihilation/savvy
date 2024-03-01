@@ -5,6 +5,7 @@ pub enum Error {
     UnexpectedType(String),
     NotScalar,
     Aborted(SEXP),
+    InvalidPointer,
     GeneralError(String),
 }
 
@@ -22,6 +23,7 @@ impl std::fmt::Display for Error {
             Error::UnexpectedType(type_name) => write!(f, "Unexpected type: {}", type_name),
             Error::NotScalar => write!(f, "Must be length 1 of non-missing value"),
             Error::Aborted(_) => write!(f, "Aborted due to some error"),
+            Error::InvalidPointer => write!(f, "Invalid external pointer"),
             Error::GeneralError(msg) => write!(f, "{}", msg),
         }
     }

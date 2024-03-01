@@ -33,7 +33,7 @@ impl SavvyFn {
                 #(#attrs)*
                 #[allow(non_snake_case)]
                 unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                    let self__ = savvy::get_external_pointer_addr(self__) as *mut #ty;
+                    let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
                     #(#stmts_additional)*
 
                     (*self__).#fn_name_orig(#(#args_pat),*)
