@@ -45,7 +45,12 @@ pub trait IntoExtPtrSexp: Sized {
         unsafe extern "C" fn finalizer<T>(x: SEXP) {
             // bring back the ownership to Rust's side so that Rust will drop
             // after this block ends.
-            let _ = Box::from_raw(R_ExternalPtrAddr(x) as *mut T);
+            let ptr = R_ExternalPtrAddr(x);
+
+            // the pointer can be null (e.g. https://github.com/pola-rs/r-polars/issues/851)
+            if !ptr.is_null() {
+                drop(Box::from_raw(ptr as *mut T));
+            }
 
             R_ClearExternalPtr(x);
         }
@@ -73,8 +78,16 @@ pub trait IntoExtPtrSexp: Sized {
 ///
 /// ## Safety
 /// This is intended to be used only in savvy-bindgen
-pub unsafe fn get_external_pointer_addr(x: SEXP) -> *mut std::os::raw::c_void {
-    R_ExternalPtrAddr(x)
+pub unsafe fn get_external_pointer_addr(
+    x: SEXP,
+) -> crate::error::Result<*mut std::os::raw::c_void> {
+    let ptr = R_ExternalPtrAddr(x);
+
+    if ptr.is_null() {
+        return Err(crate::error::Error::InvalidPointer);
+    }
+
+    Ok(ptr)
 }
 
 /// An **external** external pointer.
