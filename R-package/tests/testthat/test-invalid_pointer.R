@@ -1,14 +1,10 @@
+# Taken from https://github.com/pola-rs/r-polars/issues/851#issuecomment-1971551241
 test_that("invalid pointer doesn't clash the session", {
-  dir.create("data", showWarnings = FALSE)
-  rds_file <- file.path("data", "person.rds")
+  rds_file <- tempfile(fileext = ".rds")
 
-  if (file.exists(rds_file)) {
-    x <- readRDS(rds_file)
-    expect_error(x$name(), "Invalid external pointer")
-  } else {
-    x <- Person()
-    saveRDS(x, rds_file)
+  x <- Person()
+  saveRDS(x, rds_file)
 
-    skip("This test is for the first run. Please rerun later.")
-  }
+  x <- readRDS(rds_file)
+  expect_error(x$name(), "Invalid external pointer")
 })
