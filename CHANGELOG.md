@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.15] (2024-03-02)
+
 ### New Features
 
 * Previously, if a crate uses savvy, `cargo test` fails to compile on some
@@ -139,7 +141,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.14...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.15...HEAD
+[v0.2.15]: https://github.com/yutannihilation/savvy/compare/v0.2.14...v0.2.15
 [v0.2.14]: https://github.com/yutannihilation/savvy/compare/v0.2.13...v0.2.14
 [v0.2.13]: https://github.com/yutannihilation/savvy/compare/v0.2.12...v0.2.13
 [v0.2.12]: https://github.com/yutannihilation/savvy/compare/v0.2.11...v0.2.12
