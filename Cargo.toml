@@ -51,7 +51,7 @@ homepage = "https://github.com/yutannihilation/savvy/guide/"
 # Config for 'cargo dist'
 [workspace.metadata.dist]
 # The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.10.0"
+cargo-dist-version = "0.11.1"
 # CI backends to support
 ci = ["github"]
 # The installers to generate for each app
@@ -66,6 +66,8 @@ targets = [
 ]
 # Publish jobs to run in CI
 pr-run-mode = "plan"
+
+allow-dirty = ["ci"]
 
 # Use custom runner for Arm64 build
 [workspace.metadata.dist.github-custom-runners]
