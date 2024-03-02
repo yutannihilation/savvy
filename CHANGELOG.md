@@ -3,6 +3,21 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New Features
+
+* Previously, if a crate uses savvy, `cargo test` fails to compile on some
+  platforms even if the test code doesn't use the savvy API at all. This is
+  because the symbols from Rinternals.h needs to be resolved. You can add
+  `savvy` with `fake-libR` feature in `dev-dependencies` to avoid this issue.
+  ```toml
+  [dependencies]
+  savvy = "*"
+
+  [dev-dependencies]
+  savvy = { version = "*", features = ["fake-libR"] }
+  ```
+  Note that, this doesn't mock libR APIs yet.
+
 ### Fixed bugs
 
 * Reject invalid external pointers so that the R session doesn't crash.
