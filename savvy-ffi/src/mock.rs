@@ -12,6 +12,7 @@ pub const Rboolean_TRUE: Rboolean = 1;
 pub type Rboolean = ::std::os::raw::c_int;
 
 // SEXP
+#[derive(Clone)]
 pub enum SexpMock {
     Integer(Vec<i32>),
     Real(Vec<f64>),
@@ -102,7 +103,16 @@ pub unsafe fn Rf_xlength(arg1: SEXP) -> R_xlen_t {
     (*arg1).len() as _
 }
 pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP {
-    unimplemented!();
+    let out = match arg1 {
+        INTSXP => SexpMock::Integer(vec![0_i32; arg2 as usize]),
+        REALSXP => SexpMock::Real(vec![0_f64; arg2 as usize]),
+        LGLSXP => SexpMock::Logical(vec![0_i32; arg2 as usize]),
+        STRSXP => SexpMock::String(vec!["".to_string(); arg2 as usize]),
+        LISTSXP => SexpMock::List(vec![SexpMock::Null; arg2 as usize]),
+        _ => SexpMock::Null,
+    };
+
+    Box::into_raw(Box::new(out))
 }
 pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP {
     unimplemented!();
