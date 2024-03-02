@@ -13,10 +13,10 @@ fn main() {
         println!("cargo:rerun-if-changed=src/unwind_protect_wrapper.c");
     } else {
         cc::Build::new()
-            .file("src/unwind_protect_wrapper fallback.c")
+            .file("src/unwind_protect_fake.c")
             .compile("unwind_protect");
         println!("cargo:warning=R_INCLUDE_DIR envvar should be provided.");
 
-        println!("cargo:rerun-if-changed=src/unwind_protect_wrapper_fallback.c");
+        println!("cargo:rerun-if-changed=src/unwind_protect_fake.c");
     }
 }

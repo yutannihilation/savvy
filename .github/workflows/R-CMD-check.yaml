@@ -80,9 +80,7 @@ jobs:
         shell: bash
 
       - name: Run cagro test of the R package
-        run: |
-          cargo test --manifest-path=./R-package/src/rust/Cargo.toml
-          cargo clean --manifest-path=./R-package/src/rust/Cargo.toml
+        run: cargo test --manifest-path=./R-package/src/rust/Cargo.toml
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

@@ -7,4 +7,5 @@
 ^src/.cargo$
 ^src/rust/.cargo$
 ^src/rust/.vscode$
-^src/Makevars.webr$
+^src/rust/target/.rustc_info.json$
+^src/rust/target/debug$
