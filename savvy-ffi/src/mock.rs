@@ -17,9 +17,23 @@ pub enum SexpMock {
     Real(Vec<f64>),
     Logical(Vec<i32>),
     String(Vec<String>),
-    List(SEXP),
+    List(Box<SexpMock>),
     Null,
 }
+
+impl SexpMock {
+    fn len(&self) -> usize {
+        match self {
+            SexpMock::Integer(v) => v.len(),
+            SexpMock::Real(v) => v.len(),
+            SexpMock::Logical(v) => v.len(),
+            SexpMock::String(v) => v.len(),
+            SexpMock::List(b) => b.as_ref().len(),
+            SexpMock::Null => 0,
+        }
+    }
+}
+
 pub type SEXP = *mut SexpMock;
 
 // SEXPTYPE
@@ -82,8 +96,10 @@ pub fn R_IsNA(arg1: f64) -> ::std::os::raw::c_int {
 }
 
 // Allocation and attributes
-pub fn Rf_xlength(arg1: SEXP) -> R_xlen_t {
-    unimplemented!();
+/// # Safety
+/// This is for testing only
+pub unsafe fn Rf_xlength(arg1: SEXP) -> R_xlen_t {
+    (*arg1).len() as _
 }
 pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP {
     unimplemented!();
@@ -245,13 +261,14 @@ pub static mut R_GlobalEnv: SEXP = std::ptr::null_mut() as _;
 
 // protection
 pub fn Rf_protect(arg1: SEXP) -> SEXP {
-    unimplemented!();
+    // Do nothing
+    arg1
 }
 pub fn Rf_unprotect(arg1: ::std::os::raw::c_int) {
-    unimplemented!();
+    // Do nothing
 }
 pub fn R_PreserveObject(arg1: SEXP) {
-    unimplemented!();
+    // Do nothing
 }
 
 // type
@@ -269,8 +286,8 @@ pub fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char) -> ! {
 
 // I/O
 pub fn Rprintf(arg1: *const ::std::os::raw::c_char) {
-    unimplemented!();
+    // Do nothing
 }
 pub fn REprintf(arg1: *const ::std::os::raw::c_char) {
-    unimplemented!();
+    // Do nothing
 }
