@@ -70,7 +70,7 @@ jobs:
           targets: aarch64-unknown-linux-gnu
       
       - name: Install GCC toolchain for ARM
-        run: apt-get install -y aarch64-linux-gnu-gcc
+        run: sudo apt-get install -y aarch64-linux-gnu-gcc
 
       - name: Build
         run: cargo build --target aarch64-unknown-linux-gnu
