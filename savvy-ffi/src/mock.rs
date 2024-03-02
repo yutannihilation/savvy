@@ -17,7 +17,7 @@ pub enum SexpMock {
     Real(Vec<f64>),
     Logical(Vec<i32>),
     String(Vec<String>),
-    List(Box<SexpMock>),
+    List(Vec<SexpMock>),
     Null,
 }
 
@@ -28,7 +28,7 @@ impl SexpMock {
             SexpMock::Real(v) => v.len(),
             SexpMock::Logical(v) => v.len(),
             SexpMock::String(v) => v.len(),
-            SexpMock::List(b) => b.as_ref().len(),
+            SexpMock::List(v) => v.len(),
             SexpMock::Null => 0,
         }
     }
