@@ -314,3 +314,13 @@ impl Person {
         "associated_function".try_into()
     }
 }
+
+// Make sure cargo test runs without linking errors
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}

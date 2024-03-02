@@ -17,6 +17,9 @@ once_cell = "1"
 [build-dependencies]
 cc = "1"
 
+[features]
+fake-libR = ["savvy-ffi/fake-libR"]
+
 [workspace.metadata.release]
 tag = false # do not create tags for individual crates (e.g. "savvy-cli-v0.2.5")
 

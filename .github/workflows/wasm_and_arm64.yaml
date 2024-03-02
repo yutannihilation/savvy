@@ -35,6 +35,10 @@ jobs:
           savvy = { path = "../savvy" }
           savvy-ffi = { path = "../savvy/savvy-ffi" }
 
+          [dev-dependencies]
+          savvy = { path = "../savvy", features = ["fake-libR"] }
+          savvy-ffi = { path = "../savvy/savvy-ffi", features = ["fake-libR"] }
+
           [workspace.package]
           version = "0.1.0"
           edition = "2021"
@@ -64,6 +68,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-unknown-linux-gnu
+      
+      - name: Install GCC toolchain for ARM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Build
         run: cargo build --target aarch64-unknown-linux-gnu

@@ -8,3 +8,6 @@ crate-type = ["staticlib"]
 
 [dependencies]
 savvy = "*"
+
+[dev-dependencies]
+savvy = {{ version = "*", features = ["fake-libR"] }}

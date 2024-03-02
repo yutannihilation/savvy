@@ -60,6 +60,10 @@ jobs:
           savvy = { path = "../savvy" }
           savvy-ffi = { path = "../savvy/savvy-ffi" }
 
+          [dev-dependencies]
+          savvy = { path = "../savvy", features = ["fake-libR"] }
+          savvy-ffi = { path = "../savvy/savvy-ffi", features = ["fake-libR"] }
+
           [workspace.package]
           version = "0.1.0"
           edition = "2021"
@@ -74,6 +78,9 @@ jobs:
           mv savvy-bindgen/ ./R-package/src/savvy/
           mv savvy-ffi/ ./R-package/src/savvy/
         shell: bash
+
+      - name: Run cagro test of the R package
+        run: cargo test --manifest-path=./R-package/src/rust/Cargo.toml
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

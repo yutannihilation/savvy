@@ -8,5 +8,8 @@ license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 
+[features]
+fake-libR = []
+
 [package.metadata.dist]
 dist = false
