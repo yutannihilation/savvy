@@ -10,4 +10,8 @@ crate-type = ["staticlib"]
 savvy = { path = "../../../" }
 savvy-ffi = { path = "../../../savvy-ffi" }
 
+[dev-dependencies]
+savvy = { path = "../../../", features = ["fake-libR"] }
+savvy-ffi = { path = "../../../savvy-ffi", features = ["fake-libR"] }
+
 [workspace]
