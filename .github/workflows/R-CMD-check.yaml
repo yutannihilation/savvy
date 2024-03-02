@@ -75,6 +75,10 @@ jobs:
           mv savvy-ffi/ ./R-package/src/savvy/
         shell: bash
 
+      - name: Run cagro test of the R package
+        run: |
+          cargo test --manifest-path=./R-package/src/rust/Cargo.toml
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
