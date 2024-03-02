@@ -124,6 +124,8 @@ jobs:
       - name: Install stable Rust (tweak for axodotdev/cargo-dist#792)
         uses: dtolnay/rust-toolchain@master
         if: ${{ join(matrix.targets, ', ') == 'aarch64-unknown-linux-gnu' }}
+        with:
+          toolchain: stable
       - name: Build artifacts
         run: |
           # Actually do builds and make zips and whatnot
