@@ -95,7 +95,8 @@ const fn R_ValueOfNA() -> f64 {
 }
 pub static mut R_NaReal: f64 = R_ValueOfNA();
 
-pub static mut R_NaString: SEXP = "".as_ptr() as _;
+const NA_CHAR: &str = "NA";
+pub static mut R_NaString: SEXP = NA_CHAR.as_ptr() as _;
 
 pub unsafe fn R_IsNA(arg1: f64) -> ::std::os::raw::c_int {
     if arg1 == unsafe { R_NaReal } {
@@ -329,6 +330,9 @@ pub unsafe fn Rf_isString(s: SEXP) -> Rboolean {
 }
 
 pub unsafe fn R_CHAR(x: SEXP) -> *const ::std::os::raw::c_char {
+    if x == R_NaString {
+        return CString::new(NA_CHAR).unwrap().into_raw();
+    }
     match &(*x).data {
         SexpData::Char(data) => CString::new(data.as_str()).unwrap().into_raw(),
         _ => panic!("A non-character SEXP is passed to R_CHAR()"),
@@ -381,25 +385,25 @@ pub unsafe fn R_RegisterCFinalizerEx(s: SEXP, fun: R_CFinalizer_t, onexit: Rbool
 
 // Pairlist
 pub unsafe fn Rf_cons(arg1: SEXP, arg2: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn CAR(e: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn CDR(e: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn SETCAR(x: SEXP, y: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn SETCDR(x: SEXP, y: SEXP) -> SEXP {
-    unimplemented!();
+    R_NilValue // do nothing
 }
 pub unsafe fn SET_TAG(x: SEXP, y: SEXP) {
-    unimplemented!();
+    // do nothing
 }
 
 // Function and environment
