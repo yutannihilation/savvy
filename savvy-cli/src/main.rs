@@ -113,6 +113,7 @@ fn parse_description(path: &Path) -> PackageDescription {
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_SRC_DIR: &str = "src/rust/src";
+const PATH_DOT_CARGO_DIR: &str = "src/rust/.cargo";
 const PATH_CARGO_TOML: &str = "src/rust/Cargo.toml";
 const PATH_CONFIG_TOML: &str = "src/rust/.cargo/config.toml";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
@@ -235,8 +236,8 @@ fn init(path: &Path) {
         return;
     }
 
-    std::fs::create_dir_all(path.join(PATH_SRC_DIR).join(".cargo"))
-        .expect("Failed to create src dir");
+    std::fs::create_dir_all(path.join(PATH_SRC_DIR)).expect("Failed to create src dir");
+    std::fs::create_dir_all(path.join(PATH_DOT_CARGO_DIR)).expect("Failed to create .cargo dir");
 
     write_file(
         &path.join(PATH_CARGO_TOML),
