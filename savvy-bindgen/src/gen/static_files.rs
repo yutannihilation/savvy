@@ -24,6 +24,10 @@ pub fn generate_cargo_toml(crate_name: &str) -> String {
     format!(include_str!("./templates/Cargo_toml"), crate_name)
 }
 
+pub fn generate_config_toml() -> String {
+    include_str!("./templates/config_toml").to_string()
+}
+
 pub fn generate_example_lib_rs() -> String {
     include_str!("./templates/lib_rs").to_string()
 }

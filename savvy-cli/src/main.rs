@@ -10,16 +10,11 @@ use std::path::PathBuf;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-use savvy_bindgen::generate_c_header_file;
-use savvy_bindgen::generate_c_impl_file;
-use savvy_bindgen::generate_cargo_toml;
-use savvy_bindgen::generate_configure;
-use savvy_bindgen::generate_example_lib_rs;
-use savvy_bindgen::generate_gitignore;
-use savvy_bindgen::generate_makevars_in;
-use savvy_bindgen::generate_makevars_win;
-use savvy_bindgen::generate_r_impl_file;
-use savvy_bindgen::ParsedResult;
+use savvy_bindgen::{
+    generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
+    generate_configure, generate_example_lib_rs, generate_gitignore, generate_makevars_in,
+    generate_makevars_win, generate_r_impl_file, ParsedResult,
+};
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -119,6 +114,7 @@ fn parse_description(path: &Path) -> PackageDescription {
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_SRC_DIR: &str = "src/rust/src";
 const PATH_CARGO_TOML: &str = "src/rust/Cargo.toml";
+const PATH_CONFIG_TOML: &str = "src/rust/.cargo/config.toml";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
 const PATH_CONFIGURE: &str = "configure";
@@ -239,12 +235,14 @@ fn init(path: &Path) {
         return;
     }
 
-    std::fs::create_dir_all(path.join(PATH_SRC_DIR)).expect("Failed to create src dir");
+    std::fs::create_dir_all(path.join(PATH_SRC_DIR).join(".cargo"))
+        .expect("Failed to create src dir");
 
     write_file(
         &path.join(PATH_CARGO_TOML),
         &generate_cargo_toml(&pkg_metadata.package_name),
     );
+    write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
     write_file(
         &path.join(PATH_MAKEVARS_IN),
