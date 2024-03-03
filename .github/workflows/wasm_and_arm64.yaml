@@ -35,10 +35,6 @@ jobs:
           savvy = { path = "../savvy" }
           savvy-ffi = { path = "../savvy/savvy-ffi" }
 
-          [dev-dependencies]
-          savvy = { path = "../savvy", features = ["fake-libR"] }
-          savvy-ffi = { path = "../savvy/savvy-ffi", features = ["fake-libR"] }
-
           [workspace.package]
           version = "0.1.0"
           edition = "2021"
