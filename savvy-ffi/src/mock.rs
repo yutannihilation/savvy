@@ -5,6 +5,8 @@
 
 // internal types
 
+use std::{collections::HashMap, ffi::CStr};
+
 pub type R_xlen_t = isize;
 
 pub const Rboolean_FALSE: Rboolean = 0;
@@ -13,25 +15,32 @@ pub type Rboolean = ::std::os::raw::c_int;
 
 // SEXP
 #[derive(Clone)]
-pub enum SexpMock {
+pub enum SexpData {
     Integer(Vec<i32>),
     Real(Vec<f64>),
     Logical(Vec<i32>),
     String(Vec<String>),
-    List(Vec<SexpMock>),
+    List(Vec<SEXP>),
+    Symbol(&'static str),
     Null,
 }
 
+#[derive(Clone)]
+pub struct SexpMock {
+    data: SexpData,
+    attrib: Vec<(String, SEXP)>,
+}
+
 impl SexpMock {
-    fn len(&self) -> usize {
-        match self {
-            SexpMock::Integer(v) => v.len(),
-            SexpMock::Real(v) => v.len(),
-            SexpMock::Logical(v) => v.len(),
-            SexpMock::String(v) => v.len(),
-            SexpMock::List(v) => v.len(),
-            SexpMock::Null => 0,
+    fn new(data: SexpData) -> Self {
+        Self {
+            data,
+            attrib: Vec::new(),
         }
+    }
+
+    fn null() -> Self {
+        Self::new(SexpData::Null)
     }
 }
 
@@ -67,9 +76,10 @@ pub const RAWSXP: u32 = 24;
 pub const OBJSXP: u32 = 25;
 
 // pre-defined symbols
-pub static mut R_NamesSymbol: SEXP = std::ptr::null_mut() as _;
-pub static mut R_ClassSymbol: SEXP = std::ptr::null_mut() as _;
-pub static mut R_DimSymbol: SEXP = std::ptr::null_mut() as _;
+// This is a bit tricky. Rust doesn't allow to create a static *mut SexpMock.
+pub static mut R_NamesSymbol: SEXP = "names".as_ptr() as _;
+pub static mut R_ClassSymbol: SEXP = "class".as_ptr() as _;
+pub static mut R_DimSymbol: SEXP = "dim".as_ptr() as _;
 
 // NULL
 pub static mut R_NilValue: SEXP = std::ptr::null_mut() as _;
@@ -88,7 +98,9 @@ pub static mut R_NaReal: f64 = R_ValueOfNA();
 
 pub static mut R_NaString: SEXP = "".as_ptr() as _;
 
-pub fn R_IsNA(arg1: f64) -> ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_IsNA(arg1: f64) -> ::std::os::raw::c_int {
     if arg1 == unsafe { R_NaReal } {
         1
     } else {
@@ -99,79 +111,160 @@ pub fn R_IsNA(arg1: f64) -> ::std::os::raw::c_int {
 // Allocation and attributes
 /// # Safety
 /// This is for testing only
+/// # Safety
+/// This is unsafe, of course
 pub unsafe fn Rf_xlength(arg1: SEXP) -> R_xlen_t {
-    (*arg1).len() as _
+    match &(*arg1).data {
+        SexpData::Integer(v) => v.len() as R_xlen_t,
+        SexpData::Real(v) => v.len() as R_xlen_t,
+        SexpData::Logical(v) => v.len() as R_xlen_t,
+        SexpData::String(v) => v.len() as R_xlen_t,
+        SexpData::List(v) => v.len() as R_xlen_t,
+        SexpData::Symbol(_) => 1,
+        SexpData::Null => 0,
+    }
 }
-pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP {
+
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP {
     let out = match arg1 {
-        INTSXP => SexpMock::Integer(vec![0_i32; arg2 as usize]),
-        REALSXP => SexpMock::Real(vec![0_f64; arg2 as usize]),
-        LGLSXP => SexpMock::Logical(vec![0_i32; arg2 as usize]),
-        STRSXP => SexpMock::String(vec!["".to_string(); arg2 as usize]),
-        LISTSXP => SexpMock::List(vec![SexpMock::Null; arg2 as usize]),
-        _ => SexpMock::Null,
+        INTSXP => SexpMock::new(SexpData::Integer(vec![0_i32; arg2 as usize])),
+        REALSXP => SexpMock::new(SexpData::Real(vec![0_f64; arg2 as usize])),
+        LGLSXP => SexpMock::new(SexpData::Logical(vec![0_i32; arg2 as usize])),
+        STRSXP => SexpMock::new(SexpData::String(vec!["".to_string(); arg2 as usize])),
+        LISTSXP => SexpMock::new(SexpData::List(vec![R_NilValue; arg2 as usize])),
+        SYMSXP => SexpMock::new(SexpData::Symbol("")),
+        _ => return R_NilValue,
     };
 
     Box::into_raw(Box::new(out))
 }
-pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP {
-    unimplemented!();
+
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP {
+    let c_str = CStr::from_ptr(arg1).to_string_lossy();
+    let out = SexpMock::new(SexpData::Symbol(c_str.to_string().leak()));
+    Box::into_raw(Box::new(out))
 }
-pub fn Rf_getAttrib(arg1: SEXP, arg2: SEXP) -> SEXP {
-    unimplemented!();
+
+unsafe fn get_key(arg2: *mut SexpMock) -> Option<String> {
+    let key = if arg2 == R_NamesSymbol {
+        "names"
+    } else if arg2 == R_ClassSymbol {
+        "class"
+    } else if arg2 == R_DimSymbol {
+        "dim"
+    } else {
+        match (*arg2).data {
+            SexpData::Symbol(s) => s,
+            _ => return None,
+        }
+    };
+
+    Some(key.to_string())
 }
-pub fn Rf_setAttrib(arg1: SEXP, arg2: SEXP, arg3: SEXP) -> SEXP {
+
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_getAttrib(arg1: SEXP, arg2: SEXP) -> SEXP {
+    let key = match get_key(arg2) {
+        Some(value) => value,
+        None => return R_NilValue,
+    };
+
+    if let Some((_, v)) = (*arg1).attrib.iter().find(|(k, _)| k.as_str() == key) {
+        *v
+    } else {
+        R_NilValue
+    }
+}
+
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_setAttrib(arg1: SEXP, arg2: SEXP, arg3: SEXP) -> SEXP {
     unimplemented!();
 }
 
 // Integer
-pub fn INTEGER(x: SEXP) -> *mut ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn INTEGER(x: SEXP) -> *mut ::std::os::raw::c_int {
     unimplemented!();
 }
-pub fn INTEGER_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn INTEGER_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int {
     unimplemented!();
 }
-pub fn SET_INTEGER_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_INTEGER_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int) {
     unimplemented!();
 }
-pub fn Rf_ScalarInteger(arg1: ::std::os::raw::c_int) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_ScalarInteger(arg1: ::std::os::raw::c_int) -> SEXP {
     unimplemented!();
 }
-pub fn Rf_isInteger(arg1: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isInteger(arg1: SEXP) -> Rboolean {
     unimplemented!();
 }
 
 // Real
-pub fn REAL(x: SEXP) -> *mut f64 {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn REAL(x: SEXP) -> *mut f64 {
     unimplemented!();
 }
-pub fn REAL_ELT(x: SEXP, i: R_xlen_t) -> f64 {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn REAL_ELT(x: SEXP, i: R_xlen_t) -> f64 {
     unimplemented!();
 }
-pub fn SET_REAL_ELT(x: SEXP, i: R_xlen_t, v: f64) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_REAL_ELT(x: SEXP, i: R_xlen_t, v: f64) {
     unimplemented!();
 }
-pub fn Rf_ScalarReal(arg1: f64) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_ScalarReal(arg1: f64) -> SEXP {
     unimplemented!();
 }
-pub fn Rf_isReal(s: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isReal(s: SEXP) -> Rboolean {
     unimplemented!();
 }
 
 // Logical
-pub fn LOGICAL(x: SEXP) -> *mut ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn LOGICAL(x: SEXP) -> *mut ::std::os::raw::c_int {
     unimplemented!();
 }
-pub fn LOGICAL_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn LOGICAL_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int {
     unimplemented!();
 }
-pub fn SET_LOGICAL_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_LOGICAL_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int) {
     unimplemented!();
 }
-pub fn Rf_ScalarLogical(arg1: ::std::os::raw::c_int) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_ScalarLogical(arg1: ::std::os::raw::c_int) -> SEXP {
     unimplemented!();
 }
-pub fn Rf_isLogical(s: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isLogical(s: SEXP) -> Rboolean {
     unimplemented!();
 }
 
@@ -185,23 +278,35 @@ pub const cetype_t_CE_SYMBOL: cetype_t = 5;
 pub const cetype_t_CE_ANY: cetype_t = 99;
 pub type cetype_t = ::std::os::raw::c_int;
 
-pub fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP {
     unimplemented!();
 }
-pub fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP) {
     unimplemented!();
 }
-pub fn Rf_ScalarString(arg1: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_ScalarString(arg1: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn Rf_isString(s: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isString(s: SEXP) -> Rboolean {
     unimplemented!();
 }
 
-pub fn R_CHAR(x: SEXP) -> *const ::std::os::raw::c_char {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_CHAR(x: SEXP) -> *const ::std::os::raw::c_char {
     unimplemented!();
 }
-pub fn Rf_mkCharLenCE(
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_mkCharLenCE(
     arg1: *const ::std::os::raw::c_char,
     arg2: ::std::os::raw::c_int,
     arg3: cetype_t,
@@ -210,94 +315,142 @@ pub fn Rf_mkCharLenCE(
 }
 
 // List
-pub fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP {
     unimplemented!();
 }
-pub fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP {
     unimplemented!();
 }
 
 // External pointer
 
 pub type R_CFinalizer_t = ::std::option::Option<unsafe extern "C" fn(arg1: SEXP)>;
-pub fn R_MakeExternalPtr(p: *mut ::std::os::raw::c_void, tag: SEXP, prot: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_MakeExternalPtr(p: *mut ::std::os::raw::c_void, tag: SEXP, prot: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn R_ExternalPtrAddr(s: SEXP) -> *mut ::std::os::raw::c_void {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_ExternalPtrAddr(s: SEXP) -> *mut ::std::os::raw::c_void {
     unimplemented!();
 }
-pub fn R_ClearExternalPtr(s: SEXP) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_ClearExternalPtr(s: SEXP) {
     unimplemented!();
 }
-pub fn R_RegisterCFinalizerEx(s: SEXP, fun: R_CFinalizer_t, onexit: Rboolean) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_RegisterCFinalizerEx(s: SEXP, fun: R_CFinalizer_t, onexit: Rboolean) {
     unimplemented!();
 }
 
 // Pairlist
-pub fn Rf_cons(arg1: SEXP, arg2: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_cons(arg1: SEXP, arg2: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn CAR(e: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn CAR(e: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn CDR(e: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn CDR(e: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn SETCAR(x: SEXP, y: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SETCAR(x: SEXP, y: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn SETCDR(x: SEXP, y: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SETCDR(x: SEXP, y: SEXP) -> SEXP {
     unimplemented!();
 }
-pub fn SET_TAG(x: SEXP, y: SEXP) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn SET_TAG(x: SEXP, y: SEXP) {
     unimplemented!();
 }
 
 // Function and environment
-pub fn Rf_isFunction(arg1: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isFunction(arg1: SEXP) -> Rboolean {
     unimplemented!();
 }
-pub fn Rf_isEnvironment(arg1: SEXP) -> Rboolean {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_isEnvironment(arg1: SEXP) -> Rboolean {
     unimplemented!();
 }
-pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP {
     unimplemented!();
 }
 
 pub static mut R_GlobalEnv: SEXP = std::ptr::null_mut() as _;
 
 // protection
-pub fn Rf_protect(arg1: SEXP) -> SEXP {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_protect(arg1: SEXP) -> SEXP {
     // Do nothing
     arg1
 }
-pub fn Rf_unprotect(arg1: ::std::os::raw::c_int) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_unprotect(arg1: ::std::os::raw::c_int) {
     // Do nothing
 }
-pub fn R_PreserveObject(arg1: SEXP) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn R_PreserveObject(arg1: SEXP) {
     // Do nothing
 }
 
 // type
-pub fn TYPEOF(x: SEXP) -> ::std::os::raw::c_int {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn TYPEOF(x: SEXP) -> ::std::os::raw::c_int {
     unimplemented!();
 }
-pub fn Rf_type2char(arg1: SEXPTYPE) -> *const ::std::os::raw::c_char {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_type2char(arg1: SEXPTYPE) -> *const ::std::os::raw::c_char {
     unimplemented!();
 }
 
 // error
-pub fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char) -> ! {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char) -> ! {
     unimplemented!();
 }
 
 // I/O
-pub fn Rprintf(arg1: *const ::std::os::raw::c_char) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn Rprintf(arg1: *const ::std::os::raw::c_char) {
     // Do nothing
 }
-pub fn REprintf(arg1: *const ::std::os::raw::c_char) {
+/// # Safety
+/// This is unsafe, of course
+pub unsafe fn REprintf(arg1: *const ::std::os::raw::c_char) {
     // Do nothing
 }
