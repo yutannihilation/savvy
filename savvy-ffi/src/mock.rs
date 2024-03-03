@@ -18,7 +18,6 @@ pub const Rboolean_TRUE: Rboolean = 1;
 pub type Rboolean = ::std::os::raw::c_int;
 
 // SEXP
-#[derive(Clone)]
 pub enum SexpData {
     Integer(Vec<i32>),
     Real(Vec<f64>),
@@ -30,7 +29,6 @@ pub enum SexpData {
     Null,
 }
 
-#[derive(Clone)]
 pub struct SexpMock {
     data: SexpData,
     attrib: HashMap<String, SEXP>,
