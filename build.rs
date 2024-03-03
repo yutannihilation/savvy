@@ -9,14 +9,9 @@ fn main() {
             .file("src/unwind_protect_wrapper.c")
             .include(Path::new(d.as_str()))
             .compile("unwind_protect");
-
-        println!("cargo:rerun-if-changed=src/unwind_protect_wrapper.c");
     } else {
-        cc::Build::new()
-            .file("src/unwind_protect_fake.c")
-            .compile("unwind_protect");
         println!("cargo:warning=R_INCLUDE_DIR envvar should be provided.");
-
-        println!("cargo:rerun-if-changed=src/unwind_protect_fake.c");
     }
+
+    println!("cargo:rerun-if-changed=src/unwind_protect_wrapper.c");
 }
