@@ -3,22 +3,23 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `fake-libR` feature is withdrawn. Instead, Windows users can add this build
+  configuration to avoid the linker error:
+  ```toml
+  [target.x86_64-pc-windows-msvc]
+  rustflags = ["-C", "link-arg=/FORCE:UNRESOLVED"]
+  ```
+
 ## [v0.2.15] (2024-03-02)
 
 ### New Features
 
-* Previously, if a crate uses savvy, `cargo test` fails to compile on some
-  platforms even if the test code doesn't use the savvy API at all. This is
-  because the symbols from Rinternals.h needs to be resolved. You can add
-  `savvy` with `fake-libR` feature in `dev-dependencies` to avoid this issue.
-  ```toml
-  [dependencies]
-  savvy = "*"
-
-  [dev-dependencies]
-  savvy = { version = "*", features = ["fake-libR"] }
-  ```
-  Note that, this doesn't mock libR APIs yet.
+* Previously, if a crate uses savvy, `cargo test` fails to compile on Windows
+  even if the test code doesn't use the savvy API at all. This is because the
+  symbols from Rinternals.h needs to be resolved. You can add `savvy` with
+  `fake-libR` feature in `dev-dependencies` to avoid this issue.
 
 ### Fixed bugs
 
