@@ -1,7 +1,7 @@
 use savvy_ffi::{LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
-use crate::protect;
+use crate::{protect, IntegerSexp};
 
 /// An external SEXP of a logical vector.
 pub struct LogicalSexp(pub SEXP);

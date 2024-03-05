@@ -249,20 +249,14 @@ impl Sexp {
     }
 }
 
-pub(crate) fn get_dim_from_sexp(value: SEXP) -> Option<Vec<usize>> {
+pub(crate) fn get_dim_from_sexp(value: SEXP) -> Option<IntegerSexp> {
     let dim_sexp = unsafe { savvy_ffi::Rf_getAttrib(value, savvy_ffi::R_DimSymbol) };
 
     if dim_sexp == unsafe { savvy_ffi::R_NilValue } {
         None
     // Bravely assume the "dim" attribute is always a valid INTSXP.
     } else {
-        Some(
-            crate::IntegerSexp(dim_sexp)
-                .as_slice()
-                .iter()
-                .map(|i| *i as _)
-                .collect(),
-        )
+        Some(crate::IntegerSexp(dim_sexp))
     }
 }
 
@@ -312,7 +306,7 @@ macro_rules! impl_common_sexp_ops {
             }
 
             /// Returns the dimension.
-            pub fn get_dim(&self) -> Option<Vec<usize>> {
+            pub fn get_dim(&self) -> Option<IntegerSexp> {
                 crate::sexp::get_dim_from_sexp(self.inner())
             }
         }
@@ -356,7 +350,7 @@ macro_rules! impl_common_sexp_ops_owned {
             }
 
             /// Returns the dimension.
-            pub fn get_dim(&self) -> Option<Vec<usize>> {
+            pub fn get_dim(&self) -> Option<IntegerSexp> {
                 crate::sexp::get_dim_from_sexp(self.inner())
             }
 

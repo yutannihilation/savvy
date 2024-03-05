@@ -7,7 +7,7 @@ use savvy_ffi::{
 
 use super::na::NotAvailableValue;
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
-use crate::protect;
+use crate::{protect, IntegerSexp};
 
 /// An external SEXP of a character vector.
 pub struct StringSexp(pub SEXP);
