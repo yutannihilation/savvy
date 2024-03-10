@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.17] (2024-03-10)
+
 ### Breaking changes
 
 * `get_dim()` now returns `&[i32]` instead of `Vec<usize>` to avoid allocation.
@@ -151,7 +153,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.16...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.17...HEAD
+[v0.2.17]: https://github.com/yutannihilation/savvy/compare/v0.2.16...v0.2.17
 [v0.2.16]: https://github.com/yutannihilation/savvy/compare/v0.2.15...v0.2.16
 [v0.2.15]: https://github.com/yutannihilation/savvy/compare/v0.2.14...v0.2.15
 [v0.2.14]: https://github.com/yutannihilation/savvy/compare/v0.2.13...v0.2.14
