@@ -1,8 +1,8 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isReal,
-    Rf_isString, Rf_type2char, EXTPTRSXP, SEXP, TYPEOF, VECSXP,
+    R_NilValue, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical,
+    Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, TYPEOF, VECSXP,
 };
 
 use crate::{
@@ -249,30 +249,32 @@ impl Sexp {
     }
 }
 
-pub(crate) fn get_dim_from_sexp(value: SEXP) -> Option<Vec<usize>> {
-    let dim_sexp = unsafe { savvy_ffi::Rf_getAttrib(value, savvy_ffi::R_DimSymbol) };
+// Note: There's no Sexp::get_dim() because, unlike `class` and `name`, `dim` is
+//       not what is expeceted to be on all types of SEXPs.
+pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
+    let dim_sexp = unsafe { Rf_getAttrib(*value, savvy_ffi::R_DimSymbol) };
 
-    if dim_sexp == unsafe { savvy_ffi::R_NilValue } {
+    // TODO
+    if unsafe { TYPEOF(dim_sexp) != savvy_ffi::INTSXP as _ } {
         None
-    // Bravely assume the "dim" attribute is always a valid INTSXP.
     } else {
-        Some(
-            crate::IntegerSexp(dim_sexp)
-                .as_slice()
-                .iter()
-                .map(|i| *i as _)
-                .collect(),
-        )
+        Some(unsafe {
+            std::slice::from_raw_parts(INTEGER(dim_sexp) as _, Rf_xlength(dim_sexp) as _)
+        })
     }
 }
 
-pub(crate) fn set_dim_to_sexp(value: SEXP, dim: &[usize]) -> crate::error::Result<()> {
-    let dim_sexp: Sexp = dim
-        .iter()
-        .map(|v| *v as i32)
-        .collect::<Vec<i32>>()
-        .try_into()?;
-    unsafe { savvy_ffi::Rf_setAttrib(value, savvy_ffi::R_DimSymbol, dim_sexp.0) };
+// Note: There's no Sexp::set_dim() because, unlike `class` and `name`, `dim` is
+//       not what is expeceted to be on all types of SEXPs.
+pub(crate) fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error::Result<()>
+where
+    T: TryInto<i32> + Copy,
+{
+    let mut dim_sexp = unsafe { OwnedIntegerSexp::new_without_init(dim.len())? };
+    dim.iter()
+        .enumerate()
+        .for_each(|(i, &v)| dim_sexp[i] = v.try_into().unwrap_or_default());
+    unsafe { savvy_ffi::Rf_setAttrib(value, savvy_ffi::R_DimSymbol, dim_sexp.inner()) };
     Ok(())
 }
 
@@ -283,6 +285,13 @@ macro_rules! impl_common_sexp_ops {
             #[inline]
             pub fn inner(&self) -> savvy_ffi::SEXP {
                 self.0
+            }
+
+            /// Returns the reference to the raw SEXP. This is convenient when
+            /// the lifetime is needed (e.g. returning a slice).
+            #[inline]
+            pub(crate) fn inner_ref(&self) -> &savvy_ffi::SEXP {
+                &self.0
             }
 
             /// Returns the length of the SEXP.
@@ -312,8 +321,8 @@ macro_rules! impl_common_sexp_ops {
             }
 
             /// Returns the dimension.
-            pub fn get_dim(&self) -> Option<Vec<usize>> {
-                crate::sexp::get_dim_from_sexp(self.inner())
+            pub fn get_dim(&self) -> Option<&[i32]> {
+                crate::sexp::get_dim_from_sexp(self.inner_ref())
             }
         }
     };
@@ -326,6 +335,13 @@ macro_rules! impl_common_sexp_ops_owned {
             #[inline]
             pub fn inner(&self) -> SEXP {
                 self.inner
+            }
+
+            /// Returns the reference to the raw SEXP. This is convenient when
+            /// the lifetime is needed (e.g. returning a slice).
+            #[inline]
+            pub(crate) fn inner_ref(&self) -> &savvy_ffi::SEXP {
+                &self.inner
             }
 
             /// Returns the length of the SEXP.
@@ -356,8 +372,8 @@ macro_rules! impl_common_sexp_ops_owned {
             }
 
             /// Returns the dimension.
-            pub fn get_dim(&self) -> Option<Vec<usize>> {
-                crate::sexp::get_dim_from_sexp(self.inner())
+            pub fn get_dim(&self) -> Option<&[i32]> {
+                crate::sexp::get_dim_from_sexp(self.inner_ref())
             }
 
             /// Set the input value to the specified attribute.
@@ -375,8 +391,12 @@ macro_rules! impl_common_sexp_ops_owned {
                 crate::Sexp(self.inner()).set_names(names)
             }
 
-            /// Set the dimension.
-            pub fn set_dim(&mut self, dim: &[usize]) -> crate::error::Result<()> {
+            /// Set the dimension. `dim` can be `i32`, `usize`, or whatever
+            /// numeric types that implements `TryInto<i32>`.
+            pub fn set_dim<T: TryInto<i32> + Copy>(
+                &mut self,
+                dim: &[T],
+            ) -> crate::error::Result<()> {
                 crate::sexp::set_dim_to_sexp(self.inner(), dim)
             }
         }

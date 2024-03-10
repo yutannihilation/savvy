@@ -19,7 +19,10 @@ fn get_names_int(x: savvy::IntegerSexp) -> savvy::Result<savvy::Sexp> {
 #[savvy]
 fn get_dim_int(x: savvy::IntegerSexp) -> savvy::Result<savvy::Sexp> {
     match x.get_dim() {
-        Some(dim) => dim.iter().map(|i| *i as _).collect::<Vec<i32>>().try_into(),
+        Some(dim) => {
+            let x: OwnedIntegerSexp = dim.to_vec().try_into()?;
+            x.into()
+        }
         None => ().try_into(),
     }
 }

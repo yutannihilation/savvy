@@ -9,7 +9,7 @@ attribute.
 |:----------|:--------------|:--------------|:-------------|
 | `names`   | `get_names()` |`set_names()`  | `Vec<&str>`  |
 | `class`   | `get_class()` |`set_class()`  | `Vec<&str>`  |
-| `dim`     | `get_dim()`   |`set_dim()`    | `Vec<usize>` |
+| `dim`     | `get_dim()`   |`set_dim()`    | `&[i32]`     |
 | arbitrary | `get_attrib()`|`set_attrib()` | `Sexp`       |
 
 The getter methods return `Option<T>` because the object doesn't always have the

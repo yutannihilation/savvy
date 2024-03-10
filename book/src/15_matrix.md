@@ -26,7 +26,9 @@ use savvy::{r_println, savvy, RealSexp};
 
 #[savvy]
 fn ndarray_input(x: RealSexp) -> savvy::Result<()> {
-    let dim = x.get_dim().ok_or("no dimension found")?;
+    // In R, dim is i32, so you need to convert it to usize first.
+    let dim_i32 = x.get_dim().ok_or("no dimension found")?;
+    let dim: Vec<usize> = dim_i32.iter().map(|i| *i as usize).collect();
 
     // f() changes the order from row-major (C-style convention) to column-major (Fortran-style convention).
     let a = Array::from_shape_vec(dim.f(), x.to_vec());
@@ -53,7 +55,7 @@ fn nalgebra_input(x: RealSexp) -> savvy::Result<()> {
         return Err("Input must be matrix!".into());
     }
 
-    let m = DMatrix::from_vec(dim[0], dim[1], x.to_vec());
+    let m = DMatrix::from_vec(dim[0] as _, dim[1] as _, x.to_vec());
 
     r_println!("{m:?}");
 
@@ -75,7 +77,7 @@ use savvy::{r_println, savvy, OwnedRealSexp, RealSexp};
 fn glam_input(x: RealSexp) -> savvy::Result<()> {
     let dim = x.get_dim().ok_or("no dimension found")?;
 
-    if dim.as_slice() != [3, 3] {
+    if dim != [3, 3] {
         return Err("Input must be 3x3 matrix!".into());
     }
 

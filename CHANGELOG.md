@@ -3,6 +3,13 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `get_dim()` now returns `&[i32]` instead of `Vec<usize>` to avoid allocation.
+  If the matrix library requires `usize`, you need to convert the `i32` to
+  `usize` by yourself now.
+  Accordingly, `set_dim()` now accepts both `&[i32]` and `&[usize]`.
+
 ## [v0.2.16] (2024-03-03)
 
 ### Breaking changes
