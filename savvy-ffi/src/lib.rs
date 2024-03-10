@@ -17,30 +17,30 @@ pub type SEXP = *mut ::std::os::raw::c_void;
 
 pub type SEXPTYPE = ::std::os::raw::c_uint;
 
-pub const NILSXP: u32 = 0;
-pub const SYMSXP: u32 = 1;
-pub const LISTSXP: u32 = 2;
-pub const CLOSXP: u32 = 3;
-pub const ENVSXP: u32 = 4;
-pub const PROMSXP: u32 = 5;
-pub const LANGSXP: u32 = 6;
-pub const SPECIALSXP: u32 = 7;
-pub const BUILTINSXP: u32 = 8;
-pub const CHARSXP: u32 = 9;
-pub const LGLSXP: u32 = 10;
-pub const INTSXP: u32 = 13;
-pub const REALSXP: u32 = 14;
-pub const CPLXSXP: u32 = 15;
-pub const STRSXP: u32 = 16;
-pub const DOTSXP: u32 = 17;
-pub const ANYSXP: u32 = 18;
-pub const VECSXP: u32 = 19;
-pub const EXPRSXP: u32 = 20;
-pub const BCODESXP: u32 = 21;
-pub const EXTPTRSXP: u32 = 22;
-pub const WEAKREFSXP: u32 = 23;
-pub const RAWSXP: u32 = 24;
-pub const OBJSXP: u32 = 25;
+pub const NILSXP: SEXPTYPE = 0;
+pub const SYMSXP: SEXPTYPE = 1;
+pub const LISTSXP: SEXPTYPE = 2;
+pub const CLOSXP: SEXPTYPE = 3;
+pub const ENVSXP: SEXPTYPE = 4;
+pub const PROMSXP: SEXPTYPE = 5;
+pub const LANGSXP: SEXPTYPE = 6;
+pub const SPECIALSXP: SEXPTYPE = 7;
+pub const BUILTINSXP: SEXPTYPE = 8;
+pub const CHARSXP: SEXPTYPE = 9;
+pub const LGLSXP: SEXPTYPE = 10;
+pub const INTSXP: SEXPTYPE = 13;
+pub const REALSXP: SEXPTYPE = 14;
+pub const CPLXSXP: SEXPTYPE = 15;
+pub const STRSXP: SEXPTYPE = 16;
+pub const DOTSXP: SEXPTYPE = 17;
+pub const ANYSXP: SEXPTYPE = 18;
+pub const VECSXP: SEXPTYPE = 19;
+pub const EXPRSXP: SEXPTYPE = 20;
+pub const BCODESXP: SEXPTYPE = 21;
+pub const EXTPTRSXP: SEXPTYPE = 22;
+pub const WEAKREFSXP: SEXPTYPE = 23;
+pub const RAWSXP: SEXPTYPE = 24;
+pub const OBJSXP: SEXPTYPE = 25;
 
 // pre-defined symbols
 extern "C" {
@@ -169,7 +169,20 @@ extern "C" {
 
 // type
 extern "C" {
-    pub fn TYPEOF(x: SEXP) -> ::std::os::raw::c_int;
+    // Note: For some reason, the return type of TYPEOF() is defined as int in
+    // RInternals.h and memory.c. However, the actual implementation is
+    //
+    // In memory.c:
+    //
+    //     int (TYPEOF)(SEXP x) { return TYPEOF(CHK(x)); }
+    //
+    // In Defn.h:
+    //
+    //     #define TYPEOF(x)    ((x)->sxpinfo.type)
+    //
+    // and the definition of the `type` field of `sxpinfo_struct` is `SEXPTYPE`,
+    // so the actual return type should be `SEXPTYPE`, while I'm not 100% sure...
+    pub fn TYPEOF(x: SEXP) -> SEXPTYPE;
     pub fn Rf_type2char(arg1: SEXPTYPE) -> *const ::std::os::raw::c_char;
 }
 
