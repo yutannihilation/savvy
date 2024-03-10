@@ -80,7 +80,7 @@ impl Sexp {
     pub fn get_human_readable_type_name(&self) -> &'static str {
         unsafe {
             // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
-            let c = Rf_type2char(TYPEOF(self.0) as _);
+            let c = Rf_type2char(TYPEOF(self.0));
             CStr::from_ptr(c).to_str().unwrap()
         }
     }
@@ -254,8 +254,7 @@ impl Sexp {
 pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     let dim_sexp = unsafe { Rf_getAttrib(*value, savvy_ffi::R_DimSymbol) };
 
-    // TODO
-    if unsafe { TYPEOF(dim_sexp) != savvy_ffi::INTSXP as _ } {
+    if unsafe { TYPEOF(dim_sexp) != savvy_ffi::INTSXP } {
         None
     } else {
         Some(unsafe {

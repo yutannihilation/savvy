@@ -77,9 +77,9 @@ pub use unwind_protect::unwind_protect;
 pub use savvy_macro::savvy;
 
 use ffi::SEXP;
-use savvy_ffi::{cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE};
+use savvy_ffi::{cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, SEXPTYPE};
 
-fn alloc_vector(arg1: u32, arg2: usize) -> crate::error::Result<SEXP> {
+fn alloc_vector(arg1: SEXPTYPE, arg2: usize) -> crate::error::Result<SEXP> {
     unsafe { unwind_protect(|| Rf_allocVector(arg1, arg2 as _)) }
 }
 
