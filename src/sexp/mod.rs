@@ -249,6 +249,8 @@ impl Sexp {
     }
 }
 
+// Note: There's no Sexp::get_dim() because, unlike `class` and `name`, `dim` is
+//       not what is expeceted to be on all types of SEXPs.
 pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     let dim_sexp = unsafe { Rf_getAttrib(*value, savvy_ffi::R_DimSymbol) };
 
@@ -262,13 +264,17 @@ pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     }
 }
 
-pub(crate) fn set_dim_to_sexp(value: SEXP, dim: &[usize]) -> crate::error::Result<()> {
-    let dim_sexp: Sexp = dim
-        .iter()
-        .map(|v| *v as i32)
-        .collect::<Vec<i32>>()
-        .try_into()?;
-    unsafe { savvy_ffi::Rf_setAttrib(value, savvy_ffi::R_DimSymbol, dim_sexp.0) };
+// Note: There's no Sexp::set_dim() because, unlike `class` and `name`, `dim` is
+//       not what is expeceted to be on all types of SEXPs.
+pub(crate) fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error::Result<()>
+where
+    T: TryInto<i32> + Copy,
+{
+    let mut dim_sexp = unsafe { OwnedIntegerSexp::new_without_init(dim.len())? };
+    dim.iter()
+        .enumerate()
+        .for_each(|(i, &v)| dim_sexp[i] = v.try_into().unwrap_or_default());
+    unsafe { savvy_ffi::Rf_setAttrib(value, savvy_ffi::R_DimSymbol, dim_sexp.inner()) };
     Ok(())
 }
 
@@ -385,8 +391,12 @@ macro_rules! impl_common_sexp_ops_owned {
                 crate::Sexp(self.inner()).set_names(names)
             }
 
-            /// Set the dimension.
-            pub fn set_dim(&mut self, dim: &[usize]) -> crate::error::Result<()> {
+            /// Set the dimension. `dim` can be `i32`, `usize`, or whatever
+            /// numeric types that implements `TryInto<i32>`.
+            pub fn set_dim<T: TryInto<i32> + Copy>(
+                &mut self,
+                dim: &[T],
+            ) -> crate::error::Result<()> {
                 crate::sexp::set_dim_to_sexp(self.inner(), dim)
             }
         }
