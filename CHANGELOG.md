@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.2.18] (2024-03-11)
+
 ### Minor improvements
 
 * The version requirement is a bit more strict now.
@@ -157,7 +159,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.17...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.2.18...HEAD
+[v0.2.18]: https://github.com/yutannihilation/savvy/compare/v0.2.17...v0.2.18
 [v0.2.17]: https://github.com/yutannihilation/savvy/compare/v0.2.16...v0.2.17
 [v0.2.16]: https://github.com/yutannihilation/savvy/compare/v0.2.15...v0.2.16
 [v0.2.15]: https://github.com/yutannihilation/savvy/compare/v0.2.14...v0.2.15
