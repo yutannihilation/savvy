@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+* The version requirement is a bit more strict now.
+
 ## [v0.2.17] (2024-03-10)
 
 ### Breaking changes

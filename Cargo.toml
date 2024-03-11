@@ -10,8 +10,8 @@ readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
 [dependencies]
-savvy-ffi = { version = "0", path = "./savvy-ffi" }
-savvy-macro = { version = "0", path = "./savvy-macro" }
+savvy-ffi = { version = ">=0.2.17", path = "./savvy-ffi" }
+savvy-macro = { version = ">=0.2.15", path = "./savvy-macro" }
 once_cell = "1"
 
 [build-dependencies]
