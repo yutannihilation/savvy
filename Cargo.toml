@@ -9,6 +9,9 @@ repository.workspace = true
 readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
+# Determined by `cargo msrv`
+rust-version = "1.64.0"
+
 [dependencies]
 savvy-ffi = { version = "0.2.17", path = "./savvy-ffi" }
 savvy-macro = { version = "0.2.15", path = "./savvy-macro" }

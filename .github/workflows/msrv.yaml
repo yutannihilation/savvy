@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  
+name: check MSRV
+
+jobs:
+  # check at least it can build
+  check-msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+  
+      - uses: dtolnay/rust-toolchain@1.64.0
+      
+      - name: Build
+        run: cargo build
