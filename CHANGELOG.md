@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New Features
+
+* `LogicalSexp` and `OwnedLogicalSexp` now have `as_slice_raw()` method.  This
+    is an expert-only function which might be found useful when you really need
+    to distinguish NAs.
+
 ## [v0.2.18] (2024-03-11)
 
 ### Minor improvements

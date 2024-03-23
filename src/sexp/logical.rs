@@ -19,7 +19,10 @@ impl_common_sexp_ops!(LogicalSexp);
 impl_common_sexp_ops_owned!(OwnedLogicalSexp);
 
 impl LogicalSexp {
-    fn as_slice_raw(&self) -> &[i32] {
+    /// Returns the internal representation, `&[i32]`, not `&[bool]`. This is an
+    /// expert-only function which might be found useful when you really need to
+    /// distinguish NAs.
+    pub fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
     }
 
@@ -39,7 +42,10 @@ impl OwnedLogicalSexp {
         LogicalSexp(self.inner)
     }
 
-    fn as_slice_raw(&self) -> &[i32] {
+    /// Returns the internal representation, `&[i32]`, not `&[bool]`. This is an
+    /// expert-only function which might be found useful when you really need to
+    /// distinguish NAs.
+    pub fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len()) }
     }
 
