@@ -9,6 +9,11 @@
     is an expert-only function which might be found useful when you really need
     to distinguish NAs.
 
+### Minor improvements
+
+* `savvy-cli init` now generates `<dllname>-win.def` to avoid the infamous
+  "export ordinal too large" error on Windows.
+
 ## [v0.2.18] (2024-03-11)
 
 ### Minor improvements

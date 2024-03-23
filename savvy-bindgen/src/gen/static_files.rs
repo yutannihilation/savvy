@@ -16,6 +16,10 @@ pub fn generate_makevars_win(crate_name: &str) -> String {
     )
 }
 
+pub fn generate_win_def(crate_name: &str) -> String {
+    format!(include_str!("./templates/dllname-win.def"), crate_name)
+}
+
 pub fn generate_gitignore() -> String {
     include_str!("./templates/gitignore").to_string()
 }

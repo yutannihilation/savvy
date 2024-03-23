@@ -13,7 +13,7 @@ use walkdir::WalkDir;
 use savvy_bindgen::{
     generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
     generate_configure, generate_example_lib_rs, generate_gitignore, generate_makevars_in,
-    generate_makevars_win, generate_r_impl_file, ParsedResult,
+    generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
 
 /// Generate C bindings and R bindings for a Rust library
@@ -26,42 +26,6 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Generate C header file
-    CHeader {
-        /// Path to a Rust file
-        file: PathBuf,
-    },
-
-    /// Generate C implementation for init.c
-    CImpl {
-        /// Path to a Rust file
-        file: PathBuf,
-    },
-
-    /// Generate R wrapper functions
-    RImpl {
-        /// Path to a Rust file
-        file: PathBuf,
-    },
-
-    /// Generate Makevars.in
-    MakevarsIn {
-        /// package name
-        crate_name: String,
-    },
-
-    /// Generate configure
-    Configure {},
-
-    /// Generate Makevars.win
-    MakevarsWin {
-        /// package name
-        crate_name: String,
-    },
-
-    /// Generate .gitignore
-    Gitignore {},
-
     /// Update wrappers in an R package
     Update {
         /// Path to the root of an R package
@@ -250,7 +214,11 @@ fn init(path: &Path) {
         &generate_makevars_in(&pkg_metadata.package_name),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
-    set_executable(&path.join(PATH_CONFIGURE));
+    set_executable(&path.join(PATH_CONFIGURE)); // This doesn't work on Windows!
+    write_file(
+        &path.join(format!("src/{}-win.def", &pkg_metadata.package_name)),
+        &generate_win_def(&pkg_metadata.package_name),
+    );
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
         &generate_makevars_win(&pkg_metadata.package_name),
@@ -284,36 +252,6 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CHeader { file } => {
-            let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!("{}", generate_c_header_file(&[parsed_result]));
-        }
-        Commands::CImpl { file } => {
-            let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!(
-                "{}",
-                generate_c_impl_file(&[parsed_result], "%%PACKAGE_NAME%%")
-            );
-        }
-        Commands::RImpl { file } => {
-            let parsed_result = savvy_bindgen::parse_file(file.as_path());
-            println!(
-                "{}",
-                generate_r_impl_file(&[parsed_result], "%%PACKAGE_NAME%%")
-            );
-        }
-        Commands::MakevarsIn { crate_name } => {
-            println!("{}", generate_makevars_in(&crate_name))
-        }
-        Commands::Configure {} => {
-            println!("{}", generate_configure())
-        }
-        Commands::MakevarsWin { crate_name } => {
-            println!("{}", generate_makevars_win(&crate_name))
-        }
-        Commands::Gitignore {} => {
-            println!("{}", generate_gitignore())
-        }
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
     }
