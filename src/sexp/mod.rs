@@ -190,9 +190,9 @@ impl Sexp {
     }
 
     unsafe fn get_string_attrib_by_symbol(&self, attr: SEXP) -> Option<Vec<&'static str>> {
-        let sexp = savvy_ffi::Rf_getAttrib(self.0, attr);
+        let sexp = unsafe { savvy_ffi::Rf_getAttrib(self.0, attr) };
 
-        if sexp == savvy_ffi::R_NilValue {
+        if sexp == unsafe { savvy_ffi::R_NilValue } {
             None
         // Bravely assume the "class" attribute is always a valid STRSXP.
         } else {

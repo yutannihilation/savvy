@@ -45,14 +45,15 @@ pub trait IntoExtPtrSexp: Sized {
         unsafe extern "C" fn finalizer<T>(x: SEXP) {
             // bring back the ownership to Rust's side so that Rust will drop
             // after this block ends.
-            let ptr = R_ExternalPtrAddr(x);
+            let ptr = unsafe { R_ExternalPtrAddr(x) };
 
             // the pointer can be null (e.g. https://github.com/pola-rs/r-polars/issues/851)
             if !ptr.is_null() {
-                drop(Box::from_raw(ptr as *mut T));
+                let rust_obj = unsafe { Box::from_raw(ptr as *mut T) };
+                drop(rust_obj);
             }
 
-            R_ClearExternalPtr(x);
+            unsafe { R_ClearExternalPtr(x) };
         }
 
         unsafe {
@@ -81,7 +82,7 @@ pub trait IntoExtPtrSexp: Sized {
 pub unsafe fn get_external_pointer_addr(
     x: SEXP,
 ) -> crate::error::Result<*mut std::os::raw::c_void> {
-    let ptr = R_ExternalPtrAddr(x);
+    let ptr = unsafe { R_ExternalPtrAddr(x) };
 
     if ptr.is_null() {
         return Err(crate::error::Error::InvalidPointer);
@@ -107,7 +108,7 @@ impl ExternalPointerSexp {
     /// This function is highly unsafe in that there's no mechanism to verify
     /// the destination type is the correct one.
     pub unsafe fn cast_unchecked<T>(&self) -> *const T {
-        savvy_ffi::R_ExternalPtrAddr(self.0) as _
+        unsafe { savvy_ffi::R_ExternalPtrAddr(self.0) as _ }
     }
 
     /// Cast the SEXP to a concrete type of pointer.
@@ -117,7 +118,7 @@ impl ExternalPointerSexp {
     /// This function is highly unsafe in that there's no mechanism to verify
     /// the destination type is the correct one.
     pub unsafe fn cast_mut_unchecked<T>(&self) -> *mut T {
-        savvy_ffi::R_ExternalPtrAddr(self.0) as _
+        unsafe { savvy_ffi::R_ExternalPtrAddr(self.0) as _ }
     }
 }
 
