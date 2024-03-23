@@ -20,13 +20,6 @@ Generate C bindings and R bindings for a Rust library
 Usage: savvy-cli <COMMAND>
 
 Commands:
-  c-header      Generate C header file
-  c-impl        Generate C implementation for init.c
-  r-impl        Generate R wrapper functions
-  makevars-in   Generate Makevars.in
-  configure     Generate configure
-  makevars-win  Generate Makevars.win
-  gitignore     Generate .gitignore
   update        Update wrappers in an R package
   init          Init savvy-powered Rust crate in an R package
   help          Print this message or the help of the given subcommand(s)
