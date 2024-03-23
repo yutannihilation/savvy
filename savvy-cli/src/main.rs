@@ -13,7 +13,7 @@ use walkdir::WalkDir;
 use savvy_bindgen::{
     generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
     generate_configure, generate_example_lib_rs, generate_gitignore, generate_makevars_in,
-    generate_makevars_win, generate_r_impl_file, ParsedResult,
+    generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
 
 /// Generate C bindings and R bindings for a Rust library
@@ -250,7 +250,11 @@ fn init(path: &Path) {
         &generate_makevars_in(&pkg_metadata.package_name),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
-    set_executable(&path.join(PATH_CONFIGURE));
+    set_executable(&path.join(PATH_CONFIGURE)); // This doesn't work on Windows!
+    write_file(
+        &path.join(format!("src/{}-win.def", &pkg_metadata.package_name)),
+        &generate_win_def(&pkg_metadata.package_name),
+    );
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
         &generate_makevars_win(&pkg_metadata.package_name),
