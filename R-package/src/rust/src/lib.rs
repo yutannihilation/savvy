@@ -297,6 +297,12 @@ impl Person {
         }
     }
 
+    fn new_with_name(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+        }
+    }
+
     fn set_name(&mut self, name: &str) -> savvy::Result<()> {
         self.name = name.to_string();
         Ok(())

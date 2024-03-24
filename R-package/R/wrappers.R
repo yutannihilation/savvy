@@ -315,6 +315,19 @@ Person <- function() {
   e
 }
 
+Person_new_with_name <- function(name) {
+  e <- new.env(parent = emptyenv())
+  self <- .Call(Person_new_with_name__impl, name)
+
+  e$.ptr <- self
+  e$set_name <- Person_set_name(self)
+  e$name <- Person_name(self)
+  e$associated_function <- Person_associated_function(self)
+
+  class(e) <- "Person"
+  e
+}
+
 
 Person_set_name <- function(self) {
   function(name) {
