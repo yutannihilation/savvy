@@ -85,3 +85,13 @@ test_that("structs work", {
 
   expect_equal(x$associated_function(), "associated_function")
 })
+
+test_that("function that takes struct works", {
+  x <- Person()
+  x$set_name("foo")
+
+  expect_equal(get_name_external(x), "foo")
+
+  set_name_external(x, "bar")
+  expect_equal(get_name_external(x), "bar")
+})

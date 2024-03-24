@@ -43,3 +43,10 @@ test_that("conversion from vectors", {
   expect_equal(rep_str_vec(3L), c("foo", "foo", "foo"))
   expect_equal(rep_str_slice(3L), c("foo", "foo", "foo"))
 })
+
+test_that("user-defined structs", {
+  expect_error(get_name_external(NULL))
+  x <- Person()
+  class(x) <- "foo"
+  expect_error(get_name_external(x))
+})

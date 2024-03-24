@@ -65,6 +65,36 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
             }
         }
 
+        impl TryFrom<savvy::Sexp> for &mut #ty {
+            type Error = savvy::Error;
+
+            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
+                if !value.is_external_pointer() {
+                    let type_name = value.get_human_readable_type_name();
+                    let msg = format!("Expected an external pointer, got {type_name}s");
+                    return Err(savvy::error::Error::UnexpectedType(msg));
+                }
+                let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
+                let res = unsafe { x.as_mut() };
+                res.ok_or("Failed to convert the external pointer to the Rust object".into())
+            }
+        }
+
+        impl TryFrom<savvy::Sexp> for &#ty {
+            type Error = savvy::Error;
+
+            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
+                if !value.is_external_pointer() {
+                    let type_name = value.get_human_readable_type_name();
+                    let msg = format!("Expected an external pointer, got {type_name}s");
+                    return Err(savvy::error::Error::UnexpectedType(msg));
+                }
+                let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
+                let res = unsafe { x.as_ref() };
+                res.ok_or("Failed to convert the external pointer to the Rust object".into())
+            }
+        }
+
         #(#list_fn_inner)*
         #(#list_fn_outer)*
     }

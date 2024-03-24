@@ -12,9 +12,6 @@ pub use convert_from_rust_types::*;
 mod error_handling;
 pub use error_handling::*;
 
-mod try_from;
-pub use try_from::*;
-
 mod init_vectors;
 pub use init_vectors::*;
 
@@ -313,6 +310,16 @@ impl Person {
     fn associated_function() -> savvy::Result<savvy::Sexp> {
         "associated_function".try_into()
     }
+}
+
+#[savvy]
+fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
+    x.name()
+}
+
+#[savvy]
+fn set_name_external(x: &mut Person, name: &str) -> savvy::Result<()> {
+    x.set_name(name)
 }
 
 // Make sure cargo test runs without linking errors
