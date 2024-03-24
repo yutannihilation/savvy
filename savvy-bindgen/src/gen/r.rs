@@ -145,6 +145,7 @@ impl SavvyImpl {
   e <- new.env(parent = emptyenv())
   self <- .Call({args_call})
 
+  e$`__inner` <- function() self
 {methods}
 
   class(e) <- "{class_r}"
