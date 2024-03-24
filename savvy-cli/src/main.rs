@@ -44,6 +44,16 @@ struct PackageDescription {
     has_sysreq: bool,
 }
 
+impl PackageDescription {
+    fn package_name_for_rust(&self) -> String {
+        to_snake_case(&self.package_name)
+    }
+
+    fn package_name_for_r(&self) -> String {
+        self.package_name.clone()
+    }
+}
+
 // Parse DESCRIPTION file and get the package name
 fn parse_description(path: &Path) -> PackageDescription {
     let content = savvy_bindgen::read_file(path);
@@ -70,7 +80,7 @@ fn parse_description(path: &Path) -> PackageDescription {
     }
 
     PackageDescription {
-        package_name: to_snake_case(package_name_orig),
+        package_name: package_name_orig.to_string(),
         has_sysreq,
     }
 }
@@ -168,6 +178,7 @@ fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
 
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
+
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
     for e in WalkDir::new(path.join(PATH_SRC_DIR))
@@ -184,11 +195,11 @@ fn update(path: &Path) {
     );
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(parsed.as_slice(), &pkg_metadata.package_name),
+        &generate_c_impl_file(parsed.as_slice(), &pkg_metadata.package_name_for_r()),
     );
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(parsed.as_slice(), &pkg_metadata.package_name),
+        &generate_r_impl_file(parsed.as_slice(), &pkg_metadata.package_name_for_r()),
     );
 }
 
@@ -205,23 +216,26 @@ fn init(path: &Path) {
 
     write_file(
         &path.join(PATH_CARGO_TOML),
-        &generate_cargo_toml(&pkg_metadata.package_name),
+        &generate_cargo_toml(&pkg_metadata.package_name_for_rust()),
     );
     write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
     write_file(
         &path.join(PATH_MAKEVARS_IN),
-        &generate_makevars_in(&pkg_metadata.package_name),
+        &generate_makevars_in(&pkg_metadata.package_name_for_rust()),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
     set_executable(&path.join(PATH_CONFIGURE)); // This doesn't work on Windows!
     write_file(
-        &path.join(format!("src/{}-win.def", &pkg_metadata.package_name)),
-        &generate_win_def(&pkg_metadata.package_name),
+        &path.join(format!(
+            "src/{}-win.def",
+            &pkg_metadata.package_name_for_r()
+        )),
+        &generate_win_def(&pkg_metadata.package_name_for_r()),
     );
     write_file(
         &path.join(PATH_MAKEVARS_WIN),
-        &generate_makevars_win(&pkg_metadata.package_name),
+        &generate_makevars_win(&pkg_metadata.package_name_for_rust()),
     );
     write_file(&path.join(PATH_GITIGNORE), &generate_gitignore());
 
