@@ -299,7 +299,6 @@ SEXP Person_associated_function__impl(void) {
 }
 
 
-
 static const R_CallMethodDef CallEntries[] = {
 
     {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
@@ -355,7 +354,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
-
     {NULL, NULL, 0}
 };
 

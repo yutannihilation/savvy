@@ -48,7 +48,13 @@ impl SavvyFn {
             .map(|(pat, _)| pat.clone())
             .collect::<Vec<String>>();
 
-        let extract_ext_ptr = self
+        let mut args_call = args.clone();
+        args_call.insert(0, format!("{fn_name_c}__impl"));
+
+        let args = args.join(", ");
+        let args_call = args_call.join(", ");
+
+        let mut body_lines = self
             .args
             .iter()
             .flat_map(|arg| {
@@ -56,32 +62,28 @@ impl SavvyFn {
                     let r_var = arg.pat_string();
                     let r_class = arg.ty_string();
                     Some(format!(
-                        r#"{r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
+                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
                     ))
                 } else {
                     None
                 }
             })
-            .collect::<Vec<String>>()
-            .join("  \n");
-
-        let mut args_call = args.clone();
-        args_call.insert(0, format!("{fn_name_c}__impl"));
-
-        let args = args.join(", ");
-        let args_call = args_call.join(", ");
+            .collect::<Vec<String>>();
 
         // If the result is NULL, wrap it with invisible
-        let body = match self.return_type {
-            SavvyFnReturnType::ResultSexp(_) => format!(".Call({args_call})"),
-            SavvyFnReturnType::ResultUnit(_) => format!("invisible(.Call({args_call}))"),
+        match self.return_type {
+            SavvyFnReturnType::ResultSexp(_) => body_lines.push(format!("  .Call({args_call})")),
+            SavvyFnReturnType::ResultUnit(_) => {
+                body_lines.push(format!("  invisible(.Call({args_call}))"))
+            }
         };
+
+        let body = body_lines.join("\n");
 
         format!(
             "{doc_comments}
 {fn_name} <- function({args}) {{
-  {extract_ext_ptr}
-  {body}
+{body}
 }}
 "
         )
