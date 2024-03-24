@@ -315,6 +315,16 @@ impl Person {
     }
 }
 
+#[savvy]
+fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
+    x.name()
+}
+
+#[savvy]
+fn set_name_external(x: &mut Person, name: &str) -> savvy::Result<()> {
+    x.set_name(name)
+}
+
 // Make sure cargo test runs without linking errors
 #[cfg(test)]
 mod tests {
