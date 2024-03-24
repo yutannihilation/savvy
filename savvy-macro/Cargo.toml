@@ -21,7 +21,6 @@ savvy-bindgen = { version = "0.3.0", path = "../savvy-bindgen" }
 
 [dev-dependencies]
 trybuild = "1"
-savvy = { version = "0.3.0", path = "../" }
 
 [package.metadata.dist]
 dist = false

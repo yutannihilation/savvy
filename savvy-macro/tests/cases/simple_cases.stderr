@@ -45,7 +45,7 @@ error: For safety, a function that takes `self` and returns `Self` is not allowe
    | |_____^
 
 error: A user-defined struct must be in the form of either `&Foo2` or `&mut Foo2`
-  --> tests/cases/simple_cases.rs:46:37
+  --> tests/cases/simple_cases.rs:48:37
    |
-46 | fn wrong_type_custom_type_no_ref(x: Foo2) -> savvy::Result<()> {
+48 | fn wrong_type_custom_type_no_ref(x: Foo2) -> savvy::Result<()> {
    |                                     ^^^^

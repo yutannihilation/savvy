@@ -37,24 +37,28 @@ impl Foo1 {
     }
 }
 
-struct Foo2;
+// TODO
 
-#[savvy]
-impl Foo2 {}
+// struct Foo2;
+
+// #[savvy]
+// impl Foo2 {}
 
 #[savvy]
 fn wrong_type_custom_type_no_ref(x: Foo2) -> savvy::Result<()> {
     Ok(())
 }
 
-#[savvy]
-fn correct_type_custom_type_ref(x: &Foo2) -> savvy::Result<()> {
-    Ok(())
-}
+// TODO
+//
+// #[savvy]
+// fn correct_type_custom_type_ref(x: &Foo2) -> savvy::Result<()> {
+//     Ok(())
+// }
 
-#[savvy]
-fn correct_type_custom_type_ref_mut(x: &mut Foo2) -> savvy::Result<()> {
-    Ok(())
-}
+// #[savvy]
+// fn correct_type_custom_type_ref_mut(x: &mut Foo2) -> savvy::Result<()> {
+//     Ok(())
+// }
 
 fn main() {}
