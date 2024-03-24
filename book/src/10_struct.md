@@ -39,6 +39,20 @@ x$name()
 #> [1] "たかし"
 ```
 
+You can also use the struct as the argument of a `#[savvy]`-ed function. The
+type must be specified either as `&Ty` or as `&mut Ty`, not as `Ty`.
+
+```rust
+#[savvy]
+fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
+    x.name()
+}
+```
+```r
+get_name_external(x)
+#> [1] "たかし"
+```
+
 ## External pointer?
 
 Under the hood, the `Person` struct is stored in `EXTPTRSXP`. But, you don't
@@ -52,6 +66,7 @@ Person <- function() {
   e <- new.env(parent = emptyenv())
   self <- .Call(Person_new__impl)
 
+  e$.ptr <- self
   e$set_name <- Person_set_name(self)
   e$name <- Person_name(self)
 
