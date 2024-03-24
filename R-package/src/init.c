@@ -268,6 +268,16 @@ SEXP list_with_names_and_values__impl(void) {
     return handle_result(res);
 }
 
+SEXP get_name_external__impl(SEXP x) {
+    SEXP res = get_name_external(x);
+    return handle_result(res);
+}
+
+SEXP set_name_external__impl(SEXP x, SEXP name) {
+    SEXP res = set_name_external(x, name);
+    return handle_result(res);
+}
+
 SEXP Person_new__impl(void) {
     SEXP res = Person_new();
     return handle_result(res);
@@ -288,10 +298,6 @@ SEXP Person_associated_function__impl(void) {
     return handle_result(res);
 }
 
-SEXP my_integer__impl(SEXP x) {
-    SEXP res = my_integer(x);
-    return handle_result(res);
-}
 
 
 static const R_CallMethodDef CallEntries[] = {
@@ -343,11 +349,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"list_with_no_values__impl", (DL_FUNC) &list_with_no_values__impl, 0},
     {"list_with_no_names__impl", (DL_FUNC) &list_with_no_names__impl, 0},
     {"list_with_names_and_values__impl", (DL_FUNC) &list_with_names_and_values__impl, 0},
+    {"get_name_external__impl", (DL_FUNC) &get_name_external__impl, 1},
+    {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
     {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
-    {"my_integer__impl", (DL_FUNC) &my_integer__impl, 1},
+
     {NULL, NULL, 0}
 };
 

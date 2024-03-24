@@ -9,33 +9,97 @@ pub struct ParsedResult {
     pub impls: Vec<SavvyImpl>,
 }
 
-struct SavvyInputType(syn::Type);
+enum SavvyInputTypeCategory {
+    SexpWrapper,
+    PrimitiveType,
+    UserDefinedType,
+}
+
+struct SavvyInputType {
+    category: SavvyInputTypeCategory,
+    ty_orig: syn::Type,
+    ty_str: String,
+}
 
 #[allow(dead_code)]
 impl SavvyInputType {
     fn from_type(ty: &syn::Type) -> syn::Result<Self> {
-        if let syn::Type::Path(type_path) = ty {
-            let type_ident = &type_path.path.segments.last().unwrap().ident;
-            let ty_str = type_ident.to_string();
-            match ty_str.as_str() {
-                "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedLogicalSexp" | "OwnedStringSexp"
-                | "OwnedListSexp" => {
-                    let msg = format!(
-                        "`Owned-` types are not allowed here. Did you mean `{}`?",
-                        ty_str.strip_prefix("Owned").unwrap()
-                    );
-                    return Err(syn::Error::new_spanned(type_path, msg));
+        match &ty {
+            // User-defined structs are accepted in the form of either `&` or
+            // `&mut`. Note that `&str` also falls here.
+            syn::Type::Reference(syn::TypeReference { elem, .. }) => {
+                if let syn::Type::Path(type_path) = elem.as_ref() {
+                    let ty_str = type_path.path.segments.last().unwrap().ident.to_string();
+                    if &ty_str == "str" {
+                        Ok(Self {
+                            category: SavvyInputTypeCategory::PrimitiveType,
+                            ty_orig: ty.clone(),
+                            ty_str: "&str".to_string(),
+                        })
+                    } else {
+                        Ok(Self {
+                            category: SavvyInputTypeCategory::UserDefinedType,
+                            ty_orig: ty.clone(),
+                            ty_str,
+                        })
+                    }
+                } else {
+                    Err(syn::Error::new_spanned(
+                        ty.clone(),
+                        "Unexpected type specification: {:?}",
+                    ))
                 }
-                _ => {}
             }
-        }
 
-        Ok(Self(ty.clone()))
+            syn::Type::Path(type_path) => {
+                let type_ident = &type_path.path.segments.last().unwrap().ident;
+                let ty_str = type_ident.to_string();
+                match ty_str.as_str() {
+                    // Owned-types are not allowed for the input
+                    "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedLogicalSexp"
+                    | "OwnedStringSexp" | "OwnedListSexp" => {
+                        let msg = format!(
+                            "`Owned-` types are not allowed here. Did you mean `{}`?",
+                            ty_str.strip_prefix("Owned").unwrap()
+                        );
+                        Err(syn::Error::new_spanned(type_path, msg))
+                    }
+
+                    // Read-only types
+                    "Sexp" | "IntegerSexp" | "RealSexp" | "LogicalSexp" | "StringSexp"
+                    | "ListSexp" | "FunctionSexp" => Ok(Self {
+                        category: SavvyInputTypeCategory::SexpWrapper,
+                        ty_orig: ty.clone(),
+                    ty_str
+                }),
+
+                    // Primitive types
+                    "i32" | "usize" | "f64" | "bool" => Ok(Self {
+                        category: SavvyInputTypeCategory::PrimitiveType,
+                        ty_orig: ty.clone(),
+                    ty_str
+                }),
+
+                    _ => Err(syn::Error::new_spanned(
+                        type_path,
+                        format!("A user-defined struct must be in the form of either `&{ty_str}` or `&mut {ty_str}`"),
+                    )),
+                }
+            }
+            _ => Err(syn::Error::new_spanned(
+                ty.clone(),
+                "Unexpected type specification: {:?}",
+            )),
+        }
     }
 
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
-        self.0.clone()
+        match &self.category {
+            SavvyInputTypeCategory::SexpWrapper => self.ty_orig.clone(),
+            SavvyInputTypeCategory::PrimitiveType => self.ty_orig.clone(),
+            SavvyInputTypeCategory::UserDefinedType => self.ty_orig.clone(),
+        }
     }
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
@@ -59,8 +123,16 @@ impl SavvyFnArg {
         self.pat.clone()
     }
 
+    pub fn is_user_defined_type(&self) -> bool {
+        matches!(&self.ty.category, SavvyInputTypeCategory::UserDefinedType)
+    }
+
     pub fn pat_string(&self) -> String {
         self.pat.to_string()
+    }
+
+    pub fn ty_string(&self) -> String {
+        self.ty.ty_str.clone()
     }
 
     pub fn to_c_type_string(&self) -> String {
