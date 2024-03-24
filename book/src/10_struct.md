@@ -39,6 +39,26 @@ x$name()
 #> [1] "たかし"
 ```
 
+If you define a constructor with a different name than `new()`, the
+correspopnding R function is `<type_name>_<method>`. For example, the method
+below will be available as `Person_new_with_name()` on R's side.
+
+```rust
+#[savvy]
+impl Person {
+    fn new_with_name(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+        }
+    }
+}
+```
+```r
+x <- Person_new_with_name("Scipio")
+x$name()
+#> [1] "Scipio"
+```
+
 You can also use the struct as the argument of a `#[savvy]`-ed function. The
 type must be specified either as `&Ty` or as `&mut Ty`, not as `Ty`.
 
