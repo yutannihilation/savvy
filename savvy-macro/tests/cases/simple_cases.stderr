@@ -7,37 +7,45 @@ error: function must have return type
   = note: this error originates in the attribute macro `savvy` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: the return type must be either syn::Result<Sexp> or syn::Result<()>
- --> tests/cases/simple_cases.rs:7:34
+ --> tests/cases/simple_cases.rs:7:30
   |
-7 | fn foo_wrong_return_type(x: i32) -> i32 {}
-  |                                  ^^^^^^
+7 | fn wrong_return_type(x: i32) -> i32 {}
+  |                              ^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
-  --> tests/cases/simple_cases.rs:10:32
+  --> tests/cases/simple_cases.rs:10:28
    |
-10 | fn foo_wrong_type_owned_int(x: OwnedIntegerSexp) {}
-   |                                ^^^^^^^^^^^^^^^^
+10 | fn wrong_type_owned_int(x: OwnedIntegerSexp) -> savvy::Result<()> {
+   |                            ^^^^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `RealSexp`?
-  --> tests/cases/simple_cases.rs:13:33
+  --> tests/cases/simple_cases.rs:15:29
    |
-13 | fn foo_wrong_type_owned_real(x: OwnedRealSexp) {}
-   |                                 ^^^^^^^^^^^^^
+15 | fn wrong_type_owned_real(x: OwnedRealSexp) -> savvy::Result<()> {
+   |                             ^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `LogicalSexp`?
-  --> tests/cases/simple_cases.rs:16:36
+  --> tests/cases/simple_cases.rs:20:32
    |
-16 | fn foo_wrong_type_owned_logical(x: OwnedLogicalSexp) {}
-   |                                    ^^^^^^^^^^^^^^^^
+20 | fn wrong_type_owned_logical(x: OwnedLogicalSexp) -> savvy::Result<()> {
+   |                                ^^^^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
-  --> tests/cases/simple_cases.rs:19:35
+  --> tests/cases/simple_cases.rs:25:31
    |
-19 | fn foo_wrong_type_owned_string(x: OwnedStringSexp) {}
-   |                                   ^^^^^^^^^^^^^^^
+25 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
+   |                               ^^^^^^^^^^^^^^^
 
 error: For safety, a function that takes `self` and returns `Self` is not allowed
-  --> tests/cases/simple_cases.rs:25:5
+  --> tests/cases/simple_cases.rs:33:5
    |
-25 |     fn foo_self(&self) -> Self {}
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+33 | /     fn foo_self(&self) -> Self {
+34 | |         Self {}
+35 | |     }
+   | |_____^
+
+error: A user-defined struct must be in the form of either `&Foo2` or `&mut Foo2`
+  --> tests/cases/simple_cases.rs:44:37
+   |
+44 | fn wrong_type_custom_type_no_ref(x: Foo2) -> savvy::Result<()> {
+   |                                     ^^^^
