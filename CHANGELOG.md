@@ -3,6 +3,40 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New Features
+
+* Now user-defined struct can be used as an argument of `#[savvy]`-ed functions.
+  It must be specified as `&Ty` or `&mut Ty`, not `Ty`. 
+
+Example:
+
+```rust
+struct Person {
+    pub name: String,
+}
+
+#[savvy]
+impl Person {
+    fn get_name(&self) -> savvy::Result<savvy::Sexp> {
+        let name = self.name.as_str();
+        name.try_into()
+    }
+}
+
+#[savvy]
+fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
+    x.get_name()
+}
+```
+
+### Breaking changes
+
+* While this is described in the New Features section, it was already allowed to
+  specify user-defined structs as argument if the user defined the necessary
+  `TryFrom` implementations propoerly. At that time, specifying it without `&`
+  was possible, but now it's not allowed. Anyway, as this was undocumented and
+  expert-only usage, I expect no one notices this breaking change.
+
 ## [v0.2.20] (2024-03-23)
 
 ## [v0.2.19] (2024-03-23)
