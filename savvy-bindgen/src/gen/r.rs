@@ -72,10 +72,10 @@ impl SavvyFn {
 
         // If the result is NULL, wrap it with invisible
         match self.return_type {
-            SavvyFnReturnType::ResultSexp(_) => body_lines.push(format!("  .Call({args_call})")),
-            SavvyFnReturnType::ResultUnit(_) => {
+            SavvyFnReturnType::Unit(_) => {
                 body_lines.push(format!("  invisible(.Call({args_call}))"))
             }
+            _ => body_lines.push(format!("  .Call({args_call})")),
         };
 
         let body = body_lines.join("\n");
@@ -125,8 +125,8 @@ impl SavvyImpl {
 
                 // If the result is NULL, wrap it with invisible
                 let body = match x.return_type {
-                    SavvyFnReturnType::ResultSexp(_) => format!(".Call({args_call})"),
-                    SavvyFnReturnType::ResultUnit(_) => format!("invisible(.Call({args_call}))"),
+                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
+                    _ => format!(".Call({args_call})"),
                 };
 
                 format!(

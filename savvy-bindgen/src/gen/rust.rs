@@ -75,10 +75,10 @@ impl SavvyFn {
             .collect();
 
         let (ok_lhs, ok_rhs): (syn::Expr, syn::Expr) = match &self.return_type {
-            SavvyFnReturnType::ResultSexp(_) => (parse_quote!(result), parse_quote!(result.0)),
-            SavvyFnReturnType::ResultUnit(_) => {
+            SavvyFnReturnType::Unit(_) => {
                 (parse_quote!(_), parse_quote!(savvy::sexp::null::null()))
             }
+            _ => (parse_quote!(result), parse_quote!(result.0)),
         };
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument

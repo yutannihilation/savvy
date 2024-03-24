@@ -319,6 +319,13 @@ impl Person {
 }
 
 #[savvy]
+fn new_external() -> savvy::Result<Person> {
+    Ok(Self {
+        name: "".to_string(),
+    })
+}
+
+#[savvy]
 fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
     x.name()
 }
