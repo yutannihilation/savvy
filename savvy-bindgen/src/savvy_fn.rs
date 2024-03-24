@@ -9,10 +9,16 @@ pub struct ParsedResult {
     pub impls: Vec<SavvyImpl>,
 }
 
-enum SavvyInputType {
-    SexpWrapper(syn::Type),
-    PrimitiveType(syn::Type),
-    UserDefinedType(syn::Type),
+enum SavvyInputTypeCategory {
+    SexpWrapper,
+    PrimitiveType,
+    UserDefinedType,
+}
+
+struct SavvyInputType {
+    category: SavvyInputTypeCategory,
+    ty_orig: syn::Type,
+    ty_str: String,
 }
 
 #[allow(dead_code)]
@@ -23,11 +29,19 @@ impl SavvyInputType {
             // `&mut`. Note that `&str` also falls here.
             syn::Type::Reference(syn::TypeReference { elem, .. }) => {
                 if let syn::Type::Path(type_path) = elem.as_ref() {
-                    let type_ident = &type_path.path.segments.last().unwrap().ident;
-                    if &type_ident.to_string() == "str" {
-                        Ok(Self::PrimitiveType(ty.clone()))
+                    let ty_str = type_path.path.segments.last().unwrap().ident.to_string();
+                    if &ty_str == "str" {
+                        Ok(Self {
+                            category: SavvyInputTypeCategory::PrimitiveType,
+                            ty_orig: ty.clone(),
+                            ty_str: "&str".to_string(),
+                        })
                     } else {
-                        Ok(Self::UserDefinedType(ty.clone()))
+                        Ok(Self {
+                            category: SavvyInputTypeCategory::UserDefinedType,
+                            ty_orig: ty.clone(),
+                            ty_str,
+                        })
                     }
                 } else {
                     Err(syn::Error::new_spanned(
@@ -53,10 +67,18 @@ impl SavvyInputType {
 
                     // Read-only types
                     "Sexp" | "IntegerSexp" | "RealSexp" | "LogicalSexp" | "StringSexp"
-                    | "ListSexp" | "FunctionSexp" => Ok(Self::SexpWrapper(ty.clone())),
+                    | "ListSexp" | "FunctionSexp" => Ok(Self {
+                        category: SavvyInputTypeCategory::SexpWrapper,
+                        ty_orig: ty.clone(),
+                    ty_str
+                }),
 
                     // Primitive types
-                    "i32" | "usize" | "f64" | "bool" => Ok(Self::PrimitiveType(ty.clone())),
+                    "i32" | "usize" | "f64" | "bool" => Ok(Self {
+                        category: SavvyInputTypeCategory::PrimitiveType,
+                        ty_orig: ty.clone(),
+                    ty_str
+                }),
 
                     _ => Err(syn::Error::new_spanned(
                         type_path,
@@ -73,10 +95,10 @@ impl SavvyInputType {
 
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
-        match self {
-            SavvyInputType::SexpWrapper(ty) => ty.clone(),
-            SavvyInputType::PrimitiveType(ty) => ty.clone(),
-            SavvyInputType::UserDefinedType(ty) => ty.clone(),
+        match &self.category {
+            SavvyInputTypeCategory::SexpWrapper => self.ty_orig.clone(),
+            SavvyInputTypeCategory::PrimitiveType => self.ty_orig.clone(),
+            SavvyInputTypeCategory::UserDefinedType => self.ty_orig.clone(),
         }
     }
 
@@ -101,8 +123,16 @@ impl SavvyFnArg {
         self.pat.clone()
     }
 
+    pub fn is_user_defined_type(&self) -> bool {
+        matches!(&self.ty.category, SavvyInputTypeCategory::UserDefinedType)
+    }
+
     pub fn pat_string(&self) -> String {
         self.pat.to_string()
+    }
+
+    pub fn ty_string(&self) -> String {
+        self.ty.ty_str.clone()
     }
 
     pub fn to_c_type_string(&self) -> String {

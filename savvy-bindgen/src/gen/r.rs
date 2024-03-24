@@ -48,6 +48,23 @@ impl SavvyFn {
             .map(|(pat, _)| pat.clone())
             .collect::<Vec<String>>();
 
+        let extract_ext_ptr = self
+            .args
+            .iter()
+            .flat_map(|arg| {
+                if arg.is_user_defined_type() {
+                    let r_var = arg.pat_string();
+                    let r_class = arg.ty_string();
+                    Some(format!(
+                        r#"{r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<String>>()
+            .join("  \n");
+
         let mut args_call = args.clone();
         args_call.insert(0, format!("{fn_name_c}__impl"));
 
@@ -63,6 +80,7 @@ impl SavvyFn {
         format!(
             "{doc_comments}
 {fn_name} <- function({args}) {{
+  {extract_ext_ptr}
   {body}
 }}
 "
@@ -145,7 +163,7 @@ impl SavvyImpl {
   e <- new.env(parent = emptyenv())
   self <- .Call({args_call})
 
-  e$`__inner` <- function() self
+  e$.ptr <- self
 {methods}
 
   class(e) <- "{class_r}"
@@ -188,6 +206,16 @@ pub fn generate_r_impl_file(parsed_results: &[ParsedResult], pkg_name: &str) -> 
         r#"#' @useDynLib {pkg_name}, .registration = TRUE
 #' @keywords internal
 NULL
+
+# Check class and extract the external pointer embedded in the environment
+.savvy_extract_ptr <- function(e, class) {{
+  if(inherits(e, class)) {{
+    e$.ptr
+  }} else {{
+    msg <- paste0("Expected ", class, ", got ", class(e)[1])
+    stop(msg, call. = FALSE)
+  }}
+}}
 
 {r_fns}
 {r_impls}
