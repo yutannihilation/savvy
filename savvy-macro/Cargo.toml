@@ -17,11 +17,11 @@ proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
 
-savvy-bindgen = { version = "0.2.20", path = "../savvy-bindgen" }
+savvy-bindgen = { version = "0.3.0", path = "../savvy-bindgen" }
 
 [dev-dependencies]
 trybuild = "1"
-savvy = { version = "0.2.20", path = "../" }
+savvy = { version = "0.3.0", path = "../" }
 
 [package.metadata.dist]
 dist = false
