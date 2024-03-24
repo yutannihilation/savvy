@@ -1,3 +1,5 @@
+#![allow(unused_variables)]
+
 use savvy_macro::savvy;
 
 #[savvy]
