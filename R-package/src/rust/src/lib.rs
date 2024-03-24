@@ -12,9 +12,6 @@ pub use convert_from_rust_types::*;
 mod error_handling;
 pub use error_handling::*;
 
-mod try_from;
-pub use try_from::*;
-
 mod init_vectors;
 pub use init_vectors::*;
 
