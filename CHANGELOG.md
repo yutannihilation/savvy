@@ -29,10 +29,15 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 }
 ```
 
+### Fixed bugs
+
+* Previously, `savvy-cli init` and `savvy-cli update` didn't handle the package
+  name properly ("packageName" vs "package_name"). Now it's fixed.
+
 ### Breaking changes
 
 * While this is described in the New Features section, it was already allowed to
-  specify user-defined structs as argument if the user defined the necessary
+  specify user-defined structs as argument if the user defines the necessary
   `TryFrom` implementations propoerly. At that time, specifying it without `&`
   was possible, but now it's not allowed. Anyway, as this was undocumented and
   expert-only usage, I expect no one notices this breaking change.
