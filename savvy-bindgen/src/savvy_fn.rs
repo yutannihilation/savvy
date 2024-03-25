@@ -455,9 +455,22 @@ mod tests {
             assert!(matches!(srt.unwrap(), SavvyFnReturnType::Unit(_)));
         }
 
+        let ok_cases3: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<Foo>),
+            parse_quote!(-> savvy::Result<Foo>),
+        ];
+
+        for rt in ok_cases3 {
+            let srt = get_savvy_return_type(rt);
+            assert!(srt.is_ok());
+            assert!(matches!(
+                srt.unwrap(),
+                SavvyFnReturnType::UserDefinedStruct(_)
+            ));
+        }
+
         let err_cases: &[syn::ReturnType] = &[
-            parse_quote!(-> FOO),
-            parse_quote!(-> savvy::Result<FOO>),
+            parse_quote!(-> Foo),
             parse_quote!(-> savvy::Result<(T, T)>),
             parse_quote!(-> foo::Result<Sexp>),
             parse_quote!(),
