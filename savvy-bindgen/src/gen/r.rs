@@ -141,6 +141,25 @@ impl SavvyImpl {
             .collect::<Vec<String>>()
             .join("\n");
 
+        let methods = others
+            .iter()
+            .map(|o| format!("  e${} <- {}(ptr)", o.fn_name, o.fn_name_r()))
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        let wrap_fn_name = self.fn_name_r_wrapper();
+        let wrap_fn = format!(
+            r#"{wrap_fn_name} <- function(ptr) {{
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+{methods}
+
+  class(e) <- "{class_r}"
+  e
+}}
+"#
+        );
+
         let builders = ctors
             .iter()
             .map(|x| {
@@ -162,14 +181,7 @@ impl SavvyImpl {
 
                 format!(
                     r#"{fn_name} <- function({args_r}) {{
-  e <- new.env(parent = emptyenv())
-  self <- .Call({args_call})
-
-  e$.ptr <- self
-{methods}
-
-  class(e) <- "{class_r}"
-  e
+  {wrap_fn_name}(.Call({args_call}))
 }}
 "#
                 )
@@ -182,6 +194,8 @@ impl SavvyImpl {
         format!(
             "{doc_comments}
 {builders}
+
+{wrap_fn}
 
 {closures}
 "

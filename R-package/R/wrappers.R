@@ -303,26 +303,20 @@ set_name_external <- function(x, name) {
 #'
 #' @export
 Person <- function() {
-  e <- new.env(parent = emptyenv())
-  self <- .Call(Person_new__impl)
-
-  e$.ptr <- self
-  e$set_name <- Person_set_name(self)
-  e$name <- Person_name(self)
-  e$associated_function <- Person_associated_function(self)
-
-  class(e) <- "Person"
-  e
+  .savvy_wrap_Person(.Call(Person_new__impl))
 }
 
 Person_new_with_name <- function(name) {
-  e <- new.env(parent = emptyenv())
-  self <- .Call(Person_new_with_name__impl, name)
+  .savvy_wrap_Person(.Call(Person_new_with_name__impl, name))
+}
 
-  e$.ptr <- self
-  e$set_name <- Person_set_name(self)
-  e$name <- Person_name(self)
-  e$associated_function <- Person_associated_function(self)
+
+.savvy_wrap_Person <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$set_name <- Person_set_name(ptr)
+  e$name <- Person_name(ptr)
+  e$associated_function <- Person_associated_function(ptr)
 
   class(e) <- "Person"
   e
