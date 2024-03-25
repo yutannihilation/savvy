@@ -497,6 +497,27 @@ mod tests {
             ));
         }
 
+        let ok_cases4: &[syn::ReturnType] = &[
+            parse_quote!(-> Result<Self>),
+            parse_quote!(-> savvy::Result<Self>),
+        ];
+        let self_ty: syn::Type = parse_quote!(Foo);
+
+        for rt in ok_cases4 {
+            let srt = get_savvy_return_type(rt, Some(&self_ty));
+            assert!(srt.is_ok());
+            if let SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                ty_str,
+                return_type,
+            }) = srt.unwrap()
+            {
+                assert_eq!(ty_str, "Foo");
+                assert_eq!(return_type, parse_quote!(-> savvy::Result<Foo>));
+            } else {
+                panic!("Unpexpected SavvyFnReturnType");
+            }
+        }
+
         let err_cases: &[syn::ReturnType] = &[
             parse_quote!(-> Foo),
             parse_quote!(-> savvy::Result<(T, T)>),
