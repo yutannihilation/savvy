@@ -173,12 +173,6 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                let methods = others
-                    .iter()
-                    .map(|o| format!("  e${} <- {}(self)", o.fn_name, o.fn_name_r()))
-                    .collect::<Vec<String>>()
-                    .join("\n");
-
                 format!(
                     r#"{fn_name} <- function({args_r}) {{
   {wrap_fn_name}(.Call({args_call}))
