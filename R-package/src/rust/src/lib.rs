@@ -320,7 +320,7 @@ impl Person {
 
 #[savvy]
 fn new_external() -> savvy::Result<Person> {
-    Ok(Self {
+    Ok(Person {
         name: "".to_string(),
     })
 }

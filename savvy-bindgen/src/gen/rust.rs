@@ -78,8 +78,16 @@ impl SavvyFn {
             SavvyFnReturnType::Unit(_) => {
                 (parse_quote!(_), parse_quote!(savvy::sexp::null::null()))
             }
-            _ => (parse_quote!(result), parse_quote!(result.0)),
+            SavvyFnReturnType::Sexp(_) => (parse_quote!(result), parse_quote!(result.0)),
+            SavvyFnReturnType::UserDefinedStruct(_) => (
+                parse_quote!(result),
+                parse_quote!({
+                    use savvy::IntoExtPtrSexp;
+                    result.into_external_pointer().0
+                }),
+            ),
         };
+
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
             SavvyFnType::Method(_) => parse_quote!(

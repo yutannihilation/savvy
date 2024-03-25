@@ -288,6 +288,11 @@ list_with_names_and_values <- function() {
 }
 
 
+new_external <- function() {
+  .Call(new_external__impl)
+}
+
+
 get_name_external <- function(x) {
   x <- .savvy_extract_ptr(x, "Person")
   .Call(get_name_external__impl, x)

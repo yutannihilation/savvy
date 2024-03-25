@@ -148,7 +148,7 @@ impl SavvyFnArg {
     }
 }
 
-struct UserDefinedStructReturnType {
+pub struct UserDefinedStructReturnType {
     orig_type_path: syn::TypePath,
     return_type: syn::ReturnType,
 }
@@ -388,12 +388,10 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
                                 if &last_path_seg.ident.to_string() == "Sexp" {
                                     Ok(SavvyFnReturnType::Sexp(return_type.clone()))
                                 } else {
-                                    let ret_ty: syn::ReturnType =
-                                        parse_quote!(-> savvy::Result<savvy::Sexp>);
                                     Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
                                             orig_type_path: type_path.clone(),
-                                            return_type: ret_ty,
+                                            return_type: return_type.clone(),
                                         },
                                     ))
                                 }
