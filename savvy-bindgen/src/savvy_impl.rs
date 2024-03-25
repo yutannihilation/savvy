@@ -52,7 +52,7 @@ impl SavvyImpl {
                         }
                     };
 
-                    Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type))
+                    Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type, self_ty))
                 }
                 _ => None,
             })
@@ -86,20 +86,32 @@ fn is_method(impl_item_fn: &syn::ImplItemFn) -> bool {
     )
 }
 
-// check if the return type is `Self`
+// check if the return type is `Self` or `Result<Self>`
 fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
     match &impl_item_fn.sig.output {
         syn::ReturnType::Type(_, ty) => match ty.as_ref() {
             syn::Type::Path(type_path) => {
-                type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Unexpected path")
-                    .ident
-                    .to_string()
-                    .as_str()
-                    == "Self"
+                let last_path_seg = type_path.path.segments.last().unwrap();
+                match last_path_seg.ident.to_string().as_str() {
+                    "Result" => {
+                        if let syn::PathArguments::AngleBracketed(
+                            syn::AngleBracketedGenericArguments { args, .. },
+                        ) = &last_path_seg.arguments
+                        {
+                            if let syn::GenericArgument::Type(syn::Type::Path(type_path)) =
+                                args.first().unwrap()
+                            {
+                                type_path.path.segments.last().unwrap().ident == "Self"
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
+                    }
+                    "Self" => true,
+                    _ => false,
+                }
             }
             _ => false,
         },

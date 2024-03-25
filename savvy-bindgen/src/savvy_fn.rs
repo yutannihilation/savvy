@@ -239,11 +239,16 @@ impl SavvyFn {
             &orig.sig,
             orig.block.as_ref(),
             SavvyFnType::BareFunction,
+            None,
         )
     }
 
-    pub fn from_impl_fn(orig: &syn::ImplItemFn, fn_type: SavvyFnType) -> syn::Result<Self> {
-        Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type)
+    pub fn from_impl_fn(
+        orig: &syn::ImplItemFn,
+        fn_type: SavvyFnType,
+        self_ty: &syn::Type,
+    ) -> syn::Result<Self> {
+        Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type, Some(self_ty))
     }
 
     pub fn new(
@@ -251,6 +256,7 @@ impl SavvyFn {
         sig: &Signature,
         block: &Block,
         fn_type: SavvyFnType,
+        self_ty: Option<&syn::Type>,
     ) -> syn::Result<Self> {
         // TODO: check function signature and abort if any of it is unexpected one.
 
@@ -313,7 +319,7 @@ impl SavvyFn {
             fn_name,
             fn_type,
             args: args_new,
-            return_type: get_savvy_return_type(&sig.output)?,
+            return_type: get_savvy_return_type(&sig.output, self_ty)?,
             stmts_orig,
             stmts_additional,
         })
@@ -326,7 +332,10 @@ impl SavvyFn {
 // - `savvy::Result<savvy::Sexp>`
 // - `savvy::Result<()>`
 // - `Self`
-fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnReturnType> {
+fn get_savvy_return_type(
+    return_type: &syn::ReturnType,
+    self_ty: Option<&syn::Type>,
+) -> syn::Result<SavvyFnReturnType> {
     match return_type {
         syn::ReturnType::Default => Err(syn::Error::new_spanned(
             return_type.clone(),
@@ -348,7 +357,7 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
 
                     let last_path_seg = type_path.path.segments.last().unwrap();
                     match last_path_seg.ident.to_string().as_str() {
-                        "Result" => {}
+                        "Result" => {} // if Result, investigate the inner type below
                         "Self" => {
                             let ret_ty: syn::ReturnType =
                                 parse_quote!(-> savvy::Result<savvy::Sexp>);
@@ -386,15 +395,34 @@ fn get_savvy_return_type(return_type: &syn::ReturnType) -> syn::Result<SavvyFnRe
 
                                 let ty_str =
                                     type_path.path.segments.last().unwrap().ident.to_string();
-                                if &ty_str == "Sexp" {
-                                    Ok(SavvyFnReturnType::Sexp(return_type.clone()))
-                                } else {
-                                    Ok(SavvyFnReturnType::UserDefinedStruct(
+                                match ty_str.as_str() {
+                                    "Sexp" => Ok(SavvyFnReturnType::Sexp(return_type.clone())),
+                                    "Self" => {
+                                        let ty_str =
+                                            if let Some(syn::Type::Path(type_path)) = &self_ty {
+                                                type_path
+                                                    .path
+                                                    .segments
+                                                    .last()
+                                                    .unwrap()
+                                                    .ident
+                                                    .to_string()
+                                            } else {
+                                                return e;
+                                            };
+                                        Ok(SavvyFnReturnType::UserDefinedStruct(
+                                            UserDefinedStructReturnType {
+                                                ty_str,
+                                                return_type: parse_quote!(-> savvy::Result<#self_ty>),
+                                            },
+                                        ))
+                                    }
+                                    _ => Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
                                             ty_str,
                                             return_type: return_type.clone(),
                                         },
-                                    ))
+                                    )),
                                 }
                             }
                             _ => e,
@@ -439,7 +467,7 @@ mod tests {
         ];
 
         for rt in ok_cases1 {
-            let srt = get_savvy_return_type(rt);
+            let srt = get_savvy_return_type(rt, None);
             assert!(srt.is_ok());
             assert!(matches!(srt.unwrap(), SavvyFnReturnType::Sexp(_)));
         }
@@ -450,7 +478,7 @@ mod tests {
         ];
 
         for rt in ok_cases2 {
-            let srt = get_savvy_return_type(rt);
+            let srt = get_savvy_return_type(rt, None);
             assert!(srt.is_ok());
             assert!(matches!(srt.unwrap(), SavvyFnReturnType::Unit(_)));
         }
@@ -461,7 +489,7 @@ mod tests {
         ];
 
         for rt in ok_cases3 {
-            let srt = get_savvy_return_type(rt);
+            let srt = get_savvy_return_type(rt, None);
             assert!(srt.is_ok());
             assert!(matches!(
                 srt.unwrap(),
@@ -477,7 +505,7 @@ mod tests {
         ];
 
         for rt in err_cases {
-            assert!(get_savvy_return_type(rt).is_err())
+            assert!(get_savvy_return_type(rt, None).is_err())
         }
     }
 }

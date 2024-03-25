@@ -297,6 +297,12 @@ impl Person {
         }
     }
 
+    fn new_fallible() -> savvy::Result<Self> {
+        Ok(Self {
+            name: "".to_string(),
+        })
+    }
+
     fn new_with_name(name: &str) -> Self {
         Self {
             name: name.to_string(),

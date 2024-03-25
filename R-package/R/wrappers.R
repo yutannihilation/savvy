@@ -311,6 +311,10 @@ Person <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
 }
 
+Person_new_fallible <- function() {
+  .savvy_wrap_Person(.Call(Person_new_fallible__impl))
+}
+
 Person_new_with_name <- function(name) {
   .savvy_wrap_Person(.Call(Person_new_with_name__impl, name))
 }

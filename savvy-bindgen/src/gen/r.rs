@@ -140,7 +140,7 @@ impl SavvyImpl {
                         ty_str,
                         ..
                     }) => {
-                        format!(".savvy_wrap_{ty_str}.Call({args_call})")
+                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
                     }
                 };
 
