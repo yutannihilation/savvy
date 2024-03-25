@@ -288,8 +288,8 @@ list_with_names_and_values <- function() {
 }
 
 
-new_external <- function() {
-  .savvy_wrap_Person(.Call(new_external__impl))
+external_Person_new <- function() {
+  .savvy_wrap_Person(.Call(external_Person_new__impl))
 }
 
 

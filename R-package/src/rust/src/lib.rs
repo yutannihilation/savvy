@@ -319,7 +319,7 @@ impl Person {
 }
 
 #[savvy]
-fn new_external() -> savvy::Result<Person> {
+fn external_Person_new() -> savvy::Result<Person> {
     Ok(Person {
         name: "".to_string(),
     })

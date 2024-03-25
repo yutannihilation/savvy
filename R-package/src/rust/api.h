@@ -45,7 +45,7 @@ SEXP print_list(SEXP x);
 SEXP list_with_no_values(void);
 SEXP list_with_no_names(void);
 SEXP list_with_names_and_values(void);
-SEXP new_external(void);
+SEXP external_Person_new(void);
 SEXP get_name_external(SEXP x);
 SEXP set_name_external(SEXP x, SEXP name);
 

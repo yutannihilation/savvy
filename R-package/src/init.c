@@ -268,8 +268,8 @@ SEXP list_with_names_and_values__impl(void) {
     return handle_result(res);
 }
 
-SEXP new_external__impl(void) {
-    SEXP res = new_external();
+SEXP external_Person_new__impl(void) {
+    SEXP res = external_Person_new();
     return handle_result(res);
 }
 
@@ -358,7 +358,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"list_with_no_values__impl", (DL_FUNC) &list_with_no_values__impl, 0},
     {"list_with_no_names__impl", (DL_FUNC) &list_with_no_names__impl, 0},
     {"list_with_names_and_values__impl", (DL_FUNC) &list_with_names_and_values__impl, 0},
-    {"new_external__impl", (DL_FUNC) &new_external__impl, 0},
+    {"external_Person_new__impl", (DL_FUNC) &external_Person_new__impl, 0},
     {"get_name_external__impl", (DL_FUNC) &get_name_external__impl, 1},
     {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
