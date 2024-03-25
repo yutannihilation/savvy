@@ -1,6 +1,9 @@
 use quote::format_ident;
 
-use crate::{savvy_fn::SavvyFnReturnType, ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
+use crate::{
+    savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType},
+    ParsedResult, SavvyFn, SavvyFnType, SavvyImpl,
+};
 
 fn get_r_doc_comment(docs: &[String]) -> String {
     docs.iter()
@@ -71,12 +74,18 @@ impl SavvyFn {
             .collect::<Vec<String>>();
 
         // If the result is NULL, wrap it with invisible
-        match self.return_type {
+        let fn_call = match &self.return_type {
             SavvyFnReturnType::Unit(_) => {
-                body_lines.push(format!("  invisible(.Call({args_call}))"))
+                format!("  invisible(.Call({args_call}))")
             }
-            _ => body_lines.push(format!("  .Call({args_call})")),
+            SavvyFnReturnType::Sexp(_) => format!("  .Call({args_call})"),
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                ty_str, ..
+            }) => {
+                format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+            }
         };
+        body_lines.push(fn_call);
 
         let body = body_lines.join("\n");
 
@@ -124,9 +133,15 @@ impl SavvyImpl {
                 let args_call = args.join(", ");
 
                 // If the result is NULL, wrap it with invisible
-                let body = match x.return_type {
+                let body = match &x.return_type {
                     SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
-                    _ => format!(".Call({args_call})"),
+                    SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
+                    SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                        ty_str,
+                        ..
+                    }) => {
+                        format!(".savvy_wrap_{ty_str}.Call({args_call})")
+                    }
                 };
 
                 format!(
@@ -147,7 +162,8 @@ impl SavvyImpl {
             .collect::<Vec<String>>()
             .join("\n");
 
-        let wrap_fn_name = self.fn_name_r_wrapper();
+        let wrap_fn_name = format!(".savvy_wrap_{}", self.ty);
+
         let wrap_fn = format!(
             r#"{wrap_fn_name} <- function(ptr) {{
   e <- new.env(parent = emptyenv())

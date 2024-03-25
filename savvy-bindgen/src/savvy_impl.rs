@@ -67,10 +67,6 @@ impl SavvyImpl {
         })
     }
 
-    pub fn fn_name_r_wrapper(&self) -> String {
-        format!(".savvy_wrap_{}", self.ty)
-    }
-
     #[allow(dead_code)]
     pub fn generate_inner_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.generate_inner_fn()).collect()

@@ -289,7 +289,7 @@ list_with_names_and_values <- function() {
 
 
 new_external <- function() {
-  .Call(new_external__impl)
+  .savvy_wrap_Person(.Call(new_external__impl))
 }
 
 
