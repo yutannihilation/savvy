@@ -279,6 +279,7 @@ mod tests {
             }
         );
 
+        #[rustfmt::skip]
         assert_eq_outer_impl(
             &impl1,
             parse_quote!(
@@ -286,7 +287,10 @@ mod tests {
                 #[no_mangle]
                 pub unsafe extern "C" fn Person_new() -> savvy::ffi::SEXP {
                     match savvy_Person_new_inner() {
-                        Ok(result) => result.0,
+                        Ok(result) => {
+                            use savvy::IntoExtPtrSexp;
+                            result.into_external_pointer().0
+                        },
                         Err(e) => savvy::handle_error(e),
                     }
                 }

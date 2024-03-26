@@ -6,7 +6,7 @@ error: function must have return type
   |
   = note: this error originates in the attribute macro `savvy` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: the return type must be either syn::Result<Sexp> or syn::Result<()>
+error: the return type must be savvy::Result<T> or savvy::Result<()>
  --> tests/cases/simple_cases.rs:9:30
   |
 9 | fn wrong_return_type(x: i32) -> i32 {}
@@ -36,16 +36,8 @@ error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
 27 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
    |                               ^^^^^^^^^^^^^^^
 
-error: For safety, a function that takes `self` and returns `Self` is not allowed
-  --> tests/cases/simple_cases.rs:35:5
+error: A user-defined struct must be in the form of either `&Foo` or `&mut Foo`
+  --> tests/cases/simple_cases.rs:34:37
    |
-35 | /     fn foo_self(&self) -> Self {
-36 | |         Self {}
-37 | |     }
-   | |_____^
-
-error: A user-defined struct must be in the form of either `&Foo2` or `&mut Foo2`
-  --> tests/cases/simple_cases.rs:48:37
-   |
-48 | fn wrong_type_custom_type_no_ref(x: Foo2) -> savvy::Result<()> {
-   |                                     ^^^^
+34 | fn wrong_type_custom_type_no_ref(x: Foo) -> savvy::Result<()> {
+   |                                     ^^^
