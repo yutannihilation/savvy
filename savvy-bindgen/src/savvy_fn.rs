@@ -187,10 +187,10 @@ impl SavvyFnReturnType {
 pub enum SavvyFnType {
     /// A function that doesn't belong to a struct
     BareFunction,
-    /// A function that belong to a struct, and the first argument is `&self` or
-    /// `&mut self`. Contains the type name of the sturct.
+    /// A function that belongs to a struct, and the first argument is `&self`
+    /// or `&mut self`. Contains the type name of the sturct.
     Method(syn::Type),
-    /// A function that belong to a struct, but  the first argument is not
+    /// A function that belongs to a struct, but  the first argument is not
     /// `&self` or `&mut self`. Contains the type name of the sturct.
     AssociatedFunction(syn::Type),
 }
@@ -361,13 +361,14 @@ fn get_savvy_return_type(
         syn::ReturnType::Type(_, ty) => {
             let e = Err(syn::Error::new_spanned(
                 return_type.clone(),
-                "the return type must be either syn::Result<Sexp> or syn::Result<()>",
+                "the return type must be savvy::Result<T> or savvy::Result<()>",
             ));
 
             // Check if the type path is savvy::Result<..> or Result<..> and get
             // the arguments inside < >.
             let path_args = match ty.as_ref() {
                 syn::Type::Path(type_path) => {
+                    // At least it must be savvy::T or T
                     if !is_type_path_savvy_or_no_qualifier(type_path) {
                         return e;
                     }
