@@ -46,7 +46,7 @@ test_that("conversion from vectors", {
 
 test_that("user-defined structs", {
   expect_error(get_name_external(NULL))
-  x <- Person()
+  x <- Person$new()
   class(x) <- "foo"
   expect_error(get_name_external(x))
 })
