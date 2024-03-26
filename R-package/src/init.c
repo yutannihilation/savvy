@@ -293,6 +293,11 @@ SEXP Person_new_fallible__impl(void) {
     return handle_result(res);
 }
 
+SEXP Person_another_person__impl(SEXP self__) {
+    SEXP res = Person_another_person(self__);
+    return handle_result(res);
+}
+
 SEXP Person_new_with_name__impl(SEXP name) {
     SEXP res = Person_new_with_name(name);
     return handle_result(res);
@@ -310,6 +315,11 @@ SEXP Person_name__impl(SEXP self__) {
 
 SEXP Person_associated_function__impl(void) {
     SEXP res = Person_associated_function();
+    return handle_result(res);
+}
+
+SEXP Person2_name__impl(SEXP self__) {
+    SEXP res = Person2_name(self__);
     return handle_result(res);
 }
 
@@ -368,10 +378,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
     {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
+    {"Person_another_person__impl", (DL_FUNC) &Person_another_person__impl, 1},
     {"Person_new_with_name__impl", (DL_FUNC) &Person_new_with_name__impl, 1},
     {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
+    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
     {NULL, NULL, 0}
 };
 

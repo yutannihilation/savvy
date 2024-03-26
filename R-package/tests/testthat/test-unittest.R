@@ -93,10 +93,16 @@ test_that("alternative constructor of a struct works", {
 })
 
 test_that("function that returns a struct works", {
+  # bare function
   x <- external_person_new()
   expect_s3_class(x, "Person")
   x$set_name("foo")
   expect_equal(x$name(), "foo")
+
+  # method
+  x2 <- x$another_person() # creates Person2 with copying the name
+  expect_s3_class(x2, "Person2")
+  expect_equal(x2$name(), "foo")
 })
 
 test_that("function that takes a struct works", {

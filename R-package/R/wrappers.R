@@ -328,6 +328,7 @@ Person$associated_function <- function() {
 .savvy_wrap_Person <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
+  e$another_person <- Person_another_person(ptr)
   e$set_name <- Person_set_name(ptr)
   e$name <- Person_name(ptr)
 
@@ -335,6 +336,12 @@ Person$associated_function <- function() {
   e
 }
 
+
+Person_another_person <- function(self) {
+  function() {
+    .savvy_wrap_Person2(.Call(Person_another_person__impl, self))
+  }
+}
 
 Person_set_name <- function(self) {
   function(name) {
@@ -345,6 +352,27 @@ Person_set_name <- function(self) {
 Person_name <- function(self) {
   function() {
     .Call(Person_name__impl, self)
+  }
+}
+
+
+
+Person2 <- new.env(parent = emptyenv())
+
+
+.savvy_wrap_Person2 <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$name <- Person2_name(ptr)
+
+  class(e) <- "Person2"
+  e
+}
+
+
+Person2_name <- function(self) {
+  function() {
+    .Call(Person2_name__impl, self)
   }
 }
 

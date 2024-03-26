@@ -286,6 +286,11 @@ struct Person {
     pub name: String,
 }
 
+#[allow(dead_code)]
+struct Person2 {
+    pub name: String,
+}
+
 /// A person with a name
 ///
 /// @export
@@ -300,6 +305,12 @@ impl Person {
     fn new_fallible() -> savvy::Result<Self> {
         Ok(Self {
             name: "".to_string(),
+        })
+    }
+
+    fn another_person(&self) -> savvy::Result<Person2> {
+        Ok(Person2 {
+            name: self.name.clone(),
         })
     }
 
@@ -321,6 +332,14 @@ impl Person {
 
     fn associated_function() -> savvy::Result<savvy::Sexp> {
         "associated_function".try_into()
+    }
+}
+
+#[savvy]
+impl Person2 {
+    fn name(&self) -> savvy::Result<savvy::Sexp> {
+        let name = self.name.as_str();
+        name.try_into()
     }
 }
 
