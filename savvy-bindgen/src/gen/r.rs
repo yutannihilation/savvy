@@ -113,8 +113,6 @@ impl SavvyImpl {
             }
         }
 
-        // TODO: error if no ctor
-
         let closures = method_fns
             .iter()
             .map(|x| {
