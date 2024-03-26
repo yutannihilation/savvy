@@ -101,20 +101,21 @@ impl SavvyFn {
 
 impl SavvyImpl {
     fn generate_r_impl_for_impl(&self) -> String {
-        let mut ctors: Vec<&SavvyFn> = Vec::new();
-        let mut others: Vec<&SavvyFn> = Vec::new();
+        let mut associated_fns: Vec<&SavvyFn> = Vec::new();
+        let mut method_fns: Vec<&SavvyFn> = Vec::new();
         let class_r = self.ty.clone();
 
         for savvy_fn in &self.fns {
             match savvy_fn.fn_type {
-                SavvyFnType::Constructor(_) => ctors.push(savvy_fn),
-                _ => others.push(savvy_fn),
+                SavvyFnType::AssociatedFunction(_) => associated_fns.push(savvy_fn),
+                SavvyFnType::Method(_) => method_fns.push(savvy_fn),
+                SavvyFnType::BareFunction => panic!("Something is wrong"),
             }
         }
 
         // TODO: error if no ctor
 
-        let closures = others
+        let closures = method_fns
             .iter()
             .map(|x| {
                 let fn_name = x.fn_name_r();
@@ -132,10 +133,12 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                // If the result is NULL, wrap it with invisible
                 let body = match &x.return_type {
-                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
                     SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
+                    // If the result is NULL, wrap it with invisible
+                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
+                    // If the result is an external pointer, wrap it with the
+                    // corresponding wraping function
                     SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
                         ty_str,
                         ..
@@ -156,13 +159,13 @@ impl SavvyImpl {
             .collect::<Vec<String>>()
             .join("\n");
 
-        let methods = others
+        let methods = method_fns
             .iter()
             .map(|o| format!("  e${} <- {}(ptr)", o.fn_name, o.fn_name_r()))
             .collect::<Vec<String>>()
             .join("\n");
 
-        let wrap_fn_name = format!(".savvy_wrap_{}", self.ty);
+        let wrap_fn_name = format!(".savvy_wrap_{}", class_r);
 
         let wrap_fn = format!(
             r#"{wrap_fn_name} <- function(ptr) {{
@@ -176,10 +179,10 @@ impl SavvyImpl {
 "#
         );
 
-        let builders = ctors
+        let associated_fns = associated_fns
             .iter()
             .map(|x| {
-                let fn_name = x.fn_name_r();
+                let fn_name = x.fn_name.clone();
                 let fn_name_c = x.fn_name_outer();
 
                 let mut args = x.get_r_args();
@@ -189,9 +192,23 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
+                let body = match &x.return_type {
+                    SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
+                    // If the result is NULL, wrap it with invisible
+                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
+                    // If the result is an external pointer, wrap it with the
+                    // corresponding wraping function
+                    SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                        ty_str,
+                        ..
+                    }) => {
+                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
+                    }
+                };
+
                 format!(
-                    r#"{fn_name} <- function({args_r}) {{
-  {wrap_fn_name}(.Call({args_call}))
+                    r#"{class_r}${fn_name} <- function({args_r}) {{
+  {body}
 }}
 "#
                 )
@@ -203,7 +220,8 @@ impl SavvyImpl {
 
         format!(
             "{doc_comments}
-{builders}
+{class_r} <- new.env(parent = emptyenv())
+{associated_fns}
 
 {wrap_fn}
 

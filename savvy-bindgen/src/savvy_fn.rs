@@ -155,9 +155,8 @@ impl SavvyFnArg {
 /// - `Self`
 pub struct UserDefinedStructReturnType {
     pub(crate) ty_str: String, // TODO: move to a method to extract from `return_type` directly.
-    return_type: syn::ReturnType,
-    is_self: bool,
-    is_result: bool,
+    pub(crate) return_type: syn::ReturnType,
+    pub(crate) wrapped_with_result: bool,
 }
 
 /// Return type. This can be either
@@ -343,6 +342,14 @@ impl SavvyFn {
     }
 }
 
+fn self_ty_to_string(self_ty: Option<&syn::Type>) -> Option<String> {
+    if let Some(syn::Type::Path(type_path)) = self_ty {
+        Some(type_path.path.segments.last().unwrap().ident.to_string())
+    } else {
+        None
+    }
+}
+
 // Allowed return types are the followings. Note that, `Self` is converted to
 // `EXTPTRSXP`, so the same as `savvy::Result<savvy::Sexp>`.
 //
@@ -377,9 +384,18 @@ fn get_savvy_return_type(
                     match last_path_seg.ident.to_string().as_str() {
                         "Result" => {} // if Result, investigate the inner type below
                         "Self" => {
-                            let ret_ty: syn::ReturnType =
-                                parse_quote!(-> savvy::Result<savvy::Sexp>);
-                            return Ok(SavvyFnReturnType::Sexp(ret_ty));
+                            let ty_str = if let Some(ty_str) = self_ty_to_string(self_ty) {
+                                ty_str
+                            } else {
+                                return e;
+                            };
+                            return Ok(SavvyFnReturnType::UserDefinedStruct(
+                                UserDefinedStructReturnType {
+                                    ty_str,
+                                    return_type: parse_quote!(-> savvy::Result<#self_ty>),
+                                    wrapped_with_result: false,
+                                },
+                            ));
                         }
                         _ => return e,
                     }
@@ -388,7 +404,7 @@ fn get_savvy_return_type(
                 _ => return e,
             };
 
-            // Check if the args inside < > is either savvy::Sexp, Sexp, or ()
+            // Check `T`` in savvy::Result<T>
             match path_args {
                 syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
                     args,
@@ -407,24 +423,16 @@ fn get_savvy_return_type(
                                 }
                             }
                             syn::Type::Path(type_path) => {
-                                if !is_type_path_savvy_or_no_qualifier(type_path) {
-                                    return e;
-                                }
-
                                 let ty_str =
                                     type_path.path.segments.last().unwrap().ident.to_string();
                                 match ty_str.as_str() {
                                     "Sexp" => Ok(SavvyFnReturnType::Sexp(return_type.clone())),
+
+                                    // if it's `savvy::Result<Self>`, replace `Self` with the actual type
                                     "Self" => {
                                         let ty_str =
-                                            if let Some(syn::Type::Path(type_path)) = &self_ty {
-                                                type_path
-                                                    .path
-                                                    .segments
-                                                    .last()
-                                                    .unwrap()
-                                                    .ident
-                                                    .to_string()
+                                            if let Some(ty_str) = self_ty_to_string(self_ty) {
+                                                ty_str
                                             } else {
                                                 return e;
                                             };
@@ -432,13 +440,17 @@ fn get_savvy_return_type(
                                             UserDefinedStructReturnType {
                                                 ty_str,
                                                 return_type: parse_quote!(-> savvy::Result<#self_ty>),
+                                                wrapped_with_result: true,
                                             },
                                         ))
                                     }
+
+                                    // if it's the actual type, us as it is.
                                     _ => Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
                                             ty_str,
                                             return_type: return_type.clone(),
+                                            wrapped_with_result: true,
                                         },
                                     )),
                                 }
@@ -527,6 +539,7 @@ mod tests {
             if let SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
                 ty_str,
                 return_type,
+                wrapped_with_result: false,
             }) = srt.unwrap()
             {
                 assert_eq!(ty_str, "Foo");

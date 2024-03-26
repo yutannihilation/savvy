@@ -1,6 +1,9 @@
 use syn::parse_quote;
 
-use crate::{savvy_fn::SavvyFnReturnType, SavvyFn, SavvyFnType};
+use crate::{
+    savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType},
+    SavvyFn, SavvyFnType,
+};
 
 impl SavvyFn {
     pub fn generate_inner_fn(&self) -> syn::ItemFn {
@@ -19,6 +22,16 @@ impl SavvyFn {
         let attrs = &self.attrs;
 
         let ret_ty = self.return_type.inner();
+
+        // If the original return type is not wrapped with Result, it needs to be wrapped with Ok()
+        let wrapped_with_result = match &self.return_type {
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                wrapped_with_result,
+                ..
+            }) => *wrapped_with_result,
+            _ => true,
+        };
+
         let out: syn::ItemFn = match &self.fn_type {
             // A bare function
             SavvyFnType::BareFunction => parse_quote!(
@@ -29,35 +42,55 @@ impl SavvyFn {
                 }
             ),
             // A method
-            SavvyFnType::Method(ty) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                    let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
-                    #(#stmts_additional)*
+            SavvyFnType::Method(ty) => {
+                if wrapped_with_result {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                            let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
+                            #(#stmts_additional)*
 
-                    (*self__).#fn_name_orig(#(#args_pat),*)
+                            (*self__).#fn_name_orig(#(#args_pat),*)
+                        }
+                    )
+                } else {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                            let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
+                            #(#stmts_additional)*
+
+                            Ok((*self__).#fn_name_orig(#(#args_pat),*))
+                        }
+                    )
                 }
-            ),
+            }
             // An associated function
-            SavvyFnType::AssociatedFunction(ty) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                    #(#stmts_additional)*
+            SavvyFnType::AssociatedFunction(ty) => {
+                if wrapped_with_result {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                            #(#stmts_additional)*
 
-                    #ty::#fn_name_orig(#(#args_pat),*)
+                            #ty::#fn_name_orig(#(#args_pat),*)
+                        }
+                    )
+                } else {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                            #(#stmts_additional)*
+
+                            Ok(#ty::#fn_name_orig(#(#args_pat),*))
+                        }
+                    )
                 }
-            ),
-            SavvyFnType::Constructor(ty) => parse_quote!(
-                #(#attrs)*
-                #[allow(non_snake_case)]
-                unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                    #(#stmts_additional)*
-                    let x = #ty::#fn_name_orig(#(#args_pat),*);
-                    x.try_into()
-                }
-            ),
+            }
         };
 
         out
@@ -74,32 +107,52 @@ impl SavvyFn {
             .map(|arg| arg.to_rust_type_inner())
             .collect();
 
-        let (ok_lhs, ok_rhs): (syn::Expr, syn::Expr) = match &self.return_type {
-            SavvyFnReturnType::Unit(_) => {
-                (parse_quote!(_), parse_quote!(savvy::sexp::null::null()))
-            }
-            SavvyFnReturnType::Sexp(_) => (parse_quote!(result), parse_quote!(result.0)),
-            SavvyFnReturnType::UserDefinedStruct(_) => (
-                parse_quote!(result),
-                parse_quote!({
-                    use savvy::IntoExtPtrSexp;
-                    result.into_external_pointer().0
-                }),
-            ),
-        };
+        let (ok_lhs, ok_rhs, wrapped_with_result): (syn::Expr, syn::Expr, bool) =
+            match &self.return_type {
+                SavvyFnReturnType::Unit(_) => (
+                    parse_quote!(_),
+                    parse_quote!(savvy::sexp::null::null()),
+                    true,
+                ),
+                SavvyFnReturnType::Sexp(_) => (parse_quote!(result), parse_quote!(result.0), true),
+                SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                    wrapped_with_result,
+                    ..
+                }) => (
+                    parse_quote!(result),
+                    parse_quote!({
+                        use savvy::IntoExtPtrSexp;
+                        result.into_external_pointer().0
+                    }),
+                    *wrapped_with_result,
+                ),
+            };
 
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
-            SavvyFnType::Method(_) => parse_quote!(
-                #[allow(clippy::missing_safety_doc)]
-                #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
-                    match #fn_name_inner(self__, #(#args_pat),*) {
-                        Ok(#ok_lhs) => #ok_rhs,
-                        Err(e) => savvy::handle_error(e),
-                    }
+            SavvyFnType::Method(_) => {
+                // `-> Self` is allowed
+                if wrapped_with_result {
+                    parse_quote!(
+                        #[allow(clippy::missing_safety_doc)]
+                        #[no_mangle]
+                        pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
+                            match #fn_name_inner(self__, #(#args_pat),*) {
+                                Ok(#ok_lhs) => #ok_rhs,
+                                Err(e) => savvy::handle_error(e),
+                            }
+                        }
+                    )
+                } else {
+                    parse_quote!(
+                        #[allow(clippy::missing_safety_doc)]
+                        #[no_mangle]
+                        pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
+                            #fn_name_inner(self__, #(#args_pat),*)
+                        }
+                    )
                 }
-            ),
+            }
             _ => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
