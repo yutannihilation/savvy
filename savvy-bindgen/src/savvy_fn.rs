@@ -148,12 +148,26 @@ impl SavvyFnArg {
     }
 }
 
+/// Return type of a user-defined struct. This can be either
+///
+/// - `savvy::Result<Foo>`
+/// - `savvy::Result<Self>`
+/// - `Self`
 pub struct UserDefinedStructReturnType {
-    pub(crate) ty_str: String,
+    pub(crate) ty_str: String, // TODO: move to a method to extract from `return_type` directly.
     return_type: syn::ReturnType,
+    is_self: bool,
+    is_result: bool,
 }
 
-/// Currently, only `Result::<SEXP>`, `Result<()>`, and Self are supported
+/// Return type. This can be either
+///
+/// - `savvy::Result<Sexp>`
+/// - `savvy::Result<()>`
+/// - a user-defined struct
+///     - `savvy::Result<Foo>`
+///     - `savvy::Result<Self>`
+///     - `Self`
 pub enum SavvyFnReturnType {
     Sexp(syn::ReturnType),
     Unit(syn::ReturnType),
@@ -171,9 +185,13 @@ impl SavvyFnReturnType {
 }
 
 pub enum SavvyFnType {
+    /// A function that doesn't belong to a struct
     BareFunction,
-    Constructor(syn::Type),
+    /// A function that belong to a struct, and the first argument is `&self` or
+    /// `&mut self`. Contains the type name of the sturct.
     Method(syn::Type),
+    /// A function that belong to a struct, but  the first argument is not
+    /// `&self` or `&mut self`. Contains the type name of the sturct.
     AssociatedFunction(syn::Type),
 }
 
@@ -201,7 +219,6 @@ impl SavvyFn {
     pub(crate) fn get_self_ty_ident(&self) -> Option<syn::Ident> {
         let self_ty = match &self.fn_type {
             SavvyFnType::BareFunction => return None,
-            SavvyFnType::Constructor(ty) => ty,
             SavvyFnType::Method(ty) => ty,
             SavvyFnType::AssociatedFunction(ty) => ty,
         };
