@@ -40,13 +40,6 @@ impl SavvyImpl {
                 syn::ImplItem::Fn(impl_item_fn) => {
                     let ty = self_ty.clone();
                     let fn_type = if is_method(impl_item_fn) {
-                        if returns_self(impl_item_fn) {
-                            return Some(Err(syn::Error::new_spanned(
-                                f,
-                                "For safety, a function that takes `self` and returns `Self` is not allowed",
-                            )));
-
-                        }
                         SavvyFnType::Method(ty)
                     } else {
                         SavvyFnType::AssociatedFunction(ty)
@@ -84,39 +77,6 @@ fn is_method(impl_item_fn: &syn::ImplItemFn) -> bool {
         impl_item_fn.sig.inputs.first(),
         Some(syn::FnArg::Receiver(_))
     )
-}
-
-// check if the return type is `Self` or `Result<Self>`
-fn returns_self(impl_item_fn: &syn::ImplItemFn) -> bool {
-    match &impl_item_fn.sig.output {
-        syn::ReturnType::Type(_, ty) => match ty.as_ref() {
-            syn::Type::Path(type_path) => {
-                let last_path_seg = type_path.path.segments.last().unwrap();
-                match last_path_seg.ident.to_string().as_str() {
-                    "Result" => {
-                        if let syn::PathArguments::AngleBracketed(
-                            syn::AngleBracketedGenericArguments { args, .. },
-                        ) = &last_path_seg.arguments
-                        {
-                            if let syn::GenericArgument::Type(syn::Type::Path(type_path)) =
-                                args.first().unwrap()
-                            {
-                                type_path.path.segments.last().unwrap().ident == "Self"
-                            } else {
-                                false
-                            }
-                        } else {
-                            false
-                        }
-                    }
-                    "Self" => true,
-                    _ => false,
-                }
-            }
-            _ => false,
-        },
-        _ => false,
-    }
 }
 
 #[cfg(test)]
