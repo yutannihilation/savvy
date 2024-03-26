@@ -288,6 +288,11 @@ list_with_names_and_values <- function() {
 }
 
 
+external_person_new <- function() {
+  .savvy_wrap_Person(.Call(external_person_new__impl))
+}
+
+
 get_name_external <- function(x) {
   x <- .savvy_extract_ptr(x, "Person")
   .Call(get_name_external__impl, x)
@@ -302,32 +307,41 @@ set_name_external <- function(x, name) {
 #' A person with a name
 #'
 #' @export
-Person <- function() {
-  e <- new.env(parent = emptyenv())
-  self <- .Call(Person_new__impl)
+Person <- new.env(parent = emptyenv())
+Person$new <- function() {
+  .savvy_wrap_Person(.Call(Person_new__impl))
+}
 
-  e$.ptr <- self
-  e$set_name <- Person_set_name(self)
-  e$name <- Person_name(self)
-  e$associated_function <- Person_associated_function(self)
+Person$new_fallible <- function() {
+  .savvy_wrap_Person(.Call(Person_new_fallible__impl))
+}
+
+Person$new_with_name <- function(name) {
+  .savvy_wrap_Person(.Call(Person_new_with_name__impl, name))
+}
+
+Person$associated_function <- function() {
+  .Call(Person_associated_function__impl)
+}
+
+
+.savvy_wrap_Person <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$another_person <- Person_another_person(ptr)
+  e$set_name <- Person_set_name(ptr)
+  e$name <- Person_name(ptr)
 
   class(e) <- "Person"
   e
 }
 
-Person_new_with_name <- function(name) {
-  e <- new.env(parent = emptyenv())
-  self <- .Call(Person_new_with_name__impl, name)
 
-  e$.ptr <- self
-  e$set_name <- Person_set_name(self)
-  e$name <- Person_name(self)
-  e$associated_function <- Person_associated_function(self)
-
-  class(e) <- "Person"
-  e
+Person_another_person <- function(self) {
+  function() {
+    .savvy_wrap_Person2(.Call(Person_another_person__impl, self))
+  }
 }
-
 
 Person_set_name <- function(self) {
   function(name) {
@@ -341,9 +355,24 @@ Person_name <- function(self) {
   }
 }
 
-Person_associated_function <- function(self) {
+
+
+Person2 <- new.env(parent = emptyenv())
+
+
+.savvy_wrap_Person2 <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$name <- Person2_name(ptr)
+
+  class(e) <- "Person2"
+  e
+}
+
+
+Person2_name <- function(self) {
   function() {
-    .Call(Person_associated_function__impl)
+    .Call(Person2_name__impl, self)
   }
 }
 

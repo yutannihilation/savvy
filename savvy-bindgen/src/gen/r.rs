@@ -1,6 +1,9 @@
 use quote::format_ident;
 
-use crate::{savvy_fn::SavvyFnReturnType, ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
+use crate::{
+    savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType},
+    ParsedResult, SavvyFn, SavvyFnType, SavvyImpl,
+};
 
 fn get_r_doc_comment(docs: &[String]) -> String {
     docs.iter()
@@ -71,12 +74,18 @@ impl SavvyFn {
             .collect::<Vec<String>>();
 
         // If the result is NULL, wrap it with invisible
-        match self.return_type {
-            SavvyFnReturnType::ResultSexp(_) => body_lines.push(format!("  .Call({args_call})")),
-            SavvyFnReturnType::ResultUnit(_) => {
-                body_lines.push(format!("  invisible(.Call({args_call}))"))
+        let fn_call = match &self.return_type {
+            SavvyFnReturnType::Unit(_) => {
+                format!("  invisible(.Call({args_call}))")
+            }
+            SavvyFnReturnType::Sexp(_) => format!("  .Call({args_call})"),
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                ty_str, ..
+            }) => {
+                format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
             }
         };
+        body_lines.push(fn_call);
 
         let body = body_lines.join("\n");
 
@@ -92,20 +101,19 @@ impl SavvyFn {
 
 impl SavvyImpl {
     fn generate_r_impl_for_impl(&self) -> String {
-        let mut ctors: Vec<&SavvyFn> = Vec::new();
-        let mut others: Vec<&SavvyFn> = Vec::new();
+        let mut associated_fns: Vec<&SavvyFn> = Vec::new();
+        let mut method_fns: Vec<&SavvyFn> = Vec::new();
         let class_r = self.ty.clone();
 
         for savvy_fn in &self.fns {
             match savvy_fn.fn_type {
-                SavvyFnType::Constructor(_) => ctors.push(savvy_fn),
-                _ => others.push(savvy_fn),
+                SavvyFnType::AssociatedFunction(_) => associated_fns.push(savvy_fn),
+                SavvyFnType::Method(_) => method_fns.push(savvy_fn),
+                SavvyFnType::BareFunction => panic!("Something is wrong"),
             }
         }
 
-        // TODO: error if no ctor
-
-        let closures = others
+        let closures = method_fns
             .iter()
             .map(|x| {
                 let fn_name = x.fn_name_r();
@@ -123,10 +131,18 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                // If the result is NULL, wrap it with invisible
-                let body = match x.return_type {
-                    SavvyFnReturnType::ResultSexp(_) => format!(".Call({args_call})"),
-                    SavvyFnReturnType::ResultUnit(_) => format!("invisible(.Call({args_call}))"),
+                let body = match &x.return_type {
+                    SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
+                    // If the result is NULL, wrap it with invisible
+                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
+                    // If the result is an external pointer, wrap it with the
+                    // corresponding wraping function
+                    SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                        ty_str,
+                        ..
+                    }) => {
+                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
+                    }
                 };
 
                 format!(
@@ -141,10 +157,30 @@ impl SavvyImpl {
             .collect::<Vec<String>>()
             .join("\n");
 
-        let builders = ctors
+        let methods = method_fns
+            .iter()
+            .map(|o| format!("  e${} <- {}(ptr)", o.fn_name, o.fn_name_r()))
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        let wrap_fn_name = format!(".savvy_wrap_{}", class_r);
+
+        let wrap_fn = format!(
+            r#"{wrap_fn_name} <- function(ptr) {{
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+{methods}
+
+  class(e) <- "{class_r}"
+  e
+}}
+"#
+        );
+
+        let associated_fns = associated_fns
             .iter()
             .map(|x| {
-                let fn_name = x.fn_name_r();
+                let fn_name = x.fn_name.clone();
                 let fn_name_c = x.fn_name_outer();
 
                 let mut args = x.get_r_args();
@@ -154,22 +190,23 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                let methods = others
-                    .iter()
-                    .map(|o| format!("  e${} <- {}(self)", o.fn_name, o.fn_name_r()))
-                    .collect::<Vec<String>>()
-                    .join("\n");
+                let body = match &x.return_type {
+                    SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
+                    // If the result is NULL, wrap it with invisible
+                    SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
+                    // If the result is an external pointer, wrap it with the
+                    // corresponding wraping function
+                    SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                        ty_str,
+                        ..
+                    }) => {
+                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
+                    }
+                };
 
                 format!(
-                    r#"{fn_name} <- function({args_r}) {{
-  e <- new.env(parent = emptyenv())
-  self <- .Call({args_call})
-
-  e$.ptr <- self
-{methods}
-
-  class(e) <- "{class_r}"
-  e
+                    r#"{class_r}${fn_name} <- function({args_r}) {{
+  {body}
 }}
 "#
                 )
@@ -181,7 +218,10 @@ impl SavvyImpl {
 
         format!(
             "{doc_comments}
-{builders}
+{class_r} <- new.env(parent = emptyenv())
+{associated_fns}
+
+{wrap_fn}
 
 {closures}
 "

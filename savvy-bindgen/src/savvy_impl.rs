@@ -39,20 +39,13 @@ impl SavvyImpl {
             .filter_map(|f| match f {
                 syn::ImplItem::Fn(impl_item_fn) => {
                     let ty = self_ty.clone();
-
-                    let fn_type = match (is_method(impl_item_fn), is_ctor(impl_item_fn)) {
-                        (true, false) => SavvyFnType::Method(ty),
-                        (false, true) => SavvyFnType::Constructor(ty),
-                        (false, false) => SavvyFnType::AssociatedFunction(ty),
-                        (true, true) => {
-                            return Some(Err(syn::Error::new_spanned(
-                                f,
-                                "For safety, a function that takes `self` and returns `Self` is not allowed",
-                            )));
-                        }
+                    let fn_type = if is_method(impl_item_fn) {
+                        SavvyFnType::Method(ty)
+                    } else {
+                        SavvyFnType::AssociatedFunction(ty)
                     };
 
-                    Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type))
+                    Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type, self_ty))
                 }
                 _ => None,
             })
@@ -84,27 +77,6 @@ fn is_method(impl_item_fn: &syn::ImplItemFn) -> bool {
         impl_item_fn.sig.inputs.first(),
         Some(syn::FnArg::Receiver(_))
     )
-}
-
-// check if the return type is `Self`
-fn is_ctor(impl_item_fn: &syn::ImplItemFn) -> bool {
-    match &impl_item_fn.sig.output {
-        syn::ReturnType::Type(_, ty) => match ty.as_ref() {
-            syn::Type::Path(type_path) => {
-                type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Unexpected path")
-                    .ident
-                    .to_string()
-                    .as_str()
-                    == "Self"
-            }
-            _ => false,
-        },
-        _ => false,
-    }
 }
 
 #[cfg(test)]
@@ -145,7 +117,7 @@ mod tests {
         assert_eq!(parsed.fns.len(), 4);
 
         assert_eq!(parsed.fns[0].fn_name.to_string().as_str(), "new");
-        assert!(matches!(parsed.fns[0].fn_type, Constructor(_)));
+        assert!(matches!(parsed.fns[0].fn_type, AssociatedFunction(_)));
 
         assert_eq!(parsed.fns[1].fn_name.to_string().as_str(), "set_name");
         assert!(matches!(parsed.fns[1].fn_type, Method(_)));

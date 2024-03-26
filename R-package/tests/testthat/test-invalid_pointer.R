@@ -2,7 +2,7 @@
 test_that("invalid pointer doesn't clash the session", {
   rds_file <- tempfile(fileext = ".rds")
 
-  x <- Person()
+  x <- Person$new()
   saveRDS(x, rds_file)
 
   x <- readRDS(rds_file)

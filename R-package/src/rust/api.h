@@ -45,12 +45,18 @@ SEXP print_list(SEXP x);
 SEXP list_with_no_values(void);
 SEXP list_with_no_names(void);
 SEXP list_with_names_and_values(void);
+SEXP external_person_new(void);
 SEXP get_name_external(SEXP x);
 SEXP set_name_external(SEXP x, SEXP name);
 
 // methods and associated functions for Person
 SEXP Person_new(void);
+SEXP Person_new_fallible(void);
+SEXP Person_another_person(SEXP self__);
 SEXP Person_new_with_name(SEXP name);
 SEXP Person_set_name(SEXP self__, SEXP name);
 SEXP Person_name(SEXP self__);
 SEXP Person_associated_function(void);
+
+// methods and associated functions for Person2
+SEXP Person2_name(SEXP self__);
