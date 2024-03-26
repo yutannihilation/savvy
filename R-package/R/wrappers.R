@@ -307,16 +307,21 @@ set_name_external <- function(x, name) {
 #' A person with a name
 #'
 #' @export
-Person <- function() {
+Person <- new.env(parent = emptyenv())
+Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
 }
 
-Person_new_fallible <- function() {
+Person$new_fallible <- function() {
   .savvy_wrap_Person(.Call(Person_new_fallible__impl))
 }
 
-Person_new_with_name <- function(name) {
+Person$new_with_name <- function(name) {
   .savvy_wrap_Person(.Call(Person_new_with_name__impl, name))
+}
+
+Person$associated_function <- function() {
+  .Call(Person_associated_function__impl)
 }
 
 
@@ -325,7 +330,6 @@ Person_new_with_name <- function(name) {
   e$.ptr <- ptr
   e$set_name <- Person_set_name(ptr)
   e$name <- Person_name(ptr)
-  e$associated_function <- Person_associated_function(ptr)
 
   class(e) <- "Person"
   e
@@ -341,12 +345,6 @@ Person_set_name <- function(self) {
 Person_name <- function(self) {
   function() {
     .Call(Person_name__impl, self)
-  }
-}
-
-Person_associated_function <- function(self) {
-  function() {
-    .Call(Person_associated_function__impl)
   }
 }
 
