@@ -488,12 +488,11 @@ mod tests {
     use syn::parse_quote;
 
     #[test]
-    fn test_detect_return_type() {
+    fn test_detect_return_type_sexp() {
         let ok_cases1: &[syn::ReturnType] = &[
             parse_quote!(-> Result<Sexp>),
             parse_quote!(-> savvy::Result<Sexp>),
             parse_quote!(-> savvy::Result<savvy::Sexp>),
-            parse_quote!(-> Self),
         ];
 
         for rt in ok_cases1 {
@@ -501,7 +500,10 @@ mod tests {
             assert!(srt.is_ok());
             assert!(matches!(srt.unwrap(), SavvyFnReturnType::Sexp(_)));
         }
+    }
 
+    #[test]
+    fn test_detect_return_type_unit() {
         let ok_cases2: &[syn::ReturnType] = &[
             parse_quote!(-> Result<()>),
             parse_quote!(-> savvy::Result<()>),
@@ -512,7 +514,10 @@ mod tests {
             assert!(srt.is_ok());
             assert!(matches!(srt.unwrap(), SavvyFnReturnType::Unit(_)));
         }
+    }
 
+    #[test]
+    fn test_detect_return_type_sturct() {
         let ok_cases3: &[syn::ReturnType] = &[
             parse_quote!(-> Result<Foo>),
             parse_quote!(-> savvy::Result<Foo>),
@@ -526,29 +531,32 @@ mod tests {
                 SavvyFnReturnType::UserDefinedStruct(_)
             ));
         }
+    }
 
+    #[test]
+    fn test_detect_return_type_self() {
         let ok_cases4: &[syn::ReturnType] = &[
+            parse_quote!(-> Self),
             parse_quote!(-> Result<Self>),
             parse_quote!(-> savvy::Result<Self>),
         ];
         let self_ty: syn::Type = parse_quote!(Foo);
 
-        for rt in ok_cases4 {
+        for (i, rt) in ok_cases4.iter().enumerate() {
             let srt = get_savvy_return_type(rt, Some(&self_ty));
             assert!(srt.is_ok());
-            if let SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                ty_str,
-                return_type,
-                wrapped_with_result: false,
-            }) = srt.unwrap()
-            {
-                assert_eq!(ty_str, "Foo");
-                assert_eq!(return_type, parse_quote!(-> savvy::Result<Foo>));
+            if let SavvyFnReturnType::UserDefinedStruct(uds) = srt.unwrap() {
+                assert_eq!(uds.ty_str, "Foo");
+                assert_eq!(uds.return_type, parse_quote!(-> savvy::Result<Foo>));
+                assert_eq!(uds.wrapped_with_result, i != 0); // only the first case is false
             } else {
                 panic!("Unpexpected SavvyFnReturnType");
             }
         }
+    }
 
+    #[test]
+    fn test_detect_return_type_fail() {
         let err_cases: &[syn::ReturnType] = &[
             parse_quote!(-> Foo),
             parse_quote!(-> savvy::Result<(T, T)>),
