@@ -15,6 +15,9 @@ and the latter, owned SEXP, is writable. Here's the list:
 | `STRSXP` (character)            | `StringSexp`            | `OwnedStringSexp`    |
 | `VECSXP` (list)                 | `ListSexp`              | `OwnedListSexp`      |
 | `EXTPTRSXP` (external pointer)  | `ExternalPointerSexp`   | n/a                  |
+| `CPLXSXP` (complex)[^1]         | `ComplexSexp`           | `OwnedComplexSexp`   |
+
+[^1]: Complex is optionally supported under feature flag `complex`
 
 You might wonder why this is needed when we can just use `mut` to distinguish
 the difference of mutability. I mainly had two motivations for this:

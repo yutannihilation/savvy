@@ -14,7 +14,7 @@
 - [Handling Vector Output](./05_output.md)
 - [Handling Scalars](./06_scalar.md)
 - [Type-specific Topics]()
-    - [Integer, Real, String, And Bool](./08_atomic_types.md)
+    - [Integer, Real, String, Bool, And Complex](./08_atomic_types.md)
     - [List](./09_list.md)
     - [Struct](./10_struct.md)
 - [Error-handling](./11_error.md)

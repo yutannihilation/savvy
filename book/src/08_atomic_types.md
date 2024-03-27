@@ -1,4 +1,4 @@
-# Integer, Real, String, And Bool
+# Integer, Real, String, Bool, And Complex
 
 ## Integer and real
 
@@ -149,3 +149,26 @@ very unsafe.
 [Rf_translateCharUTF8]: https://github.com/wch/r-source/blob/c3423d28830acbbbf7b38daa58f436fb06d91381/src/main/sysutils.c#L1284-L1296
 
 
+## Complex
+
+Complex is optionally supported under feature flag `complex`. If it's enabled,
+you can use `ComplexSexp` and `OwnedComplexSexp` to use a complex vector for
+input or output, and you can extract the slice of `num_complex::Complex64` from
+it.
+
+```rust
+#[savvy]
+fn abs_complex(x: savvy::ComplexSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = savvy::OwnedRealSexp::new(x.len())?;
+
+    for (i, c) in x.iter().enumerate() {
+        if !c.is_na() {
+            out[i] = (c.re * c.re + c.im * c.im).sqrt();
+        } else {
+            out.set_na(i)?;
+        }
+    }
+
+    out.into()
+}
+```
