@@ -77,35 +77,33 @@ wrapper_of_some_savvy_fun <- function(x) {
 }
 ```
 
-If you really want to handle the 3 states, use `IntegerSexp` as the argument type
-and convert the logical into an integer before calling the savvy function. To
-represent 3-state, the internal representation of `LGLSXP` is int, which is the
-same as `INTSXP`. So, the conversion should be cheap.
+If you really want to handle the 3 states, use an expert-only method
+`as_slice_raw()`. This returns `&[i32]` instead of `&[bool]`. Why `i32`? It's
+the internal representation of a logical vector, which is the same as an integer
+vector. By treating the data as `i32`, you can use `is_na()`.
 
 ```rust
-use savvy::NotAvailableValue;   // for is_na() and na()
+use savvy::NotAvailableValue;   // for is_na()
 
 #[savvy]
-fn some_savvy_fun(logical: IntegerSexp) -> savvy::Result<()> {
-    for l in logical.iter() {
-        if l.is_na() {
-            r_print!("NA\n");
-        } else if *l == 1 {
-            r_print!("TRUE\n");
+fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
+
+    for (i, e) in x.as_slice_raw().iter().enumerate() {
+        if e.is_na() {
+            out.set_na(i)?;
         } else {
-            r_print!("FALSE\n");
+            out.set_elt(i, *e != 1)?; // 1 means TRUE
         }
     }
 
-    Ok(())
+    out.into()
 }
 ```
 
-``` r
-wrapper_of_some_savvy_fun <- function(x) {
-  x <- vctrs::vec_cast(x, integer())
-  some_savvy_fun(x)
-}
+```r
+flip_logical_expert_only(c(TRUE, FALSE, NA))
+#> [1]  TRUE FALSE    NA
 ```
 
 ## String

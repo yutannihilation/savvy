@@ -114,27 +114,5 @@ identity_logical(c(TRUE, FALSE, NA))
 ```
 
 The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
-This returns `&[i32]` instead of `&[bool]`. Why `i32`? It's the internal
-representation of a logical vector, which is the same as an integer vector.
-
-```rust
-#[savvy]
-fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
-    let mut out = OwnedLogicalSexp::new(x.len())?;
-
-    for (i, e) in x.as_slice_raw().iter().enumerate() {
-        if e.is_na() {
-            out.set_na(i)?;
-        } else {
-            out.set_elt(i, *e != 1)?; // 1 means TRUE
-        }
-    }
-
-    out.into()
-}
-```
-
-```r
-flip_logical_expert_only(c(TRUE, FALSE, NA))
-#> [1]  TRUE FALSE    NA
-```
+See "Logical" section of [Integer, Real, String, And Bool](./08_atomic_types.md)
+for the details.
