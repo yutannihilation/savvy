@@ -122,3 +122,121 @@ impl OwnedComplexSexp {
         })
     }
 }
+
+impl Drop for OwnedComplexSexp {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
+    }
+}
+
+// conversions from/to ComplexSexp ***************
+
+impl TryFrom<Sexp> for ComplexSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
+        if !value.is_real() {
+            let type_name = value.get_human_readable_type_name();
+            let msg = format!("Expected reals, got {type_name}s");
+            return Err(crate::error::Error::UnexpectedType(msg));
+        }
+        Ok(Self(value.0))
+    }
+}
+
+impl From<ComplexSexp> for Sexp {
+    fn from(value: ComplexSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<ComplexSexp> for crate::error::Result<Sexp> {
+    fn from(value: ComplexSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+// conversions from/to OwnedComplexSexp ***************
+
+impl TryFrom<&[Complex64]> for OwnedComplexSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: &[Complex64]) -> crate::error::Result<Self> {
+        let mut out = unsafe { Self::new_without_init(value.len())? };
+        out.as_mut_slice().copy_from_slice(value);
+        Ok(out)
+    }
+}
+
+impl TryFrom<Vec<Complex64>> for OwnedComplexSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Vec<Complex64>) -> crate::error::Result<Self> {
+        <Self>::try_from(value.as_slice())
+    }
+}
+
+impl TryFrom<Complex64> for OwnedComplexSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Complex64) -> crate::error::Result<Self> {
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarComplex(value))? };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
+}
+
+impl From<OwnedComplexSexp> for Sexp {
+    fn from(value: OwnedComplexSexp) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<OwnedComplexSexp> for crate::error::Result<Sexp> {
+    fn from(value: OwnedComplexSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
+macro_rules! impl_try_from_rust_reals {
+    ($ty: ty) => {
+        impl TryFrom<$ty> for Sexp {
+            type Error = crate::error::Error;
+
+            fn try_from(value: $ty) -> crate::error::Result<Self> {
+                <OwnedComplexSexp>::try_from(value).map(|x| x.into())
+            }
+        }
+    };
+}
+
+impl_try_from_rust_reals!(&[Complex64]);
+impl_try_from_rust_reals!(Vec<Complex64>);
+impl_try_from_rust_reals!(Complex64);
+
+// Index for OwnedComplexSexp ***************
+
+impl Index<usize> for OwnedComplexSexp {
+    type Output = Complex64;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        if index >= self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &*(self.raw.add(index)) }
+    }
+}
+
+impl IndexMut<usize> for OwnedComplexSexp {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        if index >= self.len {
+            panic!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, index
+            );
+        }
+        unsafe { &mut *(self.raw.add(index)) }
+    }
+}
