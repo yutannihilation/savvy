@@ -178,6 +178,7 @@ impl Sexp {
         match ty as u32 {
             savvy_ffi::INTSXP => TypedSexp::Integer(IntegerSexp(self.0)),
             savvy_ffi::REALSXP => TypedSexp::Real(RealSexp(self.0)),
+            #[cfg(feature = "complex")]
             savvy_ffi::CPLXSXP => TypedSexp::Complex(ComplexSexp(self.0)),
             savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
             savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
