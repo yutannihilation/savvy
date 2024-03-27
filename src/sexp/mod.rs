@@ -20,6 +20,7 @@ pub mod null;
 pub mod real;
 pub mod scalar;
 pub mod string;
+pub mod utils;
 
 /// An `SEXP`.
 pub struct Sexp(pub SEXP);

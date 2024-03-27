@@ -1,4 +1,4 @@
-use savvy_ffi::{LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
+use savvy_ffi::{R_NaInt, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
@@ -59,16 +59,23 @@ impl OwnedLogicalSexp {
         self.iter().collect()
     }
 
+    /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: bool) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        super::utils::verify_len(self.len, i)?;
 
         unsafe {
             SET_LOGICAL_ELT(self.inner, i as _, v as _);
+        }
+
+        Ok(())
+    }
+
+    /// Set the `i`-th element to NA.
+    pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
+        super::utils::verify_len(self.len, i)?;
+
+        unsafe {
+            SET_LOGICAL_ELT(self.inner, i as _, R_NaInt);
         }
 
         Ok(())

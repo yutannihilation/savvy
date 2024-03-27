@@ -2,7 +2,8 @@ use std::ffi::CStr;
 use std::os::raw::c_char;
 
 use savvy_ffi::{
-    cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP,
+    cetype_t_CE_UTF8, R_NaString, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP,
+    STRING_ELT, STRSXP,
 };
 
 use super::na::NotAvailableValue;
@@ -54,6 +55,7 @@ impl OwnedStringSexp {
         self.iter().collect()
     }
 
+    /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: &str) -> crate::error::Result<()> {
         if i >= self.len {
             return Err(crate::error::Error::new(&format!(
@@ -63,6 +65,22 @@ impl OwnedStringSexp {
         }
         unsafe {
             SET_STRING_ELT(self.inner, i as _, str_to_charsxp(v)?);
+        }
+
+        Ok(())
+    }
+
+    /// Set the `i`-th element to NA.
+    pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
+        if i >= self.len {
+            return Err(crate::error::Error::new(&format!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            )));
+        }
+
+        unsafe {
+            SET_STRING_ELT(self.inner, i as _, R_NaString);
         }
 
         Ok(())

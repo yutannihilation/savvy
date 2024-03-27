@@ -43,6 +43,12 @@ test_that("functions work", {
     c(FALSE, TRUE, TRUE)
   )
 
+  # Use as_slice_raw() to handle NA
+  expect_equal(
+    flip_logical_expert_only(c(TRUE, FALSE, NA)),
+    c(FALSE, TRUE, NA)
+  )
+
   # bool vector and scalar
   expect_equal(
     or_logical(c(TRUE, FALSE), TRUE),

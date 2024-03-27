@@ -38,7 +38,7 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na())?;
+            out.set_na(i)?;
             continue;
         }
 
@@ -61,7 +61,7 @@ fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na())?;
+            out.set_na(i)?;
             continue;
         }
 
@@ -82,7 +82,7 @@ fn times_two_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out[i] = i32::na();
+            out.set_na(i)?;
         } else {
             out[i] = e * 2;
         }
@@ -103,7 +103,7 @@ fn times_any_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out[i] = i32::na();
+            out.set_na(i)?;
         } else {
             out[i] = e * y;
         }
@@ -123,7 +123,7 @@ fn times_two_numeric(x: RealSexp) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out[i] = f64::na();
+            out.set_na(i)?;
         } else {
             out[i] = e * 2.0;
         }
@@ -144,7 +144,7 @@ fn times_any_numeric(x: RealSexp, y: f64) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out[i] = f64::na();
+            out.set_na(i)?;
         } else {
             out[i] = e * y;
         }
@@ -164,6 +164,22 @@ fn flip_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         out.set_elt(i, !e)?;
+    }
+
+    out.into()
+}
+
+// To handle NA values in a logical vector, use the raw values of i32, instead of bool.
+#[savvy]
+fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
+
+    for (i, e) in x.as_slice_raw().iter().enumerate() {
+        if e.is_na() {
+            out.set_na(i)?;
+        } else {
+            out.set_elt(i, *e == 1)?; // 1 means TRUE
+        }
     }
 
     out.into()

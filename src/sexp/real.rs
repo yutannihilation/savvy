@@ -4,6 +4,7 @@ use savvy_ffi::{REAL, REALSXP, SEXP};
 
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
+use crate::NotAvailableValue; // for na()
 
 /// An external SEXP of a real vector.
 pub struct RealSexp(pub SEXP);
@@ -59,16 +60,23 @@ impl OwnedRealSexp {
         self.as_slice().to_vec()
     }
 
+    /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        super::utils::verify_len(self.len, i)?;
 
         unsafe {
             *(self.raw.add(i)) = v;
+        }
+
+        Ok(())
+    }
+
+    /// Set the `i`-th element to NA.
+    pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
+        super::utils::verify_len(self.len, i)?;
+
+        unsafe {
+            *(self.raw.add(i)) = f64::na();
         }
 
         Ok(())
