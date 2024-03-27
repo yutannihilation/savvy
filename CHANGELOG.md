@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.4.0] (2024-03-27)
+
 ### Breaking changes
 
 * `#[savvy]` on a struct's `impl` now generates the same name of R object that
@@ -257,7 +259,8 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/yutannihilation/savvy/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/yutannihilation/savvy/compare/v0.2.20...v0.3.0
 [v0.2.20]: https://github.com/yutannihilation/savvy/compare/v0.2.19...v0.2.20
 [v0.2.19]: https://github.com/yutannihilation/savvy/compare/v0.2.18...v0.2.19
