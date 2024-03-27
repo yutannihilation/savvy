@@ -10,8 +10,7 @@ You cannot modify the values in place.
 ### 1. `iter()`
 
 `IntegerSexp`, `RealSexp`, `LogicalSexp`, and `StringSexp` provide `iter()`
-method so that you can access to the value one by one. This can be efficient
-when the data is too large to copy.
+method so that you can access to the value one by one.
 
 ```rust
 for (i, e) in x.iter().enumerate() {
@@ -32,15 +31,11 @@ fn foo(x: IntegerSexp) -> savvy::Result<()> {
 }
 ```
 
-Note that, while this is samely efficient for non-ALTREP vectors, this might be
-costly for ALTREP vectors because an ALTREP needs to be materialized first. For
-example, if the input is `1:1e8`, `iter()` should be more efficient.
-
 ### 3. `to_vec()`
 
-As the name indicates, `to_vec()` copies values to a Rust vector. Copying can be
-costly for big data, but a vector is handy if you need to pass the data around
-among Rust functions.
+As the name indicates, `to_vec()` copies the values to a new Rust vector.
+Copying can be costly for big data, but a vector is handy if you need to pass
+the data around among Rust functions.
 
 ```rust
 let mut v = x.to_vec();
@@ -99,6 +94,28 @@ The bad news is that `bool` is not the case. `bool` doesn't have `is_na()` or
 `na()`. `NA` is treated as `TRUE` without any errors. So, you have to make sure
 the input doesn't contain any missing values **on R's side**. For example, this
 function is not an identity function.
+
+```rust
+#[savvy]
+fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedLogicalSexp::new(x.len())?;
+
+    for (i, e) in x.iter().enumerate() {
+        out.set_elt(i, e)?;
+    }
+
+    out.into()
+}
+```
+
+```r
+identity_logical(c(TRUE, FALSE, NA))
+#> [1]  TRUE FALSE  TRUE
+```
+
+The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
+This returns `&[i32]` instead of `&[bool]`. Why `i32`? It's the internal
+representation of a logical vector, which is the same as an integer vector.
 
 ```rust
 #[savvy]
