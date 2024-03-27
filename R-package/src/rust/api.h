@@ -40,6 +40,7 @@ SEXP times_any_int(SEXP x, SEXP y);
 SEXP times_two_numeric(SEXP x);
 SEXP times_any_numeric(SEXP x, SEXP y);
 SEXP flip_logical(SEXP x);
+SEXP flip_logical_expert_only(SEXP x);
 SEXP or_logical(SEXP x, SEXP y);
 SEXP print_list(SEXP x);
 SEXP list_with_no_values(void);
