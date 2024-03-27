@@ -99,6 +99,7 @@ impl Sexp {
     }
 }
 
+#[non_exhaustive]
 /// A typed version of `SEXP`.
 pub enum TypedSexp {
     Integer(IntegerSexp),
@@ -177,8 +178,9 @@ impl Sexp {
         match ty as u32 {
             savvy_ffi::INTSXP => TypedSexp::Integer(IntegerSexp(self.0)),
             savvy_ffi::REALSXP => TypedSexp::Real(RealSexp(self.0)),
-            savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
+            savvy_ffi::CPLXSXP => TypedSexp::Complex(ComplexSexp(self.0)),
             savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
+            savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
             savvy_ffi::VECSXP => TypedSexp::List(ListSexp(self.0)),
             savvy_ffi::EXTPTRSXP => TypedSexp::ExternalPointer(ExternalPointerSexp(self.0)),
             // cf. https://github.com/wch/r-source/blob/95ac44a87065d5b42579b621d278adc44641dcf0/src/include/Rinlinedfuns.h#L810-L815
