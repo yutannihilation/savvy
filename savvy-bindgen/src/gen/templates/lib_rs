@@ -40,7 +40,7 @@ fn int_times_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_na(i);
+            out.set_na(i)?;
         } else {
             out[i] = e * y;
         }
