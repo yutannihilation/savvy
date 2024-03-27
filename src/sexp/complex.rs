@@ -135,9 +135,9 @@ impl TryFrom<Sexp> for ComplexSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        if !value.is_real() {
+        if !value.is_complex() {
             let type_name = value.get_human_readable_type_name();
-            let msg = format!("Expected reals, got {type_name}s");
+            let msg = format!("Expected complexes, got {type_name}s");
             return Err(crate::error::Error::UnexpectedType(msg));
         }
         Ok(Self(value.0))
@@ -197,7 +197,7 @@ impl From<OwnedComplexSexp> for crate::error::Result<Sexp> {
     }
 }
 
-macro_rules! impl_try_from_rust_reals {
+macro_rules! impl_try_from_rust_complexes {
     ($ty: ty) => {
         impl TryFrom<$ty> for Sexp {
             type Error = crate::error::Error;
@@ -209,9 +209,9 @@ macro_rules! impl_try_from_rust_reals {
     };
 }
 
-impl_try_from_rust_reals!(&[Complex64]);
-impl_try_from_rust_reals!(Vec<Complex64>);
-impl_try_from_rust_reals!(Complex64);
+impl_try_from_rust_complexes!(&[Complex64]);
+impl_try_from_rust_complexes!(Vec<Complex64>);
+impl_try_from_rust_complexes!(Complex64);
 
 // Index for OwnedComplexSexp ***************
 
