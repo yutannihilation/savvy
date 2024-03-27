@@ -119,11 +119,15 @@ representation of a logical vector, which is the same as an integer vector.
 
 ```rust
 #[savvy]
-fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
+fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(x.len())?;
 
-    for (i, e) in x.iter().enumerate() {
-        out.set_elt(i, e)?;
+    for (i, e) in x.as_slice_raw().iter().enumerate() {
+        if e.is_na() {
+            out.set_na(i)?;
+        } else {
+            out.set_elt(i, *e != 1)?; // 1 means TRUE
+        }
     }
 
     out.into()
@@ -131,6 +135,6 @@ fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
 ```
 
 ```r
-identity_logical(c(TRUE, FALSE, NA))
-#> [1]  TRUE FALSE  TRUE
+flip_logical_expert_only(c(TRUE, FALSE, NA))
+#> [1]  TRUE FALSE    NA
 ```
