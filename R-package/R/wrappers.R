@@ -53,6 +53,21 @@ set_attr_int <- function(attr, value) {
 }
 
 
+new_complex <- function(size) {
+  .Call(new_complex__impl, size)
+}
+
+
+first_complex <- function(x) {
+  .Call(first_complex__impl, x)
+}
+
+
+abs_complex <- function(x) {
+  .Call(abs_complex__impl, x)
+}
+
+
 scalar_input_int <- function(x) {
   invisible(.Call(scalar_input_int__impl, x))
 }
