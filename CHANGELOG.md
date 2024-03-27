@@ -3,6 +3,13 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New Features
+
+* `OwnedIntegerSexp` and etc now have `set_na(i)` method for shorthand of
+  `set_elt(i, T::na())`. This is particularly useful for `OwnedLogicalSexp`
+  because its setter interface `set_elt()` only accepts `bool` and no missing
+  values.
+
 ## [v0.3.0] (2024-03-24)
 
 ### New Features

@@ -243,6 +243,11 @@ SEXP flip_logical__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP flip_logical_expert_only__impl(SEXP x) {
+    SEXP res = flip_logical_expert_only(x);
+    return handle_result(res);
+}
+
 SEXP or_logical__impl(SEXP x, SEXP y) {
     SEXP res = or_logical(x, y);
     return handle_result(res);
@@ -368,6 +373,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"times_two_numeric__impl", (DL_FUNC) &times_two_numeric__impl, 1},
     {"times_any_numeric__impl", (DL_FUNC) &times_any_numeric__impl, 2},
     {"flip_logical__impl", (DL_FUNC) &flip_logical__impl, 1},
+    {"flip_logical_expert_only__impl", (DL_FUNC) &flip_logical_expert_only__impl, 1},
     {"or_logical__impl", (DL_FUNC) &or_logical__impl, 2},
     {"print_list__impl", (DL_FUNC) &print_list__impl, 1},
     {"list_with_no_values__impl", (DL_FUNC) &list_with_no_values__impl, 0},

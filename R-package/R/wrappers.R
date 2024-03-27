@@ -253,6 +253,11 @@ flip_logical <- function(x) {
   .Call(flip_logical__impl, x)
 }
 
+
+flip_logical_expert_only <- function(x) {
+  .Call(flip_logical_expert_only__impl, x)
+}
+
 #' Or operation
 #'
 #' @param x A logical vector.
