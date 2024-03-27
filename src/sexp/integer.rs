@@ -136,7 +136,7 @@ impl OwnedIntegerSexp {
     /// As the memory is uninitialized, all elements must be filled values
     /// before return.
     pub unsafe fn new_without_init(len: usize) -> crate::error::Result<Self> {
-        Self::new_inner(len, true)
+        Self::new_inner(len, false)
     }
 
     fn new_from_raw_sexp(inner: SEXP, len: usize) -> crate::error::Result<Self> {

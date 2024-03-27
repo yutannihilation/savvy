@@ -39,6 +39,11 @@ impl Person {
   because its setter interface `set_elt()` only accepts `bool` and no missing
   values.
 
+### Fixed bugs
+
+* An expert-only method `new_without_init()` now skips initialization as
+  intended.
+
 ## [v0.3.0] (2024-03-24)
 
 ### New Features
