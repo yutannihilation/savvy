@@ -3,7 +3,36 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `#[savvy]` on a struct's `impl` now generates the same name of R object that
+  holds all the accociated functions. For example, previously the below code
+  generates a constructor `Person()`, but now the constructor is available as
+  `Person$new()`.
+
+```rust
+struct Person {
+    pub name: String,
+}
+
+/// @export
+#[savvy]
+impl Person {
+    fn new() -> Self {
+        Self {
+            name: "".to_string(),
+        }
+    }
+}
+```
+
 ### New Features
+
+* A struct marked with `#[savvy]` can be used as the return type of the
+  associated function. In conjunction with the change in v0.3.0, now a
+  user-defined struct can be used more flexibly than before. Please refer to
+  [the "Struct" section of the
+  guide](https://yutannihilation.github.io/savvy/guide/10_struct.html)
 
 * `OwnedIntegerSexp` and etc now have `set_na(i)` method for shorthand of
   `set_elt(i, T::na())`. This is particularly useful for `OwnedLogicalSexp`

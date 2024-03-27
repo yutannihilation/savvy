@@ -10,8 +10,7 @@ You cannot modify the values in place.
 ### 1. `iter()`
 
 `IntegerSexp`, `RealSexp`, `LogicalSexp`, and `StringSexp` provide `iter()`
-method so that you can access to the value one by one. This can be efficient
-when the data is too large to copy.
+method so that you can access to the value one by one.
 
 ```rust
 for (i, e) in x.iter().enumerate() {
@@ -32,15 +31,11 @@ fn foo(x: IntegerSexp) -> savvy::Result<()> {
 }
 ```
 
-Note that, while this is samely efficient for non-ALTREP vectors, this might be
-costly for ALTREP vectors because an ALTREP needs to be materialized first. For
-example, if the input is `1:1e8`, `iter()` should be more efficient.
-
 ### 3. `to_vec()`
 
-As the name indicates, `to_vec()` copies values to a Rust vector. Copying can be
-costly for big data, but a vector is handy if you need to pass the data around
-among Rust functions.
+As the name indicates, `to_vec()` copies the values to a new Rust vector.
+Copying can be costly for big data, but a vector is handy if you need to pass
+the data around among Rust functions.
 
 ```rust
 let mut v = x.to_vec();
@@ -117,3 +112,7 @@ fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
 identity_logical(c(TRUE, FALSE, NA))
 #> [1]  TRUE FALSE  TRUE
 ```
+
+The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
+See "Logical" section of [Integer, Real, String, And Bool](./08_atomic_types.md)
+for the details.

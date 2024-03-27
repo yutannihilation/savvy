@@ -160,3 +160,30 @@ list_with_no_names()
 
 `set_name_and_value()` is simply `set_name()` + `set_value()`. Probably this is
 what you need in most of the cases.
+
+```rust
+#[savvy]
+fn list_with_both() -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedListSexp::new(2, false)?;
+
+    let mut e1 = OwnedIntegerSexp::new(1)?;
+    e1[0] = 100;
+    
+    let mut e2 = OwnedStringSexp::new(1)?;
+    e2.set_elt(0, "cool")?;
+
+    out.set_name_and_value(0, "foo", e1)?;
+    out.set_name_and_value(1, "bar", e2)?;
+
+    out.into()
+}
+```
+```r
+list_with_both()
+#> $foo
+#> [1] 100
+#> 
+#> $bar
+#> [1] "cool"
+#> 
+```

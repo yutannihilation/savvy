@@ -28,10 +28,32 @@ for (i, e) in x.iter().enumerate() {
 }
 ```
 
-Then, you can convert it to `Result<Sexp>` by `into()`.
+You can use `set_na()` to set the specified element as NA. For example, it's a
+common case to use this in order to propagate the missingness like below.
 
 ```rust
-out.into()
+for (i, e) in x.iter().enumerate() {
+    // ...snip...
+    if e.is_na() {
+        out.set_na(i)?;
+    } else {
+        // ...snip...
+    }
+}
+```
+
+After putting the values to the vector, you can convert it to `Result<Sexp>` by
+`into()`.
+
+```rust
+#[savvy]
+fn foo() -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedStringSexp::new(x.len())?;
+
+    // ...snip...
+
+    out.into()
+}
 ```
 
 ## 2. Convert a Rust scalar or vector by `try_into()` at last

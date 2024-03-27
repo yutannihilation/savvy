@@ -1,7 +1,9 @@
 # Struct
 
-You can use `#[savvy]` macro on `impl` for a `struct`. For example, this code
-allows you to use `Person` like below on R sessions.
+## Basic usage
+
+You can use `#[savvy]` macro on `impl` for a `struct` to make it available from
+R code.
 
 ```rust
 struct Person {
@@ -26,41 +28,109 @@ impl Person {
         out.set_elt(0, &self.name)?;
         out.into()
     }
+
+    fn say_hello() -> savvy::Result<savvy::Sexp> {
+        "Hello!".try_into()
+    }
 }
 ```
 
-One special convention is that, if the name of the method is `new`, it's used as
-the constructor function (in this case, `Person()`).
+If we focus on the arguments, there are two types of functions here:
+
+1. method: the first argument is `&self` or `&mut self` [^self] (`set_name()` and `name()`)
+2. associated function: no `&self` or `&mut self` argument (`new()` and `say_hello()`)
+
+[^self]: Note that consuming the struct (i.e., `self`) is not allowed
+
+On an R session, associated functions are available as the element of the same
+name of R object as the Rust type (in this case, `Person`).
 
 ```r
-x <- Person()
-x$set_name("たかし")
-x$name()
+p <- Person$new()
+
+Person$say_hello()
+#> [1] "Hello"
+```
+
+Among these two associated functions, `new()` is a constructor which returns
+`Self`. This creates an instance of the struct.
+
+The instance has the methods. You can call them like below.
+
+```r
+# create an instance
+p <- Person$new()
+
+# call methods
+p$set_name("たかし")
+p$name()
 #> [1] "たかし"
 ```
 
-If you define a constructor with a different name than `new()`, the
-correspopnding R function is `<type_name>_<method>`. For example, the method
-below will be available as `Person_new_with_name()` on R's side.
+The instance has the same name of S3 class as the Rust type, so you can implement
+S3 methods such as `print.<your struct>()` if necessary.
+
+```r
+class(p)
+#> [1] "Person"
+```
+
+### Struct output
+
+The above example uses `-> Self` as the return type of the associated function,
+but it's not the only specification. You can wrap it with `savvy::Result<Self>`.
 
 ```rust
 #[savvy]
 impl Person {
-    fn new_with_name(name: &str) -> Self {
-        Self {
-            name: name.to_string(),
-        }
+    fn new_fallible() -> savvy::Result<Self> {
+        let x = Self {
+            name: "".to_string(),
+        };
+        Ok(x)
     }
 }
 ```
-```r
-x <- Person_new_with_name("Scipio")
-x$name()
-#> [1] "Scipio"
+
+More generally, you can specify an arbitrary struct marked with `#[savvy]` as
+the return type. For example, you can create an instance of the struct outside
+of `impl`,
+
+```rust
+#[savvy]
+fn create_person() -> savvy::Result<Person> {
+    let x = Self {
+        name: "".to_string(),
+    };
+    Ok(x)
+}
 ```
 
+and you can generate another type of instance from an instance.
+
+```rust
+struct UpperPerson {
+    pub name: String,
+}
+
+#[savvy]
+impl Person {}
+
+#[savvy]
+impl Person {
+    fn reborn_as_upper_person(&self) -> savvy::Result<UpperPerson> {
+        let x = UpperPerson {
+            name: self.name.to_uppercase(),
+        };
+        Ok(x)
+    }
+}
+```
+
+### Struct input
+
 You can also use the struct as the argument of a `#[savvy]`-ed function. The
-type must be specified either as `&Ty` or as `&mut Ty`, not as `Ty`.
+type must be specified either as `&T` or as `&mut T`, not as `T`.
 
 ```rust
 #[savvy]
