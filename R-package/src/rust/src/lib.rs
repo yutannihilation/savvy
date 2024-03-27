@@ -178,7 +178,7 @@ fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
         if e.is_na() {
             out.set_na(i)?;
         } else {
-            out.set_elt(i, *e == 1)?; // 1 means TRUE
+            out.set_elt(i, *e != 1)?; // 1 means TRUE
         }
     }
 
