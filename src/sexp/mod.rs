@@ -22,6 +22,9 @@ pub mod scalar;
 pub mod string;
 pub mod utils;
 
+#[cfg(feature = "complex")]
+pub mod complex;
+
 /// An `SEXP`.
 pub struct Sexp(pub SEXP);
 

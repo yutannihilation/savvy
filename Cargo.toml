@@ -16,6 +16,11 @@ rust-version = "1.64.0"
 savvy-ffi = { version = "0.3.0", path = "./savvy-ffi" }
 savvy-macro = { version = "0.3.0", path = "./savvy-macro" }
 once_cell = "1"
+num-complex = { version = "0.4.5", optional = true }
+
+[features]
+default = []
+complex = ["num-complex", "savvy-ffi/complex"]
 
 [build-dependencies]
 cc = "1"

@@ -97,9 +97,16 @@ fn show() -> Result<(), DynError> {
         // Real
         .allowlist_function("REAL")
         .allowlist_function("REAL_ELT")
-        .allowlist_function("SET_REAL_ELT")
+        .allowlist_function("SET_COMPLEX_ELT")
         .allowlist_function("Rf_ScalarReal")
         .allowlist_function("Rf_isReal")
+        // Complex
+        .allowlist_type("RComplex")
+        .allowlist_function("COMPLEX")
+        .allowlist_function("COMPLEX_ELT")
+        .allowlist_function("SET_COMPLEX_ELT")
+        .allowlist_function("Rf_ScalarComplex")
+        .allowlist_function("Rf_isComplex")
         // Logical
         .allowlist_function("LOGICAL")
         .allowlist_function("LOGICAL_ELT")
