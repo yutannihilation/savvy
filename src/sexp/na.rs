@@ -26,6 +26,22 @@ impl NotAvailableValue for i32 {
     }
 }
 
+#[cfg(feature = "complex")]
+impl NotAvailableValue for num_complex::Complex64 {
+    fn is_na(&self) -> bool {
+        unsafe { self.re == savvy_ffi::R_NaReal }
+    }
+
+    fn na() -> Self {
+        unsafe {
+            num_complex::Complex64 {
+                re: savvy_ffi::R_NaReal,
+                im: savvy_ffi::R_NaReal,
+            }
+        }
+    }
+}
+
 use once_cell::sync::Lazy;
 
 pub(crate) static NA_CHAR_PTR: Lazy<&str> = Lazy::new(|| unsafe {

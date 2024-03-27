@@ -10,3 +10,10 @@ repository.workspace = true
 
 [package.metadata.dist]
 dist = false
+
+[dependencies]
+num-complex = { version = "0.4.5", optional = true }
+
+[features]
+default = []
+complex = ["num-complex"]

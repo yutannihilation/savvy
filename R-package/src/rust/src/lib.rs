@@ -18,6 +18,9 @@ pub use init_vectors::*;
 mod function;
 pub use function::*;
 
+mod complex;
+pub use complex::*;
+
 use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{
@@ -229,8 +232,14 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
-            TypedSexp::String(x) => {
-                format!("character [{}]", x.iter().collect::<Vec<&str>>().join(", "))
+            TypedSexp::Complex(x) => {
+                format!(
+                    "complex [{}]",
+                    x.iter()
+                        .map(|r| format!("{}+{}i", r.re, r.im))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                )
             }
             TypedSexp::Logical(x) => {
                 format!(
@@ -241,11 +250,14 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
                         .join(", ")
                 )
             }
+            TypedSexp::String(x) => {
+                format!("character [{}]", x.iter().collect::<Vec<&str>>().join(", "))
+            }
             TypedSexp::List(_) => "list".to_string(),
             TypedSexp::Null(_) => "NULL".to_string(),
             TypedSexp::ExternalPointer(_) => "external pointer".to_string(),
             TypedSexp::Function(_) => "function".to_string(),
-            TypedSexp::Other(_) => "Unsupported".to_string(),
+            _ => "Unsupported".to_string(),
         };
 
         let name = if k.is_empty() { "(no name)" } else { k };

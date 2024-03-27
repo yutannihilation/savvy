@@ -73,6 +73,21 @@ SEXP set_attr_int__impl(SEXP attr, SEXP value) {
     return handle_result(res);
 }
 
+SEXP new_complex__impl(SEXP size) {
+    SEXP res = new_complex(size);
+    return handle_result(res);
+}
+
+SEXP first_complex__impl(SEXP x) {
+    SEXP res = first_complex(x);
+    return handle_result(res);
+}
+
+SEXP abs_complex__impl(SEXP x) {
+    SEXP res = abs_complex(x);
+    return handle_result(res);
+}
+
 SEXP scalar_input_int__impl(SEXP x) {
     SEXP res = scalar_input_int(x);
     return handle_result(res);
@@ -339,6 +354,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"set_names_int__impl", (DL_FUNC) &set_names_int__impl, 0},
     {"set_dim_int__impl", (DL_FUNC) &set_dim_int__impl, 0},
     {"set_attr_int__impl", (DL_FUNC) &set_attr_int__impl, 2},
+    {"new_complex__impl", (DL_FUNC) &new_complex__impl, 1},
+    {"first_complex__impl", (DL_FUNC) &first_complex__impl, 1},
+    {"abs_complex__impl", (DL_FUNC) &abs_complex__impl, 1},
     {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
     {"scalar_input_usize__impl", (DL_FUNC) &scalar_input_usize__impl, 1},
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},

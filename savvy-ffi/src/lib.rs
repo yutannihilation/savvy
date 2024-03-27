@@ -90,6 +90,31 @@ extern "C" {
     pub fn Rf_isReal(s: SEXP) -> Rboolean;
 }
 
+// Complex
+//
+// Since the representation of Rcomplex matches num_complex's Compplex64, use it
+// directly. Note that num-complex's docment warns as following and this seems
+// the case of passing as a value.
+//
+//     Note that `Complex<F>` where `F` is a floating point type is **only**
+//     memory layout compatible with C’s complex types, **not** necessarily
+//     calling convention compatible. This means that for FFI you can only pass
+//     `Complex<F>` behind a pointer, not as a value.
+//     (https://docs.rs/num-complex/latest/num_complex/struct.Complex.html#representation-and-foreign-function-interface-compatibility)
+//
+// While it's true it's not guaranteed to be safe, in actual, no problem has
+// benn found so far, and it's a common attitude to ignore the unsafety.
+//
+// cf. https://gitlab.com/petsc/petsc-rs/-/issues/1
+#[cfg(feature = "complex")]
+extern "C" {
+    pub fn COMPLEX(x: SEXP) -> *mut num_complex::Complex64;
+    pub fn COMPLEX_ELT(x: SEXP, i: R_xlen_t) -> num_complex::Complex64;
+    pub fn SET_COMPLEX_ELT(x: SEXP, i: R_xlen_t, v: num_complex::Complex64);
+    pub fn Rf_ScalarComplex(arg1: num_complex::Complex64) -> SEXP;
+    pub fn Rf_isComplex(s: SEXP) -> Rboolean;
+}
+
 // Logical
 extern "C" {
     pub fn LOGICAL(x: SEXP) -> *mut ::std::os::raw::c_int;

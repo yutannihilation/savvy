@@ -35,7 +35,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
 
       - name: Build API Reference
-        run: cargo doc --no-deps
+        run: cargo doc --no-deps --features complex
         env:
           RUSTDOCFLAGS: "--enable-index-page -Zunstable-options"
 
