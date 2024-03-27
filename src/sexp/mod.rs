@@ -10,6 +10,9 @@ use crate::{
     OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
 };
 
+#[cfg(feature = "complex")]
+use crate::{ComplexSexp, OwnedComplexSexp};
+
 pub mod external_pointer;
 pub mod function;
 pub mod integer;
@@ -53,6 +56,12 @@ impl Sexp {
         unsafe { Rf_isReal(self.0) == 1 }
     }
 
+    #[cfg(feature = "complex")]
+    /// Returns `true` if the SEXP is a complex.
+    pub fn is_complex(&self) -> bool {
+        unsafe { savvy_ffi::Rf_isComplex(self.0) == 1 }
+    }
+
     /// Returns `true` if the SEXP is a logical vector.
     pub fn is_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.0) == 1 }
@@ -94,8 +103,10 @@ impl Sexp {
 pub enum TypedSexp {
     Integer(IntegerSexp),
     Real(RealSexp),
-    String(StringSexp),
+    #[cfg(feature = "complex")]
+    Complex(ComplexSexp),
     Logical(LogicalSexp),
+    String(StringSexp),
     List(ListSexp),
     Null(NullSexp),
     ExternalPointer(ExternalPointerSexp),
@@ -115,8 +126,10 @@ macro_rules! into_typed_sxp {
 
 into_typed_sxp!(IntegerSexp, Integer);
 into_typed_sxp!(RealSexp, Real);
-into_typed_sxp!(StringSexp, String);
+#[cfg(feature = "complex")]
+into_typed_sxp!(ComplexSexp, Complex);
 into_typed_sxp!(LogicalSexp, Logical);
+into_typed_sxp!(StringSexp, String);
 into_typed_sxp!(ListSexp, List);
 into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
 into_typed_sxp!(FunctionSexp, Function);
@@ -134,6 +147,8 @@ macro_rules! into_typed_sxp_owned {
 
 into_typed_sxp_owned!(OwnedIntegerSexp, Integer);
 into_typed_sxp_owned!(OwnedRealSexp, Real);
+#[cfg(feature = "complex")]
+into_typed_sxp_owned!(OwnedComplexSexp, Complex);
 into_typed_sxp_owned!(OwnedStringSexp, String);
 into_typed_sxp_owned!(OwnedLogicalSexp, Logical);
 
@@ -143,6 +158,8 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::Null(_) => unsafe { savvy_ffi::R_NilValue },
             TypedSexp::Integer(sxp) => sxp.inner(),
             TypedSexp::Real(sxp) => sxp.inner(),
+            #[cfg(feature = "complex")]
+            TypedSexp::Complex(sxp) => sxp.inner(),
             TypedSexp::String(sxp) => sxp.inner(),
             TypedSexp::Logical(sxp) => sxp.inner(),
             TypedSexp::List(sxp) => sxp.inner(),

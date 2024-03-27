@@ -71,6 +71,9 @@ pub use sexp::real::{OwnedRealSexp, RealSexp};
 pub use sexp::string::{OwnedStringSexp, StringSexp};
 pub use sexp::{Sexp, TypedSexp};
 
+#[cfg(feature = "complex")]
+pub use sexp::complex::{ComplexSexp, OwnedComplexSexp};
+
 pub use unwind_protect::unwind_protect;
 
 // re-export
