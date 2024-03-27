@@ -12,7 +12,7 @@ fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
 
     for (i, e) in x.iter().enumerate() {
         if e.is_na() {
-            out.set_elt(i, <&str>::na())?;
+            out.set_na(i)?;
             continue;
         }
 

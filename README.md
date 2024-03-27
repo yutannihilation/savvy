@@ -38,8 +38,8 @@ fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         // To Rust, missing value is an ordinary value. In `&str`'s case, it's just "NA".
         // You have to use `.is_na()` method to distinguish the missing value.
         if e.is_na() {
-            // Values need to be set by `set_elt()` one by one.
-            out.set_elt(i, <&str>::na())?;
+            // Set the i-th element to NA
+            out.set_na(i)?;
             continue;
         }
 
