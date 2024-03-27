@@ -33,7 +33,8 @@ impl Person {
   user-defined struct can be used more flexibly than before. Please refer to
   [the "Struct" section of the
   guide](https://yutannihilation.github.io/savvy/guide/10_struct.html)
-
+* An experimental support on complex is added under `compex` feature flag.
+  `ComplexSexp` and `OwnedComplexSexp` are the corresponding Rust types.
 * `OwnedIntegerSexp` and etc now have `set_na(i)` method for shorthand of
   `set_elt(i, T::na())`. This is particularly useful for `OwnedLogicalSexp`
   because its setter interface `set_elt()` only accepts `bool` and no missing
