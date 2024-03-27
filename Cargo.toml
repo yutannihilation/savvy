@@ -20,10 +20,15 @@ num-complex = { version = "0.4.5", optional = true }
 
 [features]
 default = []
+
+# Support complex 
 complex = ["num-complex", "savvy-ffi/complex"]
 
 [build-dependencies]
 cc = "1"
+
+[package.metadata.docs.rs]
+features = ["complex"]
 
 [workspace.metadata.release]
 tag = false # do not create tags for individual crates (e.g. "savvy-cli-v0.2.5")
