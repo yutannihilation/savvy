@@ -234,6 +234,11 @@ impl Sexp {
         unsafe { self.get_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol) }
     }
 
+    /// Returns the dimension.
+    pub fn get_dim(&self) -> Option<&[i32]> {
+        unsafe { crate::sexp::get_dim_from_sexp(&self.0) }
+    }
+
     /// Set the input value to the specified attribute.
     pub fn set_attrib(&mut self, attr: &str, value: Sexp) -> crate::error::Result<()> {
         let attr_cstr = match CString::new(attr) {
@@ -271,11 +276,15 @@ impl Sexp {
     pub fn set_names<T: AsRef<str>>(&mut self, names: &[T]) -> crate::error::Result<()> {
         unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol, names) }
     }
+
+    /// Set the dimension. `dim` can be `i32`, `usize`, or whatever
+    /// numeric types that implements `TryInto<i32>`.
+    pub fn set_dim<T: TryInto<i32> + Copy>(&mut self, dim: &[T]) -> crate::error::Result<()> {
+        unsafe { crate::sexp::set_dim_to_sexp(self.0, dim) }
+    }
 }
 
-// Note: There's no Sexp::get_dim() because, unlike `class` and `name`, `dim` is
-//       not what is expeceted to be on all types of SEXPs.
-pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
+pub(crate) unsafe fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     let dim_sexp = unsafe { Rf_getAttrib(*value, savvy_ffi::R_DimSymbol) };
 
     if unsafe { TYPEOF(dim_sexp) != savvy_ffi::INTSXP } {
@@ -287,9 +296,7 @@ pub(crate) fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     }
 }
 
-// Note: There's no Sexp::set_dim() because, unlike `class` and `name`, `dim` is
-//       not what is expeceted to be on all types of SEXPs.
-pub(crate) fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error::Result<()>
+pub(crate) unsafe fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error::Result<()>
 where
     T: TryInto<i32> + Copy,
 {
@@ -345,7 +352,10 @@ macro_rules! impl_common_sexp_ops {
 
             /// Returns the dimension.
             pub fn get_dim(&self) -> Option<&[i32]> {
-                crate::sexp::get_dim_from_sexp(self.inner_ref())
+                // In order to maintain the lifetime, this cannot rely on the
+                // Sexp's method. Otherwise, you'll see the "cannot return
+                // reference to temporary value" error.
+                unsafe { crate::sexp::get_dim_from_sexp(self.inner_ref()) }
             }
         }
     };
@@ -396,7 +406,10 @@ macro_rules! impl_common_sexp_ops_owned {
 
             /// Returns the dimension.
             pub fn get_dim(&self) -> Option<&[i32]> {
-                crate::sexp::get_dim_from_sexp(self.inner_ref())
+                // In order to maintain the lifetime, this cannot rely on the
+                // Sexp's method. Otherwise, you'll see the "cannot return
+                // reference to temporary value" error.
+                unsafe { crate::sexp::get_dim_from_sexp(self.inner_ref()) }
             }
 
             /// Set the input value to the specified attribute.
@@ -420,7 +433,10 @@ macro_rules! impl_common_sexp_ops_owned {
                 &mut self,
                 dim: &[T],
             ) -> crate::error::Result<()> {
-                crate::sexp::set_dim_to_sexp(self.inner(), dim)
+                // In order to maintain the lifetime, this cannot rely on the
+                // Sexp's method. Otherwise, you'll see the "cannot return
+                // reference to temporary value" error.
+                unsafe { crate::sexp::set_dim_to_sexp(self.inner(), dim) }
             }
         }
     };
