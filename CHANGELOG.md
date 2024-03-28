@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* `get_dim()` and `set_dim()` are now available also on `Sexp`.
+
 ## [v0.4.0] (2024-03-27)
 
 ### Breaking changes
@@ -28,7 +32,7 @@ impl Person {
 }
 ```
 
-### New Features
+### New features
 
 * A struct marked with `#[savvy]` can be used as the return type of the
   associated function. In conjunction with the change in v0.3.0, now a
@@ -49,7 +53,7 @@ impl Person {
 
 ## [v0.3.0] (2024-03-24)
 
-### New Features
+### New features
 
 * Now user-defined struct can be used as an argument of `#[savvy]`-ed functions.
   It must be specified as `&Ty` or `&mut Ty`, not `Ty`. 
@@ -82,7 +86,7 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 
 ### Breaking changes
 
-* While this is described in the New Features section, it was already allowed to
+* While this is described in the New features section, it was already allowed to
   specify user-defined structs as argument if the user defines the necessary
   `TryFrom` implementations propoerly. At that time, specifying it without `&`
   was possible, but now it's not allowed. Anyway, as this was undocumented and
@@ -92,7 +96,7 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 
 ## [v0.2.19] (2024-03-23)
 
-### New Features
+### New features
 
 * `LogicalSexp` and `OwnedLogicalSexp` now have `as_slice_raw()` method.  This
     is an expert-only function which might be found useful when you really need
@@ -131,7 +135,7 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 
 ## [v0.2.15] (2024-03-02)
 
-### New Features
+### New features
 
 * Previously, if a crate uses savvy, `cargo test` fails to compile on Windows
   even if the test code doesn't use the savvy API at all. This is because the
@@ -157,7 +161,7 @@ fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
 
 ## [v0.2.12] (2024-02-14)
 
-### New Features
+### New features
 
 * `savvy-cli init` now adds `SystemRequirements` to the `DESCRIPTION` file.
 
