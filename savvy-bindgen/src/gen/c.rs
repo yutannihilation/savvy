@@ -12,11 +12,12 @@ impl SavvyFn {
             })
             .collect();
 
-        // if it's a method, add `self__` arg
-        if let SavvyFnType::Method(_) = &self.fn_type {
-            out.insert(0, ("self__".to_string(), "SEXP".to_string()))
+        match &self.fn_type {
+            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
+                out.insert(0, ("self__".to_string(), "SEXP".to_string()))
+            }
+            _ => {}
         }
-
         out
     }
 
