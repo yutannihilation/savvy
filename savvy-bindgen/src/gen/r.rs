@@ -57,21 +57,7 @@ impl SavvyFn {
         let args = args.join(", ");
         let args_call = args_call.join(", ");
 
-        let mut body_lines = self
-            .args
-            .iter()
-            .flat_map(|arg| {
-                if arg.is_user_defined_type() {
-                    let r_var = arg.pat_string();
-                    let r_class = arg.ty_string();
-                    Some(format!(
-                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
-                    ))
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<String>>();
+        let mut body_lines = self.get_extractions();
 
         // If the result is NULL, wrap it with invisible
         let fn_call = match &self.return_type {
@@ -96,6 +82,23 @@ impl SavvyFn {
 }}
 "
         )
+    }
+
+    fn get_extractions(&self) -> Vec<String> {
+        self.args
+            .iter()
+            .flat_map(|arg| {
+                if arg.is_user_defined_type() {
+                    let r_var = arg.pat_string();
+                    let r_class = arg.ty_string();
+                    Some(format!(
+                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<String>>()
     }
 }
 
@@ -131,7 +134,9 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                let body = match &x.return_type {
+                let mut body_lines = x.get_extractions();
+
+                let fn_call = match &x.return_type {
                     SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
                     // If the result is NULL, wrap it with invisible
                     SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
@@ -141,14 +146,17 @@ impl SavvyImpl {
                         ty_str,
                         ..
                     }) => {
-                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
+                        format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
                     }
                 };
+                body_lines.push(fn_call);
+
+                let body = body_lines.join("\n");
 
                 format!(
                     "{fn_name} <- function(self) {{
   function({args_r}) {{
-    {body}
+  {body}
   }}
 }}
 "
@@ -190,7 +198,9 @@ impl SavvyImpl {
                 args.insert(0, format!("{fn_name_c}__impl"));
                 let args_call = args.join(", ");
 
-                let body = match &x.return_type {
+                let mut body_lines = x.get_extractions();
+
+                let fn_call = match &x.return_type {
                     SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
                     // If the result is NULL, wrap it with invisible
                     SavvyFnReturnType::Unit(_) => format!("invisible(.Call({args_call}))"),
@@ -200,13 +210,17 @@ impl SavvyImpl {
                         ty_str,
                         ..
                     }) => {
-                        format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
+                        format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
                     }
                 };
 
+                body_lines.push(fn_call);
+
+                let body = body_lines.join("\n");
+
                 format!(
                     r#"{class_r}${fn_name} <- function({args_r}) {{
-  {body}
+{body}
 }}
 "#
                 )
