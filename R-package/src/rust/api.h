@@ -9,6 +9,7 @@ SEXP set_attr_int(SEXP attr, SEXP value);
 SEXP new_complex(SEXP size);
 SEXP first_complex(SEXP x);
 SEXP abs_complex(SEXP x);
+SEXP new_value_pair(SEXP a, SEXP b);
 SEXP scalar_input_int(SEXP x);
 SEXP scalar_input_usize(SEXP x);
 SEXP scalar_input_real(SEXP x);
@@ -52,6 +53,16 @@ SEXP list_with_names_and_values(void);
 SEXP external_person_new(void);
 SEXP get_name_external(SEXP x);
 SEXP set_name_external(SEXP x, SEXP name);
+
+// methods and associated functions for Value
+SEXP Value_new(SEXP x);
+SEXP Value_pair(SEXP self__, SEXP b);
+SEXP Value_get(SEXP self__);
+
+// methods and associated functions for ValuePair
+SEXP ValuePair_new(SEXP a, SEXP b);
+SEXP ValuePair_new_copy(SEXP a, SEXP b);
+SEXP ValuePair_print(SEXP self__);
 
 // methods and associated functions for Person
 SEXP Person_new(void);

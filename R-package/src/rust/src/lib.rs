@@ -21,6 +21,9 @@ pub use function::*;
 mod complex;
 pub use complex::*;
 
+mod consuming_type;
+pub use consuming_type::*;
+
 use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{

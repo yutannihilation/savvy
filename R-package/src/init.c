@@ -88,6 +88,41 @@ SEXP abs_complex__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP new_value_pair__impl(SEXP a, SEXP b) {
+    SEXP res = new_value_pair(a, b);
+    return handle_result(res);
+}
+
+SEXP Value_new__impl(SEXP x) {
+    SEXP res = Value_new(x);
+    return handle_result(res);
+}
+
+SEXP Value_pair__impl(SEXP self__, SEXP b) {
+    SEXP res = Value_pair(self__, b);
+    return handle_result(res);
+}
+
+SEXP Value_get__impl(SEXP self__) {
+    SEXP res = Value_get(self__);
+    return handle_result(res);
+}
+
+SEXP ValuePair_new__impl(SEXP a, SEXP b) {
+    SEXP res = ValuePair_new(a, b);
+    return handle_result(res);
+}
+
+SEXP ValuePair_new_copy__impl(SEXP a, SEXP b) {
+    SEXP res = ValuePair_new_copy(a, b);
+    return handle_result(res);
+}
+
+SEXP ValuePair_print__impl(SEXP self__) {
+    SEXP res = ValuePair_print(self__);
+    return handle_result(res);
+}
+
 SEXP scalar_input_int__impl(SEXP x) {
     SEXP res = scalar_input_int(x);
     return handle_result(res);
@@ -357,6 +392,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"new_complex__impl", (DL_FUNC) &new_complex__impl, 1},
     {"first_complex__impl", (DL_FUNC) &first_complex__impl, 1},
     {"abs_complex__impl", (DL_FUNC) &abs_complex__impl, 1},
+    {"new_value_pair__impl", (DL_FUNC) &new_value_pair__impl, 2},
+    {"Value_new__impl", (DL_FUNC) &Value_new__impl, 1},
+    {"Value_pair__impl", (DL_FUNC) &Value_pair__impl, 2},
+    {"Value_get__impl", (DL_FUNC) &Value_get__impl, 1},
+    {"ValuePair_new__impl", (DL_FUNC) &ValuePair_new__impl, 2},
+    {"ValuePair_new_copy__impl", (DL_FUNC) &ValuePair_new_copy__impl, 2},
+    {"ValuePair_print__impl", (DL_FUNC) &ValuePair_print__impl, 1},
     {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
     {"scalar_input_usize__impl", (DL_FUNC) &scalar_input_usize__impl, 1},
     {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
