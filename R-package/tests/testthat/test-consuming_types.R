@@ -26,8 +26,7 @@ test_that("consuming types work", {
   b3 <- Value$new(20L)
   x3 <- a3$pair(b3)
   expect_snapshot(x3$print())
-  # TODO
-  # expect_error(a3$get())
+  expect_error(a3$get())
   expect_error(b3$get())
 
   # bare function

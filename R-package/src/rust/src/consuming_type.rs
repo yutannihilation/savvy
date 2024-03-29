@@ -10,8 +10,8 @@ impl Value {
     }
 
     // TODO: allow consuming self?
-    fn pair(&self, b: Value) -> savvy::Result<ValuePair> {
-        Ok(ValuePair { a: self.clone(), b })
+    fn pair(self, b: Value) -> savvy::Result<ValuePair> {
+        Ok(ValuePair { a: self, b })
     }
 
     fn get(&self) -> savvy::Result<Sexp> {
