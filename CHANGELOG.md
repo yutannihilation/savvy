@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* `Sexp` loses `is_environment()` method becuase this isn't useful, considering
+  savvy doesn't support environment.
+
 ### New features
 
 * `get_dim()` and `set_dim()` are now available also on `Sexp`.
