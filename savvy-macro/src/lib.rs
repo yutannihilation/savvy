@@ -69,11 +69,9 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
             type Error = savvy::Error;
 
             fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                if !value.is_external_pointer() {
-                    let type_name = value.get_human_readable_type_name();
-                    let msg = format!("Expected an external pointer, got {type_name}s");
-                    return Err(savvy::error::Error::UnexpectedType(msg));
-                }
+                // Return error if the SEXP is not an external pointer
+                value.verify_external_pointer()?;
+
                 let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                 let res = unsafe { x.as_mut() };
                 res.ok_or("Failed to convert the external pointer to the Rust object".into())
@@ -84,14 +82,23 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
             type Error = savvy::Error;
 
             fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                if !value.is_external_pointer() {
-                    let type_name = value.get_human_readable_type_name();
-                    let msg = format!("Expected an external pointer, got {type_name}s");
-                    return Err(savvy::error::Error::UnexpectedType(msg));
-                }
+                // Return error if the SEXP is not an external pointer
+                value.verify_external_pointer()?;
+
                 let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                 let res = unsafe { x.as_ref() };
                 res.ok_or("Failed to convert the external pointer to the Rust object".into())
+            }
+        }
+
+        impl TryFrom<savvy::Sexp> for #ty {
+            type Error = savvy::Error;
+
+            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
+                // Return error if the SEXP is not an external pointer
+                value.verify_external_pointer()?;
+
+                unsafe { savvy::take_external_pointer_value::<#ty>(value.0) }
             }
         }
 

@@ -91,6 +91,25 @@ pub unsafe fn get_external_pointer_addr(
     Ok(ptr)
 }
 
+/// Takes the value of the external pointer and set the pointer to null.
+///
+/// ## Safety
+/// This is intended to be used only in savvy-bindgen
+pub unsafe fn take_external_pointer_value<T>(x: SEXP) -> crate::error::Result<T> {
+    let ptr = unsafe { R_ExternalPtrAddr(x) };
+
+    if !ptr.is_null() {
+        let rust_obj = unsafe { Box::from_raw(ptr as *mut T) };
+
+        // Set the pointer to null
+        unsafe { R_ClearExternalPtr(x) };
+
+        Ok(*rust_obj)
+    } else {
+        Err(crate::error::Error::InvalidPointer)
+    }
+}
+
 /// An **external** external pointer.
 ///
 /// This exists solely for casting a EXTPTRSXP into the underlying type.
@@ -126,11 +145,9 @@ impl TryFrom<Sexp> for ExternalPointerSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        if !value.is_external_pointer() {
-            let type_name = value.get_human_readable_type_name();
-            let msg = format!("Expected an external pointer, got {type_name}s");
-            return Err(crate::error::Error::UnexpectedType(msg));
-        }
+        // Return error if the SEXP is not an external pointer
+        value.verify_external_pointer()?;
+
         Ok(Self(value.0))
     }
 }

@@ -28,11 +28,4 @@ fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
     Ok(())
 }
 
-struct Foo;
-
-#[savvy]
-fn wrong_type_custom_type_no_ref(x: Foo) -> savvy::Result<()> {
-    Ok(())
-}
-
 fn main() {}

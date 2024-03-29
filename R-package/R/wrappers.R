@@ -68,6 +68,13 @@ abs_complex <- function(x) {
 }
 
 
+new_value_pair <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(new_value_pair__impl, a, b))
+}
+
+
 scalar_input_int <- function(x) {
   invisible(.Call(scalar_input_int__impl, x))
 }
@@ -324,6 +331,70 @@ set_name_external <- function(x, name) {
   invisible(.Call(set_name_external__impl, x, name))
 }
 
+
+Value <- new.env(parent = emptyenv())
+Value$new <- function(x) {
+  .savvy_wrap_Value(.Call(Value_new__impl, x))
+}
+
+
+.savvy_wrap_Value <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$pair <- Value_pair(ptr)
+  e$get <- Value_get(ptr)
+
+  class(e) <- "Value"
+  e
+}
+
+
+Value_pair <- function(self) {
+  function(b) {
+    b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(Value_pair__impl, self, b))
+  }
+}
+
+Value_get <- function(self) {
+  function() {
+  .Call(Value_get__impl, self)
+  }
+}
+
+
+
+ValuePair <- new.env(parent = emptyenv())
+ValuePair$new <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(ValuePair_new__impl, a, b))
+}
+
+ValuePair$new_copy <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(ValuePair_new_copy__impl, a, b))
+}
+
+
+.savvy_wrap_ValuePair <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$print <- ValuePair_print(ptr)
+
+  class(e) <- "ValuePair"
+  e
+}
+
+
+ValuePair_print <- function(self) {
+  function() {
+  invisible(.Call(ValuePair_print__impl, self))
+  }
+}
+
+
 #' A person with a name
 #'
 #' @export
@@ -341,7 +412,7 @@ Person$new_with_name <- function(name) {
 }
 
 Person$associated_function <- function() {
-  .Call(Person_associated_function__impl)
+.Call(Person_associated_function__impl)
 }
 
 
@@ -365,13 +436,13 @@ Person_another_person <- function(self) {
 
 Person_set_name <- function(self) {
   function(name) {
-    invisible(.Call(Person_set_name__impl, self, name))
+  invisible(.Call(Person_set_name__impl, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-    .Call(Person_name__impl, self)
+  .Call(Person_name__impl, self)
   }
 }
 
@@ -392,7 +463,7 @@ Person2 <- new.env(parent = emptyenv())
 
 Person2_name <- function(self) {
   function() {
-    .Call(Person2_name__impl, self)
+  .Call(Person2_name__impl, self)
   }
 }
 
