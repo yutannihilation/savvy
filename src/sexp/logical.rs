@@ -159,11 +159,7 @@ impl TryFrom<Sexp> for LogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        if !value.is_logical() {
-            let type_name = value.get_human_readable_type_name();
-            let msg = format!("Expected logicals, got {type_name}s");
-            return Err(crate::error::Error::UnexpectedType(msg));
-        }
+        value.verify_logical()?;
         Ok(Self(value.0))
     }
 }

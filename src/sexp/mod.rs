@@ -38,15 +38,6 @@ impl Sexp {
         unsafe { self.0 == R_NilValue }
     }
 
-    /// Returns `true` if the SEXP is a character vector.
-    pub fn is_string(&self) -> bool {
-        // There are two versions of `Rf_isString()``, but anyway this should be cheap.
-        //
-        // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
-        // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
-        unsafe { Rf_isString(self.0) == 1 }
-    }
-
     /// Returns `true` if the SEXP is an integer vector.
     pub fn is_integer(&self) -> bool {
         unsafe { Rf_isInteger(self.0) == 1 }
@@ -66,6 +57,15 @@ impl Sexp {
     /// Returns `true` if the SEXP is a logical vector.
     pub fn is_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.0) == 1 }
+    }
+
+    /// Returns `true` if the SEXP is a character vector.
+    pub fn is_string(&self) -> bool {
+        // There are two versions of `Rf_isString()``, but anyway this should be cheap.
+        //
+        // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
+        // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
+        unsafe { Rf_isString(self.0) == 1 }
     }
 
     /// Returns `true` if the SEXP is a list.
@@ -134,10 +134,51 @@ macro_rules! impl_sexp_verify_type {
     };
 }
 
-// TODO: implement more
 impl Sexp {
+    /// Returns error when the SEXP is not NULL.
+    pub fn verify_null(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, NILSXP)
+    }
+
+    /// Returns error when the SEXP is not an integer vector.
+    pub fn verify_integer(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, INTSXP)
+    }
+
+    /// Returns error when the SEXP is not a real vector.
+    pub fn verify_real(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, REALSXP)
+    }
+
+    /// Returns error when the SEXP is not an complex pointer.
+    #[cfg(feature = "complex")]
+    pub fn verify_complex(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, CPLXSXP)
+    }
+
+    /// Returns error when the SEXP is not a logical vector.
+    pub fn verify_logical(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, LGLSXP)
+    }
+
+    /// Returns error when the SEXP is not a string vector.
+    pub fn verify_string(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, STRSXP)
+    }
+
+    /// Returns error when the SEXP is not a list.
+    pub fn verify_list(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, VECSXP)
+    }
+
+    /// Returns error when the SEXP is not an external pointer.
     pub fn verify_external_pointer(&self) -> crate::error::Result<()> {
         impl_sexp_verify_type!(self, EXTPTRSXP)
+    }
+
+    /// Returns error when the SEXP is not a function.
+    pub fn verify_function(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, CLOSXP)
     }
 }
 
