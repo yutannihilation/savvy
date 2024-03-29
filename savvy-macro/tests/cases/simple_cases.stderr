@@ -35,9 +35,3 @@ error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
    |
 27 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
    |                               ^^^^^^^^^^^^^^^
-
-error: A user-defined struct must be in the form of either `&Foo` or `&mut Foo`
-  --> tests/cases/simple_cases.rs:34:37
-   |
-34 | fn wrong_type_custom_type_no_ref(x: Foo) -> savvy::Result<()> {
-   |                                     ^^^
