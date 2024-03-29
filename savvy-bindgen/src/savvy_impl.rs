@@ -39,10 +39,15 @@ impl SavvyImpl {
             .filter_map(|f| match f {
                 syn::ImplItem::Fn(impl_item_fn) => {
                     let ty = self_ty.clone();
-                    let fn_type = if is_method(impl_item_fn) {
-                        SavvyFnType::Method(ty)
-                    } else {
-                        SavvyFnType::AssociatedFunction(ty)
+                    let fn_type = match impl_item_fn.sig.inputs.first() {
+                        Some(syn::FnArg::Receiver(syn::Receiver { reference, .. })) => {
+                            if reference.is_some() {
+                                SavvyFnType::Method(ty)
+                            } else {
+                                SavvyFnType::ConsumingMethod(ty)
+                            }
+                        }
+                        _ => SavvyFnType::AssociatedFunction(ty),
                     };
 
                     Some(SavvyFn::from_impl_fn(impl_item_fn, fn_type, self_ty))
@@ -69,14 +74,6 @@ impl SavvyImpl {
     pub fn generate_outer_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.generate_outer_fn()).collect()
     }
-}
-
-// check if the first argument is `self`
-fn is_method(impl_item_fn: &syn::ImplItemFn) -> bool {
-    matches!(
-        impl_item_fn.sig.inputs.first(),
-        Some(syn::FnArg::Receiver(_))
-    )
 }
 
 #[cfg(test)]

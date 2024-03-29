@@ -41,7 +41,7 @@ impl SavvyFn {
                     #(#stmts_orig)*
                 }
             ),
-            // A method
+            // A method with &self or &mut self
             SavvyFnType::Method(ty) => {
                 if wrapped_with_result {
                     parse_quote!(
@@ -67,6 +67,33 @@ impl SavvyFn {
                     )
                 }
             }
+            // A method with self
+            SavvyFnType::ConsumingMethod(ty) => {
+                if wrapped_with_result {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
+                            #(#stmts_additional)*
+
+                            self__.#fn_name_orig(#(#args_pat),*)
+                        }
+                    )
+                } else {
+                    parse_quote!(
+                        #(#attrs)*
+                        #[allow(non_snake_case)]
+                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
+                            #(#stmts_additional)*
+
+                            Ok(self__.#fn_name_orig(#(#args_pat),*))
+                        }
+                    )
+                }
+            }
+
             // An associated function
             SavvyFnType::AssociatedFunction(ty) => {
                 if wrapped_with_result {
@@ -130,7 +157,7 @@ impl SavvyFn {
 
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
-            SavvyFnType::Method(_) => {
+            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
                 // `-> Self` is allowed
                 if wrapped_with_result {
                     parse_quote!(

@@ -32,8 +32,11 @@ impl SavvyFn {
         let mut out: Vec<_> = self.args.iter().map(|arg| arg.pat_string()).collect();
 
         // if it's a method, add `self__` arg
-        if let SavvyFnType::Method(_) = &self.fn_type {
-            out.insert(0, "self".to_string())
+        match &self.fn_type {
+            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
+                out.insert(0, "self".to_string())
+            }
+            _ => {}
         }
 
         out
@@ -111,7 +114,9 @@ impl SavvyImpl {
         for savvy_fn in &self.fns {
             match savvy_fn.fn_type {
                 SavvyFnType::AssociatedFunction(_) => associated_fns.push(savvy_fn),
-                SavvyFnType::Method(_) => method_fns.push(savvy_fn),
+                SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
+                    method_fns.push(savvy_fn)
+                }
                 SavvyFnType::BareFunction => panic!("Something is wrong"),
             }
         }
