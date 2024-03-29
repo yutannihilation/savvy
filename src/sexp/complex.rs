@@ -64,7 +64,7 @@ impl OwnedComplexSexp {
 
     /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: Complex64) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             *(self.raw.add(i)) = v;
@@ -75,7 +75,7 @@ impl OwnedComplexSexp {
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             *(self.raw.add(i)) = Complex64::na();
@@ -135,7 +135,7 @@ impl TryFrom<Sexp> for ComplexSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.verify_complex()?;
+        value.assert_complex()?;
         Ok(Self(value.0))
     }
 }

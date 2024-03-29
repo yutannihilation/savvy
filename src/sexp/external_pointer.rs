@@ -146,7 +146,7 @@ impl TryFrom<Sexp> for ExternalPointerSexp {
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
         // Return error if the SEXP is not an external pointer
-        value.verify_external_pointer()?;
+        value.assert_external_pointer()?;
 
         Ok(Self(value.0))
     }

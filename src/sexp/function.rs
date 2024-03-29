@@ -172,7 +172,7 @@ impl TryFrom<Sexp> for FunctionSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.verify_function()?;
+        value.assert_function()?;
         Ok(Self(value.0))
     }
 }

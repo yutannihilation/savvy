@@ -138,7 +138,7 @@ impl TryFrom<Sexp> for StringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.verify_string()?;
+        value.assert_string()?;
         Ok(Self(value.0))
     }
 }

@@ -61,7 +61,7 @@ impl OwnedLogicalSexp {
 
     /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: bool) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             SET_LOGICAL_ELT(self.inner, i as _, v as _);
@@ -72,7 +72,7 @@ impl OwnedLogicalSexp {
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             SET_LOGICAL_ELT(self.inner, i as _, R_NaInt);
@@ -159,7 +159,7 @@ impl TryFrom<Sexp> for LogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.verify_logical()?;
+        value.assert_logical()?;
         Ok(Self(value.0))
     }
 }

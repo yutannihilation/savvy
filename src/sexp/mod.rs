@@ -121,7 +121,7 @@ unsafe fn get_human_readable_type_name(sexptype: SEXPTYPE) -> &'static str {
     }
 }
 
-macro_rules! impl_sexp_verify_type {
+macro_rules! impl_sexp_type_assert {
     ($self: ident, $sexptype: ident) => {
         if $self.is_sexp_type(savvy_ffi::$sexptype) {
             Ok(())
@@ -136,53 +136,53 @@ macro_rules! impl_sexp_verify_type {
 
 impl Sexp {
     /// Returns error when the SEXP is not NULL.
-    pub fn verify_null(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, NILSXP)
+    pub fn assert_null(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, NILSXP)
     }
 
     /// Returns error when the SEXP is not an integer vector.
-    pub fn verify_integer(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, INTSXP)
+    pub fn assert_integer(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, INTSXP)
     }
 
     /// Returns error when the SEXP is not a real vector.
-    pub fn verify_real(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, REALSXP)
+    pub fn assert_real(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, REALSXP)
     }
 
     /// Returns error when the SEXP is not an complex pointer.
     #[cfg(feature = "complex")]
-    pub fn verify_complex(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, CPLXSXP)
+    pub fn assert_complex(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, CPLXSXP)
     }
 
     /// Returns error when the SEXP is not a logical vector.
-    pub fn verify_logical(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, LGLSXP)
+    pub fn assert_logical(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, LGLSXP)
     }
 
     /// Returns error when the SEXP is not a string vector.
-    pub fn verify_string(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, STRSXP)
+    pub fn assert_string(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, STRSXP)
     }
 
     /// Returns error when the SEXP is not a list.
-    pub fn verify_list(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, VECSXP)
+    pub fn assert_list(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, VECSXP)
     }
 
     /// Returns error when the SEXP is not an external pointer.
-    pub fn verify_external_pointer(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, EXTPTRSXP)
+    pub fn assert_external_pointer(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, EXTPTRSXP)
     }
 
     /// Returns error when the SEXP is not a function.
-    pub fn verify_function(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, CLOSXP)
+    pub fn assert_function(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, CLOSXP)
     }
 }
 
-// fn verify_sexp<T>(x: SEXP) -> crate::error::Result<()> {
+// fn assert_sexp<T>(x: SEXP) -> crate::error::Result<()> {
 //     if x.is_external_pointer() {
 //         Ok(())
 //     } else {

@@ -223,7 +223,7 @@ impl TryFrom<Sexp> for ListSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.verify_list()?;
+        value.assert_list()?;
         Ok(Self(value.0))
     }
 }
