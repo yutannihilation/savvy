@@ -11,6 +11,7 @@
 ### New features
 
 * `get_dim()` and `set_dim()` are now available also on `Sexp`.
+
 * Now savvy allows to consume the value behind an external pointer. i.e., `T`
   instead of `&T` or `&mut T` as the argument. After getting consumed, the
   pointer is null, so any function call on the already-consumed R object results
@@ -44,6 +45,9 @@
   w <- Wrapper$new(v)
   #> Error: This external pointer is already consumed or deleted
   ```
+
+* `Sexp` now has `assert_integer()` etc to verify the type of the underlying
+  SEXP is as expected.
 
 ## [v0.4.0] (2024-03-27)
 

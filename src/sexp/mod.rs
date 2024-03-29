@@ -37,15 +37,6 @@ impl Sexp {
         unsafe { self.0 == R_NilValue }
     }
 
-    /// Returns `true` if the SEXP is a character vector.
-    pub fn is_string(&self) -> bool {
-        // There are two versions of `Rf_isString()``, but anyway this should be cheap.
-        //
-        // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
-        // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
-        unsafe { Rf_isString(self.0) == 1 }
-    }
-
     /// Returns `true` if the SEXP is an integer vector.
     pub fn is_integer(&self) -> bool {
         unsafe { Rf_isInteger(self.0) == 1 }
@@ -65,6 +56,15 @@ impl Sexp {
     /// Returns `true` if the SEXP is a logical vector.
     pub fn is_logical(&self) -> bool {
         unsafe { Rf_isLogical(self.0) == 1 }
+    }
+
+    /// Returns `true` if the SEXP is a character vector.
+    pub fn is_string(&self) -> bool {
+        // There are two versions of `Rf_isString()``, but anyway this should be cheap.
+        //
+        // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
+        // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
+        unsafe { Rf_isString(self.0) == 1 }
     }
 
     /// Returns `true` if the SEXP is a list.
@@ -115,7 +115,7 @@ unsafe fn get_human_readable_type_name(sexptype: SEXPTYPE) -> &'static str {
     }
 }
 
-macro_rules! impl_sexp_verify_type {
+macro_rules! impl_sexp_type_assert {
     ($self: ident, $sexptype: ident) => {
         if $self.is_sexp_type(savvy_ffi::$sexptype) {
             Ok(())
@@ -128,22 +128,53 @@ macro_rules! impl_sexp_verify_type {
     };
 }
 
-// TODO: implement more
 impl Sexp {
-    pub fn verify_external_pointer(&self) -> crate::error::Result<()> {
-        impl_sexp_verify_type!(self, EXTPTRSXP)
+    /// Returns error when the SEXP is not NULL.
+    pub fn assert_null(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, NILSXP)
+    }
+
+    /// Returns error when the SEXP is not an integer vector.
+    pub fn assert_integer(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, INTSXP)
+    }
+
+    /// Returns error when the SEXP is not a real vector.
+    pub fn assert_real(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, REALSXP)
+    }
+
+    /// Returns error when the SEXP is not an complex pointer.
+    #[cfg(feature = "complex")]
+    pub fn assert_complex(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, CPLXSXP)
+    }
+
+    /// Returns error when the SEXP is not a logical vector.
+    pub fn assert_logical(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, LGLSXP)
+    }
+
+    /// Returns error when the SEXP is not a string vector.
+    pub fn assert_string(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, STRSXP)
+    }
+
+    /// Returns error when the SEXP is not a list.
+    pub fn assert_list(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, VECSXP)
+    }
+
+    /// Returns error when the SEXP is not an external pointer.
+    pub fn assert_external_pointer(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, EXTPTRSXP)
+    }
+
+    /// Returns error when the SEXP is not a function.
+    pub fn assert_function(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, CLOSXP)
     }
 }
-
-// fn verify_sexp<T>(x: SEXP) -> crate::error::Result<()> {
-//     if x.is_external_pointer() {
-//         Ok(())
-//     } else {
-//         let type_name = x.get_human_readable_type_name();
-//         let msg = format!("Expected an external pointer, got {type_name}s");
-//         Err(crate::error::Error::UnexpectedType(msg))
-//     }
-// }
 
 #[non_exhaustive]
 /// A typed version of `SEXP`.

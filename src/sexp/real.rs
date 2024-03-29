@@ -62,7 +62,7 @@ impl OwnedRealSexp {
 
     /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             *(self.raw.add(i)) = v;
@@ -73,7 +73,7 @@ impl OwnedRealSexp {
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
-        super::utils::verify_len(self.len, i)?;
+        super::utils::assert_len(self.len, i)?;
 
         unsafe {
             *(self.raw.add(i)) = f64::na();
@@ -160,11 +160,7 @@ impl TryFrom<Sexp> for RealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        if !value.is_real() {
-            let type_name = value.get_human_readable_type_name();
-            let msg = format!("Expected reals, got {type_name}s");
-            return Err(crate::error::Error::UnexpectedType(msg));
-        }
+        value.assert_real()?;
         Ok(Self(value.0))
     }
 }

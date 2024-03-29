@@ -70,7 +70,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
             fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
                 // Return error if the SEXP is not an external pointer
-                value.verify_external_pointer()?;
+                value.assert_external_pointer()?;
 
                 let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                 let res = unsafe { x.as_mut() };
@@ -83,7 +83,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
             fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
                 // Return error if the SEXP is not an external pointer
-                value.verify_external_pointer()?;
+                value.assert_external_pointer()?;
 
                 let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                 let res = unsafe { x.as_ref() };
@@ -96,7 +96,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
             fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
                 // Return error if the SEXP is not an external pointer
-                value.verify_external_pointer()?;
+                value.assert_external_pointer()?;
 
                 unsafe { savvy::take_external_pointer_value::<#ty>(value.0) }
             }

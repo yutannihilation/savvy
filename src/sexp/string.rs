@@ -138,11 +138,7 @@ impl TryFrom<Sexp> for StringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        if !value.is_string() {
-            let type_name = value.get_human_readable_type_name();
-            let msg = format!("Expected strings, got {type_name}s");
-            return Err(crate::error::Error::UnexpectedType(msg));
-        }
+        value.assert_string()?;
         Ok(Self(value.0))
     }
 }
