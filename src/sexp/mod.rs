@@ -1,9 +1,8 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical,
-    Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF,
-    VECSXP,
+    R_NilValue, Rf_getAttrib, Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString,
+    Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{
@@ -77,11 +76,6 @@ impl Sexp {
     /// Returns `true` if the SEXP is an external pointer.
     pub fn is_external_pointer(&self) -> bool {
         unsafe { TYPEOF(self.0) as u32 == EXTPTRSXP }
-    }
-
-    /// Returns `true` if the SEXP is an environment.
-    pub fn is_environment(&self) -> bool {
-        unsafe { Rf_isEnvironment(self.0) == 1 }
     }
 
     /// Returns `true` if the SEXP is a function.
