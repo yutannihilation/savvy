@@ -6,6 +6,39 @@
 ### New features
 
 * `get_dim()` and `set_dim()` are now available also on `Sexp`.
+* Now savvy allows to consume the value behind an external pointer. i.e., `T`
+  instead of `&T` or `&mut T` as the argument. After getting consumed, the
+  pointer is null, so any function call on the already-consumed R object results
+  in an error.
+  
+  Example:
+
+  ```rust
+  struct Value {};
+  struct Wrapper { inner: Value }
+
+  #[savvy]
+  impl Value {
+    fn new() -> Self {
+      Self {}
+    }
+  }
+
+  #[savvy]
+  impl Wrapper {
+    fn new(value: Value) -> Self {
+      Self { inner: value }
+    }
+  }
+  ```
+
+  ```r
+  v <- Value$new()
+  w <- Wrapper$new(v)  # value is consumed here.
+
+  w <- Wrapper$new(v)
+  #> Error: This external pointer is already consumed or deleted
+  ```
 
 ## [v0.4.0] (2024-03-27)
 
@@ -16,21 +49,21 @@
   generates a constructor `Person()`, but now the constructor is available as
   `Person$new()`.
 
-```rust
-struct Person {
-    pub name: String,
-}
-
-/// @export
-#[savvy]
-impl Person {
-    fn new() -> Self {
-        Self {
-            name: "".to_string(),
-        }
-    }
-}
-```
+  ```rust
+  struct Person {
+      pub name: String,
+  }
+  
+  /// @export
+  #[savvy]
+  impl Person {
+      fn new() -> Self {
+          Self {
+              name: "".to_string(),
+          }
+      }
+  }
+  ```
 
 ### New features
 
@@ -58,26 +91,26 @@ impl Person {
 * Now user-defined struct can be used as an argument of `#[savvy]`-ed functions.
   It must be specified as `&Ty` or `&mut Ty`, not `Ty`. 
 
-Example:
-
-```rust
-struct Person {
-    pub name: String,
-}
-
-#[savvy]
-impl Person {
-    fn get_name(&self) -> savvy::Result<savvy::Sexp> {
-        let name = self.name.as_str();
-        name.try_into()
-    }
-}
-
-#[savvy]
-fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
-    x.get_name()
-}
-```
+  Example:
+  
+  ```rust
+  struct Person {
+      pub name: String,
+  }
+  
+  #[savvy]
+  impl Person {
+      fn get_name(&self) -> savvy::Result<savvy::Sexp> {
+          let name = self.name.as_str();
+          name.try_into()
+      }
+  }
+  
+  #[savvy]
+  fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
+      x.get_name()
+  }
+  ```
 
 ### Fixed bugs
 
