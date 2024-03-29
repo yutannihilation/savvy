@@ -2,7 +2,8 @@ use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
     R_NilValue, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical,
-    Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, TYPEOF, VECSXP,
+    Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF,
+    VECSXP,
 };
 
 use crate::{
@@ -88,16 +89,67 @@ impl Sexp {
         unsafe { Rf_isFunction(self.0) == 1 }
     }
 
+    fn is_sexp_type(&self, sexptype: SEXPTYPE) -> bool {
+        match sexptype {
+            savvy_ffi::INTSXP => self.is_integer(),
+            savvy_ffi::REALSXP => self.is_real(),
+            #[cfg(feature = "complex")]
+            savvy_ffi::CPLXSXP => self.is_complex(),
+            savvy_ffi::LGLSXP => self.is_logical(),
+            savvy_ffi::STRSXP => self.is_string(),
+            savvy_ffi::VECSXP => self.is_list(),
+            savvy_ffi::EXTPTRSXP => self.is_external_pointer(),
+            // cf. https://github.com/wch/r-source/blob/95ac44a87065d5b42579b621d278adc44641dcf0/src/include/Rinlinedfuns.h#L810-L815
+            savvy_ffi::CLOSXP | savvy_ffi::BUILTINSXP | savvy_ffi::SPECIALSXP => self.is_function(),
+            savvy_ffi::NILSXP => self.is_null(),
+            _ => false,
+        }
+    }
+
     /// Returns the string representation of the SEXP type.
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
     pub fn get_human_readable_type_name(&self) -> &'static str {
-        unsafe {
-            // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
-            let c = Rf_type2char(TYPEOF(self.0));
-            CStr::from_ptr(c).to_str().unwrap()
-        }
+        unsafe { get_human_readable_type_name(TYPEOF(self.0)) }
     }
 }
+
+unsafe fn get_human_readable_type_name(sexptype: SEXPTYPE) -> &'static str {
+    unsafe {
+        // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
+        let c = Rf_type2char(sexptype);
+        CStr::from_ptr(c).to_str().unwrap()
+    }
+}
+
+macro_rules! impl_sexp_verify_type {
+    ($self: ident, $sexptype: ident) => {
+        if $self.is_sexp_type(savvy_ffi::$sexptype) {
+            Ok(())
+        } else {
+            let expected = unsafe { get_human_readable_type_name(savvy_ffi::$sexptype) };
+            let actual = $self.get_human_readable_type_name();
+            let msg = format!("Expected {expected}, got {actual}");
+            Err(crate::error::Error::UnexpectedType(msg))
+        }
+    };
+}
+
+// TODO: implement more
+impl Sexp {
+    pub fn verify_external_pointer(&self) -> crate::error::Result<()> {
+        impl_sexp_verify_type!(self, EXTPTRSXP)
+    }
+}
+
+// fn verify_sexp<T>(x: SEXP) -> crate::error::Result<()> {
+//     if x.is_external_pointer() {
+//         Ok(())
+//     } else {
+//         let type_name = x.get_human_readable_type_name();
+//         let msg = format!("Expected an external pointer, got {type_name}s");
+//         Err(crate::error::Error::UnexpectedType(msg))
+//     }
+// }
 
 #[non_exhaustive]
 /// A typed version of `SEXP`.
@@ -175,7 +227,7 @@ impl Sexp {
     /// Downcast the `SEXP` to a concrete type.
     pub fn into_typed(self) -> TypedSexp {
         let ty = unsafe { TYPEOF(self.0) };
-        match ty as u32 {
+        match ty {
             savvy_ffi::INTSXP => TypedSexp::Integer(IntegerSexp(self.0)),
             savvy_ffi::REALSXP => TypedSexp::Real(RealSexp(self.0)),
             #[cfg(feature = "complex")]

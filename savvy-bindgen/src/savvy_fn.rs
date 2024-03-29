@@ -12,7 +12,8 @@ pub struct ParsedResult {
 enum SavvyInputTypeCategory {
     SexpWrapper,
     PrimitiveType,
-    UserDefinedType,
+    UserDefinedTypeRef, // &T
+    UserDefinedType,    // T
 }
 
 struct SavvyInputType {
@@ -38,7 +39,7 @@ impl SavvyInputType {
                         })
                     } else {
                         Ok(Self {
-                            category: SavvyInputTypeCategory::UserDefinedType,
+                            category: SavvyInputTypeCategory::UserDefinedTypeRef,
                             ty_orig: ty.clone(),
                             ty_str,
                         })
@@ -56,8 +57,8 @@ impl SavvyInputType {
                 let ty_str = type_ident.to_string();
                 match ty_str.as_str() {
                     // Owned-types are not allowed for the input
-                    "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedComplexSexp" | "OwnedLogicalSexp"
-                    | "OwnedStringSexp" | "OwnedListSexp" => {
+                    "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedComplexSexp"
+                    | "OwnedLogicalSexp" | "OwnedStringSexp" | "OwnedListSexp" => {
                         let msg = format!(
                             "`Owned-` types are not allowed here. Did you mean `{}`?",
                             ty_str.strip_prefix("Owned").unwrap()
@@ -66,24 +67,25 @@ impl SavvyInputType {
                     }
 
                     // Read-only types
-                    "Sexp" | "IntegerSexp" | "RealSexp" | "ComplexSexp" | "LogicalSexp" | "StringSexp"
-                    | "ListSexp" | "FunctionSexp" => Ok(Self {
+                    "Sexp" | "IntegerSexp" | "RealSexp" | "ComplexSexp" | "LogicalSexp"
+                    | "StringSexp" | "ListSexp" | "FunctionSexp" => Ok(Self {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
-                    ty_str
-                }),
+                        ty_str,
+                    }),
 
                     // Primitive types
                     "i32" | "usize" | "f64" | "bool" => Ok(Self {
                         category: SavvyInputTypeCategory::PrimitiveType,
                         ty_orig: ty.clone(),
-                    ty_str
-                }),
+                        ty_str,
+                    }),
 
-                    _ => Err(syn::Error::new_spanned(
-                        type_path,
-                        format!("A user-defined struct must be in the form of either `&{ty_str}` or `&mut {ty_str}`"),
-                    )),
+                    _ => Ok(Self {
+                        category: SavvyInputTypeCategory::UserDefinedType,
+                        ty_orig: ty.clone(),
+                        ty_str,
+                    }),
                 }
             }
             _ => Err(syn::Error::new_spanned(
@@ -95,11 +97,7 @@ impl SavvyInputType {
 
     /// Return the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
-        match &self.category {
-            SavvyInputTypeCategory::SexpWrapper => self.ty_orig.clone(),
-            SavvyInputTypeCategory::PrimitiveType => self.ty_orig.clone(),
-            SavvyInputTypeCategory::UserDefinedType => self.ty_orig.clone(),
-        }
+        self.ty_orig.clone()
     }
 
     /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
@@ -124,7 +122,10 @@ impl SavvyFnArg {
     }
 
     pub fn is_user_defined_type(&self) -> bool {
-        matches!(&self.ty.category, SavvyInputTypeCategory::UserDefinedType)
+        matches!(
+            &self.ty.category,
+            SavvyInputTypeCategory::UserDefinedTypeRef | SavvyInputTypeCategory::UserDefinedType
+        )
     }
 
     pub fn pat_string(&self) -> String {
