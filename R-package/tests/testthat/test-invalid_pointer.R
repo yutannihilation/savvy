@@ -6,5 +6,5 @@ test_that("invalid pointer doesn't clash the session", {
   saveRDS(x, rds_file)
 
   x <- readRDS(rds_file)
-  expect_error(x$name(), "Invalid external pointer")
+  expect_error(x$name(), "This external pointer is already consumed or deleted")
 })
