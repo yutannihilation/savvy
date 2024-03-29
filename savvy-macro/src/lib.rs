@@ -277,6 +277,9 @@ mod tests {
                 fn new() -> Self {
                     Self {}
                 }
+                fn new2() -> Person {
+                    Person {}
+                }
                 fn name(&self) -> savvy::Result<savvy::Sexp> {
                     Ok(out.into())
                 }
@@ -305,22 +308,42 @@ mod tests {
             0,
         );
 
-        // TODO
-        //
-        // assert_eq_outer_impl(
-        //     &impl1,
-        //     parse_quote!(
-        //         #[allow(clippy::missing_safety_doc)]
-        //         #[no_mangle]
-        //         pub unsafe extern "C" fn Person_name(self__: savvy::ffi::SEXP) -> savvy::ffi::SEXP {
-        //             match savvy_Person_name_inner(self__) {
-        //                 Ok(result) => result,
-        //                 Err(e) => savvy::handle_error(e),
-        //             }
-        //         }
-        //     ),
-        //     1,
-        // );
+        #[rustfmt::skip]
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_new2() -> savvy::ffi::SEXP {
+                    match savvy_Person_new2_inner() {
+                        Ok(result) => {
+                            use savvy::IntoExtPtrSexp;
+                            result.into_external_pointer().0
+                        },
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            1,
+        );
+
+        #[rustfmt::skip]
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_name(
+                    self__: savvy::ffi::SEXP,
+                ) -> savvy::ffi::SEXP {
+                    match savvy_Person_name_inner(self__, ) {
+                        Ok(result) => result.0,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            2,
+        );
 
         #[rustfmt::skip]
         assert_eq_outer_impl(
@@ -338,7 +361,7 @@ mod tests {
                     }
                 }
             ),
-            2,
+            3,
         );
     }
 }

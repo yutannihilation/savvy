@@ -382,23 +382,29 @@ fn get_savvy_return_type(
                     }
 
                     let last_path_seg = type_path.path.segments.last().unwrap();
-                    match last_path_seg.ident.to_string().as_str() {
-                        "Result" => {} // if Result, investigate the inner type below
-                        "Self" => {
-                            let ty_str = if let Some(ty_str) = self_ty_to_string(self_ty) {
-                                ty_str
-                            } else {
+                    match (
+                        last_path_seg.ident.to_string().as_str(),
+                        self_ty_to_string(self_ty),
+                    ) {
+                        // if Result, do further investigation about hte inside.
+                        ("Result", _) => {}
+                        // if Self or the same as the self type, it's allowed
+                        (ret_ty_str, Some(ty_str)) => {
+                            if ret_ty_str != "Self" && ret_ty_str != ty_str {
                                 return e;
-                            };
-                            return Ok(SavvyFnReturnType::UserDefinedStruct(
-                                UserDefinedStructReturnType {
-                                    ty_str,
-                                    return_type: parse_quote!(-> savvy::Result<#self_ty>),
-                                    wrapped_with_result: false,
-                                },
-                            ));
+                            } else {
+                                return Ok(SavvyFnReturnType::UserDefinedStruct(
+                                    UserDefinedStructReturnType {
+                                        ty_str,
+                                        return_type: parse_quote!(-> savvy::Result<#self_ty>),
+                                        wrapped_with_result: false,
+                                    },
+                                ));
+                            }
                         }
-                        _ => return e,
+                        _ => {
+                            return e;
+                        }
                     }
                     &last_path_seg.arguments
                 }
