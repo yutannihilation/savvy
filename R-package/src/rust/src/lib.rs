@@ -333,6 +333,15 @@ impl Person {
         }
     }
 
+    // Allow the same type name as Self
+    //
+    // https://github.com/yutannihilation/savvy/issues/136
+    fn new2() -> Person {
+        Person {
+            name: "".to_string(),
+        }
+    }
+
     fn new_fallible() -> savvy::Result<Self> {
         Ok(Self {
             name: "".to_string(),

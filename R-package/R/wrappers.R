@@ -403,6 +403,10 @@ Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
 }
 
+Person$new2 <- function() {
+  .savvy_wrap_Person(.Call(Person_new2__impl))
+}
+
 Person$new_fallible <- function() {
   .savvy_wrap_Person(.Call(Person_new_fallible__impl))
 }

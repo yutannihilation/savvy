@@ -343,6 +343,11 @@ SEXP Person_new__impl(void) {
     return handle_result(res);
 }
 
+SEXP Person_new2__impl(void) {
+    SEXP res = Person_new2();
+    return handle_result(res);
+}
+
 SEXP Person_new_fallible__impl(void) {
     SEXP res = Person_new_fallible();
     return handle_result(res);
@@ -443,6 +448,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"get_name_external__impl", (DL_FUNC) &get_name_external__impl, 1},
     {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
+    {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
     {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
     {"Person_another_person__impl", (DL_FUNC) &Person_another_person__impl, 1},
     {"Person_new_with_name__impl", (DL_FUNC) &Person_new_with_name__impl, 1},

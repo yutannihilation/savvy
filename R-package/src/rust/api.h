@@ -66,6 +66,7 @@ SEXP ValuePair_print(SEXP self__);
 
 // methods and associated functions for Person
 SEXP Person_new(void);
+SEXP Person_new2(void);
 SEXP Person_new_fallible(void);
 SEXP Person_another_person(SEXP self__);
 SEXP Person_new_with_name(SEXP name);

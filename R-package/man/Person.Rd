@@ -5,7 +5,7 @@
 \alias{Person}
 \title{A person with a name}
 \format{
-An object of class \code{environment} of length 4.
+An object of class \code{environment} of length 5.
 }
 \usage{
 Person
