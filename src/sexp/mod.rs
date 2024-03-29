@@ -176,16 +176,6 @@ impl Sexp {
     }
 }
 
-// fn assert_sexp<T>(x: SEXP) -> crate::error::Result<()> {
-//     if x.is_external_pointer() {
-//         Ok(())
-//     } else {
-//         let type_name = x.get_human_readable_type_name();
-//         let msg = format!("Expected an external pointer, got {type_name}s");
-//         Err(crate::error::Error::UnexpectedType(msg))
-//     }
-// }
-
 #[non_exhaustive]
 /// A typed version of `SEXP`.
 pub enum TypedSexp {
