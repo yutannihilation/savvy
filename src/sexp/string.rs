@@ -300,8 +300,4 @@ impl<'a> Iterator for StringSexpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StringSexpIter<'a> {
-    fn len(&self) -> usize {
-        self.len
-    }
-}
+impl<'a> ExactSizeIterator for StringSexpIter<'a> {}

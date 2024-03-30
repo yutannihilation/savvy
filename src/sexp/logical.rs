@@ -253,8 +253,4 @@ impl<'a> Iterator for LogicalSexpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for LogicalSexpIter<'a> {
-    fn len(&self) -> usize {
-        self.iter_raw.len()
-    }
-}
+impl<'a> ExactSizeIterator for LogicalSexpIter<'a> {}
