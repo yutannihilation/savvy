@@ -75,6 +75,13 @@ S3 methods such as `print.<your struct>()` if necessary.
 ```r
 class(p)
 #> [1] "Person"
+
+# register print() S3 method for Person
+print.Person <- function(x, ...) print(x$name())
+registerS3method("print", "Person", print.Person)
+
+p
+#> たかし
 ```
 
 ### Struct output
@@ -203,12 +210,18 @@ copying. For example, consider there's a type `HeavyData`, which contains huge
 size of data, and `HeavyDataBundle` which bundles two `HeavyData`s.
 
 ```rust
+#[derive(Clone)]
 struct HeavyData(Vec<i32>);
 
 struct HeavyDataBundle {
     data1: HeavyData,
     data2: HeavyData,
-};
+}
+
+#[savvy]
+impl HeavyData {
+    // ...snip...
+}
 ```
 
 `HeavyDataBundle` requires the ownership of the `DataBundle`s. So, if the input
@@ -216,7 +229,7 @@ is `&`, you need to `clone()` the data, which can be costly.
 
 ```rust
 #[savvy]
-impl HeavyDataBundle(Vec<i32>) {
+impl HeavyDataBundle {
     fn new(
         data1: &HeavyData,
         data2: &HeavyData,
@@ -233,7 +246,7 @@ In this case, you can move the ownership to avoid copying.
 
 ```rust
 #[savvy]
-impl HeavyDataBundle(Vec<i32>) {
+impl HeavyDataBundle {
     fn new(
         data1: HeavyData,
         data2: HeavyData,
