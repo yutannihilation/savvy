@@ -84,6 +84,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_IsNA")
         // Allocation and attributes
         .allowlist_function("Rf_xlength")
+        .allowlist_function("SETLENGTH")
         .allowlist_function("Rf_allocVector")
         .allowlist_function("Rf_install")
         .allowlist_function("Rf_getAttrib")

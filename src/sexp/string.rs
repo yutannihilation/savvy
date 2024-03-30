@@ -105,6 +105,36 @@ impl OwnedStringSexp {
 
         Ok(Self { inner, token, len })
     }
+
+    pub fn try_from_iter<I, U>(iter: I) -> crate::error::Result<Self>
+    where
+        I: Iterator<Item = U>,
+        U: AsRef<str>,
+    {
+        let iter = iter.into_iter();
+        match iter.size_hint() {
+            (_, Some(upper)) => {
+                let mut out = Self::new(upper)?;
+                let mut actual_len = 0;
+                for (i, v) in iter.enumerate() {
+                    out.set_elt(i, v.as_ref())?;
+                    actual_len = i;
+                }
+
+                if actual_len != upper {
+                    unsafe {
+                        savvy_ffi::SETLENGTH(out.inner, actual_len as _);
+                    }
+                }
+
+                Ok(out)
+            }
+            (_, None) => {
+                let v: Vec<I::Item> = iter.collect();
+                v.try_into()
+            }
+        }
+    }
 }
 
 unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {

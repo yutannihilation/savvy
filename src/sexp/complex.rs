@@ -121,6 +121,35 @@ impl OwnedComplexSexp {
             raw,
         })
     }
+
+    pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
+    where
+        I: Iterator<Item = Complex64>,
+    {
+        let iter = iter.into_iter();
+        match iter.size_hint() {
+            (_, Some(upper)) => {
+                let mut out = unsafe { Self::new_without_init(upper)? };
+                let mut actual_len = 0;
+                for (i, v) in iter.enumerate() {
+                    out.set_elt(i, v)?;
+                    actual_len = i;
+                }
+
+                if actual_len != upper {
+                    unsafe {
+                        savvy_ffi::SETLENGTH(out.inner, actual_len as _);
+                    }
+                }
+
+                Ok(out)
+            }
+            (_, None) => {
+                let v: Vec<I::Item> = iter.collect();
+                v.try_into()
+            }
+        }
+    }
 }
 
 impl Drop for OwnedComplexSexp {
