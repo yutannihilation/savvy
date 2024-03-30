@@ -15,7 +15,9 @@
 * Now savvy allows to consume the value behind an external pointer. i.e., `T`
   instead of `&T` or `&mut T` as the argument. After getting consumed, the
   pointer is null, so any function call on the already-consumed R object results
-  in an error.
+  in an error. See [the
+  guide](https://yutannihilation.github.io/savvy/guide/10_struct.html) for more
+  details.
   
   Example:
 
