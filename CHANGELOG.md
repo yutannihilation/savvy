@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.4.1] (2024-03-30)
+
 ### Breaking changes
 
 * `Sexp` loses `is_environment()` method becuase this isn't useful, considering
@@ -307,7 +309,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.4.1...HEAD
+[v0.4.1]: https://github.com/yutannihilation/savvy/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/yutannihilation/savvy/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/yutannihilation/savvy/compare/v0.2.20...v0.3.0
 [v0.2.20]: https://github.com/yutannihilation/savvy/compare/v0.2.19...v0.2.20
