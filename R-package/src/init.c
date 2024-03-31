@@ -383,6 +383,31 @@ SEXP Person2_name__impl(SEXP self__) {
     return handle_result(res);
 }
 
+SEXP filter_integer_odd__impl(SEXP x) {
+    SEXP res = filter_integer_odd(x);
+    return handle_result(res);
+}
+
+SEXP filter_real_negative__impl(SEXP x) {
+    SEXP res = filter_real_negative(x);
+    return handle_result(res);
+}
+
+SEXP filter_complex_without_im__impl(SEXP x) {
+    SEXP res = filter_complex_without_im(x);
+    return handle_result(res);
+}
+
+SEXP filter_logical_duplicates__impl(SEXP x) {
+    SEXP res = filter_logical_duplicates(x);
+    return handle_result(res);
+}
+
+SEXP filter_string_ascii__impl(SEXP x) {
+    SEXP res = filter_string_ascii(x);
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
 
@@ -456,6 +481,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
     {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
+    {"filter_integer_odd__impl", (DL_FUNC) &filter_integer_odd__impl, 1},
+    {"filter_real_negative__impl", (DL_FUNC) &filter_real_negative__impl, 1},
+    {"filter_complex_without_im__impl", (DL_FUNC) &filter_complex_without_im__impl, 1},
+    {"filter_logical_duplicates__impl", (DL_FUNC) &filter_logical_duplicates__impl, 1},
+    {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
     {NULL, NULL, 0}
 };
 

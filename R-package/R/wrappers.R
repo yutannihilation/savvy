@@ -332,6 +332,31 @@ set_name_external <- function(x, name) {
 }
 
 
+filter_integer_odd <- function(x) {
+  .Call(filter_integer_odd__impl, x)
+}
+
+
+filter_real_negative <- function(x) {
+  .Call(filter_real_negative__impl, x)
+}
+
+
+filter_complex_without_im <- function(x) {
+  .Call(filter_complex_without_im__impl, x)
+}
+
+
+filter_logical_duplicates <- function(x) {
+  .Call(filter_logical_duplicates__impl, x)
+}
+
+
+filter_string_ascii <- function(x) {
+  .Call(filter_string_ascii__impl, x)
+}
+
+
 Value <- new.env(parent = emptyenv())
 Value$new <- function(x) {
   .savvy_wrap_Value(.Call(Value_new__impl, x))

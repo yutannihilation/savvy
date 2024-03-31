@@ -105,6 +105,47 @@ impl OwnedStringSexp {
 
         Ok(Self { inner, token, len })
     }
+
+    /// Constructs a new real vector from an iterator.
+    pub fn try_from_iter<I, U>(iter: I) -> crate::error::Result<Self>
+    where
+        I: IntoIterator<Item = U>,
+        U: AsRef<str>,
+    {
+        let iter = iter.into_iter();
+
+        match iter.size_hint() {
+            (_, Some(upper)) => {
+                // If the maximum length is known, use it at frist. But, the
+                // iterator's length might be shorter than the reported one
+                // (e.g. `(0..10).filter(|x| x % 2 == 0)`), so it needs to be
+                // truncated to the actual length at last.
+
+                // string doesn't have new_without_init() method
+                let mut out = Self::new(upper)?;
+
+                let mut last_index = 0;
+                for (i, v) in iter.enumerate() {
+                    out.set_elt(i, v.as_ref())?;
+                    last_index = i;
+                }
+
+                if last_index + 1 != upper {
+                    unsafe {
+                        savvy_ffi::SETLENGTH(out.inner, (last_index + 1) as _);
+                    }
+                }
+
+                Ok(out)
+            }
+            (_, None) => {
+                // When the length is not known at all, collect() it first.
+
+                let v: Vec<I::Item> = iter.collect();
+                v.try_into()
+            }
+        }
+    }
 }
 
 unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {

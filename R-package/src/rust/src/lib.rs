@@ -24,6 +24,9 @@ pub use complex::*;
 mod consuming_type;
 pub use consuming_type::*;
 
+mod try_from_iter;
+pub use try_from_iter::*;
+
 use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{
