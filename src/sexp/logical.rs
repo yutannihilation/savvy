@@ -63,20 +63,22 @@ impl OwnedLogicalSexp {
     pub fn set_elt(&mut self, i: usize, v: bool) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            SET_LOGICAL_ELT(self.inner, i as _, v as _);
-        }
+        unsafe { self.set_elt_unchecked(i as _, v as _) };
 
         Ok(())
+    }
+
+    /// Set the value of the `i`-th element.
+    /// Safety: the user has to assure bounds are checked.
+    unsafe fn set_elt_unchecked(&mut self, i: isize, v: i32) {
+        SET_LOGICAL_ELT(self.inner, i, v);
     }
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            SET_LOGICAL_ELT(self.inner, i as _, R_NaInt);
-        }
+        unsafe { self.set_elt_unchecked(i as _, R_NaInt) };
 
         Ok(())
     }
@@ -196,7 +198,8 @@ impl OwnedLogicalSexp {
         let x_slice = x.as_ref();
         let mut out = unsafe { Self::new_without_init(x_slice.len())? };
         for (i, v) in x_slice.iter().enumerate() {
-            out.set_elt(i, *v)?;
+            // Safety: slice and OwnedLogicalSexp have the same length.
+            unsafe { out.set_elt_unchecked(i as _, *v as _) };
         }
         Ok(out)
     }
