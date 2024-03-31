@@ -68,9 +68,9 @@ impl OwnedLogicalSexp {
         Ok(())
     }
 
-    /// Set the value of the `i`-th element.
-    /// Safety: the user has to assure bounds are checked.
-    unsafe fn set_elt_unchecked(&mut self, i: isize, v: i32) {
+    // Set the value of the `i`-th element.
+    // Safety: the user has to assure bounds are checked.
+    pub(crate) unsafe fn set_elt_unchecked(&mut self, i: isize, v: i32) {
         SET_LOGICAL_ELT(self.inner, i, v);
     }
 

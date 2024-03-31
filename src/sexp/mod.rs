@@ -377,6 +377,8 @@ pub(crate) unsafe fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error:
 where
     T: TryInto<i32> + Copy,
 {
+    let dim_sexp: OwnedIntegerSexp =
+        OwnedIntegerSexp::try_from_slice::<&[i32]>(dim.try_into().unwrap_or_default())?;
     let mut dim_sexp = unsafe { OwnedIntegerSexp::new_without_init(dim.len())? };
     dim.iter()
         .enumerate()
