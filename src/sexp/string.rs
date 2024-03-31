@@ -108,7 +108,7 @@ impl OwnedStringSexp {
 
     pub fn try_from_iter<I, U>(iter: I) -> crate::error::Result<Self>
     where
-        I: Iterator<Item = U>,
+        I: IntoIterator<Item = U>,
         U: AsRef<str>,
     {
         let iter = iter.into_iter();

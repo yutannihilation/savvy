@@ -149,7 +149,7 @@ impl OwnedRealSexp {
 
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
-        I: Iterator<Item = f64>,
+        I: IntoIterator<Item = f64>,
     {
         let iter = iter.into_iter();
         match iter.size_hint() {

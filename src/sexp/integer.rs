@@ -153,7 +153,7 @@ impl OwnedIntegerSexp {
 
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
-        I: Iterator<Item = i32>,
+        I: IntoIterator<Item = i32>,
     {
         let iter = iter.into_iter();
         match iter.size_hint() {
