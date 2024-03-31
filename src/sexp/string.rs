@@ -124,15 +124,15 @@ impl OwnedStringSexp {
                 // string doesn't have new_without_init() method
                 let mut out = Self::new(upper)?;
 
-                let mut actual_len = 0;
+                let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
                     out.set_elt(i, v.as_ref())?;
-                    actual_len = i;
+                    last_index = i;
                 }
 
-                if actual_len != upper {
+                if last_index + 1 != upper {
                     unsafe {
-                        savvy_ffi::SETLENGTH(out.inner, actual_len as _);
+                        savvy_ffi::SETLENGTH(out.inner, (last_index + 1) as _);
                     }
                 }
 
