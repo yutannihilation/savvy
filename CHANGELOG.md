@@ -3,6 +3,23 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* `OwnedIntegerSexp` and etc now have `try_from_iter()` method for constructing
+  a new instance.
+
+  Example:
+
+  ```rust
+  #[savvy]
+  fn filter_integer_odd(x: IntegerSexp) -> savvy::Result<Sexp> {
+      // is_na() is to propagate NAs
+      let iter = x.iter().copied().filter(|i| i.is_na() || *i % 2 == 0);
+      let out = OwnedIntegerSexp::try_from_iter(iter)?;
+      out.into()
+  }
+  ```
+
 ## [v0.4.1] (2024-03-30)
 
 ### Breaking changes
