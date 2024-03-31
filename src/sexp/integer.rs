@@ -68,20 +68,21 @@ impl OwnedIntegerSexp {
     pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            *(self.raw.add(i)) = v;
-        }
+        unsafe { self.set_elt_unchecked(i, v) };
 
         Ok(())
+    }
+
+    #[inline]
+    unsafe fn set_elt_unchecked(&mut self, i: usize, v: i32) {
+        unsafe { *(self.raw.add(i)) = v };
     }
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            *(self.raw.add(i)) = i32::na();
-        }
+        unsafe { self.set_elt_unchecked(i, i32::na()) };
 
         Ok(())
     }
@@ -173,7 +174,11 @@ impl OwnedIntegerSexp {
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
+                    // The upper bound of size_hint() is just for optimization
+                    // and what we should not trust. So, we should't use
+                    // `set_elt_unchecked()` here.
                     out.set_elt(i, v)?;
+
                     last_index = i;
                 }
 

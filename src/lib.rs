@@ -1,3 +1,6 @@
+// TODO: Remove this when edition is set to 2024
+#![warn(unsafe_op_in_unsafe_fn)]
+
 //! # Savvy - A Simple R Interface
 //!
 //! **savvy** is a simple R extension interface using Rust, like the [extendr] framework.
