@@ -163,6 +163,20 @@ impl OwnedStringSexp {
         }
         Ok(out)
     }
+
+    /// Constructs a new string vector from a scalar value.
+    pub fn try_from_scalar<T: AsRef<str>>(value: T) -> crate::error::Result<Self> {
+        let sexp = unsafe {
+            // Note: unlike `new()`, this allocates a STRSXP after creating a
+            // CHARSXP. So, the `CHARSXP` needs to be protected.
+            let charsxp = str_to_charsxp(value.as_ref())?;
+            savvy_ffi::Rf_protect(charsxp);
+            let out = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
+            savvy_ffi::Rf_unprotect(1);
+            out
+        };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
 }
 
 unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
@@ -241,26 +255,15 @@ impl TryFrom<&str> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &str) -> crate::error::Result<Self> {
-        let sexp = unsafe {
-            // Note: unlike `new()`, this allocates a STRSXP after creating a
-            // CHARSXP. So, the `CHARSXP` needs to be protected.
-            let charsxp = str_to_charsxp(value)?;
-            savvy_ffi::Rf_protect(charsxp);
-            let out = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
-            savvy_ffi::Rf_unprotect(1);
-            out
-        };
-        Self::new_from_raw_sexp(sexp, 1)
+        Self::try_from_scalar(value)
     }
 }
 
-// TODO: if I turn this to `impl<T: AsRef<str>> TryFrom<T>`, the compiler warns
-// this is a conflicting implementation. Why...?
 impl TryFrom<String> for OwnedStringSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: String) -> crate::error::Result<Self> {
-        OwnedStringSexp::try_from(value.as_str())
+        Self::try_from_scalar(value)
     }
 }
 

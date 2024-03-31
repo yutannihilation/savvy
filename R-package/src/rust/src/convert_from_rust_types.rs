@@ -1,4 +1,7 @@
-use savvy::{savvy, IntegerSexp, RealSexp};
+use savvy::{
+    savvy, IntegerSexp, OwnedComplexSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
+    OwnedStringSexp, RealSexp,
+};
 
 // Scalar input, no out
 
@@ -40,8 +43,18 @@ fn scalar_output_int() -> savvy::Result<savvy::Sexp> {
 }
 
 #[savvy]
+fn scalar_output_int2() -> savvy::Result<savvy::Sexp> {
+    OwnedIntegerSexp::try_from_scalar(1)?.into()
+}
+
+#[savvy]
 fn scalar_output_real() -> savvy::Result<savvy::Sexp> {
     1.3.try_into()
+}
+
+#[savvy]
+fn scalar_output_real2() -> savvy::Result<savvy::Sexp> {
+    OwnedRealSexp::try_from_scalar(1.3)?.into()
 }
 
 #[savvy]
@@ -50,8 +63,29 @@ fn scalar_output_logical() -> savvy::Result<savvy::Sexp> {
 }
 
 #[savvy]
+fn scalar_output_logical2() -> savvy::Result<savvy::Sexp> {
+    OwnedLogicalSexp::try_from_scalar(false)?.into()
+}
+
+#[savvy]
 fn scalar_output_string() -> savvy::Result<savvy::Sexp> {
     "foo".try_into()
+}
+
+#[savvy]
+fn scalar_output_string2() -> savvy::Result<savvy::Sexp> {
+    OwnedStringSexp::try_from_scalar("foo")?.into()
+}
+
+#[savvy]
+fn scalar_output_complex() -> savvy::Result<savvy::Sexp> {
+    savvy::Complex64 { re: 1.0, im: 1.0 }.try_into()
+}
+
+#[savvy]
+fn scalar_output_complex2() -> savvy::Result<savvy::Sexp> {
+    let x = savvy::Complex64 { re: 1.0, im: 1.0 };
+    OwnedComplexSexp::try_from_scalar(x)?.into()
 }
 
 // Vector input, scalar out

@@ -21,8 +21,14 @@
   ```
 
 * `OwnedIntegerSexp` and etc now have `try_from_slice()` method for constructing
-  a new instance from a slice or vec. This conversion had been possible via
-  `try_from()`, but this method was added for discoverability.
+  a new instance from a slice or vec. This conversion is and has been possible
+  via `try_from()`, but this method was added for discoverability.
+
+* `OwnedIntegerSexp` and etc now have `try_from_scalar()` method for
+  constructing a new instance from a scalar value (e.g. `i32`). This conversion
+  is and has been possible via `try_from()`, but this method was added for
+  discoverability.
+
 
 ## [v0.4.1] (2024-03-30)
 

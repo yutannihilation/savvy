@@ -23,9 +23,15 @@ test_that("scalar functions reject non-scalar values and missing values", {
 test_that("function can return scalar value", {
   # no error
   expect_equal(scalar_output_int(), 1L)
+  expect_equal(scalar_output_int2(), 1L)
   expect_equal(scalar_output_real(), 1.3)
+  expect_equal(scalar_output_real2(), 1.3)
+  expect_equal(scalar_output_complex(), 1.0 + 1.0i)
+  expect_equal(scalar_output_complex2(),  1.0 + 1.0i)
   expect_equal(scalar_output_logical(), FALSE)
+  expect_equal(scalar_output_logical2(), FALSE)
   expect_equal(scalar_output_string(), "foo")
+  expect_equal(scalar_output_string2(), "foo")
 })
 
 test_that("sum functions", {

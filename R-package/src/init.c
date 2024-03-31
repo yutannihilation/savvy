@@ -153,8 +153,18 @@ SEXP scalar_output_int__impl(void) {
     return handle_result(res);
 }
 
+SEXP scalar_output_int2__impl(void) {
+    SEXP res = scalar_output_int2();
+    return handle_result(res);
+}
+
 SEXP scalar_output_real__impl(void) {
     SEXP res = scalar_output_real();
+    return handle_result(res);
+}
+
+SEXP scalar_output_real2__impl(void) {
+    SEXP res = scalar_output_real2();
     return handle_result(res);
 }
 
@@ -163,8 +173,28 @@ SEXP scalar_output_logical__impl(void) {
     return handle_result(res);
 }
 
+SEXP scalar_output_logical2__impl(void) {
+    SEXP res = scalar_output_logical2();
+    return handle_result(res);
+}
+
 SEXP scalar_output_string__impl(void) {
     SEXP res = scalar_output_string();
+    return handle_result(res);
+}
+
+SEXP scalar_output_string2__impl(void) {
+    SEXP res = scalar_output_string2();
+    return handle_result(res);
+}
+
+SEXP scalar_output_complex__impl(void) {
+    SEXP res = scalar_output_complex();
+    return handle_result(res);
+}
+
+SEXP scalar_output_complex2__impl(void) {
+    SEXP res = scalar_output_complex2();
     return handle_result(res);
 }
 
@@ -435,9 +465,15 @@ static const R_CallMethodDef CallEntries[] = {
     {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
     {"scalar_input_string__impl", (DL_FUNC) &scalar_input_string__impl, 1},
     {"scalar_output_int__impl", (DL_FUNC) &scalar_output_int__impl, 0},
+    {"scalar_output_int2__impl", (DL_FUNC) &scalar_output_int2__impl, 0},
     {"scalar_output_real__impl", (DL_FUNC) &scalar_output_real__impl, 0},
+    {"scalar_output_real2__impl", (DL_FUNC) &scalar_output_real2__impl, 0},
     {"scalar_output_logical__impl", (DL_FUNC) &scalar_output_logical__impl, 0},
+    {"scalar_output_logical2__impl", (DL_FUNC) &scalar_output_logical2__impl, 0},
     {"scalar_output_string__impl", (DL_FUNC) &scalar_output_string__impl, 0},
+    {"scalar_output_string2__impl", (DL_FUNC) &scalar_output_string2__impl, 0},
+    {"scalar_output_complex__impl", (DL_FUNC) &scalar_output_complex__impl, 0},
+    {"scalar_output_complex2__impl", (DL_FUNC) &scalar_output_complex2__impl, 0},
     {"sum_int__impl", (DL_FUNC) &sum_int__impl, 1},
     {"sum_real__impl", (DL_FUNC) &sum_real__impl, 1},
     {"rep_int_vec__impl", (DL_FUNC) &rep_int_vec__impl, 1},

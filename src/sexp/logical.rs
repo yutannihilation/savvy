@@ -200,6 +200,12 @@ impl OwnedLogicalSexp {
         }
         Ok(out)
     }
+
+    /// Constructs a new logical vector from a scalar value.
+    pub fn try_from_scalar(value: bool) -> crate::error::Result<Self> {
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarLogical(value as i32))? };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
 }
 
 impl Drop for OwnedLogicalSexp {
@@ -253,8 +259,7 @@ impl TryFrom<bool> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: bool) -> crate::error::Result<Self> {
-        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarLogical(value as i32))? };
-        Self::new_from_raw_sexp(sexp, 1)
+        Self::try_from_scalar(value)
     }
 }
 
