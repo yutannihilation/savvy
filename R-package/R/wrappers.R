@@ -105,8 +105,18 @@ scalar_output_int <- function() {
 }
 
 
+scalar_output_int2 <- function() {
+  .Call(scalar_output_int2__impl)
+}
+
+
 scalar_output_real <- function() {
   .Call(scalar_output_real__impl)
+}
+
+
+scalar_output_real2 <- function() {
+  .Call(scalar_output_real2__impl)
 }
 
 
@@ -115,8 +125,28 @@ scalar_output_logical <- function() {
 }
 
 
+scalar_output_logical2 <- function() {
+  .Call(scalar_output_logical2__impl)
+}
+
+
 scalar_output_string <- function() {
   .Call(scalar_output_string__impl)
+}
+
+
+scalar_output_string2 <- function() {
+  .Call(scalar_output_string2__impl)
+}
+
+
+scalar_output_complex <- function() {
+  .Call(scalar_output_complex__impl)
+}
+
+
+scalar_output_complex2 <- function() {
+  .Call(scalar_output_complex2__impl)
 }
 
 
