@@ -174,7 +174,11 @@ impl OwnedIntegerSexp {
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
+                    // The upper bound of size_hint() is just for optimization
+                    // and what we should not trust. So, we should't use
+                    // `set_elt_unchecked()` here.
                     out.set_elt(i, v)?;
+
                     last_index = i;
                 }
 
