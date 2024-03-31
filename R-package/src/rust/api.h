@@ -53,6 +53,11 @@ SEXP list_with_names_and_values(void);
 SEXP external_person_new(void);
 SEXP get_name_external(SEXP x);
 SEXP set_name_external(SEXP x, SEXP name);
+SEXP filter_integer_odd(SEXP x);
+SEXP filter_real_negative(SEXP x);
+SEXP filter_complex_without_im(SEXP x);
+SEXP filter_logical_duplicates(SEXP x);
+SEXP filter_string_ascii(SEXP x);
 
 // methods and associated functions for Value
 SEXP Value_new(SEXP x);
