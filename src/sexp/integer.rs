@@ -151,14 +151,22 @@ impl OwnedIntegerSexp {
         })
     }
 
+    /// Constructs a new integer vector from an iterator.
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = i32>,
     {
         let iter = iter.into_iter();
+
         match iter.size_hint() {
             (_, Some(upper)) => {
+                // If the maximum length is known, use it at frist. But, the
+                // iterator's length might be shorter than the reported one
+                // (e.g. `(0..10).filter(|x| x % 2 == 0)`), so it needs to be
+                // truncated to the actual length at last.
+
                 let mut out = unsafe { Self::new_without_init(upper)? };
+
                 let mut actual_len = 0;
                 for (i, v) in iter.enumerate() {
                     out.set_elt(i, v)?;
@@ -174,6 +182,8 @@ impl OwnedIntegerSexp {
                 Ok(out)
             }
             (_, None) => {
+                // When the length is not known at all, collect() it first.
+
                 let v: Vec<I::Item> = iter.collect();
                 v.try_into()
             }
