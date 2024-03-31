@@ -147,6 +147,9 @@ impl OwnedLogicalSexp {
     }
 
     /// Constructs a new logical vector from an iterator.
+    ///
+    /// Note that, if you already have a slice or vec, you can also use
+    /// [`try_from_slice`].
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = bool>,
@@ -183,6 +186,19 @@ impl OwnedLogicalSexp {
                 v.try_into()
             }
         }
+    }
+
+    /// Constructs a new logical vector from a slice or vec.
+    pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
+    where
+        S: AsRef<[bool]>,
+    {
+        let x_slice = x.as_ref();
+        let mut out = unsafe { Self::new_without_init(x_slice.len())? };
+        for (i, v) in x_slice.iter().enumerate() {
+            out.set_elt(i, *v)?;
+        }
+        Ok(out)
     }
 }
 
@@ -221,11 +237,7 @@ impl TryFrom<&[bool]> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[bool]) -> crate::error::Result<Self> {
-        let mut out = unsafe { Self::new_without_init(value.len())? };
-        for (i, v) in value.iter().enumerate() {
-            out.set_elt(i, *v)?;
-        }
-        Ok(out)
+        Self::try_from_slice(value)
     }
 }
 
@@ -233,7 +245,7 @@ impl TryFrom<Vec<bool>> for OwnedLogicalSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Vec<bool>) -> crate::error::Result<Self> {
-        <Self>::try_from(value.as_slice())
+        Self::try_from_slice(value)
     }
 }
 
