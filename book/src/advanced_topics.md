@@ -14,9 +14,3 @@ created by nanoarrow R package. In such caes, you can use unsafe methods
 ```rust
 let foo: &Foo = unsafe { &*ext_ptr_sexp.cast_unchecked::<Foo>() };
 ```
-
-## Use the raw R's C API
-
-### `unwind_protect()`
-
-TBD

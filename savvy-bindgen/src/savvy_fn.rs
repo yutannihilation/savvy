@@ -155,7 +155,7 @@ impl SavvyFnArg {
 /// - `savvy::Result<Self>`
 /// - `Self`
 pub struct UserDefinedStructReturnType {
-    pub(crate) ty_str: String, // TODO: move to a method to extract from `return_type` directly.
+    pub(crate) ty_str: String,
     pub(crate) return_type: syn::ReturnType,
     pub(crate) wrapped_with_result: bool,
 }
@@ -321,16 +321,7 @@ impl SavvyFn {
                     Some(Ok(SavvyFnArg { pat, ty }))
                 }
                 // Skip `self`
-                syn::FnArg::Receiver(syn::Receiver { reference, .. }) => {
-                    if reference.is_none() {
-                        // TODO: raise compile error if no reference.
-                        // The function should not consume the object
-                        // because the EXTPTRSXP still live even after
-                        // the function returns.
-                    }
-
-                    None
-                }
+                syn::FnArg::Receiver(syn::Receiver { .. }) => None,
             })
             .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
 

@@ -9,7 +9,6 @@ impl Value {
         Self(x)
     }
 
-    // TODO: allow consuming self?
     fn pair(self, b: Value) -> savvy::Result<ValuePair> {
         Ok(ValuePair { a: self, b })
     }

@@ -18,8 +18,8 @@ fn foo_impl() -> savvy::Result<savvy::Sexp> {
     let x: Vec<f64> = some_function();
     let y: Vec<f64> = another_function();
     
-    out.set_name_and_value(0, "x", <OwnedRealSexp>::try_from(&x)?)?;
-    out.set_name_and_value(1, "y", <OwnedRealSexp>::try_from(&y)?)?;
+    out.set_name_and_value(0, "x", OwnedRealSexp::try_from_slice(x)?)?;
+    out.set_name_and_value(1, "y", OwnedRealSexp::try_from_slice(y)?)?;
 
     out.into()
 }

@@ -136,7 +136,6 @@ fn append_file(path: &Path, contents: &str) {
     write_file_inner(path, contents, opts);
 }
 
-// TODO: how can this be done on Windows?
 #[cfg(unix)]
 fn set_executable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
