@@ -76,6 +76,9 @@ pub use sexp::{Sexp, TypedSexp};
 #[cfg(feature = "complex")]
 pub use sexp::complex::{ComplexSexp, OwnedComplexSexp};
 
+#[cfg(feature = "complex")]
+pub use savvy_ffi::Complex64;
+
 pub use unwind_protect::unwind_protect;
 
 // re-export
