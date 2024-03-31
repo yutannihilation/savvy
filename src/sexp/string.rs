@@ -63,7 +63,7 @@ impl OwnedStringSexp {
                 self.len, i
             )));
         }
-        unsafe { self.set_elt_unchecked(i as _, str_to_charsxp(v)?) };
+        unsafe { self.set_elt_unchecked(i, str_to_charsxp(v)?) };
 
         Ok(())
     }
@@ -71,8 +71,8 @@ impl OwnedStringSexp {
     // Set the value of the `i`-th element.
     // Safety: the user has to assure bounds are checked.
     #[inline]
-    unsafe fn set_elt_unchecked(&mut self, i: isize, v: SEXP) {
-        unsafe { SET_STRING_ELT(self.inner, i, v) };
+    unsafe fn set_elt_unchecked(&mut self, i: usize, v: SEXP) {
+        unsafe { SET_STRING_ELT(self.inner, i as _, v) };
     }
 
     /// Set the `i`-th element to NA.
@@ -84,7 +84,7 @@ impl OwnedStringSexp {
             )));
         }
 
-        unsafe { self.set_elt_unchecked(i as _, R_NaString) };
+        unsafe { self.set_elt_unchecked(i, R_NaString) };
 
         Ok(())
     }
@@ -163,7 +163,7 @@ impl OwnedStringSexp {
         let mut out = Self::new(x_slice.len())?;
         for (i, v) in x_slice.iter().enumerate() {
             // Safety: slice and OwnedStringSexp have the same length.
-            unsafe { out.set_elt_unchecked(i as _, str_to_charsxp(v.as_ref())?) };
+            unsafe { out.set_elt_unchecked(i, str_to_charsxp(v.as_ref())?) };
         }
         Ok(out)
     }
