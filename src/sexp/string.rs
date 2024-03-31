@@ -107,6 +107,9 @@ impl OwnedStringSexp {
     }
 
     /// Constructs a new real vector from an iterator.
+    ///
+    /// Note that, if you already have a slice or vec, you can also use
+    /// [`try_from_slice`].
     pub fn try_from_iter<I, U>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = U>,
@@ -145,6 +148,20 @@ impl OwnedStringSexp {
                 v.try_into()
             }
         }
+    }
+
+    /// Constructs a new string vector from a slice or vec.
+    pub fn try_from_slice<S, U>(x: S) -> crate::error::Result<Self>
+    where
+        S: AsRef<[U]>,
+        U: AsRef<str>,
+    {
+        let x_slice = x.as_ref();
+        let mut out = Self::new(x_slice.len())?;
+        for (i, v) in x_slice.iter().enumerate() {
+            out.set_elt(i, v.as_ref())?;
+        }
+        Ok(out)
     }
 }
 
@@ -205,11 +222,7 @@ where
     type Error = crate::error::Error;
 
     fn try_from(value: &[T]) -> crate::error::Result<Self> {
-        let mut out = Self::new(value.len())?;
-        for (i, v) in value.iter().enumerate() {
-            out.set_elt(i, v.as_ref())?;
-        }
-        Ok(out)
+        Self::try_from_slice(value)
     }
 }
 
@@ -220,7 +233,7 @@ where
     type Error = crate::error::Error;
 
     fn try_from(value: Vec<T>) -> crate::error::Result<Self> {
-        <Self>::try_from(value.as_slice())
+        Self::try_from_slice(value)
     }
 }
 

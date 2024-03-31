@@ -148,6 +148,10 @@ impl OwnedRealSexp {
     }
 
     /// Constructs a new real vector from an iterator.
+    ///
+    /// Note that, if you already have a slice or vec, [`try_from_slice`] is
+    /// what you want. `try_from_slice` is more performant than `try_from_iter`
+    /// because it copies the underlying memory directly.
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = f64>,
@@ -184,6 +188,17 @@ impl OwnedRealSexp {
                 v.try_into()
             }
         }
+    }
+
+    /// Constructs a new real vector from a slice or vec.
+    pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
+    where
+        S: AsRef<[f64]>,
+    {
+        let x_slice = x.as_ref();
+        let mut out = unsafe { Self::new_without_init(x_slice.len())? };
+        out.as_mut_slice().copy_from_slice(x_slice);
+        Ok(out)
     }
 }
 
@@ -222,9 +237,7 @@ impl TryFrom<&[f64]> for OwnedRealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: &[f64]) -> crate::error::Result<Self> {
-        let mut out = unsafe { Self::new_without_init(value.len())? };
-        out.as_mut_slice().copy_from_slice(value);
-        Ok(out)
+        Self::try_from_slice(value)
     }
 }
 
@@ -232,7 +245,7 @@ impl TryFrom<Vec<f64>> for OwnedRealSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Vec<f64>) -> crate::error::Result<Self> {
-        <Self>::try_from(value.as_slice())
+        Self::try_from_slice(value)
     }
 }
 
