@@ -6,7 +6,7 @@
 ### New features
 
 * `OwnedIntegerSexp` and etc now have `try_from_iter()` method for constructing
-  a new instance.
+  a new instance from an iterator.
 
   Example:
 
@@ -19,6 +19,10 @@
       out.into()
   }
   ```
+
+* `OwnedIntegerSexp` and etc now have `try_from_slice()` method for constructing
+  a new instance from a slice or vec. This conversion had been possible via
+  `try_from()`, but this method was added for discoverability.
 
 ## [v0.4.1] (2024-03-30)
 
