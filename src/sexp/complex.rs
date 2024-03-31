@@ -175,6 +175,12 @@ impl OwnedComplexSexp {
         out.as_mut_slice().copy_from_slice(x_slice);
         Ok(out)
     }
+
+    /// Constructs a new integer vector from a scalar value.
+    pub fn try_from_scalar(value: Complex64) -> crate::error::Result<Self> {
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarComplex(value))? };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
 }
 
 impl Drop for OwnedComplexSexp {
@@ -228,8 +234,7 @@ impl TryFrom<Complex64> for OwnedComplexSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Complex64) -> crate::error::Result<Self> {
-        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarComplex(value))? };
-        Self::new_from_raw_sexp(sexp, 1)
+        Self::try_from_scalar(value)
     }
 }
 

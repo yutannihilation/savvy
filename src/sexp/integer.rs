@@ -204,6 +204,12 @@ impl OwnedIntegerSexp {
         out.as_mut_slice().copy_from_slice(x_slice);
         Ok(out)
     }
+
+    /// Constructs a new integer vector from a scalar value.
+    pub fn try_from_scalar(value: i32) -> crate::error::Result<Self> {
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
+        Self::new_from_raw_sexp(sexp, 1)
+    }
 }
 
 impl Drop for OwnedIntegerSexp {
@@ -257,8 +263,7 @@ impl TryFrom<i32> for OwnedIntegerSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: i32) -> crate::error::Result<Self> {
-        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
-        Self::new_from_raw_sexp(sexp, 1)
+        Self::try_from_scalar(value)
     }
 }
 
