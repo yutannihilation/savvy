@@ -70,7 +70,8 @@ impl OwnedStringSexp {
 
     // Set the value of the `i`-th element.
     // Safety: the user has to assure bounds are checked.
-    pub(crate) unsafe fn set_elt_unchecked(&mut self, i: isize, v: SEXP) {
+    #[inline]
+    unsafe fn set_elt_unchecked(&mut self, i: isize, v: SEXP) {
         unsafe { SET_STRING_ELT(self.inner, i, v) };
     }
 

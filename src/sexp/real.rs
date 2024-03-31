@@ -64,20 +64,21 @@ impl OwnedRealSexp {
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            *(self.raw.add(i)) = v;
-        }
+        unsafe { self.set_elt_unchecked(i, v) };
 
         Ok(())
+    }
+
+    #[inline]
+    unsafe fn set_elt_unchecked(&mut self, i: usize, v: f64) {
+        unsafe { *(self.raw.add(i)) = v };
     }
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
-        unsafe {
-            *(self.raw.add(i)) = f64::na();
-        }
+        unsafe { self.set_elt_unchecked(i, f64::na()) };
 
         Ok(())
     }
