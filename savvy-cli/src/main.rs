@@ -1,14 +1,13 @@
 mod utils;
 use utils::*;
 
+use std::collections::VecDeque;
 use std::io::Write;
 
 use clap::{Parser, Subcommand};
 
 use std::path::Path;
 use std::path::PathBuf;
-use walkdir::DirEntry;
-use walkdir::WalkDir;
 
 use savvy_bindgen::{
     generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
@@ -163,30 +162,53 @@ to set the configure script as executable
     );
 }
 
-fn get_rust_file(x: walkdir::Result<DirEntry>) -> Option<DirEntry> {
-    if let Ok(entry) = x {
-        if entry.file_name().to_string_lossy().ends_with(".rs") {
-            Some(entry)
-        } else {
-            None
-        }
-    } else {
-        None
-    }
-}
-
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
 
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    for e in WalkDir::new(path.join(PATH_SRC_DIR))
-        .into_iter()
-        .filter_map(get_rust_file)
-    {
-        println!("Parsing {}", e.path().to_string_lossy());
-        parsed.push(savvy_bindgen::parse_file(e.path()));
+    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+    let mut queue = VecDeque::from([lib_rs]);
+
+    while !queue.is_empty() {
+        let mut entry = queue.pop_front().unwrap();
+
+        // there can be two patterns for a module named "bar"
+        //
+        // - foo/bar/mod.rs
+        // - foo/bar.rs
+
+        // if it's a directory, parse the mod.rs file first
+        if entry.is_dir() {
+            queue.push_back(entry.join("mod.rs"));
+        }
+
+        entry.set_extension("rs");
+
+        if !entry.exists() || !entry.is_file() {
+            continue;
+        }
+
+        println!("Parsing {}", entry.to_string_lossy());
+
+        let result = savvy_bindgen::parse_file(&entry);
+
+        // if the file has `mod` declarations, add the files to the queue.
+        result
+            .mod_dirs()
+            .into_iter()
+            .for_each(|x| queue.push_back(x));
+
+        parsed.push(result);
     }
+
+    // for e in WalkDir::new(path.join(PATH_SRC_DIR))
+    //     .into_iter()
+    //     .filter_map(get_rust_file)
+    // {
+    //     println!("Parsing {}", e.path().to_string_lossy());
+    //     parsed.push(savvy_bindgen::parse_file(e.path()));
+    // }
 
     write_file(
         &path.join(PATH_C_HEADER),

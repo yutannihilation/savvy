@@ -41,7 +41,10 @@ pub fn parse_file(path: &Path) -> ParsedResult {
     };
 
     let mut result = ParsedResult {
-        base_path: path.to_path_buf(),
+        base_path: path
+            .parent()
+            .expect("Should have a parent dir")
+            .to_path_buf(),
         bare_fns: Vec::new(),
         impls: Vec::new(),
         mods: Vec::new(),
