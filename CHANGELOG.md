@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.4.2] (2024-04-01)
+
 ### New features
 
 * `OwnedIntegerSexp` and etc now have `try_from_iter()` method for constructing
@@ -336,7 +338,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.4.2...HEAD
+[v0.4.2]: https://github.com/yutannihilation/savvy/compare/v0.4.1...v0.4.2
 [v0.4.1]: https://github.com/yutannihilation/savvy/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/yutannihilation/savvy/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/yutannihilation/savvy/compare/v0.2.20...v0.3.0
