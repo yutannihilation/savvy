@@ -1,5 +1,6 @@
 use savvy::{r_println, savvy, Sexp};
 
+#[savvy]
 #[derive(Clone, Debug)]
 struct Value(i32);
 
@@ -19,6 +20,7 @@ impl Value {
 }
 
 #[allow(dead_code)]
+#[savvy]
 #[derive(Debug)]
 struct ValuePair {
     a: Value,

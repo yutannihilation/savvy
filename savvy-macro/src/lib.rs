@@ -1,12 +1,19 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-use savvy_bindgen::{SavvyFn, SavvyImpl};
+use savvy_bindgen::{SavvyFn, SavvyImpl, SavvyStruct};
 
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
         match savvy_fn(&item_fn) {
+            Ok(result) => return result,
+            Err(e) => return e.into_compile_error().into(),
+        }
+    }
+
+    if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
+        match savvy_struct(&item_struct) {
             Ok(result) => return result,
             Err(e) => return e.into_compile_error().into(),
         }
@@ -23,7 +30,7 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     proc_macro::TokenStream::from(
         syn::Error::new(
             parse_result.unwrap_err().span(),
-            "#[savvy] macro only accepts `Fn` or `Impl`",
+            "#[savvy] macro only accepts `fn`, `struct`, or `impl`",
         )
         .into_compile_error(),
     )
@@ -45,7 +52,6 @@ fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
 fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
     let savvy_impl = SavvyImpl::new(item_impl)?;
     let orig = savvy_impl.orig.clone();
-    let ty = savvy_impl.ty.clone();
 
     let list_fn_inner = savvy_impl.generate_inner_fns();
     let list_fn_outer = savvy_impl.generate_outer_fns();
@@ -53,58 +59,22 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
     Ok(quote! {
         #orig
 
-        impl savvy::IntoExtPtrSexp for #ty {}
-
-        impl TryFrom<#ty> for savvy::Sexp {
-            type Error = savvy::Error;
-
-            fn try_from(value: #ty) -> savvy::Result<Self> {
-                use savvy::IntoExtPtrSexp;
-
-                Ok(value.into_external_pointer())
-            }
-        }
-
-        impl TryFrom<savvy::Sexp> for &mut #ty {
-            type Error = savvy::Error;
-
-            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                // Return error if the SEXP is not an external pointer
-                value.assert_external_pointer()?;
-
-                let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
-                let res = unsafe { x.as_mut() };
-                res.ok_or("Failed to convert the external pointer to the Rust object".into())
-            }
-        }
-
-        impl TryFrom<savvy::Sexp> for &#ty {
-            type Error = savvy::Error;
-
-            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                // Return error if the SEXP is not an external pointer
-                value.assert_external_pointer()?;
-
-                let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
-                let res = unsafe { x.as_ref() };
-                res.ok_or("Failed to convert the external pointer to the Rust object".into())
-            }
-        }
-
-        impl TryFrom<savvy::Sexp> for #ty {
-            type Error = savvy::Error;
-
-            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                // Return error if the SEXP is not an external pointer
-                value.assert_external_pointer()?;
-
-                unsafe { savvy::take_external_pointer_value::<#ty>(value.0) }
-            }
-        }
-
         #(#list_fn_inner)*
         #(#list_fn_outer)*
     }
+    .into())
+}
+
+fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
+    let savvy_struct = SavvyStruct::new(item_struct)?;
+    let orig = savvy_struct.orig.clone();
+    let try_from_impls = savvy_struct.generate_try_from_impls();
+
+    Ok(quote!(
+        #orig
+
+        #(#try_from_impls)*
+    )
     .into())
 }
 

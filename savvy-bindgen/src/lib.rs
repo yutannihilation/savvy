@@ -2,6 +2,7 @@ mod gen;
 mod parse_file;
 mod savvy_fn;
 mod savvy_impl;
+mod savvy_struct;
 mod utils;
 
 pub use gen::c::{generate_c_header_file, generate_c_impl_file};
@@ -12,6 +13,7 @@ pub use gen::static_files::{
 };
 pub use savvy_fn::{ParsedResult, SavvyFn, SavvyFnArg, SavvyFnType};
 pub use savvy_impl::SavvyImpl;
+pub use savvy_struct::SavvyStruct;
 
 pub use utils::extract_docs;
 
