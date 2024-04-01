@@ -202,14 +202,6 @@ fn update(path: &Path) {
         parsed.push(result);
     }
 
-    // for e in WalkDir::new(path.join(PATH_SRC_DIR))
-    //     .into_iter()
-    //     .filter_map(get_rust_file)
-    // {
-    //     println!("Parsing {}", e.path().to_string_lossy());
-    //     parsed.push(savvy_bindgen::parse_file(e.path()));
-    // }
-
     write_file(
         &path.join(PATH_C_HEADER),
         &generate_c_header_file(parsed.as_slice()),
