@@ -41,6 +41,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
     };
 
     let mut result = ParsedResult {
+        base_path: path.to_path_buf(),
         bare_fns: Vec::new(),
         impls: Vec::new(),
         mods: Vec::new(),
