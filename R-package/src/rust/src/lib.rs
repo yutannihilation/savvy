@@ -24,6 +24,13 @@ pub use consuming_type::*;
 mod try_from_iter;
 pub use try_from_iter::*;
 
+mod mod1;
+pub use mod1::*;
+
+// This should not be parsed
+// mod mod2;
+// pub use mod2::*;
+
 use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{
