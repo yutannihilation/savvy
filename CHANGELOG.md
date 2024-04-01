@@ -29,6 +29,8 @@
   is and has been possible via `try_from()`, but this method was added for
   discoverability.
 
+* `savvy-cli update` and `savvy-cli init` now tries to parse the Rust files
+  actually declared by `mod` keyword.
 
 ## [v0.4.1] (2024-03-30)
 
@@ -44,9 +46,7 @@
 * Now savvy allows to consume the value behind an external pointer. i.e., `T`
   instead of `&T` or `&mut T` as the argument. After getting consumed, the
   pointer is null, so any function call on the already-consumed R object results
-  in an error. See [the
-  guide](https://yutannihilation.github.io/savvy/guide/10_struct.html) for more
-  details.
+  in an error. See [the guide](https://yutannihilation.github.io/savvy/guide/10_struct.html) for more details.
   
   Example:
 

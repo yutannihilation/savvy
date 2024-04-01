@@ -12,6 +12,128 @@ NULL
   }
 }
 
+#' Convert Input To Upper-Case
+#'
+#' @param x A character vector.
+#' @returns A character vector with upper case version of the input.
+#' @export
+to_upper <- function(x) {
+  .Call(to_upper__impl, x)
+}
+
+#' Add suffix
+#'
+#' @param x A character vector.
+#' @param y A suffix.
+#' @returns A character vector with upper case version of the input.
+#' @export
+add_suffix <- function(x, y) {
+  .Call(add_suffix__impl, x, y)
+}
+
+#' Multiply Input By Two
+#'
+#' @param x An integer vector.
+#' @returns An integer vector with values multiplied by 2.
+#' @export
+times_two_int <- function(x) {
+  .Call(times_two_int__impl, x)
+}
+
+#' Multiply Input By Another Input
+#'
+#' @param x An integer vector.
+#' @param y An integer to multiply.
+#' @returns An integer vector with values multiplied by `y`.
+#' @export
+times_any_int <- function(x, y) {
+  .Call(times_any_int__impl, x, y)
+}
+
+#' Multiply Input By Two
+#'
+#' @param x A numeric vector.
+#' @returns A numeric vector with values multiplied by 2.
+#' @export
+times_two_numeric <- function(x) {
+  .Call(times_two_numeric__impl, x)
+}
+
+#' Multiply Input By Another Input
+#'
+#' @param x A real vector.
+#' @param y A real to multiply.
+#' @returns A real vector with values multiplied by `y`.
+#' @export
+times_any_numeric <- function(x, y) {
+  .Call(times_any_numeric__impl, x, y)
+}
+
+#' Flip Input
+#'
+#' @param x A logical vector.
+#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
+#' @export
+flip_logical <- function(x) {
+  .Call(flip_logical__impl, x)
+}
+
+
+flip_logical_expert_only <- function(x) {
+  .Call(flip_logical_expert_only__impl, x)
+}
+
+#' Or operation
+#'
+#' @param x A logical vector.
+#' @param y A logical value.
+#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
+#' @export
+or_logical <- function(x, y) {
+  .Call(or_logical__impl, x, y)
+}
+
+#' Print the content of list
+#'
+#' @param x A list vector.
+#' @returns `NULL`
+#' @export
+print_list <- function(x) {
+  invisible(.Call(print_list__impl, x))
+}
+
+
+list_with_no_values <- function() {
+  .Call(list_with_no_values__impl)
+}
+
+
+list_with_no_names <- function() {
+  .Call(list_with_no_names__impl)
+}
+
+
+list_with_names_and_values <- function() {
+  .Call(list_with_names_and_values__impl)
+}
+
+
+external_person_new <- function() {
+  .savvy_wrap_Person(.Call(external_person_new__impl))
+}
+
+
+get_name_external <- function(x) {
+  x <- .savvy_extract_ptr(x, "Person")
+  .Call(get_name_external__impl, x)
+}
+
+
+set_name_external <- function(x, name) {
+  x <- .savvy_extract_ptr(x, "Person")
+  invisible(.Call(set_name_external__impl, x, name))
+}
+
 
 get_class_int <- function(x) {
   .Call(get_class_int__impl, x)
@@ -50,28 +172,6 @@ set_dim_int <- function() {
 
 set_attr_int <- function(attr, value) {
   .Call(set_attr_int__impl, attr, value)
-}
-
-
-new_complex <- function(size) {
-  .Call(new_complex__impl, size)
-}
-
-
-first_complex <- function(x) {
-  .Call(first_complex__impl, x)
-}
-
-
-abs_complex <- function(x) {
-  .Call(abs_complex__impl, x)
-}
-
-
-new_value_pair <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(new_value_pair__impl, a, b))
 }
 
 
@@ -210,6 +310,21 @@ raise_error <- function() {
 }
 
 
+new_int <- function(size) {
+  .Call(new_int__impl, size)
+}
+
+
+new_real <- function(size) {
+  .Call(new_real__impl, size)
+}
+
+
+new_bool <- function(size) {
+  .Call(new_bool__impl, size)
+}
+
+
 do_call <- function(fun, args) {
   .Call(do_call__impl, fun, args)
 }
@@ -225,140 +340,25 @@ get_args <- function(args) {
 }
 
 
-new_int <- function(size) {
-  .Call(new_int__impl, size)
+new_complex <- function(size) {
+  .Call(new_complex__impl, size)
 }
 
 
-new_real <- function(size) {
-  .Call(new_real__impl, size)
+first_complex <- function(x) {
+  .Call(first_complex__impl, x)
 }
 
 
-new_bool <- function(size) {
-  .Call(new_bool__impl, size)
-}
-
-#' Convert Input To Upper-Case
-#'
-#' @param x A character vector.
-#' @returns A character vector with upper case version of the input.
-#' @export
-to_upper <- function(x) {
-  .Call(to_upper__impl, x)
-}
-
-#' Add suffix
-#'
-#' @param x A character vector.
-#' @param y A suffix.
-#' @returns A character vector with upper case version of the input.
-#' @export
-add_suffix <- function(x, y) {
-  .Call(add_suffix__impl, x, y)
-}
-
-#' Multiply Input By Two
-#'
-#' @param x An integer vector.
-#' @returns An integer vector with values multiplied by 2.
-#' @export
-times_two_int <- function(x) {
-  .Call(times_two_int__impl, x)
-}
-
-#' Multiply Input By Another Input
-#'
-#' @param x An integer vector.
-#' @param y An integer to multiply.
-#' @returns An integer vector with values multiplied by `y`.
-#' @export
-times_any_int <- function(x, y) {
-  .Call(times_any_int__impl, x, y)
-}
-
-#' Multiply Input By Two
-#'
-#' @param x A numeric vector.
-#' @returns A numeric vector with values multiplied by 2.
-#' @export
-times_two_numeric <- function(x) {
-  .Call(times_two_numeric__impl, x)
-}
-
-#' Multiply Input By Another Input
-#'
-#' @param x A real vector.
-#' @param y A real to multiply.
-#' @returns A real vector with values multiplied by `y`.
-#' @export
-times_any_numeric <- function(x, y) {
-  .Call(times_any_numeric__impl, x, y)
-}
-
-#' Flip Input
-#'
-#' @param x A logical vector.
-#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
-#' @export
-flip_logical <- function(x) {
-  .Call(flip_logical__impl, x)
+abs_complex <- function(x) {
+  .Call(abs_complex__impl, x)
 }
 
 
-flip_logical_expert_only <- function(x) {
-  .Call(flip_logical_expert_only__impl, x)
-}
-
-#' Or operation
-#'
-#' @param x A logical vector.
-#' @param y A logical value.
-#' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
-#' @export
-or_logical <- function(x, y) {
-  .Call(or_logical__impl, x, y)
-}
-
-#' Print the content of list
-#'
-#' @param x A list vector.
-#' @returns `NULL`
-#' @export
-print_list <- function(x) {
-  invisible(.Call(print_list__impl, x))
-}
-
-
-list_with_no_values <- function() {
-  .Call(list_with_no_values__impl)
-}
-
-
-list_with_no_names <- function() {
-  .Call(list_with_no_names__impl)
-}
-
-
-list_with_names_and_values <- function() {
-  .Call(list_with_names_and_values__impl)
-}
-
-
-external_person_new <- function() {
-  .savvy_wrap_Person(.Call(external_person_new__impl))
-}
-
-
-get_name_external <- function(x) {
-  x <- .savvy_extract_ptr(x, "Person")
-  .Call(get_name_external__impl, x)
-}
-
-
-set_name_external <- function(x, name) {
-  x <- .savvy_extract_ptr(x, "Person")
-  invisible(.Call(set_name_external__impl, x, name))
+new_value_pair <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(new_value_pair__impl, a, b))
 }
 
 
@@ -387,68 +387,14 @@ filter_string_ascii <- function(x) {
 }
 
 
-Value <- new.env(parent = emptyenv())
-Value$new <- function(x) {
-  .savvy_wrap_Value(.Call(Value_new__impl, x))
+fun_mod1 <- function() {
+  invisible(.Call(fun_mod1__impl))
 }
 
 
-.savvy_wrap_Value <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$pair <- Value_pair(ptr)
-  e$get <- Value_get(ptr)
-
-  class(e) <- "Value"
-  e
+fun_mod1_1_foo <- function() {
+  invisible(.Call(fun_mod1_1_foo__impl))
 }
-
-
-Value_pair <- function(self) {
-  function(b) {
-    b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(Value_pair__impl, self, b))
-  }
-}
-
-Value_get <- function(self) {
-  function() {
-  .Call(Value_get__impl, self)
-  }
-}
-
-
-
-ValuePair <- new.env(parent = emptyenv())
-ValuePair$new <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(ValuePair_new__impl, a, b))
-}
-
-ValuePair$new_copy <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(ValuePair_new_copy__impl, a, b))
-}
-
-
-.savvy_wrap_ValuePair <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$print <- ValuePair_print(ptr)
-
-  class(e) <- "ValuePair"
-  e
-}
-
-
-ValuePair_print <- function(self) {
-  function() {
-  invisible(.Call(ValuePair_print__impl, self))
-  }
-}
-
 
 #' A person with a name
 #'
@@ -523,6 +469,70 @@ Person2 <- new.env(parent = emptyenv())
 Person2_name <- function(self) {
   function() {
   .Call(Person2_name__impl, self)
+  }
+}
+
+
+
+Value <- new.env(parent = emptyenv())
+Value$new <- function(x) {
+  .savvy_wrap_Value(.Call(Value_new__impl, x))
+}
+
+
+.savvy_wrap_Value <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$pair <- Value_pair(ptr)
+  e$get <- Value_get(ptr)
+
+  class(e) <- "Value"
+  e
+}
+
+
+Value_pair <- function(self) {
+  function(b) {
+    b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(Value_pair__impl, self, b))
+  }
+}
+
+Value_get <- function(self) {
+  function() {
+  .Call(Value_get__impl, self)
+  }
+}
+
+
+
+ValuePair <- new.env(parent = emptyenv())
+ValuePair$new <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(ValuePair_new__impl, a, b))
+}
+
+ValuePair$new_copy <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(ValuePair_new_copy__impl, a, b))
+}
+
+
+.savvy_wrap_ValuePair <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$print <- ValuePair_print(ptr)
+
+  class(e) <- "ValuePair"
+  e
+}
+
+
+ValuePair_print <- function(self) {
+  function() {
+  invisible(.Call(ValuePair_print__impl, self))
   }
 }
 

@@ -41,8 +41,13 @@ pub fn parse_file(path: &Path) -> ParsedResult {
     };
 
     let mut result = ParsedResult {
+        base_path: path
+            .parent()
+            .expect("Should have a parent dir")
+            .to_path_buf(),
         bare_fns: Vec::new(),
         impls: Vec::new(),
+        mods: Vec::new(),
     };
 
     for item in ast.items {
@@ -60,6 +65,13 @@ pub fn parse_file(path: &Path) -> ParsedResult {
                     result
                         .impls
                         .push(SavvyImpl::new(&item_impl).expect("Failed to parse impl"))
+                }
+            }
+
+            syn::Item::Mod(item_mod) => {
+                // ignore mod inside the file (e.g. mod test { .. })
+                if item_mod.content.is_none() {
+                    result.mods.push(item_mod.ident.to_string())
                 }
             }
             _ => continue,
