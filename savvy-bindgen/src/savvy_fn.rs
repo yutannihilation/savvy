@@ -7,6 +7,7 @@ use crate::{savvy_impl::SavvyImpl, utils::extract_docs};
 pub struct ParsedResult {
     pub bare_fns: Vec<SavvyFn>,
     pub impls: Vec<SavvyImpl>,
+    pub mods: Vec<String>,
 }
 
 enum SavvyInputTypeCategory {
