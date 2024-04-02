@@ -168,6 +168,11 @@ fn update(path: &Path) {
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+    if !lib_rs.exists() {
+        eprintln!("{} doesn't exist!", lib_rs.to_string_lossy());
+        std::process::exit(1);
+    }
+
     let mut queue = VecDeque::from([lib_rs]);
 
     while !queue.is_empty() {
