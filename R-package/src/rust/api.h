@@ -67,6 +67,9 @@ SEXP filter_string_ascii(SEXP x);
 SEXP fun_mod1(void);
 SEXP fun_mod1_1_foo(void);
 
+// methods and associated functions for Person2
+SEXP Person2_name(SEXP self__);
+
 // methods and associated functions for Person
 SEXP Person_new(void);
 SEXP Person_new2(void);
@@ -77,13 +80,11 @@ SEXP Person_set_name(SEXP self__, SEXP name);
 SEXP Person_name(SEXP self__);
 SEXP Person_associated_function(void);
 
-// methods and associated functions for Person2
-SEXP Person2_name(SEXP self__);
-
 // methods and associated functions for Value
 SEXP Value_new(SEXP x);
 SEXP Value_pair(SEXP self__, SEXP b);
 SEXP Value_get(SEXP self__);
+SEXP Value_get2(SEXP self__);
 
 // methods and associated functions for ValuePair
 SEXP ValuePair_new(SEXP a, SEXP b);

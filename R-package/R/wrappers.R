@@ -396,9 +396,28 @@ fun_mod1_1_foo <- function() {
   invisible(.Call(fun_mod1_1_foo__impl))
 }
 
-#' A person with a name
-#'
-#' @export
+
+Person2 <- new.env(parent = emptyenv())
+
+
+.savvy_wrap_Person2 <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$name <- Person2_name(ptr)
+
+  class(e) <- "Person2"
+  e
+}
+
+
+Person2_name <- function(self) {
+  function() {
+  .Call(Person2_name__impl, self)
+  }
+}
+
+
+
 Person <- new.env(parent = emptyenv())
 Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
@@ -453,27 +472,6 @@ Person_name <- function(self) {
 
 
 
-Person2 <- new.env(parent = emptyenv())
-
-
-.savvy_wrap_Person2 <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$name <- Person2_name(ptr)
-
-  class(e) <- "Person2"
-  e
-}
-
-
-Person2_name <- function(self) {
-  function() {
-  .Call(Person2_name__impl, self)
-  }
-}
-
-
-
 Value <- new.env(parent = emptyenv())
 Value$new <- function(x) {
   .savvy_wrap_Value(.Call(Value_new__impl, x))
@@ -485,6 +483,7 @@ Value$new <- function(x) {
   e$.ptr <- ptr
   e$pair <- Value_pair(ptr)
   e$get <- Value_get(ptr)
+  e$get2 <- Value_get2(ptr)
 
   class(e) <- "Value"
   e
@@ -501,6 +500,12 @@ Value_pair <- function(self) {
 Value_get <- function(self) {
   function() {
   .Call(Value_get__impl, self)
+  }
+}
+
+Value_get2 <- function(self) {
+  function() {
+  .Call(Value_get2__impl, self)
   }
 }
 
