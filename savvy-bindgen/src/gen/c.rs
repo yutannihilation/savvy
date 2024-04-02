@@ -1,4 +1,4 @@
-use crate::{ParsedResult, SavvyFn, SavvyFnType};
+use crate::{MergedResult, SavvyFn, SavvyFnType};
 
 impl SavvyFn {
     pub fn get_c_args(&self) -> Vec<(String, String)> {
@@ -78,29 +78,26 @@ impl SavvyFn {
     }
 }
 
-pub fn generate_c_header_file(parsed_results: &[ParsedResult]) -> String {
-    let bare_fns = parsed_results
+pub fn generate_c_header_file(result: &MergedResult) -> String {
+    let bare_fns = result
+        .bare_fns
         .iter()
-        .flat_map(|x| &x.bare_fns)
         .map(|x| x.to_c_function_for_header())
         .collect::<Vec<String>>()
         .join("\n");
 
-    let impls = parsed_results
+    let impls = result
+        .impls
         .iter()
-        .flat_map(|x| &x.impls)
-        .map(|x| {
-            let fns = x
+        .map(|(ty, i)| {
+            let fns = i
                 .fns
                 .iter()
                 .map(|x| x.to_c_function_for_header())
                 .collect::<Vec<String>>()
                 .join("\n");
 
-            format!(
-                "\n// methods and associated functions for {}\n{}",
-                x.ty, fns
-            )
+            format!("\n// methods and associated functions for {}\n{}", ty, fns)
         })
         .collect::<Vec<String>>()
         .join("\n");
@@ -122,7 +119,7 @@ fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
         .join("\n")
 }
 
-pub fn generate_c_impl_file(parsed_results: &[ParsedResult], pkg_name: &str) -> String {
+pub fn generate_c_impl_file(result: &MergedResult, pkg_name: &str) -> String {
     let common_part = r#"
 #include <stdint.h>
 #include <Rinternals.h>
@@ -161,14 +158,12 @@ SEXP handle_result(SEXP res_) {
     let mut c_fns: Vec<String> = Vec::new();
     let mut call_entries: Vec<String> = Vec::new();
 
-    for p in parsed_results.iter() {
-        c_fns.push(generate_c_function_impl(p.bare_fns.as_slice()));
-        call_entries.push(generate_c_function_call_entry(p.bare_fns.as_slice()));
+    c_fns.push(generate_c_function_impl(&result.bare_fns));
+    call_entries.push(generate_c_function_call_entry(&result.bare_fns));
 
-        for i in p.impls.iter() {
-            c_fns.push(generate_c_function_impl(i.fns.as_slice()));
-            call_entries.push(generate_c_function_call_entry(i.fns.as_slice()));
-        }
+    for (_, i) in result.impls.iter() {
+        c_fns.push(generate_c_function_impl(i.fns.as_slice()));
+        call_entries.push(generate_c_function_call_entry(i.fns.as_slice()));
     }
 
     let c_fns = c_fns.join("\n");

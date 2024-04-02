@@ -1,24 +1,7 @@
-use std::path::PathBuf;
-
 use quote::format_ident;
 use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
-use super::savvy_impl::SavvyImpl;
 use crate::utils::extract_docs;
-
-// For main.rs
-pub struct ParsedResult {
-    pub base_path: std::path::PathBuf,
-    pub bare_fns: Vec<SavvyFn>,
-    pub impls: Vec<SavvyImpl>,
-    pub mods: Vec<String>,
-}
-
-impl ParsedResult {
-    pub fn mod_dirs(&self) -> Vec<PathBuf> {
-        self.mods.iter().map(|x| self.base_path.join(x)).collect()
-    }
-}
 
 enum SavvyInputTypeCategory {
     SexpWrapper,

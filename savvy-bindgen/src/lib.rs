@@ -9,9 +9,10 @@ pub use gen::static_files::{
     generate_cargo_toml, generate_config_toml, generate_configure, generate_example_lib_rs,
     generate_gitignore, generate_makevars_in, generate_makevars_win, generate_win_def,
 };
-pub use parse::savvy_fn::{ParsedResult, SavvyFn, SavvyFnArg, SavvyFnType};
+pub use parse::savvy_fn::{SavvyFn, SavvyFnArg, SavvyFnType};
 pub use parse::savvy_impl::SavvyImpl;
 pub use parse::savvy_struct::SavvyStruct;
+pub use parse::{merge_parsed_results, MergedResult, ParsedResult};
 
 pub use utils::extract_docs;
 

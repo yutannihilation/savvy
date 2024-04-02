@@ -1,4 +1,5 @@
 mod utils;
+use savvy_bindgen::merge_parsed_results;
 use utils::*;
 
 use std::collections::VecDeque;
@@ -207,17 +208,16 @@ fn update(path: &Path) {
         parsed.push(result);
     }
 
-    write_file(
-        &path.join(PATH_C_HEADER),
-        &generate_c_header_file(parsed.as_slice()),
-    );
+    let merged = merge_parsed_results(parsed);
+
+    write_file(&path.join(PATH_C_HEADER), &generate_c_header_file(&merged));
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(parsed.as_slice(), &pkg_metadata.package_name_for_r()),
+        &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
     );
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(parsed.as_slice(), &pkg_metadata.package_name_for_r()),
+        &generate_r_impl_file(&merged, &pkg_metadata.package_name_for_r()),
     );
 }
 
