@@ -320,10 +320,12 @@ fn list_with_names_and_values() -> savvy::Result<savvy::Sexp> {
     out.into()
 }
 
+#[savvy]
 struct Person {
     pub name: String,
 }
 
+#[savvy]
 #[allow(dead_code)]
 struct Person2 {
     pub name: String,

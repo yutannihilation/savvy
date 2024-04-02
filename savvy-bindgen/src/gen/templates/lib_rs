@@ -49,6 +49,7 @@ fn int_times_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
     Ok(out.into())
 }
 
+#[savvy]
 struct Person {
     pub name: String,
 }
