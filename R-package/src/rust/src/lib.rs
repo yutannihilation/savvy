@@ -327,6 +327,9 @@ fn list_with_names_and_values() -> savvy::Result<savvy::Sexp> {
     out.into()
 }
 
+/// A person with a name
+///
+/// @export
 #[savvy]
 struct Person {
     pub name: String,
@@ -338,9 +341,6 @@ struct Person2 {
     pub name: String,
 }
 
-/// A person with a name
-///
-/// @export
 #[savvy]
 impl Person {
     fn new() -> Self {

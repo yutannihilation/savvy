@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::{SavvyFn, SavvyImpl};
+use crate::{SavvyFn, SavvyImpl, SavvyStruct};
 
 pub mod savvy_fn;
 pub mod savvy_impl;
@@ -11,6 +11,7 @@ pub struct ParsedResult {
     pub base_path: std::path::PathBuf,
     pub bare_fns: Vec<SavvyFn>,
     pub impls: Vec<SavvyImpl>,
+    pub structs: Vec<SavvyStruct>,
     pub mods: Vec<String>,
 }
 
@@ -56,6 +57,26 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
                             docs: Vec::new(),
                             ty: i.ty,
                             fns: i.fns,
+                        },
+                    );
+                }
+            }
+        }
+
+        // get documents from struct
+        for s in result.structs {
+            let key = s.ty.to_string();
+            match impl_map.get_mut(&key) {
+                Some(merged) => {
+                    merged.docs = s.docs;
+                }
+                None => {
+                    impl_map.insert(
+                        key,
+                        SavvyMergedImpl {
+                            docs: Vec::new(),
+                            ty: s.ty,
+                            fns: Vec::new(),
                         },
                     );
                 }

@@ -396,7 +396,9 @@ fun_mod1_1_foo <- function() {
   invisible(.Call(fun_mod1_1_foo__impl))
 }
 
-
+#' A person with a name
+#'
+#' @export
 Person <- new.env(parent = emptyenv())
 Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
