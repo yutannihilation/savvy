@@ -146,8 +146,11 @@ impl SavvyFn {
                 }) => (
                     parse_quote!(result),
                     parse_quote!({
-                        use savvy::IntoExtPtrSexp;
-                        result.into_external_pointer().0
+                        // convert the struct or enum into SEXP
+                        match <savvy::Sexp>::try_from(result) {
+                            Ok(sexp) => sexp.0,
+                            Err(e) => savvy::handle_error(e),
+                        }
                     }),
                     *wrapped_with_result,
                 ),
