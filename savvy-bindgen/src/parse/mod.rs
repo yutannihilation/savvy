@@ -1,7 +1,8 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::{SavvyFn, SavvyImpl, SavvyStruct};
+use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
+pub mod savvy_enum;
 pub mod savvy_fn;
 pub mod savvy_impl;
 pub mod savvy_struct;

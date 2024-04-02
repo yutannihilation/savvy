@@ -1,39 +1,34 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-use savvy_bindgen::{SavvyFn, SavvyImpl, SavvyStruct};
+use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
+use syn::parse_quote;
 
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
-    if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
-        match savvy_fn(&item_fn) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
-    }
+    let result = if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
+        savvy_fn(&item_fn)
+    } else if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
+        savvy_struct(&item_struct)
+    } else if let Ok(item_impl) = syn::parse::<syn::ItemImpl>(input.clone()) {
+        savvy_impl(&item_impl)
+    } else if let Ok(item_enum) = syn::parse::<syn::ItemEnum>(input.clone()) {
+        savvy_enum(&item_enum)
+    } else {
+        let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
+        return proc_macro::TokenStream::from(
+            syn::Error::new(
+                parse_result.unwrap_err().span(),
+                "#[savvy] macro only accepts `fn`, `struct`, or `impl`",
+            )
+            .into_compile_error(),
+        );
+    };
 
-    if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
-        match savvy_struct(&item_struct) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
+    match result {
+        Ok(token_stream) => token_stream,
+        Err(e) => e.into_compile_error().into(),
     }
-
-    let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
-    if let Ok(item_impl) = parse_result {
-        match savvy_impl(&item_impl) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
-    }
-
-    proc_macro::TokenStream::from(
-        syn::Error::new(
-            parse_result.unwrap_err().span(),
-            "#[savvy] macro only accepts `fn`, `struct`, or `impl`",
-        )
-        .into_compile_error(),
-    )
 }
 
 fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
@@ -74,6 +69,53 @@ fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
         #orig
 
         #(#try_from_impls)*
+    )
+    .into())
+}
+
+fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
+    let SavvyEnum {
+        docs,
+        attrs,
+        ty,
+        variants,
+    } = SavvyEnum::new(item_enum)?;
+
+    let variants_tweaked = variants
+        .iter()
+        .enumerate()
+        .map(|(i, v)| {
+            let lit_i = syn::LitInt::new(&i.to_string(), v.span());
+            parse_quote!(#v = #lit_i)
+        })
+        .collect::<Vec<syn::Variant>>();
+
+    let match_arms = variants
+        .iter()
+        .enumerate()
+        .map(|(i, v)| {
+            let lit_i = syn::LitInt::new(&i.to_string(), v.span());
+            parse_quote!(#lit_i => Ok(#ty::#v))
+        })
+        .collect::<Vec<syn::Arm>>();
+
+    Ok(quote!(
+        #(#attrs)*
+        pub enum #ty {
+            #(#variants_tweaked),*
+        }
+
+        impl TryFrom<savvy::Sexp> for #ty {
+            type Error = savvy::Error;
+
+            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
+                let i = <i32>::try_from(value)?;
+                match i {
+                    #(#match_arms),*,
+                    _ => Err("Unexpected enum variant".into()),
+                }
+            }
+        }
     )
     .into())
 }
