@@ -42,7 +42,7 @@ impl SavvyFn {
         out
     }
 
-    fn to_r_function(&self) -> String {
+    fn to_r_function(&self, exclude_types: &[String]) -> String {
         let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_outer();
 
@@ -60,7 +60,7 @@ impl SavvyFn {
         let args = args.join(", ");
         let args_call = args_call.join(", ");
 
-        let mut body_lines = self.get_extractions();
+        let mut body_lines = self.get_extractions(exclude_types);
 
         // If the result is NULL, wrap it with invisible
         let fn_call = match &self.return_type {
@@ -71,7 +71,12 @@ impl SavvyFn {
             SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
                 ty_str, ..
             }) => {
-                format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+                // enums don't need to be wrapped
+                if exclude_types.contains(ty_str) {
+                    format!("  .Call({args_call})")
+                } else {
+                    format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+                }
             }
         };
         body_lines.push(fn_call);
@@ -87,25 +92,30 @@ impl SavvyFn {
         )
     }
 
-    fn get_extractions(&self) -> Vec<String> {
+    fn get_extractions(&self, exclude_types: &[String]) -> Vec<String> {
         self.args
             .iter()
             .flat_map(|arg| {
-                if arg.is_user_defined_type() {
-                    let r_var = arg.pat_string();
-                    let r_class = arg.ty_string();
-                    Some(format!(
-                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
-                    ))
-                } else {
-                    None
+                if !arg.is_user_defined_type() {
+                    return None;
                 }
+
+                // enums don't need to be extracted
+                if exclude_types.contains(&arg.ty_string()) {
+                    return None;
+                }
+
+                let r_var = arg.pat_string();
+                let r_class = arg.ty_string();
+                Some(format!(
+                    r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
+                ))
             })
             .collect::<Vec<String>>()
     }
 }
 
-fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
+fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, exclude_types: &[String]) -> String {
     let mut associated_fns: Vec<&SavvyFn> = Vec::new();
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
     let class_r = ty;
@@ -136,7 +146,7 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
             args.insert(0, format!("{fn_name_c}__impl"));
             let args_call = args.join(", ");
 
-            let mut body_lines = x.get_extractions();
+            let mut body_lines = x.get_extractions(exclude_types);
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -200,7 +210,7 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
             args.insert(0, format!("{fn_name_c}__impl"));
             let args_call = args.join(", ");
 
-            let mut body_lines = x.get_extractions();
+            let mut body_lines = x.get_extractions(exclude_types);
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -264,17 +274,19 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
 }
 
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
+    let enum_types: Vec<String> = result.enums.iter().map(|e| e.ty.to_string()).collect();
+
     let r_fns = result
         .bare_fns
         .iter()
-        .map(|x| x.to_r_function())
+        .map(|x| x.to_r_function(&enum_types))
         .collect::<Vec<String>>()
         .join("\n");
 
     let r_impls = result
         .impls
         .iter()
-        .map(|(ty, i)| generate_r_impl_for_impl(i, ty))
+        .map(|(ty, i)| generate_r_impl_for_impl(i, ty, &enum_types))
         .collect::<Vec<String>>()
         .join("\n");
 

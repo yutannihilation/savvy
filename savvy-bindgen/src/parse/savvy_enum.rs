@@ -2,6 +2,7 @@ use syn::{parse_quote, ItemEnum, ItemImpl};
 
 use crate::extract_docs;
 
+#[derive(Clone)]
 pub struct SavvyEnum {
     /// Doc comments
     pub docs: Vec<String>,

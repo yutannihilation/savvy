@@ -2,7 +2,6 @@ use proc_macro::TokenStream;
 use quote::quote;
 
 use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
-use syn::parse_quote;
 
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {

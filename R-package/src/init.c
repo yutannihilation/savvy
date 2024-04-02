@@ -362,6 +362,11 @@ SEXP filter_string_ascii__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP foo__impl(SEXP x) {
+    SEXP res = foo(x);
+    return handle_result(res);
+}
+
 SEXP fun_mod1__impl(void) {
     SEXP res = fun_mod1();
     return handle_result(res);
@@ -520,6 +525,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"filter_complex_without_im__impl", (DL_FUNC) &filter_complex_without_im__impl, 1},
     {"filter_logical_duplicates__impl", (DL_FUNC) &filter_logical_duplicates__impl, 1},
     {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
+    {"foo__impl", (DL_FUNC) &foo__impl, 1},
     {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
     {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},

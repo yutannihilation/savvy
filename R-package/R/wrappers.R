@@ -387,6 +387,11 @@ filter_string_ascii <- function(x) {
 }
 
 
+foo <- function(x) {
+  invisible(.Call(foo__impl, x))
+}
+
+
 fun_mod1 <- function() {
   invisible(.Call(fun_mod1__impl))
 }
