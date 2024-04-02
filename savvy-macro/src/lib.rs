@@ -75,10 +75,10 @@ fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
 
 fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
     let SavvyEnum {
-        docs,
         attrs,
         ty,
         variants,
+        ..
     } = SavvyEnum::new(item_enum)?;
 
     let variants_tweaked = variants
