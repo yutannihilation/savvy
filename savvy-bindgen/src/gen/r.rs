@@ -1,9 +1,8 @@
 use quote::format_ident;
 
-use crate::{
-    savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType},
-    ParsedResult, SavvyFn, SavvyFnType, SavvyImpl,
-};
+use crate::{ParsedResult, SavvyFn, SavvyFnType, SavvyImpl};
+
+use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 
 fn get_r_doc_comment(docs: &[String]) -> String {
     docs.iter()

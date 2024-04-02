@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use quote::format_ident;
 use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
-use crate::{savvy_impl::SavvyImpl, utils::extract_docs};
+use super::savvy_impl::SavvyImpl;
+use crate::utils::extract_docs;
 
 // For main.rs
 pub struct ParsedResult {
