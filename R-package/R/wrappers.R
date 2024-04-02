@@ -544,3 +544,8 @@ ValuePair_print <- function(self) {
 }
 
 
+#' @export
+Foo <- list(
+  A = 0L,
+  B = 1L
+)
