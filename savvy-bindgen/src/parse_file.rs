@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use syn::parse_quote;
 
-use crate::{ParsedResult, SavvyFn, SavvyImpl, SavvyStruct};
+use crate::{ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
@@ -48,6 +48,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         bare_fns: Vec::new(),
         impls: Vec::new(),
         structs: Vec::new(),
+        enums: Vec::new(),
         mods: Vec::new(),
     };
 
@@ -74,6 +75,14 @@ pub fn parse_file(path: &Path) -> ParsedResult {
                     result
                         .structs
                         .push(SavvyStruct::new(&item_struct).expect("Failed to parse struct"))
+                }
+            }
+
+            syn::Item::Enum(item_enum) => {
+                if is_marked(item_enum.attrs.as_slice()) {
+                    result
+                        .enums
+                        .push(SavvyEnum::new(&item_enum).expect("Failed to parse enum"))
                 }
             }
 

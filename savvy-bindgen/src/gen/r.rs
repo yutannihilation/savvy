@@ -1,7 +1,7 @@
 use quote::format_ident;
 
 use crate::parse::SavvyMergedImpl;
-use crate::{MergedResult, SavvyFn, SavvyFnType};
+use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnType};
 
 use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 
@@ -244,6 +244,25 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
     )
 }
 
+fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
+    let class_r = e.ty.to_string();
+    let doc_comments = get_r_doc_comment(e.docs.as_slice());
+
+    let variants = e
+        .variants
+        .iter()
+        .enumerate()
+        .map(|(i, v)| format!("  {v} = {i}L"))
+        .collect::<Vec<String>>()
+        .join(",\n");
+    format!(
+        "{doc_comments}
+{class_r} <- list(
+{variants}
+)"
+    )
+}
+
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
     let r_fns = result
         .bare_fns
@@ -256,6 +275,13 @@ pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
         .impls
         .iter()
         .map(|(ty, i)| generate_r_impl_for_impl(i, ty))
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let r_enums = result
+        .enums
+        .iter()
+        .map(generate_r_impl_for_enum)
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -276,6 +302,7 @@ NULL
 
 {r_fns}
 {r_impls}
+{r_enums}
 "#
     )
 }

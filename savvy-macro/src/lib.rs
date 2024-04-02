@@ -105,6 +105,14 @@ fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
             #(#variants_tweaked),*
         }
 
+        impl TryFrom<#ty> for savvy::Sexp {
+            type Error = savvy::Error;
+
+            fn try_from(value: #ty) -> savvy::Result<Self> {
+                (value as i32).try_into()
+            }
+        }
+
         impl TryFrom<savvy::Sexp> for #ty {
             type Error = savvy::Error;
 
