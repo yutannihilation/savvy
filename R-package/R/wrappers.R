@@ -397,27 +397,6 @@ fun_mod1_1_foo <- function() {
 }
 
 
-Person2 <- new.env(parent = emptyenv())
-
-
-.savvy_wrap_Person2 <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$name <- Person2_name(ptr)
-
-  class(e) <- "Person2"
-  e
-}
-
-
-Person2_name <- function(self) {
-  function() {
-  .Call(Person2_name__impl, self)
-  }
-}
-
-
-
 Person <- new.env(parent = emptyenv())
 Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
@@ -467,6 +446,27 @@ Person_set_name <- function(self) {
 Person_name <- function(self) {
   function() {
   .Call(Person_name__impl, self)
+  }
+}
+
+
+
+Person2 <- new.env(parent = emptyenv())
+
+
+.savvy_wrap_Person2 <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$name <- Person2_name(ptr)
+
+  class(e) <- "Person2"
+  e
+}
+
+
+Person2_name <- function(self) {
+  function() {
+  .Call(Person2_name__impl, self)
   }
 }
 

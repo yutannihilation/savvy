@@ -31,12 +31,12 @@ pub struct SavvyMergedImpl {
 
 pub struct MergedResult {
     pub bare_fns: Vec<SavvyFn>,
-    pub impls: HashMap<String, SavvyMergedImpl>,
+    pub impls: Vec<(String, SavvyMergedImpl)>,
 }
 
 pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
     let mut bare_fns: Vec<SavvyFn> = Vec::new();
-    let mut impls: HashMap<String, SavvyMergedImpl> = HashMap::new();
+    let mut impl_map: HashMap<String, SavvyMergedImpl> = HashMap::new();
 
     for result in results {
         let mut fns = result.bare_fns;
@@ -44,13 +44,13 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
 
         for i in result.impls {
             let key = i.ty.to_string();
-            match impls.get_mut(&key) {
+            match impl_map.get_mut(&key) {
                 Some(merged) => {
                     let mut fns = i.fns;
                     merged.fns.append(&mut fns);
                 }
                 None => {
-                    impls.insert(
+                    impl_map.insert(
                         key,
                         SavvyMergedImpl {
                             docs: Vec::new(),
@@ -62,6 +62,11 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
             }
         }
     }
+
+    let mut impls = impl_map.into_iter().collect::<Vec<_>>();
+
+    // in order to make the wrapper generation deterministic, sort by the type
+    impls.sort_by_key(|(k, _)| k.clone());
 
     MergedResult { bare_fns, impls }
 }

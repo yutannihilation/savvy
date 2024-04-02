@@ -372,11 +372,6 @@ SEXP fun_mod1_1_foo__impl(void) {
     return handle_result(res);
 }
 
-SEXP Person2_name__impl(SEXP self__) {
-    SEXP res = Person2_name(self__);
-    return handle_result(res);
-}
-
 SEXP Person_new__impl(void) {
     SEXP res = Person_new();
     return handle_result(res);
@@ -414,6 +409,11 @@ SEXP Person_name__impl(SEXP self__) {
 
 SEXP Person_associated_function__impl(void) {
     SEXP res = Person_associated_function();
+    return handle_result(res);
+}
+
+SEXP Person2_name__impl(SEXP self__) {
+    SEXP res = Person2_name(self__);
     return handle_result(res);
 }
 
@@ -522,7 +522,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
     {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
     {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
-    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
     {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
     {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
@@ -531,6 +530,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
     {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
     {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
+    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
     {"Value_new__impl", (DL_FUNC) &Value_new__impl, 1},
     {"Value_pair__impl", (DL_FUNC) &Value_pair__impl, 2},
     {"Value_get__impl", (DL_FUNC) &Value_get__impl, 1},
