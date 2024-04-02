@@ -12,6 +12,13 @@ NULL
   }
 }
 
+.savvy_verify_enum <- function(e, class) {
+    if(!inherits(e, class)) {
+      msg <- paste0("Expected ", class, ", got ", class(e)[1])
+      stop(msg, call. = FALSE)
+    }
+  }
+
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.
@@ -388,7 +395,13 @@ filter_string_ascii <- function(x) {
 
 
 foo <- function(x) {
+  .savvy_verify_enum(x, "Foo")
   invisible(.Call(foo__impl, x))
+}
+
+
+foo_a <- function() {
+  structure(.Call(foo_a__impl), class = c("Foo", "integer"))
 }
 
 
@@ -429,10 +442,10 @@ Person$associated_function <- function() {
 .savvy_wrap_Person <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$another_person <- Person_another_person(ptr)
+    e$another_person <- Person_another_person(ptr)
   e$set_name <- Person_set_name(ptr)
   e$name <- Person_name(ptr)
-
+  
   class(e) <- "Person"
   e
 }
@@ -464,8 +477,8 @@ Person2 <- new.env(parent = emptyenv())
 .savvy_wrap_Person2 <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$name <- Person2_name(ptr)
-
+    e$name <- Person2_name(ptr)
+  
   class(e) <- "Person2"
   e
 }
@@ -488,10 +501,10 @@ Value$new <- function(x) {
 .savvy_wrap_Value <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$pair <- Value_pair(ptr)
+    e$pair <- Value_pair(ptr)
   e$get <- Value_get(ptr)
   e$get2 <- Value_get2(ptr)
-
+  
   class(e) <- "Value"
   e
 }
@@ -535,8 +548,8 @@ ValuePair$new_copy <- function(a, b) {
 .savvy_wrap_ValuePair <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$print <- ValuePair_print(ptr)
-
+    e$print <- ValuePair_print(ptr)
+  
   class(e) <- "ValuePair"
   e
 }
@@ -551,6 +564,6 @@ ValuePair_print <- function(self) {
 
 #' @export
 Foo <- list(
-  A = 0L,
-  B = 1L
+  A = structure(0L, class = c("Foo", "integer")),
+  B = structure(1L, class = c("Foo", "integer"))
 )

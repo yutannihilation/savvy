@@ -13,3 +13,8 @@ fn foo(x: Foo) -> savvy::Result<()> {
     r_println!("{:?}", x);
     Ok(())
 }
+
+#[savvy]
+fn foo_a() -> savvy::Result<Foo> {
+    Ok(Foo::A)
+}
