@@ -31,7 +31,7 @@ impl SavvyStruct {
     }
 
     pub fn generate_try_from_impls(&self) -> Vec<syn::ItemImpl> {
-        let ty = self.ty.clone();
+        let ty = &self.ty;
 
         let impl_into_external_pointer: syn::ItemImpl =
             parse_quote!(impl savvy::IntoExtPtrSexp for #ty {});

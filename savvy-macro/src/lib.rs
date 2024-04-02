@@ -62,7 +62,7 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
 fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
     let savvy_struct = SavvyStruct::new(item_struct)?;
-    let orig = savvy_struct.orig.clone();
+    let orig = &savvy_struct.orig;
     let try_from_impls = savvy_struct.generate_try_from_impls();
 
     Ok(quote!(
@@ -74,56 +74,14 @@ fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
 }
 
 fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
-    let SavvyEnum {
-        attrs,
-        ty,
-        variants,
-        ..
-    } = SavvyEnum::new(item_enum)?;
-
-    let variants_tweaked = variants
-        .iter()
-        .enumerate()
-        .map(|(i, v)| {
-            let lit_i = syn::LitInt::new(&i.to_string(), v.span());
-            parse_quote!(#v = #lit_i)
-        })
-        .collect::<Vec<syn::Variant>>();
-
-    let match_arms = variants
-        .iter()
-        .enumerate()
-        .map(|(i, v)| {
-            let lit_i = syn::LitInt::new(&i.to_string(), v.span());
-            parse_quote!(#lit_i => Ok(#ty::#v))
-        })
-        .collect::<Vec<syn::Arm>>();
+    let savvy_enum = SavvyEnum::new(item_enum)?;
+    let enum_with_discriminant = savvy_enum.generate_enum_with_discriminant();
+    let try_from_impls = savvy_enum.generate_try_from_impls();
 
     Ok(quote!(
-        #(#attrs)*
-        pub enum #ty {
-            #(#variants_tweaked),*
-        }
+        #enum_with_discriminant
 
-        impl TryFrom<#ty> for savvy::Sexp {
-            type Error = savvy::Error;
-
-            fn try_from(value: #ty) -> savvy::Result<Self> {
-                (value as i32).try_into()
-            }
-        }
-
-        impl TryFrom<savvy::Sexp> for #ty {
-            type Error = savvy::Error;
-
-            fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
-                let i = <i32>::try_from(value)?;
-                match i {
-                    #(#match_arms),*,
-                    _ => Err("Unexpected enum variant".into()),
-                }
-            }
-        }
+        #(#try_from_impls)*
     )
     .into())
 }
