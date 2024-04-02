@@ -24,6 +24,13 @@ pub use consuming_type::*;
 mod try_from_iter;
 pub use try_from_iter::*;
 
+// to test if the definition over multiple files is accepted.
+// cf. https://github.com/yutannihilation/savvy/issues/118
+mod separate_impl_definition;
+pub use separate_impl_definition::*;
+
+// to test modules are parsed properly
+// cf. https://github.com/yutannihilation/savvy/issues/147
 mod mod1;
 pub use mod1::*;
 
@@ -320,6 +327,9 @@ fn list_with_names_and_values() -> savvy::Result<savvy::Sexp> {
     out.into()
 }
 
+/// A person with a name
+///
+/// @export
 #[savvy]
 struct Person {
     pub name: String,
@@ -331,9 +341,6 @@ struct Person2 {
     pub name: String,
 }
 
-/// A person with a name
-///
-/// @export
 #[savvy]
 impl Person {
     fn new() -> Self {

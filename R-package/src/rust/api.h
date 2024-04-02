@@ -84,6 +84,7 @@ SEXP Person2_name(SEXP self__);
 SEXP Value_new(SEXP x);
 SEXP Value_pair(SEXP self__, SEXP b);
 SEXP Value_get(SEXP self__);
+SEXP Value_get2(SEXP self__);
 
 // methods and associated functions for ValuePair
 SEXP ValuePair_new(SEXP a, SEXP b);

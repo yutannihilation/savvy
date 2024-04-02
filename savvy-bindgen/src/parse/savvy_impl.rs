@@ -1,6 +1,6 @@
 use syn::parse_quote;
 
-use crate::savvy_fn::{SavvyFn, SavvyFnType};
+use super::savvy_fn::{SavvyFn, SavvyFnType};
 use crate::utils::extract_docs;
 
 pub struct SavvyImpl {

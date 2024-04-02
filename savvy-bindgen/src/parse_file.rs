@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use syn::parse_quote;
 
-use crate::{ParsedResult, SavvyFn, SavvyImpl};
+use crate::{ParsedResult, SavvyFn, SavvyImpl, SavvyStruct};
 
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
@@ -47,6 +47,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
             .to_path_buf(),
         bare_fns: Vec::new(),
         impls: Vec::new(),
+        structs: Vec::new(),
         mods: Vec::new(),
     };
 
@@ -65,6 +66,14 @@ pub fn parse_file(path: &Path) -> ParsedResult {
                     result
                         .impls
                         .push(SavvyImpl::new(&item_impl).expect("Failed to parse impl"))
+                }
+            }
+
+            syn::Item::Struct(item_struct) => {
+                if is_marked(item_struct.attrs.as_slice()) {
+                    result
+                        .structs
+                        .push(SavvyStruct::new(&item_struct).expect("Failed to parse struct"))
                 }
             }
 

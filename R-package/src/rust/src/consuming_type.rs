@@ -2,7 +2,7 @@ use savvy::{r_println, savvy, Sexp};
 
 #[savvy]
 #[derive(Clone, Debug)]
-struct Value(i32);
+pub(crate) struct Value(pub(crate) i32);
 
 #[savvy]
 impl Value {

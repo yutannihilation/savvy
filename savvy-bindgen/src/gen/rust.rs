@@ -1,9 +1,7 @@
 use syn::parse_quote;
 
-use crate::{
-    savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType},
-    SavvyFn, SavvyFnType,
-};
+use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
+use crate::{SavvyFn, SavvyFnType};
 
 impl SavvyFn {
     pub fn generate_inner_fn(&self) -> syn::ItemFn {

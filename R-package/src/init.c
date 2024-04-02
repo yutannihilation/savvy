@@ -112,51 +112,6 @@ SEXP set_name_external__impl(SEXP x, SEXP name) {
     return handle_result(res);
 }
 
-SEXP Person_new__impl(void) {
-    SEXP res = Person_new();
-    return handle_result(res);
-}
-
-SEXP Person_new2__impl(void) {
-    SEXP res = Person_new2();
-    return handle_result(res);
-}
-
-SEXP Person_new_fallible__impl(void) {
-    SEXP res = Person_new_fallible();
-    return handle_result(res);
-}
-
-SEXP Person_another_person__impl(SEXP self__) {
-    SEXP res = Person_another_person(self__);
-    return handle_result(res);
-}
-
-SEXP Person_new_with_name__impl(SEXP name) {
-    SEXP res = Person_new_with_name(name);
-    return handle_result(res);
-}
-
-SEXP Person_set_name__impl(SEXP self__, SEXP name) {
-    SEXP res = Person_set_name(self__, name);
-    return handle_result(res);
-}
-
-SEXP Person_name__impl(SEXP self__) {
-    SEXP res = Person_name(self__);
-    return handle_result(res);
-}
-
-SEXP Person_associated_function__impl(void) {
-    SEXP res = Person_associated_function();
-    return handle_result(res);
-}
-
-SEXP Person2_name__impl(SEXP self__) {
-    SEXP res = Person2_name(self__);
-    return handle_result(res);
-}
-
 SEXP get_class_int__impl(SEXP x) {
     SEXP res = get_class_int(x);
     return handle_result(res);
@@ -382,36 +337,6 @@ SEXP new_value_pair__impl(SEXP a, SEXP b) {
     return handle_result(res);
 }
 
-SEXP Value_new__impl(SEXP x) {
-    SEXP res = Value_new(x);
-    return handle_result(res);
-}
-
-SEXP Value_pair__impl(SEXP self__, SEXP b) {
-    SEXP res = Value_pair(self__, b);
-    return handle_result(res);
-}
-
-SEXP Value_get__impl(SEXP self__) {
-    SEXP res = Value_get(self__);
-    return handle_result(res);
-}
-
-SEXP ValuePair_new__impl(SEXP a, SEXP b) {
-    SEXP res = ValuePair_new(a, b);
-    return handle_result(res);
-}
-
-SEXP ValuePair_new_copy__impl(SEXP a, SEXP b) {
-    SEXP res = ValuePair_new_copy(a, b);
-    return handle_result(res);
-}
-
-SEXP ValuePair_print__impl(SEXP self__) {
-    SEXP res = ValuePair_print(self__);
-    return handle_result(res);
-}
-
 SEXP filter_integer_odd__impl(SEXP x) {
     SEXP res = filter_integer_odd(x);
     return handle_result(res);
@@ -442,9 +367,88 @@ SEXP fun_mod1__impl(void) {
     return handle_result(res);
 }
 
-
 SEXP fun_mod1_1_foo__impl(void) {
     SEXP res = fun_mod1_1_foo();
+    return handle_result(res);
+}
+
+SEXP Person_new__impl(void) {
+    SEXP res = Person_new();
+    return handle_result(res);
+}
+
+SEXP Person_new2__impl(void) {
+    SEXP res = Person_new2();
+    return handle_result(res);
+}
+
+SEXP Person_new_fallible__impl(void) {
+    SEXP res = Person_new_fallible();
+    return handle_result(res);
+}
+
+SEXP Person_another_person__impl(SEXP self__) {
+    SEXP res = Person_another_person(self__);
+    return handle_result(res);
+}
+
+SEXP Person_new_with_name__impl(SEXP name) {
+    SEXP res = Person_new_with_name(name);
+    return handle_result(res);
+}
+
+SEXP Person_set_name__impl(SEXP self__, SEXP name) {
+    SEXP res = Person_set_name(self__, name);
+    return handle_result(res);
+}
+
+SEXP Person_name__impl(SEXP self__) {
+    SEXP res = Person_name(self__);
+    return handle_result(res);
+}
+
+SEXP Person_associated_function__impl(void) {
+    SEXP res = Person_associated_function();
+    return handle_result(res);
+}
+
+SEXP Person2_name__impl(SEXP self__) {
+    SEXP res = Person2_name(self__);
+    return handle_result(res);
+}
+
+SEXP Value_new__impl(SEXP x) {
+    SEXP res = Value_new(x);
+    return handle_result(res);
+}
+
+SEXP Value_pair__impl(SEXP self__, SEXP b) {
+    SEXP res = Value_pair(self__, b);
+    return handle_result(res);
+}
+
+SEXP Value_get__impl(SEXP self__) {
+    SEXP res = Value_get(self__);
+    return handle_result(res);
+}
+
+SEXP Value_get2__impl(SEXP self__) {
+    SEXP res = Value_get2(self__);
+    return handle_result(res);
+}
+
+SEXP ValuePair_new__impl(SEXP a, SEXP b) {
+    SEXP res = ValuePair_new(a, b);
+    return handle_result(res);
+}
+
+SEXP ValuePair_new_copy__impl(SEXP a, SEXP b) {
+    SEXP res = ValuePair_new_copy(a, b);
+    return handle_result(res);
+}
+
+SEXP ValuePair_print__impl(SEXP self__) {
+    SEXP res = ValuePair_print(self__);
     return handle_result(res);
 }
 
@@ -466,15 +470,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"external_person_new__impl", (DL_FUNC) &external_person_new__impl, 0},
     {"get_name_external__impl", (DL_FUNC) &get_name_external__impl, 1},
     {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
-    {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
-    {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
-    {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
-    {"Person_another_person__impl", (DL_FUNC) &Person_another_person__impl, 1},
-    {"Person_new_with_name__impl", (DL_FUNC) &Person_new_with_name__impl, 1},
-    {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
-    {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
-    {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
-    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
     {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
     {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
     {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
@@ -520,20 +515,29 @@ static const R_CallMethodDef CallEntries[] = {
     {"first_complex__impl", (DL_FUNC) &first_complex__impl, 1},
     {"abs_complex__impl", (DL_FUNC) &abs_complex__impl, 1},
     {"new_value_pair__impl", (DL_FUNC) &new_value_pair__impl, 2},
-    {"Value_new__impl", (DL_FUNC) &Value_new__impl, 1},
-    {"Value_pair__impl", (DL_FUNC) &Value_pair__impl, 2},
-    {"Value_get__impl", (DL_FUNC) &Value_get__impl, 1},
-    {"ValuePair_new__impl", (DL_FUNC) &ValuePair_new__impl, 2},
-    {"ValuePair_new_copy__impl", (DL_FUNC) &ValuePair_new_copy__impl, 2},
-    {"ValuePair_print__impl", (DL_FUNC) &ValuePair_print__impl, 1},
     {"filter_integer_odd__impl", (DL_FUNC) &filter_integer_odd__impl, 1},
     {"filter_real_negative__impl", (DL_FUNC) &filter_real_negative__impl, 1},
     {"filter_complex_without_im__impl", (DL_FUNC) &filter_complex_without_im__impl, 1},
     {"filter_logical_duplicates__impl", (DL_FUNC) &filter_logical_duplicates__impl, 1},
     {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
     {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
-
     {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
+    {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
+    {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
+    {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
+    {"Person_another_person__impl", (DL_FUNC) &Person_another_person__impl, 1},
+    {"Person_new_with_name__impl", (DL_FUNC) &Person_new_with_name__impl, 1},
+    {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
+    {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
+    {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
+    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
+    {"Value_new__impl", (DL_FUNC) &Value_new__impl, 1},
+    {"Value_pair__impl", (DL_FUNC) &Value_pair__impl, 2},
+    {"Value_get__impl", (DL_FUNC) &Value_get__impl, 1},
+    {"Value_get2__impl", (DL_FUNC) &Value_get2__impl, 1},
+    {"ValuePair_new__impl", (DL_FUNC) &ValuePair_new__impl, 2},
+    {"ValuePair_new_copy__impl", (DL_FUNC) &ValuePair_new_copy__impl, 2},
+    {"ValuePair_print__impl", (DL_FUNC) &ValuePair_print__impl, 1},
     {NULL, NULL, 0}
 };
 
