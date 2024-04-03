@@ -1,5 +1,7 @@
 use savvy::{r_println, savvy};
 
+/// A Or B.
+///
 /// @export
 #[savvy]
 #[derive(Debug)]

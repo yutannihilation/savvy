@@ -417,7 +417,9 @@ fun_mod1_1_foo <- function() {
 }
 
 
-
+#' A Or B.
+#'
+#' @export
 Foo <- new.env(parent = emptyenv())
 Foo$A <- .savvy_wrap_Foo(0L)
 Foo$B <- .savvy_wrap_Foo(1L)
@@ -443,6 +445,7 @@ Foo$B <- .savvy_wrap_Foo(1L)
 #'
 #' @export
 Person <- new.env(parent = emptyenv())
+
 Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
 }
@@ -462,7 +465,6 @@ Person$new_with_name <- function(name) {
 Person$associated_function <- function() {
 .Call(Person_associated_function__impl)
 }
-
 
 
 Person_another_person <- function(self) {
@@ -520,10 +522,10 @@ Person2_name <- function(self) {
 
 
 Value <- new.env(parent = emptyenv())
+
 Value$new <- function(x) {
   .savvy_wrap_Value(.Call(Value_new__impl, x))
 }
-
 
 
 Value_pair <- function(self) {
@@ -558,6 +560,7 @@ Value_get2 <- function(self) {
 
 
 ValuePair <- new.env(parent = emptyenv())
+
 ValuePair$new <- function(a, b) {
   a <- .savvy_extract_ptr(a, "Value")
   b <- .savvy_extract_ptr(b, "Value")
@@ -569,7 +572,6 @@ ValuePair$new_copy <- function(a, b) {
   b <- .savvy_extract_ptr(b, "Value")
   .savvy_wrap_ValuePair(.Call(ValuePair_new_copy__impl, a, b))
 }
-
 
 
 ValuePair_print <- function(self) {
