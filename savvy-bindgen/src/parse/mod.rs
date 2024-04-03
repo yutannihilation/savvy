@@ -97,7 +97,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
                     impl_map.insert(
                         key,
                         SavvyMergedImpl {
-                            docs: Vec::new(),
+                            docs: e.docs.clone(),
                             ty: e.ty.clone(),
                             fns: Vec::new(),
                         },
