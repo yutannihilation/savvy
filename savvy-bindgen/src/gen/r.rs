@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use quote::format_ident;
 
 use crate::parse::SavvyMergedImpl;
@@ -42,7 +44,7 @@ impl SavvyFn {
         out
     }
 
-    fn to_r_function(&self, enum_types: &[String]) -> String {
+    fn to_r_function(&self) -> String {
         let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_outer();
 
@@ -60,7 +62,7 @@ impl SavvyFn {
         let args = args.join(", ");
         let args_call = args_call.join(", ");
 
-        let mut body_lines = self.get_extractions(enum_types);
+        let mut body_lines = self.get_extractions();
 
         // If the result is NULL, wrap it with invisible
         let fn_call = match &self.return_type {
@@ -71,11 +73,7 @@ impl SavvyFn {
             SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
                 ty_str, ..
             }) => {
-                if enum_types.contains(ty_str) {
-                    format!(r#"  structure(.Call({args_call}), class = c("{ty_str}", "integer"))"#)
-                } else {
-                    format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
-                }
+                format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
             }
         };
         body_lines.push(fn_call);
@@ -91,7 +89,7 @@ impl SavvyFn {
         )
     }
 
-    fn get_extractions(&self, enum_types: &[String]) -> Vec<String> {
+    fn get_extractions(&self) -> Vec<String> {
         self.args
             .iter()
             .flat_map(|arg| {
@@ -101,24 +99,19 @@ impl SavvyFn {
 
                 let r_var = arg.pat_string();
                 let r_class = arg.ty_string();
-                if enum_types.contains(&arg.ty_string()) {
-                    Some(format!(r#"  .savvy_verify_enum({r_var}, "{r_class}")"#))
-                } else {
-                    Some(format!(
-                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
-                    ))
-                }
+                Some(format!(
+                    r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
+                ))
             })
             .collect::<Vec<String>>()
     }
 }
 
-fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, enum_types: &[String]) -> String {
-    // TODO: ignore all impls related to enum
-    if enum_types.contains(&ty.to_string()) {
-        return "".to_string();
-    }
-
+fn generate_r_impl_for_impl(
+    i: &SavvyMergedImpl,
+    ty: &str,
+    enum_types: &HashMap<String, &SavvyEnum>,
+) -> String {
     let mut associated_fns: Vec<&SavvyFn> = Vec::new();
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
     let class_r = ty;
@@ -149,7 +142,7 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, enum_types: &[String]
             args.insert(0, format!("{fn_name_c}__impl"));
             let args_call = args.join(", ");
 
-            let mut body_lines = x.get_extractions(enum_types);
+            let mut body_lines = x.get_extractions();
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -213,7 +206,7 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, enum_types: &[String]
             args.insert(0, format!("{fn_name_c}__impl"));
             let args_call = args.join(", ");
 
-            let mut body_lines = x.get_extractions(enum_types);
+            let mut body_lines = x.get_extractions();
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -243,14 +236,20 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, enum_types: &[String]
         .collect::<Vec<String>>()
         .join("\n");
 
+    let init = match enum_types.get(ty) {
+        Some(e) => generate_r_impl_for_enum(e),
+        None => format!("{class_r} <- new.env(parent = emptyenv())"),
+    };
+
     let doc_comments = get_r_doc_comment(i.docs.as_slice());
 
     format!(
-        "{doc_comments}
-{class_r} <- new.env(parent = emptyenv())
+        "{wrap_fn}
+
+{doc_comments}
+{init}
 {associated_fns}
 
-{wrap_fn}
 
 {closures}
 "
@@ -259,30 +258,29 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str, enum_types: &[String]
 
 fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
     let class_r = e.ty.to_string();
-    let doc_comments = get_r_doc_comment(e.docs.as_slice());
 
     let variants = e
         .variants
         .iter()
         .enumerate()
-        .map(|(i, v)| format!(r#"  {v} = structure({i}L, class = c("{class_r}", "integer"))"#))
+        .map(|(i, v)| format!(r#"{class_r}${v} <- .savvy_wrap_{class_r}({i}L)"#))
         .collect::<Vec<String>>()
-        .join(",\n");
+        .join("\n");
     format!(
-        "{doc_comments}
-{class_r} <- list(
+        "{class_r} <- new.env(parent = emptyenv())
 {variants}
-)"
+"
     )
 }
 
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
-    let enum_types: Vec<String> = result.enums.iter().map(|e| e.ty.to_string()).collect();
+    let enum_types: HashMap<String, &SavvyEnum> =
+        result.enums.iter().map(|e| (e.ty.to_string(), e)).collect();
 
     let r_fns = result
         .bare_fns
         .iter()
-        .map(|x| x.to_r_function(&enum_types))
+        .map(|x| x.to_r_function())
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -290,13 +288,6 @@ pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
         .impls
         .iter()
         .map(|(ty, i)| generate_r_impl_for_impl(i, ty, &enum_types))
-        .collect::<Vec<String>>()
-        .join("\n");
-
-    let r_enums = result
-        .enums
-        .iter()
-        .map(generate_r_impl_for_enum)
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -315,16 +306,8 @@ NULL
   }}
 }}
 
-.savvy_verify_enum <- function(e, class) {{
-    if(!inherits(e, class)) {{
-      msg <- paste0("Expected ", class, ", got ", class(e)[1])
-      stop(msg, call. = FALSE)
-    }}
-  }}
-
 {r_fns}
 {r_impls}
-{r_enums}
 "#
     )
 }

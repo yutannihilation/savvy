@@ -87,8 +87,25 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
             }
         }
 
-        let mut e = result.enums;
-        enums.append(&mut e);
+        for e in result.enums {
+            let key = e.ty.to_string();
+            match impl_map.get_mut(&key) {
+                Some(merged) => {
+                    merged.docs = e.docs.clone();
+                }
+                None => {
+                    impl_map.insert(
+                        key,
+                        SavvyMergedImpl {
+                            docs: Vec::new(),
+                            ty: e.ty.clone(),
+                            fns: Vec::new(),
+                        },
+                    );
+                }
+            }
+            enums.push(e);
+        }
     }
 
     let mut impls = impl_map.into_iter().collect::<Vec<_>>();
