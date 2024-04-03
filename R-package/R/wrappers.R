@@ -12,13 +12,6 @@ NULL
   }
 }
 
-.savvy_verify_enum <- function(e, class) {
-    if(!inherits(e, class)) {
-      msg <- paste0("Expected ", class, ", got ", class(e)[1])
-      stop(msg, call. = FALSE)
-    }
-  }
-
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.
@@ -395,13 +388,13 @@ filter_string_ascii <- function(x) {
 
 
 foo <- function(x) {
-  .savvy_verify_enum(x, "Foo")
+  x <- .savvy_extract_ptr(x, "Foo")
   invisible(.Call(foo__impl, x))
 }
 
 
 foo_a <- function() {
-  structure(.Call(foo_a__impl), class = c("Foo", "integer"))
+  .savvy_wrap_Foo(.Call(foo_a__impl))
 }
 
 
@@ -413,6 +406,38 @@ fun_mod1 <- function() {
 fun_mod1_1_foo <- function() {
   invisible(.Call(fun_mod1_1_foo__impl))
 }
+
+.savvy_wrap_Foo <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  
+  
+  class(e) <- "Foo"
+  e
+}
+
+
+
+Foo <- new.env(parent = emptyenv())
+Foo$A <- .savvy_wrap_Foo(0L)
+Foo$B <- .savvy_wrap_Foo(1L)
+
+
+
+
+
+
+.savvy_wrap_Person <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$another_person <- Person_another_person(ptr)
+  e$set_name <- Person_set_name(ptr)
+  e$name <- Person_name(ptr)
+  
+  class(e) <- "Person"
+  e
+}
+
 
 #' A person with a name
 #'
@@ -439,17 +464,6 @@ Person$associated_function <- function() {
 }
 
 
-.savvy_wrap_Person <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-    e$another_person <- Person_another_person(ptr)
-  e$set_name <- Person_set_name(ptr)
-  e$name <- Person_name(ptr)
-  
-  class(e) <- "Person"
-  e
-}
-
 
 Person_another_person <- function(self) {
   function() {
@@ -470,10 +484,6 @@ Person_name <- function(self) {
 }
 
 
-
-Person2 <- new.env(parent = emptyenv())
-
-
 .savvy_wrap_Person2 <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
@@ -484,17 +494,15 @@ Person2 <- new.env(parent = emptyenv())
 }
 
 
+
+Person2 <- new.env(parent = emptyenv())
+
+
+
 Person2_name <- function(self) {
   function() {
   .Call(Person2_name__impl, self)
   }
-}
-
-
-
-Value <- new.env(parent = emptyenv())
-Value$new <- function(x) {
-  .savvy_wrap_Value(.Call(Value_new__impl, x))
 }
 
 
@@ -508,6 +516,14 @@ Value$new <- function(x) {
   class(e) <- "Value"
   e
 }
+
+
+
+Value <- new.env(parent = emptyenv())
+Value$new <- function(x) {
+  .savvy_wrap_Value(.Call(Value_new__impl, x))
+}
+
 
 
 Value_pair <- function(self) {
@@ -530,6 +546,16 @@ Value_get2 <- function(self) {
 }
 
 
+.savvy_wrap_ValuePair <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$print <- ValuePair_print(ptr)
+  
+  class(e) <- "ValuePair"
+  e
+}
+
+
 
 ValuePair <- new.env(parent = emptyenv())
 ValuePair$new <- function(a, b) {
@@ -545,15 +571,6 @@ ValuePair$new_copy <- function(a, b) {
 }
 
 
-.savvy_wrap_ValuePair <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-    e$print <- ValuePair_print(ptr)
-  
-  class(e) <- "ValuePair"
-  e
-}
-
 
 ValuePair_print <- function(self) {
   function() {
@@ -562,8 +579,3 @@ ValuePair_print <- function(self) {
 }
 
 
-#' @export
-Foo <- list(
-  A = structure(0L, class = c("Foo", "integer")),
-  B = structure(1L, class = c("Foo", "integer"))
-)

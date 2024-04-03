@@ -382,6 +382,7 @@ SEXP fun_mod1_1_foo__impl(void) {
     return handle_result(res);
 }
 
+
 SEXP Person_new__impl(void) {
     SEXP res = Person_new();
     return handle_result(res);
@@ -534,6 +535,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"foo_a__impl", (DL_FUNC) &foo_a__impl, 0},
     {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
     {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
+
     {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
     {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
     {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},

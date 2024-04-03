@@ -69,6 +69,9 @@ SEXP foo_a(void);
 SEXP fun_mod1(void);
 SEXP fun_mod1_1_foo(void);
 
+// methods and associated functions for Foo
+
+
 // methods and associated functions for Person
 SEXP Person_new(void);
 SEXP Person_new2(void);
