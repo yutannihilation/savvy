@@ -244,12 +244,11 @@ fn generate_r_impl_for_impl(
     let doc_comments = get_r_doc_comment(i.docs.as_slice());
 
     format!(
-        "{wrap_fn}
-
-{doc_comments}
+        "{doc_comments}
 {init}
 {associated_fns}
 
+{wrap_fn}
 
 {closures}
 "
