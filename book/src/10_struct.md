@@ -2,14 +2,23 @@
 
 ## Basic usage
 
-You can use `#[savvy]` macro on `impl` for a `struct` to make it available from
-R code.
+You can use `#[savvy]` macro on a `struct` to convert it to an R object. More
+precisely, this macro adds implementations of `TryFrom` between `Sexp` and the
+struct so you can specify the type as the function input and output.
 
 ```rust
+/// @export
+#[savvy]
 struct Person {
     pub name: String,
 }
+```
 
+The most handy form is to implement methods and associated functions for the
+type. You can add `#[savvy]` before the `impl` block to make it available on R
+sessions.
+
+```rust
 #[savvy]
 impl Person {
     fn new() -> Self {
@@ -118,12 +127,13 @@ fn create_person() -> savvy::Result<Person> {
 and you can generate another type of instance from an instance.
 
 ```rust
+#[savvy]
 struct UpperPerson {
     pub name: String,
 }
 
 #[savvy]
-impl Person {}
+impl UpperPerson {}
 
 #[savvy]
 impl Person {
@@ -210,6 +220,7 @@ copying. For example, consider there's a type `HeavyData`, which contains huge
 size of data, and `HeavyDataBundle` which bundles two `HeavyData`s.
 
 ```rust
+#[savvy]
 #[derive(Clone)]
 struct HeavyData(Vec<i32>);
 
