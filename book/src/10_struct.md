@@ -133,9 +133,6 @@ struct UpperPerson {
 }
 
 #[savvy]
-impl UpperPerson {}
-
-#[savvy]
 impl Person {
     fn reborn_as_upper_person(&self) -> savvy::Result<UpperPerson> {
         let x = UpperPerson {
