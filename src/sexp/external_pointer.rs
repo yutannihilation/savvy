@@ -77,7 +77,7 @@ pub trait IntoExtPtrSexp: Sized {
 
 /// A Wrapper of R_ExternalPtrAddr() to use in savvy-bindgen
 ///
-/// ## Safety
+/// # Safety
 /// This is intended to be used only in savvy-bindgen
 pub unsafe fn get_external_pointer_addr(
     x: SEXP,
@@ -93,7 +93,7 @@ pub unsafe fn get_external_pointer_addr(
 
 /// Takes the value of the external pointer and set the pointer to null.
 ///
-/// ## Safety
+/// # Safety
 /// This is intended to be used only in savvy-bindgen
 pub unsafe fn take_external_pointer_value<T>(x: SEXP) -> crate::error::Result<T> {
     let ptr = unsafe { R_ExternalPtrAddr(x) };

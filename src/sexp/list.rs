@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::{string::str_to_charsxp, Sexp};
+use super::{utils::assert_len, utils::str_to_charsxp, Sexp};
 
 /// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
@@ -45,7 +45,7 @@ impl ListSexp {
 
     /// # Safety
     ///
-    /// The user has to assure bounds are checked.
+    /// Calling this method with an out-of-bounds index is undefined behavior.
     pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
@@ -116,7 +116,7 @@ impl OwnedListSexp {
 
     /// # Safety
     ///
-    /// The user has to assure bounds are checked.
+    /// Calling this method with an out-of-bounds index is undefined behavior.
     pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe { self.values.get_by_index_unchecked(i) }
     }
@@ -134,12 +134,7 @@ impl OwnedListSexp {
     }
 
     pub fn set_value<T: Into<Sexp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_value_unchecked(i, v.into().0) };
 
@@ -148,19 +143,14 @@ impl OwnedListSexp {
 
     /// # Safety
     ///
-    /// The user has to assure bounds are checked.
+    /// Calling this method with an out-of-bounds index is undefined behavior.
     #[inline]
     pub unsafe fn set_value_unchecked(&mut self, i: usize, v: SEXP) {
         unsafe { SET_VECTOR_ELT(self.values.inner(), i as _, v) };
     }
 
     pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_name_unchecked(i, str_to_charsxp(k)?) };
 
@@ -169,7 +159,7 @@ impl OwnedListSexp {
 
     /// # Safety
     ///
-    /// The user has to assure bounds are checked.
+    /// Calling this method with an out-of-bounds index is undefined behavior.
     #[inline]
     pub unsafe fn set_name_unchecked(&mut self, i: usize, k: SEXP) {
         if let Some(names) = self.names.as_mut() {
