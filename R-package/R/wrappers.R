@@ -387,9 +387,15 @@ filter_string_ascii <- function(x) {
 }
 
 
-foo <- function(x) {
+print_foo_enum <- function(x) {
   x <- .savvy_extract_ptr(x, "FooEnum")
-  invisible(.Call(foo__impl, x))
+  invisible(.Call(print_foo_enum__impl, x))
+}
+
+
+print_foo_enum_ref <- function(x) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  invisible(.Call(print_foo_enum_ref__impl, x))
 }
 
 

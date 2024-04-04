@@ -19,7 +19,12 @@ impl FooEnum {
 }
 
 #[savvy]
-fn foo(x: FooEnum) -> savvy::Result<()> {
+fn print_foo_enum(x: FooEnum) -> savvy::Result<()> {
+    x.print()
+}
+
+#[savvy]
+fn print_foo_enum_ref(x: &FooEnum) -> savvy::Result<()> {
     x.print()
 }
 

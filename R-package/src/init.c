@@ -362,8 +362,13 @@ SEXP filter_string_ascii__impl(SEXP x) {
     return handle_result(res);
 }
 
-SEXP foo__impl(SEXP x) {
-    SEXP res = foo(x);
+SEXP print_foo_enum__impl(SEXP x) {
+    SEXP res = print_foo_enum(x);
+    return handle_result(res);
+}
+
+SEXP print_foo_enum_ref__impl(SEXP x) {
+    SEXP res = print_foo_enum_ref(x);
     return handle_result(res);
 }
 
@@ -535,7 +540,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"filter_complex_without_im__impl", (DL_FUNC) &filter_complex_without_im__impl, 1},
     {"filter_logical_duplicates__impl", (DL_FUNC) &filter_logical_duplicates__impl, 1},
     {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
-    {"foo__impl", (DL_FUNC) &foo__impl, 1},
+    {"print_foo_enum__impl", (DL_FUNC) &print_foo_enum__impl, 1},
+    {"print_foo_enum_ref__impl", (DL_FUNC) &print_foo_enum_ref__impl, 1},
     {"foo_a__impl", (DL_FUNC) &foo_a__impl, 0},
     {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
     {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
