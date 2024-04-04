@@ -40,13 +40,15 @@ impl SavvyImpl {
                 syn::ImplItem::Fn(impl_item_fn) => {
                     let ty = self_ty.clone();
                     let fn_type = match impl_item_fn.sig.inputs.first() {
-                        Some(syn::FnArg::Receiver(syn::Receiver { reference, .. })) => {
-                            if reference.is_some() {
-                                SavvyFnType::Method(ty)
-                            } else {
-                                SavvyFnType::ConsumingMethod(ty)
-                            }
-                        }
+                        Some(syn::FnArg::Receiver(syn::Receiver {
+                            reference,
+                            mutability,
+                            ..
+                        })) => SavvyFnType::Method {
+                            ty,
+                            reference: reference.is_some(),
+                            mutability: mutability.is_some(),
+                        },
                         _ => SavvyFnType::AssociatedFunction(ty),
                     };
 
@@ -117,10 +119,10 @@ mod tests {
         assert!(matches!(parsed.fns[0].fn_type, AssociatedFunction(_)));
 
         assert_eq!(parsed.fns[1].fn_name.to_string().as_str(), "set_name");
-        assert!(matches!(parsed.fns[1].fn_type, Method(_)));
+        assert!(matches!(parsed.fns[1].fn_type, Method { .. }));
 
         assert_eq!(parsed.fns[2].fn_name.to_string().as_str(), "name");
-        assert!(matches!(parsed.fns[2].fn_type, Method(_)));
+        assert!(matches!(parsed.fns[2].fn_type, Method { .. }));
 
         assert_eq!(parsed.fns[3].fn_name.to_string().as_str(), "do_nothing");
         assert!(matches!(parsed.fns[3].fn_type, AssociatedFunction(_)));

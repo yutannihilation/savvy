@@ -64,8 +64,14 @@ SEXP filter_real_negative(SEXP x);
 SEXP filter_complex_without_im(SEXP x);
 SEXP filter_logical_duplicates(SEXP x);
 SEXP filter_string_ascii(SEXP x);
+SEXP print_foo_enum(SEXP x);
+SEXP print_foo_enum_ref(SEXP x);
+SEXP foo_a(void);
 SEXP fun_mod1(void);
 SEXP fun_mod1_1_foo(void);
+
+// methods and associated functions for FooEnum
+SEXP FooEnum_print(SEXP self__);
 
 // methods and associated functions for Person
 SEXP Person_new(void);

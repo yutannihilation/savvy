@@ -1,39 +1,33 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-use savvy_bindgen::{SavvyFn, SavvyImpl, SavvyStruct};
+use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
-    if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
-        match savvy_fn(&item_fn) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
-    }
+    let result = if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
+        savvy_fn(&item_fn)
+    } else if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
+        savvy_struct(&item_struct)
+    } else if let Ok(item_impl) = syn::parse::<syn::ItemImpl>(input.clone()) {
+        savvy_impl(&item_impl)
+    } else if let Ok(item_enum) = syn::parse::<syn::ItemEnum>(input.clone()) {
+        savvy_enum(&item_enum)
+    } else {
+        let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
+        return proc_macro::TokenStream::from(
+            syn::Error::new(
+                parse_result.unwrap_err().span(),
+                "#[savvy] macro only accepts `fn`, `struct`, or `impl`",
+            )
+            .into_compile_error(),
+        );
+    };
 
-    if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
-        match savvy_struct(&item_struct) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
+    match result {
+        Ok(token_stream) => token_stream,
+        Err(e) => e.into_compile_error().into(),
     }
-
-    let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
-    if let Ok(item_impl) = parse_result {
-        match savvy_impl(&item_impl) {
-            Ok(result) => return result,
-            Err(e) => return e.into_compile_error().into(),
-        }
-    }
-
-    proc_macro::TokenStream::from(
-        syn::Error::new(
-            parse_result.unwrap_err().span(),
-            "#[savvy] macro only accepts `fn`, `struct`, or `impl`",
-        )
-        .into_compile_error(),
-    )
 }
 
 fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
@@ -67,11 +61,24 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
 
 fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
     let savvy_struct = SavvyStruct::new(item_struct)?;
-    let orig = savvy_struct.orig.clone();
+    let orig = &savvy_struct.orig;
     let try_from_impls = savvy_struct.generate_try_from_impls();
 
     Ok(quote!(
         #orig
+
+        #(#try_from_impls)*
+    )
+    .into())
+}
+
+fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
+    let savvy_enum = SavvyEnum::new(item_enum)?;
+    let enum_with_discriminant = savvy_enum.generate_enum_with_discriminant();
+    let try_from_impls = savvy_enum.generate_try_from_impls();
+
+    Ok(quote!(
+        #enum_with_discriminant
 
         #(#try_from_impls)*
     )
@@ -268,8 +275,10 @@ mod tests {
                 pub unsafe extern "C" fn Person_new() -> savvy::ffi::SEXP {
                     match savvy_Person_new_inner() {
                         Ok(result) => {
-                            use savvy::IntoExtPtrSexp;
-                            result.into_external_pointer().0
+                            match <savvy::Sexp>::try_from(result) {
+                                Ok(sexp) => sexp.0,
+                                Err(e) => savvy::handle_error(e),
+                            }
                         },
                         Err(e) => savvy::handle_error(e),
                     }
@@ -287,8 +296,10 @@ mod tests {
                 pub unsafe extern "C" fn Person_new2() -> savvy::ffi::SEXP {
                     match savvy_Person_new2_inner() {
                         Ok(result) => {
-                            use savvy::IntoExtPtrSexp;
-                            result.into_external_pointer().0
+                            match <savvy::Sexp>::try_from(result) {
+                                Ok(sexp) => sexp.0,
+                                Err(e) => savvy::handle_error(e),
+                            }
                         },
                         Err(e) => savvy::handle_error(e),
                     }

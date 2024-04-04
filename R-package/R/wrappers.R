@@ -387,6 +387,23 @@ filter_string_ascii <- function(x) {
 }
 
 
+print_foo_enum <- function(x) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  invisible(.Call(print_foo_enum__impl, x))
+}
+
+
+print_foo_enum_ref <- function(x) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  invisible(.Call(print_foo_enum_ref__impl, x))
+}
+
+
+foo_a <- function() {
+  .savvy_wrap_FooEnum(.Call(foo_a__impl))
+}
+
+
 fun_mod1 <- function() {
   invisible(.Call(fun_mod1__impl))
 }
@@ -396,10 +413,75 @@ fun_mod1_1_foo <- function() {
   invisible(.Call(fun_mod1_1_foo__impl))
 }
 
+### wrapper functions for FooEnum
+
+FooEnum_print <- function(self) {
+  function() {
+  invisible(.Call(FooEnum_print__impl, self))
+  }
+}
+
+.savvy_wrap_FooEnum <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$print <- FooEnum_print(ptr)
+  
+  class(e) <- "FooEnum"
+  e
+}
+
+
+#' A Or B.
+#'
+#' @export
+FooEnum <- new.env(parent = emptyenv())
+FooEnum$A <- .savvy_wrap_FooEnum(0L)
+FooEnum$B <- .savvy_wrap_FooEnum(1L)
+
+
+### associated functions for FooEnum
+
+
+
+### wrapper functions for Person
+
+Person_another_person <- function(self) {
+  function() {
+    .savvy_wrap_Person2(.Call(Person_another_person__impl, self))
+  }
+}
+
+Person_set_name <- function(self) {
+  function(name) {
+  invisible(.Call(Person_set_name__impl, self, name))
+  }
+}
+
+Person_name <- function(self) {
+  function() {
+  .Call(Person_name__impl, self)
+  }
+}
+
+.savvy_wrap_Person <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$another_person <- Person_another_person(ptr)
+  e$set_name <- Person_set_name(ptr)
+  e$name <- Person_name(ptr)
+  
+  class(e) <- "Person"
+  e
+}
+
+
 #' A person with a name
 #'
 #' @export
 Person <- new.env(parent = emptyenv())
+
+### associated functions for Person
+
 Person$new <- function() {
   .savvy_wrap_Person(.Call(Person_new__impl))
 }
@@ -421,50 +503,7 @@ Person$associated_function <- function() {
 }
 
 
-.savvy_wrap_Person <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$another_person <- Person_another_person(ptr)
-  e$set_name <- Person_set_name(ptr)
-  e$name <- Person_name(ptr)
-
-  class(e) <- "Person"
-  e
-}
-
-
-Person_another_person <- function(self) {
-  function() {
-    .savvy_wrap_Person2(.Call(Person_another_person__impl, self))
-  }
-}
-
-Person_set_name <- function(self) {
-  function(name) {
-  invisible(.Call(Person_set_name__impl, self, name))
-  }
-}
-
-Person_name <- function(self) {
-  function() {
-  .Call(Person_name__impl, self)
-  }
-}
-
-
-
-Person2 <- new.env(parent = emptyenv())
-
-
-.savvy_wrap_Person2 <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$name <- Person2_name(ptr)
-
-  class(e) <- "Person2"
-  e
-}
-
+### wrapper functions for Person2
 
 Person2_name <- function(self) {
   function() {
@@ -472,25 +511,24 @@ Person2_name <- function(self) {
   }
 }
 
-
-
-Value <- new.env(parent = emptyenv())
-Value$new <- function(x) {
-  .savvy_wrap_Value(.Call(Value_new__impl, x))
-}
-
-
-.savvy_wrap_Value <- function(ptr) {
+.savvy_wrap_Person2 <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$pair <- Value_pair(ptr)
-  e$get <- Value_get(ptr)
-  e$get2 <- Value_get2(ptr)
-
-  class(e) <- "Value"
+    e$name <- Person2_name(ptr)
+  
+  class(e) <- "Person2"
   e
 }
 
+
+
+Person2 <- new.env(parent = emptyenv())
+
+### associated functions for Person2
+
+
+
+### wrapper functions for Value
 
 Value_pair <- function(self) {
   function(b) {
@@ -511,9 +549,51 @@ Value_get2 <- function(self) {
   }
 }
 
+.savvy_wrap_Value <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$pair <- Value_pair(ptr)
+  e$get <- Value_get(ptr)
+  e$get2 <- Value_get2(ptr)
+  
+  class(e) <- "Value"
+  e
+}
+
+
+
+Value <- new.env(parent = emptyenv())
+
+### associated functions for Value
+
+Value$new <- function(x) {
+  .savvy_wrap_Value(.Call(Value_new__impl, x))
+}
+
+
+### wrapper functions for ValuePair
+
+ValuePair_print <- function(self) {
+  function() {
+  invisible(.Call(ValuePair_print__impl, self))
+  }
+}
+
+.savvy_wrap_ValuePair <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$print <- ValuePair_print(ptr)
+  
+  class(e) <- "ValuePair"
+  e
+}
+
 
 
 ValuePair <- new.env(parent = emptyenv())
+
+### associated functions for ValuePair
+
 ValuePair$new <- function(a, b) {
   a <- .savvy_extract_ptr(a, "Value")
   b <- .savvy_extract_ptr(b, "Value")
@@ -524,23 +604,6 @@ ValuePair$new_copy <- function(a, b) {
   a <- .savvy_extract_ptr(a, "Value")
   b <- .savvy_extract_ptr(b, "Value")
   .savvy_wrap_ValuePair(.Call(ValuePair_new_copy__impl, a, b))
-}
-
-
-.savvy_wrap_ValuePair <- function(ptr) {
-  e <- new.env(parent = emptyenv())
-  e$.ptr <- ptr
-  e$print <- ValuePair_print(ptr)
-
-  class(e) <- "ValuePair"
-  e
-}
-
-
-ValuePair_print <- function(self) {
-  function() {
-  invisible(.Call(ValuePair_print__impl, self))
-  }
 }
 
 

@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use quote::format_ident;
 
 use crate::parse::SavvyMergedImpl;
-use crate::{MergedResult, SavvyFn, SavvyFnType};
+use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnType};
 
 use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 
@@ -32,11 +34,8 @@ impl SavvyFn {
         let mut out: Vec<_> = self.args.iter().map(|arg| arg.pat_string()).collect();
 
         // if it's a method, add `self__` arg
-        match &self.fn_type {
-            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
-                out.insert(0, "self".to_string())
-            }
-            _ => {}
+        if matches!(&self.fn_type, SavvyFnType::Method { .. }) {
+            out.insert(0, "self".to_string())
         }
 
         out
@@ -91,21 +90,25 @@ impl SavvyFn {
         self.args
             .iter()
             .flat_map(|arg| {
-                if arg.is_user_defined_type() {
-                    let r_var = arg.pat_string();
-                    let r_class = arg.ty_string();
-                    Some(format!(
-                        r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#,
-                    ))
-                } else {
-                    None
+                if !arg.is_user_defined_type() {
+                    return None;
                 }
+
+                let r_var = arg.pat_string();
+                let r_class = arg.ty_string();
+                Some(format!(
+                    r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
+                ))
             })
             .collect::<Vec<String>>()
     }
 }
 
-fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
+fn generate_r_impl_for_impl(
+    i: &SavvyMergedImpl,
+    ty: &str,
+    enum_types: &HashMap<String, &SavvyEnum>,
+) -> String {
     let mut associated_fns: Vec<&SavvyFn> = Vec::new();
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
     let class_r = ty;
@@ -113,7 +116,7 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
     for savvy_fn in &i.fns {
         match savvy_fn.fn_type {
             SavvyFnType::AssociatedFunction(_) => associated_fns.push(savvy_fn),
-            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => method_fns.push(savvy_fn),
+            SavvyFnType::Method { .. } => method_fns.push(savvy_fn),
             SavvyFnType::BareFunction => panic!("Something is wrong"),
         }
     }
@@ -179,8 +182,8 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
         r#"{wrap_fn_name} <- function(ptr) {{
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-{methods}
-
+  {methods}
+  
   class(e) <- "{class_r}"
   e
 }}
@@ -230,21 +233,50 @@ fn generate_r_impl_for_impl(i: &SavvyMergedImpl, ty: &str) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
+    let init = match enum_types.get(ty) {
+        Some(e) => generate_r_impl_for_enum(e),
+        None => format!("{class_r} <- new.env(parent = emptyenv())"),
+    };
+
     let doc_comments = get_r_doc_comment(i.docs.as_slice());
 
     format!(
-        "{doc_comments}
-{class_r} <- new.env(parent = emptyenv())
-{associated_fns}
-
-{wrap_fn}
+        "### wrapper functions for {class_r}
 
 {closures}
+{wrap_fn}
+
+{doc_comments}
+{init}
+
+### associated functions for {class_r}
+
+{associated_fns}
+"
+    )
+}
+
+fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
+    let class_r = e.ty.to_string();
+
+    let variants = e
+        .variants
+        .iter()
+        .enumerate()
+        .map(|(i, v)| format!(r#"{class_r}${v} <- .savvy_wrap_{class_r}({i}L)"#))
+        .collect::<Vec<String>>()
+        .join("\n");
+    format!(
+        "{class_r} <- new.env(parent = emptyenv())
+{variants}
 "
     )
 }
 
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
+    let enum_types: HashMap<String, &SavvyEnum> =
+        result.enums.iter().map(|e| (e.ty.to_string(), e)).collect();
+
     let r_fns = result
         .bare_fns
         .iter()
@@ -255,7 +287,7 @@ pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
     let r_impls = result
         .impls
         .iter()
-        .map(|(ty, i)| generate_r_impl_for_impl(i, ty))
+        .map(|(ty, i)| generate_r_impl_for_impl(i, ty, &enum_types))
         .collect::<Vec<String>>()
         .join("\n");
 

@@ -24,6 +24,9 @@ pub use consuming_type::*;
 mod try_from_iter;
 pub use try_from_iter::*;
 
+mod enum_support;
+pub use enum_support::*;
+
 // to test if the definition over multiple files is accepted.
 // cf. https://github.com/yutannihilation/savvy/issues/118
 mod separate_impl_definition;

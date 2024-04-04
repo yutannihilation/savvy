@@ -28,4 +28,11 @@ fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
     Ok(())
 }
 
+// only fieldless enums is supported
+#[savvy]
+enum Foo {
+    A(i32),
+    B(&str),
+}
+
 fn main() {}

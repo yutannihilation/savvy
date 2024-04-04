@@ -35,3 +35,9 @@ error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
    |
 27 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
    |                               ^^^^^^^^^^^^^^^
+
+error: savvy only supports a fieldless enum
+  --> tests/cases/simple_cases.rs:34:5
+   |
+34 |     A(i32),
+   |     ^^^^^^
