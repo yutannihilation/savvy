@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::Sexp;
+use super::{string::str_to_charsxp, Sexp};
 
 /// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
@@ -32,7 +32,7 @@ impl ListSexp {
 
     pub fn get(&self, k: &str) -> Option<Sexp> {
         let index = self.names_iter().position(|e| e == k);
-        Some(self.get_by_index_unchecked(index?))
+        Some(unsafe { self.get_by_index_unchecked(index?) })
     }
 
     pub fn get_by_index(&self, i: usize) -> Option<Sexp> {
@@ -40,10 +40,11 @@ impl ListSexp {
             return None;
         }
 
-        Some(self.get_by_index_unchecked(i))
+        Some(unsafe { self.get_by_index_unchecked(i) })
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> Sexp {
+    // Safety: the user has to assure bounds are checked.
+    pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
             Sexp(e)
@@ -111,8 +112,9 @@ impl OwnedListSexp {
         self.values.get_by_index(i)
     }
 
-    pub fn get_by_index_unchecked(&self, i: usize) -> Sexp {
-        self.values.get_by_index_unchecked(i)
+    // Safety: the user has to assure bounds are checked.
+    pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
+        unsafe { self.values.get_by_index_unchecked(i) }
     }
 
     pub fn values_iter(&self) -> ListSexpValueIter {
@@ -135,23 +137,36 @@ impl OwnedListSexp {
             )));
         }
 
-        let v: Sexp = v.into();
-
-        unsafe {
-            SET_VECTOR_ELT(self.values.inner(), i as _, v.0);
-        }
+        unsafe { self.set_value_unchecked(i, v.into().0) };
 
         Ok(())
     }
 
-    pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
-        // OwnedStringSexp::set_elt() checks the length, so don't check here.
+    // Safety: the user has to assure bounds are checked.
+    #[inline]
+    pub unsafe fn set_value_unchecked(&mut self, i: usize, v: SEXP) {
+        unsafe { SET_VECTOR_ELT(self.values.inner(), i as _, v) };
+    }
 
-        if let Some(names) = self.names.as_mut() {
-            names.set_elt(i, k)?;
+    pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
+        if i >= self.len {
+            return Err(crate::error::Error::new(&format!(
+                "index out of bounds: the length is {} but the index is {}",
+                self.len, i
+            )));
         }
 
+        unsafe { self.set_name_unchecked(i, str_to_charsxp(k)?) };
+
         Ok(())
+    }
+
+    // Safety: the user has to assure bounds are checked.
+    #[inline]
+    pub unsafe fn set_name_unchecked(&mut self, i: usize, k: SEXP) {
+        if let Some(names) = self.names.as_mut() {
+            unsafe { names.set_elt_unchecked(i, k) };
+        }
     }
 
     pub fn set_name_and_value<T: Into<Sexp>>(
@@ -161,7 +176,8 @@ impl OwnedListSexp {
         v: T,
     ) -> crate::error::Result<()> {
         self.set_name(i, k)?;
-        self.set_value(i, v)?;
+        // cast unchecked function since set_name already does bounds check.
+        unsafe { self.set_value_unchecked(i, v.into().0) };
         Ok(())
     }
 
@@ -279,7 +295,7 @@ impl<'a> Iterator for ListSexpValueIter<'a> {
             return None;
         }
 
-        Some(self.sexp.get_by_index_unchecked(i))
+        Some(unsafe { self.sexp.get_by_index_unchecked(i) })
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
