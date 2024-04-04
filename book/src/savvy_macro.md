@@ -61,7 +61,7 @@ If you mark a funtion with `#[savvy]` macro, the corresponding implementations a
 
 For example, the above implementation generates the following codes.
 
-Rust functions:
+### Rust functions
 
 ```rust
 #[allow(clippy::missing_safety_doc)]
@@ -82,7 +82,7 @@ unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp>
 }
 ```
 
-C function signature:
+### C function signature:
 
 ```c
 SEXP add_suffix(SEXP x, SEXP y);
@@ -97,7 +97,7 @@ SEXP add_suffix__impl(SEXP x, SEXP y) {
 }
 ```
 
-R implementation:
+### R implementation
 
 ```r
 # Add Suffix
@@ -110,3 +110,16 @@ add_suffix <- function(x, y) {
 
 (`#[savvy]` macro can also be used on `struct` and `enum`, but let's focus on
 function's case for now for simplicity.)
+
+## Using `#[savvy]` on other files than `lib.rs`
+
+You can use `#[savvy]` macro just the same as `lib.rs`. One thing you have to do
+is that you need to export the objects by `*`. This is because `#[savvy]`
+defines additional functions other than the original ones, and some of these
+also need to be exported. Since you don't know the names of such auto-generated
+functions, `*` is the solution.
+
+```rust
+mod foo;
+pub use foo::*;
+```

@@ -1,6 +1,6 @@
 # Enum
 
-Savvy supports **fieldless enum** to express the possible options for the
+Savvy supports **fieldless enum** to express the possible options for a
 parameter. For example, if you define such an enum with `#[savvy]`,
 
 ```rust

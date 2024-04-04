@@ -5,27 +5,75 @@
 
 ### Breaking change
 
-To support enum properly (the details follow), now savvy requires to put
-`#[savvy]` macro also on `struct`.
+* To support enum properly (the details follow), now savvy requires to put
+  `#[savvy]` macro also on `struct`.
 
-```rust
-#[savvy]   // NEW
-struct Person {
-    pub name: String,
-}
+  ```rust
+  #[savvy]   // NEW!
+  struct Person {
+      pub name: String,
+  }
+  
+  #[savvy]
+  impl Person {
+  ```
 
-#[savvy]
-impl Person {
-```
+  This might be a bit inconvenient on the one hand, but, on the other hand,
+  several good things are introduced by this change! See the New Features
+  section.
 
 ### New features
 
-* Now `#[savvy]` macro supports enum in addition to struct. Enum is translated
-  like struct, but there are a few differences and limitations.
-    * An enum variant can be accessed via `<enum>$<variant>` on an R session.
-    * The enum type can be used in the form of `T` or `&T`, but not `&mut T`, as
-      a function argument.
-    * Only fieldless enum is supported.
+* Now `#[savvy]` macro supports enum to express the possible options for a
+  parameter. This is useful when you want to let users specify some option
+  without fear of typo. See [the guide](https://yutannihilation.github.io/savvy/guide/enum.html) for more details.
+
+  Example:
+
+  ```rust
+  /// @export
+  #[savvy]
+  enum LineType {
+      Solid,
+      Dashed,
+      Dotted,
+  }
+
+  /// @export
+  #[savvy]
+  fn plot_line(x: IntegerSexp, y: IntegerSexp, line_type: &LineType) -> savvy::Result<()> {
+      match line_type {
+          LineType::Solid => {
+              ...
+          },
+          LineType::Dashed => {
+              ...
+          },
+          LineType::Dotted => {
+              ...
+          },
+      }
+  }
+  ```
+  ```r
+  plot_line(x, y, LineType$Solid)
+  ```
+
+* Savvy now allows `impl` definition over multiple files. It had been a headache
+  that it wouldn't compile when you specified `#[savvy]` on `impl` of a same
+  struct multiple times. But now, you can split the `impl` not only within a
+  same file but also over multiple files.
+  
+  Note that, in general, if you specify a `#[savvy]` function or struct in other
+  file than `lib.rs`, you need to export the objects by `*`. This is because
+  `#[savvy]` defines additional functions other than the original ones and these
+  also need to be exported. Since you don't know the names of such
+  auto-generated functions, `*` is the solution.
+
+  ```rust
+  mod foo;
+  pub use foo::*;
+  ```
 
 * `OwnedListSexp` and `ListSexp` gains `unchecked_*()` variants of the `set` and
   `get` methods for a fast but unsafe operation. Thanks @daniellga!
