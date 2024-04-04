@@ -6,6 +6,9 @@ character vector. `#[savvy]` macro turns this into an R function.
 ```rust
 use savvy::NotAvailableValue;   // for is_na() and na()
 
+/// Add Suffix
+/// 
+/// @export
 #[savvy]
 fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
@@ -96,10 +99,13 @@ SEXP add_suffix__impl(SEXP x, SEXP y) {
 R implementation:
 
 ```r
+# Add Suffix
+# 
+# @export
 add_suffix <- function(x, y) {
   .Call(add_suffix__impl, x, y)
 }
 ```
 
-(`#[savvy]` macro can also be used for `impl` for a `struct`, but let's focus on
-function's case for now.)
+(`#[savvy]` macro can also be used on `struct` and `enum`, but let's focus on
+function's case for now for simplicity.)

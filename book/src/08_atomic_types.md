@@ -19,6 +19,7 @@ use `to_vec()` to create a new vector just to pass the data to the function that
 requires slice. 
 
 ```rust
+/// @export
 #[savvy]
 fn foo(x: IntegerSexp) -> savvy::Result<()> {
     some_function_takes_slice(x.as_slice());
@@ -33,6 +34,7 @@ only for the owned versions. This means you can write assignment operation like
 below instead of `set_elt()`.
 
 ```rust
+/// @export
 #[savvy]
 fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
@@ -85,6 +87,7 @@ vector. By treating the data as `i32`, you can use `is_na()`.
 ```rust
 use savvy::NotAvailableValue;   // for is_na()
 
+/// @export
 #[savvy]
 fn flip_logical_expert_only(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(x.len())?;
@@ -157,6 +160,7 @@ input or output, and you can extract the slice of `num_complex::Complex64` from
 it.
 
 ```rust
+/// @export
 #[savvy]
 fn abs_complex(x: savvy::ComplexSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = savvy::OwnedRealSexp::new(x.len())?;

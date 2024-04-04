@@ -115,6 +115,7 @@ the return type. For example, you can create an instance of the struct outside
 of `impl`,
 
 ```rust
+/// @export
 #[savvy]
 fn create_person() -> savvy::Result<Person> {
     let x = Self {
@@ -127,6 +128,7 @@ fn create_person() -> savvy::Result<Person> {
 and you can generate another type of instance from an instance.
 
 ```rust
+/// @export
 #[savvy]
 struct UpperPerson {
     pub name: String,
@@ -149,6 +151,7 @@ You can also use the struct as the argument of a `#[savvy]`-ed function. Note
 that, in most of the cases, you should specify `&T` or `&mut T`, not `T`.
 
 ```rust
+/// @export
 #[savvy]
 fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
     x.name()
@@ -168,6 +171,7 @@ happens in actual when you specify `T` in a `#[savvy]` function?
 Say, you mistyped `&Person` above as `Person` like this:
 
 ```rust
+/// @export
 #[savvy]
 fn get_name_external2(x: Person) -> savvy::Result<savvy::Sexp> {
     x.name()
@@ -217,10 +221,13 @@ copying. For example, consider there's a type `HeavyData`, which contains huge
 size of data, and `HeavyDataBundle` which bundles two `HeavyData`s.
 
 ```rust
+/// @export
 #[savvy]
 #[derive(Clone)]
 struct HeavyData(Vec<i32>);
 
+/// @export
+#[savvy]
 struct HeavyDataBundle {
     data1: HeavyData,
     data2: HeavyData,
@@ -236,6 +243,7 @@ impl HeavyData {
 is `&`, you need to `clone()` the data, which can be costly.
 
 ```rust
+/// @export
 #[savvy]
 impl HeavyDataBundle {
     fn new(
@@ -253,6 +261,7 @@ impl HeavyDataBundle {
 In this case, you can move the ownership to avoid copying.
 
 ```rust
+/// @export
 #[savvy]
 impl HeavyDataBundle {
     fn new(

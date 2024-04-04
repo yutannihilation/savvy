@@ -16,6 +16,7 @@ The getter methods return `Option<T>` because the object doesn't always have the
 attribute. You can `match` the result like this:
 
 ```rust
+/// @export
 #[savvy]
 fn get_class_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     match x.get_class() {
@@ -29,6 +30,7 @@ The setter methods are available only for owned SEXPs. The return type is
 `savvy::Result<()>` becuase the conversion from a Rust type to SEXP is fallible.
 
 ```rust
+/// @export
 #[savvy]
 fn set_class_int() -> savvy::Result<savvy::Sexp> {
     let mut x = OwnedIntegerSexp::new(1)?;
@@ -45,6 +47,7 @@ and `set_attrib()`. Since an attribute can store arbitrary values, the type is
 and `match`.
 
 ```rust
+/// @export
 #[savvy]
 fn print_attr_values_if_int(attr: &str, value: savvy::Sexp) -> savvy::Result<()>  {
     let attr_value = value.get_attrib(attr)?;
@@ -61,6 +64,7 @@ In order to set values, you can use `.into()` to convert from the owned SEXP to
 a `savvy::Sexp`.
 
 ```rust
+/// @export
 #[savvy]
 fn set_attr_int(attr: &str) -> savvy::Result<savvy::Sexp> {
     let s: &[i32] = &[1, 2, 3];

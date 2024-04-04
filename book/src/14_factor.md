@@ -7,6 +7,7 @@ function to convert the factor vector to a character vector.
 Say there's a Rust function that takes a character vector as its argument.
 
 ```rust
+/// @export
 #[extendr]
 fn foo_impl(x: StringSexp) -> savvy::Result<()> {
     ...
@@ -27,6 +28,7 @@ If you need the information of the order of the levels, you should pass it as an
 another argument.
 
 ```rust
+/// @export
 #[extendr]
 fn foo_impl2(x: StringSexp, levels: StringSexp) -> savvy::Result<()> {
     ...

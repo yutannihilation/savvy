@@ -10,6 +10,7 @@ this purpose. Or, if you prefer lightweight dependency, you can use
 `vctrs::new_data_frame()`, or simply `as.data.frame()`.
 
 ```rust
+/// @export
 #[savvy]
 fn foo_impl() -> savvy::Result<savvy::Sexp> {
     // create a named list

@@ -24,6 +24,7 @@ use ndarray::Array;
 use ndarray::ShapeBuilder;
 use savvy::{r_println, savvy, RealSexp};
 
+/// @export
 #[savvy]
 fn ndarray_input(x: RealSexp) -> savvy::Result<()> {
     // In R, dim is i32, so you need to convert it to usize first.
@@ -47,6 +48,7 @@ nalgebra is column-major, so you can simply pass the `dim`.
 use nalgebra::DMatrix;
 use savvy::{r_println, savvy, RealSexp};
 
+/// @export
 #[savvy]
 fn nalgebra_input(x: RealSexp) -> savvy::Result<()> {
     let dim = x.get_dim().ok_or("no dimension found")?;
@@ -73,6 +75,7 @@ expected before passing it to the constructor of a matrix.
 use glam::{dmat3, dvec3, DMat3};
 use savvy::{r_println, savvy, OwnedRealSexp, RealSexp};
 
+/// @export
 #[savvy]
 fn glam_input(x: RealSexp) -> savvy::Result<()> {
     let dim = x.get_dim().ok_or("no dimension found")?;

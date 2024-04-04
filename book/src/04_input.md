@@ -24,6 +24,7 @@ for (i, e) in x.iter().enumerate() {
 by `as_slice()`.
 
 ```rust
+/// @export
 #[savvy]
 fn foo(x: IntegerSexp) -> savvy::Result<()> {
     some_function_takes_slice(x.as_slice());
@@ -77,6 +78,7 @@ like below.
 ```rust
 use savvy::NotAvailableValue;
 
+/// @export
 #[savvy]
 fn sum(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let mut sum: f64 = 0.0;
@@ -96,6 +98,7 @@ the input doesn't contain any missing values **on R's side**. For example, this
 function is not an identity function.
 
 ```rust
+/// @export
 #[savvy]
 fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(x.len())?;
