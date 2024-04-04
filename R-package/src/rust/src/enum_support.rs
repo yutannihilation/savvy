@@ -6,8 +6,8 @@ use savvy::{r_println, savvy};
 #[savvy]
 #[derive(Debug)]
 enum FooEnum {
-    A = 0,
-    B = 1,
+    A,
+    B,
 }
 
 #[savvy]
