@@ -4,7 +4,7 @@ use num_complex::Complex64;
 use savvy_ffi::CPLXSXP;
 use savvy_ffi::{COMPLEX, SEXP};
 
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
+use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
 use crate::protect;
 use crate::NotAvailableValue; // for na()
 
@@ -277,24 +277,14 @@ impl Index<usize> for OwnedComplexSexp {
     type Output = Complex64;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index >= self.len {
-            panic!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, index
-            );
-        }
+        assert_len(self.len, index).unwrap();
         unsafe { &*(self.raw.add(index)) }
     }
 }
 
 impl IndexMut<usize> for OwnedComplexSexp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index >= self.len {
-            panic!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, index
-            );
-        }
+        assert_len(self.len, index).unwrap();
         unsafe { &mut *(self.raw.add(index)) }
     }
 }

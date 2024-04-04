@@ -7,6 +7,7 @@ use savvy_ffi::{
 };
 
 use super::na::NotAvailableValue;
+use super::utils::assert_len;
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
@@ -57,12 +58,7 @@ impl OwnedStringSexp {
 
     /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: &str) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
         unsafe { self.set_elt_unchecked(i, str_to_charsxp(v)?) };
 
         Ok(())
@@ -77,12 +73,7 @@ impl OwnedStringSexp {
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_elt_unchecked(i, R_NaString) };
 

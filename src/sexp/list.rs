@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::{string::str_to_charsxp, Sexp};
+use super::{string::str_to_charsxp, utils::assert_len, Sexp};
 
 /// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
@@ -134,12 +134,7 @@ impl OwnedListSexp {
     }
 
     pub fn set_value<T: Into<Sexp>>(&mut self, i: usize, v: T) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_value_unchecked(i, v.into().0) };
 
@@ -155,12 +150,7 @@ impl OwnedListSexp {
     }
 
     pub fn set_name(&mut self, i: usize, k: &str) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_name_unchecked(i, str_to_charsxp(k)?) };
 
