@@ -3,7 +3,29 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking change
+
+To support enum properly (the details follow), now savvy requires to put
+`#[savvy]` macro also on `struct`.
+
+```rust
+#[savvy]   // NEW
+struct Person {
+    pub name: String,
+}
+
+#[savvy]
+impl Person {
+```
+
 ### New features
+
+* Now `#[savvy]` macro supports enum in addition to struct. Enum is translated
+  like struct, but there are a few differences and limitations.
+    * An enum variant can be accessed via `<enum>$<variant>` on an R session.
+    * The enum type can be used in the form of `T` or `&T`, but not `&mut T`, as
+      a function argument.
+    * Only fieldless enum is supported.
 
 * `OwnedListSexp` and `ListSexp` gains `unchecked_*()` variants of the `set` and
   `get` methods for a fast but unsafe operation. Thanks @daniellga!
