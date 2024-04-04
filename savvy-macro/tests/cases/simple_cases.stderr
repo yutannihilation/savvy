@@ -37,7 +37,13 @@ error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
    |                               ^^^^^^^^^^^^^^^
 
 error: savvy only supports a fieldless enum
-  --> tests/cases/simple_cases.rs:34:5
+  --> tests/cases/simple_cases.rs:34:6
    |
 34 |     A(i32),
-   |     ^^^^^^
+   |      ^^^^^
+
+error: savvy doesn't support an enum with discreminant
+  --> tests/cases/simple_cases.rs:42:9
+   |
+42 |     B = 100,
+   |         ^^^
