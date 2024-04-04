@@ -71,7 +71,7 @@ impl OwnedStringSexp {
     // Set the value of the `i`-th element.
     // Safety: the user has to assure bounds are checked.
     #[inline]
-    unsafe fn set_elt_unchecked(&mut self, i: usize, v: SEXP) {
+    pub(crate) unsafe fn set_elt_unchecked(&mut self, i: usize, v: SEXP) {
         unsafe { SET_STRING_ELT(self.inner, i as _, v) };
     }
 
@@ -187,7 +187,7 @@ impl OwnedStringSexp {
     }
 }
 
-unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
+pub(crate) unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
     unsafe {
         // We might be able to put `R_NaString` directly without using
         // <&str>::na(), but probably this is an inevitable cost of
