@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use quote::format_ident;
 
-use crate::parse::SavvyMergedImpl;
+use crate::ir::SavvyMergedImpl;
 use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnType};
 
-use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
+use crate::ir::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 
 fn get_r_doc_comment(docs: &[String]) -> String {
     docs.iter()
