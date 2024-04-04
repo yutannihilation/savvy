@@ -17,6 +17,7 @@
     - [Integer, Real, String, Bool, And Complex](./atomic_types.md)
     - [List](./list.md)
     - [Struct](./struct.md)
+    - [Enum](./enum.md)
 - [Error-handling](./error.md)
 - [Handling Attributes](./attributes.md)
     - [Handling Data Frames](./data_frames.md)

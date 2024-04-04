@@ -40,12 +40,13 @@ function must satisfy the following conditions:
 * The function's inputs can be
     * a non-owned savvy type (e.g., `IntegerSexp` and `RealSexp`)
     * a corresponding Rust type for scalar (e.g., `i32` and `f64`)
-    * a reference to a user-defined struct marked with `#[savvy]` (e.g., `&T` or `&mut T`)
+    * a user-defined struct marked with `#[savvy]` (`&T`, `&mut T`, or `T`)
+    * a user-defined enum marked with `#[savvy]` (`&T`, or `T`)
 * The function's return value must be either
     * `savvy::Result<()>` for the case of no actual return value
     * `savvy::Result<savvy::Sexp>` for the case of some return value of R object
     * `savvy::Result<T>` for the case of some return value of a user-defined
-      struct marked with `#[savvy]`
+      struct or enum marked with `#[savvy]`
 
 ## How things work under the hood
 
