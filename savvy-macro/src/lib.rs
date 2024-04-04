@@ -275,8 +275,10 @@ mod tests {
                 pub unsafe extern "C" fn Person_new() -> savvy::ffi::SEXP {
                     match savvy_Person_new_inner() {
                         Ok(result) => {
-                            use savvy::IntoExtPtrSexp;
-                            result.into_external_pointer().0
+                            match <savvy::Sexp>::try_from(result) {
+                                Ok(sexp) => sexp.0,
+                                Err(e) => savvy::handle_error(e),
+                            }
                         },
                         Err(e) => savvy::handle_error(e),
                     }
@@ -294,8 +296,10 @@ mod tests {
                 pub unsafe extern "C" fn Person_new2() -> savvy::ffi::SEXP {
                     match savvy_Person_new2_inner() {
                         Ok(result) => {
-                            use savvy::IntoExtPtrSexp;
-                            result.into_external_pointer().0
+                            match <savvy::Sexp>::try_from(result) {
+                                Ok(sexp) => sexp.0,
+                                Err(e) => savvy::handle_error(e),
+                            }
                         },
                         Err(e) => savvy::handle_error(e),
                     }

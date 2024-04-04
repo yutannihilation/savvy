@@ -1,4 +1,4 @@
-use syn::parse_quote;
+use syn::{parse_quote, Token};
 
 use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 use crate::{SavvyFn, SavvyFnType};
@@ -40,16 +40,25 @@ impl SavvyFn {
                 }
             ),
             // A method with &self or &mut self
-            SavvyFnType::Method(ty) => {
+            SavvyFnType::Method {
+                ty,
+                mutability,
+                reference: true,
+            } => {
+                let mut_token: Option<Token![mut]> = if *mutability {
+                    Some(parse_quote!(mut))
+                } else {
+                    None
+                };
                 if wrapped_with_result {
                     parse_quote!(
                         #(#attrs)*
                         #[allow(non_snake_case)]
                         unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
+                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
                             #(#stmts_additional)*
 
-                            (*self__).#fn_name_orig(#(#args_pat),*)
+                            self__.#fn_name_orig(#(#args_pat),*)
                         }
                     )
                 } else {
@@ -57,16 +66,20 @@ impl SavvyFn {
                         #(#attrs)*
                         #[allow(non_snake_case)]
                         unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = savvy::get_external_pointer_addr(self__)? as *mut #ty;
+                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
                             #(#stmts_additional)*
 
-                            Ok((*self__).#fn_name_orig(#(#args_pat),*))
+                            Ok(self__.#fn_name_orig(#(#args_pat),*))
                         }
                     )
                 }
             }
             // A method with self
-            SavvyFnType::ConsumingMethod(ty) => {
+            SavvyFnType::Method {
+                ty,
+                mutability: _,
+                reference: false,
+            } => {
                 if wrapped_with_result {
                     parse_quote!(
                         #(#attrs)*
@@ -158,7 +171,7 @@ impl SavvyFn {
 
         let out: syn::ItemFn = match &self.fn_type {
             // if the function is a method, add `self__` to the first argument
-            SavvyFnType::Method(_) | SavvyFnType::ConsumingMethod(_) => {
+            SavvyFnType::Method { .. } => {
                 // `-> Self` is allowed
                 if wrapped_with_result {
                     parse_quote!(

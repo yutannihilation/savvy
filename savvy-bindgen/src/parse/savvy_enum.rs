@@ -68,6 +68,16 @@ impl SavvyEnum {
     pub fn generate_try_from_impls(&self) -> Vec<ItemImpl> {
         let ty = &self.ty;
 
+        let match_arms_ref = self
+            .variants
+            .iter()
+            .enumerate()
+            .map(|(i, v)| {
+                let lit_i = syn::LitInt::new(&i.to_string(), v.span());
+                parse_quote!(#lit_i => Ok(&#ty::#v))
+            })
+            .collect::<Vec<syn::Arm>>();
+
         let match_arms = self
             .variants
             .iter()
@@ -87,6 +97,19 @@ impl SavvyEnum {
                     (value as i32).try_into()
                 }
             }),
+            parse_quote!(
+                impl TryFrom<savvy::Sexp> for &#ty {
+                    type Error = savvy::Error;
+
+                    fn try_from(value: savvy::Sexp) -> savvy::Result<Self> {
+                        let i = <i32>::try_from(value)?;
+                        match i {
+                            #(#match_arms_ref),*,
+                            _ => Err("Unexpected enum variant".into()),
+                        }
+                    }
+                }
+            ),
             parse_quote!(
                 impl TryFrom<savvy::Sexp> for #ty {
                     type Error = savvy::Error;

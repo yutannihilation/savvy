@@ -181,14 +181,15 @@ impl SavvyFnReturnType {
 pub enum SavvyFnType {
     /// A function that doesn't belong to a struct
     BareFunction,
-    /// A function that belongs to a struct, and the first argument is `&self`
-    /// or `&mut self`. Contains the type name of the sturct.
-    Method(syn::Type),
     /// A function that belongs to a struct, and the first argument is `self`.
     /// Contains the type name of the sturct.
-    ConsumingMethod(syn::Type),
+    Method {
+        ty: syn::Type,
+        reference: bool,
+        mutability: bool,
+    },
     /// A function that belongs to a struct, but  the first argument is not
-    /// `&self` or `&mut self`. Contains the type name of the sturct.
+    /// `self`. Contains the type name of the sturct.
     AssociatedFunction(syn::Type),
 }
 
@@ -216,8 +217,7 @@ impl SavvyFn {
     pub(crate) fn get_self_ty_ident(&self) -> Option<syn::Ident> {
         let self_ty = match &self.fn_type {
             SavvyFnType::BareFunction => return None,
-            SavvyFnType::Method(ty) => ty,
-            SavvyFnType::ConsumingMethod(ty) => ty,
+            SavvyFnType::Method { ty, .. } => ty,
             SavvyFnType::AssociatedFunction(ty) => ty,
         };
         if let syn::Type::Path(type_path) = self_ty {
