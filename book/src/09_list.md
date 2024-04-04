@@ -164,7 +164,7 @@ what you need in most of the cases.
 ```rust
 #[savvy]
 fn list_with_both() -> savvy::Result<savvy::Sexp> {
-    let mut out = OwnedListSexp::new(2, false)?;
+    let mut out = OwnedListSexp::new(2, true)?;
 
     let mut e1 = OwnedIntegerSexp::new(1)?;
     e1[0] = 100;
