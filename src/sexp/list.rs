@@ -2,7 +2,7 @@ use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTO
 
 use crate::{protect, OwnedStringSexp};
 
-use super::{string::str_to_charsxp, utils::assert_len, Sexp};
+use super::{utils::assert_len, utils::str_to_charsxp, Sexp};
 
 /// An external SEXP of a list.
 pub struct ListSexp(pub SEXP);
