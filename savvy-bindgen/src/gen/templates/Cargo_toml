@@ -9,4 +9,4 @@ crate-type = ["staticlib"]
 [dependencies]
 # TODO
 # savvy = "*"
-savvy = { git = "https://github.com/yutannihilation/savvy" }
+savvy = {{ git = "https://github.com/yutannihilation/savvy" }}
