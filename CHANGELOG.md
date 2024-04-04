@@ -75,7 +75,7 @@ impl Person {
 * Now savvy allows to consume the value behind an external pointer. i.e., `T`
   instead of `&T` or `&mut T` as the argument. After getting consumed, the
   pointer is null, so any function call on the already-consumed R object results
-  in an error. See [the guide](https://yutannihilation.github.io/savvy/guide/10_struct.html) for more details.
+  in an error. See [the guide](https://yutannihilation.github.io/savvy/guide/struct.html) for more details.
   
   Example:
 
@@ -140,7 +140,7 @@ impl Person {
   associated function. In conjunction with the change in v0.3.0, now a
   user-defined struct can be used more flexibly than before. Please refer to
   [the "Struct" section of the
-  guide](https://yutannihilation.github.io/savvy/guide/10_struct.html)
+  guide](https://yutannihilation.github.io/savvy/guide/struct.html)
 * An experimental support on complex is added under `compex` feature flag.
   `ComplexSexp` and `OwnedComplexSexp` are the corresponding Rust types.
 * `OwnedIntegerSexp` and etc now have `set_na(i)` method for shorthand of

@@ -2,7 +2,7 @@
 
 ## Basic rule
 
-As described in [Key Ideas](./02_key_ideas.md), the input SEXP is **read-only**.
+As described in [Key Ideas](./key_ideas.md), the input SEXP is **read-only**.
 You cannot modify the values in place.
 
 ## Methods
@@ -117,5 +117,5 @@ identity_logical(c(TRUE, FALSE, NA))
 ```
 
 The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
-See "Logical" section of [Integer, Real, String, And Bool](./08_atomic_types.md)
+See "Logical" section of [Integer, Real, String, And Bool](./atomic_types.md)
 for the details.

@@ -287,15 +287,6 @@ guaranteed on R's side that `self` is always a `EXTPTRSXP` of `Person`, Rust
 code just restore a `Person` instance from the `EXTPTRSXP` without any checks.
 
 ```r
-Person <- new.env(parent = emptyenv())
-Person$new <- function() {
-  .savvy_wrap_Person(.Call(Person_new__impl))
-}
-
-Person$say_hello <- function() {
-.Call(Person_say_hello__impl)
-}
-
 .savvy_wrap_Person <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
@@ -306,15 +297,24 @@ Person$say_hello <- function() {
   e
 }
 
+Person <- new.env(parent = emptyenv())
+Person$new <- function() {
+  .savvy_wrap_Person(.Call(Person_new__impl))
+}
+
+Person$say_hello <- function() {
+  .Call(Person_say_hello__impl)
+}
+
 Person_set_name <- function(self) {
   function(name) {
-  invisible(.Call(Person_set_name__impl, self, name))
+    invisible(.Call(Person_set_name__impl, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-  .Call(Person_name__impl, self)
+    .Call(Person_name__impl, self)
   }
 }
 ```
