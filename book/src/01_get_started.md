@@ -2,12 +2,26 @@
 
 ## Prerequisite
 
-Before starting, install a helper R package for savvy.
+### Rust
+
+First of all, you need a Rust toolchain installed. You can follow [the official
+instruction](https://www.rust-lang.org/tools/install).
+
+If you are on Windows, you need an additional step of installing
+`x86_64-pc-windows-gnu` target.
+
+```sh
+rustup target add x86_64-pc-windows-gnu
+```
+
+### A helper R package
+
+Then, install a helper R package for savvy.
 
 ``` r
 install.packages(
-    "savvy",
-    repos = c("https://yutannihilation.r-universe.dev", "https://cloud.r-project.org")
+  "savvy",
+  repos = c("https://yutannihilation.r-universe.dev", "https://cloud.r-project.org")
 )
 ```
 

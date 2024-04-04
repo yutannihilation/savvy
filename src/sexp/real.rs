@@ -2,6 +2,7 @@ use std::ops::{Index, IndexMut};
 
 use savvy_ffi::{REAL, REALSXP, SEXP};
 
+use super::utils::assert_len;
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 use crate::NotAvailableValue; // for na()
@@ -302,24 +303,14 @@ impl Index<usize> for OwnedRealSexp {
     type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index >= self.len {
-            panic!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, index
-            );
-        }
+        assert_len(self.len, index).unwrap();
         unsafe { &*(self.raw.add(index)) }
     }
 }
 
 impl IndexMut<usize> for OwnedRealSexp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index >= self.len {
-            panic!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, index
-            );
-        }
+        assert_len(self.len, index).unwrap();
         unsafe { &mut *(self.raw.add(index)) }
     }
 }

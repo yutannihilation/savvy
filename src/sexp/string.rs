@@ -1,12 +1,9 @@
 use std::ffi::CStr;
-use std::os::raw::c_char;
 
-use savvy_ffi::{
-    cetype_t_CE_UTF8, R_NaString, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP,
-    STRING_ELT, STRSXP,
-};
+use savvy_ffi::{R_NaString, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP};
 
 use super::na::NotAvailableValue;
+use super::utils::{assert_len, str_to_charsxp};
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect;
 
@@ -57,12 +54,7 @@ impl OwnedStringSexp {
 
     /// Set the value of the `i`-th element.
     pub fn set_elt(&mut self, i: usize, v: &str) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
         unsafe { self.set_elt_unchecked(i, str_to_charsxp(v)?) };
 
         Ok(())
@@ -71,18 +63,13 @@ impl OwnedStringSexp {
     // Set the value of the `i`-th element.
     // Safety: the user has to assure bounds are checked.
     #[inline]
-    unsafe fn set_elt_unchecked(&mut self, i: usize, v: SEXP) {
+    pub(crate) unsafe fn set_elt_unchecked(&mut self, i: usize, v: SEXP) {
         unsafe { SET_STRING_ELT(self.inner, i as _, v) };
     }
 
     /// Set the `i`-th element to NA.
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
-        if i >= self.len {
-            return Err(crate::error::Error::new(&format!(
-                "index out of bounds: the length is {} but the index is {}",
-                self.len, i
-            )));
-        }
+        assert_len(self.len, i)?;
 
         unsafe { self.set_elt_unchecked(i, R_NaString) };
 
@@ -184,25 +171,6 @@ impl OwnedStringSexp {
             out
         };
         Self::new_from_raw_sexp(sexp, 1)
-    }
-}
-
-unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
-    unsafe {
-        // We might be able to put `R_NaString` directly without using
-        // <&str>::na(), but probably this is an inevitable cost of
-        // providing <&str>::na().
-        if v.is_na() {
-            Ok(savvy_ffi::R_NaString)
-        } else {
-            crate::unwind_protect(|| {
-                Rf_mkCharLenCE(
-                    v.as_ptr() as *const c_char,
-                    v.len() as i32,
-                    cetype_t_CE_UTF8,
-                )
-            })
-        }
     }
 }
 

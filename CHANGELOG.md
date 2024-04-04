@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* `OwnedListSexp` and `ListSexp` gains `unchecked_*()` variants of the `set` and
+  `get` methods for a fast but unsafe operation. Thanks @daniellga!
+
 ## [v0.4.2] (2024-04-01)
 
 ### New features
