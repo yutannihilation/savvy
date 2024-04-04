@@ -43,7 +43,9 @@ impl ListSexp {
         Some(unsafe { self.get_by_index_unchecked(i) })
     }
 
-    // Safety: the user has to assure bounds are checked.
+    /// # Safety
+    ///
+    /// The user has to assure bounds are checked.
     pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe {
             let e = VECTOR_ELT(self.0, i as _);
@@ -112,7 +114,9 @@ impl OwnedListSexp {
         self.values.get_by_index(i)
     }
 
-    // Safety: the user has to assure bounds are checked.
+    /// # Safety
+    ///
+    /// The user has to assure bounds are checked.
     pub unsafe fn get_by_index_unchecked(&self, i: usize) -> Sexp {
         unsafe { self.values.get_by_index_unchecked(i) }
     }
@@ -142,7 +146,9 @@ impl OwnedListSexp {
         Ok(())
     }
 
-    // Safety: the user has to assure bounds are checked.
+    /// # Safety
+    ///
+    /// The user has to assure bounds are checked.
     #[inline]
     pub unsafe fn set_value_unchecked(&mut self, i: usize, v: SEXP) {
         unsafe { SET_VECTOR_ELT(self.values.inner(), i as _, v) };
@@ -161,7 +167,9 @@ impl OwnedListSexp {
         Ok(())
     }
 
-    // Safety: the user has to assure bounds are checked.
+    /// # Safety
+    ///
+    /// The user has to assure bounds are checked.
     #[inline]
     pub unsafe fn set_name_unchecked(&mut self, i: usize, k: SEXP) {
         if let Some(names) = self.names.as_mut() {
