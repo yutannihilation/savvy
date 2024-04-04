@@ -1,6 +1,6 @@
 use syn::{parse_quote, Token};
 
-use crate::parse::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
+use crate::ir::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 use crate::{SavvyFn, SavvyFnType};
 
 impl SavvyFn {
