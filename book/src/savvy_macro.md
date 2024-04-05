@@ -59,7 +59,9 @@ If you mark a funtion with `#[savvy]` macro, the corresponding implementations a
 3. C implementation for bridging between R and Rust
 4. R implementation
 
-For example, the above implementation generates the following codes.
+For example, the above implementation generates the following codes. (`#[savvy]`
+macro can also be used on `struct` and `enum`, but let's focus on function's
+case for now for simplicity.)
 
 ### Rust functions
 
@@ -82,13 +84,15 @@ unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp>
 }
 ```
 
-### C function signature:
+### C function signature
 
 ```c
 SEXP add_suffix(SEXP x, SEXP y);
 ```
 
-C implementation (let's skip the details about `handle_result` for now):
+### C implementation
+
+(let's skip the details about `handle_result` for now)
 
 ```c
 SEXP add_suffix__impl(SEXP x, SEXP y) {
@@ -99,17 +103,17 @@ SEXP add_suffix__impl(SEXP x, SEXP y) {
 
 ### R implementation
 
+The Rust comments with three slashes (`///`) is converted into Roxygen comments
+on R code.
+
 ```r
-# Add Suffix
-# 
-# @export
+#' Add Suffix
+#' 
+#' @export
 add_suffix <- function(x, y) {
   .Call(add_suffix__impl, x, y)
 }
 ```
-
-(`#[savvy]` macro can also be used on `struct` and `enum`, but let's focus on
-function's case for now for simplicity.)
 
 ## Using `#[savvy]` on other files than `lib.rs`
 
