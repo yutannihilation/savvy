@@ -79,6 +79,8 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
     ├── init.c              <-------(3)
     ├── <your package>-win.def  <---(4)
     └── rust
+        ├── .cargo
+        │   └── config.toml <-------(4)
         ├── api.h           <-------(3)
         ├── Cargo.toml      <-------(5)
         └── src
@@ -88,10 +90,13 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 1. `wrappers.R`: R functions for the corresponding Rust functions
 2. `configure`, `Makevars.in`, and `Makevars.win`: Necessary build settings for compiling Rust code
 3. `init.c` and `api.h`: C functions for the corresponding Rust functions
-4. `<your package>-win.def`: This is a trick to avoid a minor error on Windows.
-   See [extendr/rextendr#211](https://github.com/extendr/rextendr/issues/211)
-   for the details.
+4. `<your package>-win.def` and `.cargo/config.toml`: These are tricks to avoid
+   a minor error on Windows. See [extendr/rextendr#211][1] and [savvy#98][2] for
+   the details.
 5. `Cargo.toml` and `lib.rs`: Rust code
+
+[1]: https://github.com/extendr/rextendr/issues/211
+[2]: https://github.com/yutannihilation/savvy/pull/98
 
 ## Write your own function
 
