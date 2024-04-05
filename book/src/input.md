@@ -2,7 +2,7 @@
 
 ## Basic rule
 
-As described in [Key Ideas](./02_key_ideas.md), the input SEXP is **read-only**.
+As described in [Key Ideas](./key_ideas.md), the input SEXP is **read-only**.
 You cannot modify the values in place.
 
 ## Methods
@@ -24,6 +24,7 @@ for (i, e) in x.iter().enumerate() {
 by `as_slice()`.
 
 ```rust
+/// @export
 #[savvy]
 fn foo(x: IntegerSexp) -> savvy::Result<()> {
     some_function_takes_slice(x.as_slice());
@@ -77,6 +78,7 @@ like below.
 ```rust
 use savvy::NotAvailableValue;
 
+/// @export
 #[savvy]
 fn sum(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let mut sum: f64 = 0.0;
@@ -96,6 +98,7 @@ the input doesn't contain any missing values **on R's side**. For example, this
 function is not an identity function.
 
 ```rust
+/// @export
 #[savvy]
 fn identity_logical(x: LogicalSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(x.len())?;
@@ -114,5 +117,5 @@ identity_logical(c(TRUE, FALSE, NA))
 ```
 
 The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
-See "Logical" section of [Integer, Real, String, And Bool](./08_atomic_types.md)
+See "Logical" section of [Integer, Real, String, And Bool](./atomic_types.md)
 for the details.

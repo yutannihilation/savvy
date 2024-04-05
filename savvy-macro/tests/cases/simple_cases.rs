@@ -35,4 +35,11 @@ enum Foo {
     B(&str),
 }
 
+// discreminant is not supported
+#[savvy]
+enum Foo {
+    A,
+    B = 100,
+}
+
 fn main() {}

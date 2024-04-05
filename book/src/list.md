@@ -25,6 +25,7 @@ possible because it's too complex.
 `names_iter()` returns an iterator of `&str`.
 
 ```rust
+/// @export
 #[savvy]
 fn print_list_names(x: ListSexp) -> savvy::Result<()> {
     for k in x.names_iter() {
@@ -53,6 +54,7 @@ print_list_names(list(a = 1, 2, c = 3))
 `TypedSexp` by `.into_typed()` and then use `match` to extract the inner data.
 
 ```rust
+/// @export
 #[savvy]
 fn print_list_values_if_int(x: ListSexp) -> savvy::Result<()>  {
     for v in x.values_iter() {
@@ -79,6 +81,7 @@ If you want pairs of name and value, you can use `iter()`. This is basically a
 `std::iter::Zip` of the two iterators explained above.
 
 ```rust
+/// @export
 #[savvy]
 fn print_list(x: ListSexp)  -> savvy::Result<()> {
     for (k, v) in x.iter() {
@@ -103,6 +106,7 @@ ignored.
 `set_name()` simply sets a name at the specified position.
 
 ```rust
+/// @export
 #[savvy]
 fn list_with_no_values() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, true)?;
@@ -130,6 +134,7 @@ type that implmenents `Into<Sexp>` trait. Since all `{type}Sexp` types
 implements it, you can simply pass it like below.
 
 ```rust
+/// @export
 #[savvy]
 fn list_with_no_names() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, false)?;
@@ -162,6 +167,7 @@ list_with_no_names()
 what you need in most of the cases.
 
 ```rust
+/// @export
 #[savvy]
 fn list_with_both() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedListSexp::new(2, true)?;

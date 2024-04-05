@@ -6,6 +6,9 @@ character vector. `#[savvy]` macro turns this into an R function.
 ```rust
 use savvy::NotAvailableValue;   // for is_na() and na()
 
+/// Add Suffix
+/// 
+/// @export
 #[savvy]
 fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
@@ -37,12 +40,13 @@ function must satisfy the following conditions:
 * The function's inputs can be
     * a non-owned savvy type (e.g., `IntegerSexp` and `RealSexp`)
     * a corresponding Rust type for scalar (e.g., `i32` and `f64`)
-    * a reference to a user-defined struct marked with `#[savvy]` (e.g., `&T` or `&mut T`)
+    * a user-defined struct marked with `#[savvy]` (`&T`, `&mut T`, or `T`)
+    * a user-defined enum marked with `#[savvy]` (`&T`, or `T`)
 * The function's return value must be either
     * `savvy::Result<()>` for the case of no actual return value
     * `savvy::Result<savvy::Sexp>` for the case of some return value of R object
     * `savvy::Result<T>` for the case of some return value of a user-defined
-      struct marked with `#[savvy]`
+      struct or enum marked with `#[savvy]`
 
 ## How things work under the hood
 
@@ -55,9 +59,11 @@ If you mark a funtion with `#[savvy]` macro, the corresponding implementations a
 3. C implementation for bridging between R and Rust
 4. R implementation
 
-For example, the above implementation generates the following codes.
+For example, the above implementation generates the following codes. (`#[savvy]`
+macro can also be used on `struct` and `enum`, but let's focus on function's
+case for now for simplicity.)
 
-Rust functions:
+### Rust functions
 
 ```rust
 #[allow(clippy::missing_safety_doc)]
@@ -78,13 +84,15 @@ unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp>
 }
 ```
 
-C function signature:
+### C function signature
 
 ```c
 SEXP add_suffix(SEXP x, SEXP y);
 ```
 
-C implementation (let's skip the details about `handle_result` for now):
+### C implementation
+
+(let's skip the details about `handle_result` for now)
 
 ```c
 SEXP add_suffix__impl(SEXP x, SEXP y) {
@@ -93,13 +101,29 @@ SEXP add_suffix__impl(SEXP x, SEXP y) {
 }
 ```
 
-R implementation:
+### R implementation
+
+The Rust comments with three slashes (`///`) is converted into Roxygen comments
+on R code.
 
 ```r
+#' Add Suffix
+#' 
+#' @export
 add_suffix <- function(x, y) {
   .Call(add_suffix__impl, x, y)
 }
 ```
 
-(`#[savvy]` macro can also be used for `impl` for a `struct`, but let's focus on
-function's case for now.)
+## Using `#[savvy]` on other files than `lib.rs`
+
+You can use `#[savvy]` macro just the same as `lib.rs`. One thing you have to do
+is that you need to export the objects by `*`. This is because `#[savvy]`
+defines additional functions other than the original ones, and some of these
+also need to be exported. Since you don't know the names of such auto-generated
+functions, `*` is the solution.
+
+```rust
+mod foo;
+pub use foo::*;
+```

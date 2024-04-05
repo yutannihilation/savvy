@@ -45,6 +45,7 @@ After putting the values to the vector, you can convert it to `Result<Sexp>` by
 `into()`.
 
 ```rust
+/// @export
 #[savvy]
 fn foo() -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
@@ -65,7 +66,7 @@ the conversion is `try_into()`, not `into()`.
 ```rust
 // Let's not consider for handling NAs at all for simplicity...
 
-// vector output
+/// @export
 #[savvy]
 fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let out: Vec<i32> = x.iter().map(|v| v * 2).collect();
@@ -90,6 +91,7 @@ cases. But, sometimes you might find this useful (e.g., the return value is a
 list and you need to construct the elements of it).
 
 ```rust
+/// @export
 #[savvy]
 fn times_two2(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let out: Vec<i32> = x.iter().map(|v| v * 2).collect();
@@ -105,6 +107,7 @@ function is the case. The previous examples first `collect()`ed into a `Vec`,
 but it's not necessary in theory.
 
 ```rust
+/// @export
 #[savvy]
 fn times_two3(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let iter = x.iter().map(|v| v * 2);

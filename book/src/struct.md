@@ -2,14 +2,23 @@
 
 ## Basic usage
 
-You can use `#[savvy]` macro on `impl` for a `struct` to make it available from
-R code.
+You can use `#[savvy]` macro on a `struct` to convert it to an R object. More
+precisely, this macro adds implementations of `TryFrom` between `Sexp` and the
+struct so you can specify the type as the function input and output.
 
 ```rust
+/// @export
+#[savvy]
 struct Person {
     pub name: String,
 }
+```
 
+The most handy form is to implement methods and associated functions for the
+type. You can add `#[savvy]` before the `impl` block to make it available on R
+sessions.
+
+```rust
 #[savvy]
 impl Person {
     fn new() -> Self {
@@ -106,6 +115,7 @@ the return type. For example, you can create an instance of the struct outside
 of `impl`,
 
 ```rust
+/// @export
 #[savvy]
 fn create_person() -> savvy::Result<Person> {
     let x = Self {
@@ -118,12 +128,11 @@ fn create_person() -> savvy::Result<Person> {
 and you can generate another type of instance from an instance.
 
 ```rust
+/// @export
+#[savvy]
 struct UpperPerson {
     pub name: String,
 }
-
-#[savvy]
-impl Person {}
 
 #[savvy]
 impl Person {
@@ -142,6 +151,7 @@ You can also use the struct as the argument of a `#[savvy]`-ed function. Note
 that, in most of the cases, you should specify `&T` or `&mut T`, not `T`.
 
 ```rust
+/// @export
 #[savvy]
 fn get_name_external(x: &Person) -> savvy::Result<savvy::Sexp> {
     x.name()
@@ -161,6 +171,7 @@ happens in actual when you specify `T` in a `#[savvy]` function?
 Say, you mistyped `&Person` above as `Person` like this:
 
 ```rust
+/// @export
 #[savvy]
 fn get_name_external2(x: Person) -> savvy::Result<savvy::Sexp> {
     x.name()
@@ -210,9 +221,13 @@ copying. For example, consider there's a type `HeavyData`, which contains huge
 size of data, and `HeavyDataBundle` which bundles two `HeavyData`s.
 
 ```rust
+/// @export
+#[savvy]
 #[derive(Clone)]
 struct HeavyData(Vec<i32>);
 
+/// @export
+#[savvy]
 struct HeavyDataBundle {
     data1: HeavyData,
     data2: HeavyData,
@@ -228,6 +243,7 @@ impl HeavyData {
 is `&`, you need to `clone()` the data, which can be costly.
 
 ```rust
+/// @export
 #[savvy]
 impl HeavyDataBundle {
     fn new(
@@ -245,6 +261,7 @@ impl HeavyDataBundle {
 In this case, you can move the ownership to avoid copying.
 
 ```rust
+/// @export
 #[savvy]
 impl HeavyDataBundle {
     fn new(
@@ -270,15 +287,6 @@ guaranteed on R's side that `self` is always a `EXTPTRSXP` of `Person`, Rust
 code just restore a `Person` instance from the `EXTPTRSXP` without any checks.
 
 ```r
-Person <- new.env(parent = emptyenv())
-Person$new <- function() {
-  .savvy_wrap_Person(.Call(Person_new__impl))
-}
-
-Person$say_hello <- function() {
-.Call(Person_say_hello__impl)
-}
-
 .savvy_wrap_Person <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
@@ -289,15 +297,24 @@ Person$say_hello <- function() {
   e
 }
 
+Person <- new.env(parent = emptyenv())
+Person$new <- function() {
+  .savvy_wrap_Person(.Call(Person_new__impl))
+}
+
+Person$say_hello <- function() {
+  .Call(Person_say_hello__impl)
+}
+
 Person_set_name <- function(self) {
   function(name) {
-  invisible(.Call(Person_set_name__impl, self, name))
+    invisible(.Call(Person_set_name__impl, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-  .Call(Person_name__impl, self)
+    .Call(Person_name__impl, self)
   }
 }
 ```

@@ -28,7 +28,18 @@ impl SavvyEnum {
 
         for v in &orig.variants {
             if !matches!(v.fields, syn::Fields::Unit) {
-                let e = syn::Error::new_spanned(v, "savvy only supports a fieldless enum");
+                let e = syn::Error::new_spanned(
+                    v.fields.clone(),
+                    "savvy only supports a fieldless enum",
+                );
+                return Err(e);
+            }
+
+            if v.discriminant.is_some() {
+                let e = syn::Error::new_spanned(
+                    v.discriminant.clone().unwrap().1,
+                    "savvy doesn't support an enum with discreminant",
+                );
                 return Err(e);
             }
 

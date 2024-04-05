@@ -6,6 +6,7 @@ Scalar inputs are handled transparently. The corresponding types are shown in
 the table below.
 
 ```rust
+/// @export
 #[savvy]
 fn scalar_input_int(x: i32) -> savvy::Result<()> {
     savvy::r_println!("{x}");
@@ -27,6 +28,7 @@ Just like a Rust vector, a Rust scalar value can be converted into `Sexp` by
 `try_from()`. It's as simple as.
 
 ```rust
+/// @export
 #[savvy]
 fn scalar_output_int() -> savvy::Result<savvy::Sexp> {
     1.try_into()
@@ -37,6 +39,7 @@ Alternatively, the same conversion is available in the form of
 `Owned{type}Sexp::try_from_scalar()`.
 
 ```rust
+/// @export
 #[savvy]
 fn scalar_output_int() -> savvy::Result<savvy::Sexp> {
     let out = OwnedIntegerSexp::try_from_scalar(1)?;
@@ -52,6 +55,7 @@ the assumption that a scalar missing value is rarely found useful on Rust's
 side.
 
 ```rust
+/// @export
 #[savvy]
 fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedLogicalSexp::new(1)?;
