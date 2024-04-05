@@ -48,6 +48,31 @@ character, which might be mistyped.
 plot_line(x, y, LineType$Solid)
 ```
 
+Of course, you can archive the same thing with `i32` or `&str` as the input and
+match the value. The difference is that enum is typo-proof. But, you might feel
+it more handy to use a plain integer or character.
+
+```rust
+/// @export
+#[savvy]
+fn plot_line(x: IntegerSexp, y: IntegerSexp, line_type: &str) -> savvy::Result<()> {
+    match line_type {
+        "solid" => {
+            ...
+        },
+        "dashed" => {
+            ...
+        },
+        "dotted" => {
+            ...
+        },
+        _ => {
+            return Err("Unsupported line type!".into());
+        }
+    }
+}
+```
+
 ## Limitation
 
 As noted above, savvy supports only fieldless enum for simplicity. If you want
