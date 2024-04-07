@@ -37,6 +37,12 @@ enum Commands {
         /// Path to the root of an R package
         r_pkg_dir: PathBuf,
     },
+
+    /// Extract doctests and test modules
+    ExtractTests {
+        /// Path to the root of an R package
+        r_pkg_dir: PathBuf,
+    },
 }
 
 struct PackageDescription {
@@ -163,18 +169,15 @@ to set the configure script as executable
     );
 }
 
-fn update(path: &Path) {
-    let pkg_metadata = get_pkg_metadata(path);
-
+fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
     if !lib_rs.exists() {
         eprintln!("{} doesn't exist!", lib_rs.to_string_lossy());
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([lib_rs]);
+    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
 
     while !queue.is_empty() {
         let mut entry = queue.pop_front().unwrap();
@@ -207,6 +210,14 @@ fn update(path: &Path) {
 
         parsed.push(result);
     }
+    parsed
+}
+
+fn update(path: &Path) {
+    let pkg_metadata = get_pkg_metadata(path);
+    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+
+    let parsed = parse_crate(&lib_rs);
 
     let merged = merge_parsed_results(parsed);
 
@@ -286,5 +297,23 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::ExtractTests { r_pkg_dir } => extract_tests(&r_pkg_dir),
+    }
+}
+
+fn extract_tests(path: &Path) {
+    let parsed = parse_crate(path);
+
+    let mut i = 0;
+    for result in parsed {
+        for test in result.tests {
+            i += 1;
+            println!(
+                "
+fn test_{i} {{
+{test}
+}}"
+            );
+        }
     }
 }

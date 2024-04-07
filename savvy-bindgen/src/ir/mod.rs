@@ -15,6 +15,7 @@ pub struct ParsedResult {
     pub structs: Vec<SavvyStruct>,
     pub enums: Vec<SavvyEnum>,
     pub mods: Vec<String>,
+    pub tests: Vec<String>,
 }
 
 impl ParsedResult {

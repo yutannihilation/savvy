@@ -32,7 +32,13 @@ pub fn read_file(path: &Path) -> String {
 }
 
 pub fn parse_file(path: &Path) -> ParsedResult {
-    let ast = match syn::parse_str::<syn::File>(&read_file(path)) {
+    let file_content = read_file(path);
+
+    let tests = parse_doctests(&file_content);
+    // TODO
+    // tests.append(parse_test_mods(&file_content));
+
+    let ast = match syn::parse_str::<syn::File>(&file_content) {
         Ok(ast) => ast,
         Err(_) => {
             eprintln!("Failed to parse the specified file");
@@ -50,6 +56,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         structs: Vec::new(),
         enums: Vec::new(),
         mods: Vec::new(),
+        tests,
     };
 
     for item in ast.items {
@@ -97,4 +104,60 @@ pub fn parse_file(path: &Path) -> ParsedResult {
     }
 
     result
+}
+
+fn parse_doctests(file_content: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+
+    let mut in_code_block = false;
+    let mut ignore = false;
+    let mut code_block: Vec<String> = Vec::new();
+    for line in file_content.lines() {
+        if !line.starts_with("///") && !line.starts_with("//!") {
+            continue;
+        }
+
+        let (_, line) = line.split_at(3);
+        let line = line.trim_start();
+
+        if line.starts_with("```") {
+            if !in_code_block {
+                // start of the code block
+
+                in_code_block = true;
+                let code_attr = line.strip_prefix("```").unwrap().trim();
+                ignore = match code_attr {
+                    "ignore" => true,
+                    "no_run" => true,
+                    "" => false,
+                    _ => {
+                        eprintln!(
+                            "[WARN] Ignoring unsupported code block attribute: {}",
+                            code_attr
+                        );
+                        true
+                    }
+                }
+            } else {
+                // end of the code block
+
+                if !ignore {
+                    out.push(code_block.join("\n"));
+                }
+
+                code_block.truncate(0);
+
+                // reset
+                in_code_block = false;
+                ignore = false;
+            }
+            continue;
+        }
+
+        if in_code_block {
+            code_block.push(line.to_string());
+        }
+    }
+
+    out
 }
