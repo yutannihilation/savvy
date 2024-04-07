@@ -198,7 +198,7 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
             continue;
         }
 
-        println!("Parsing {}", entry.to_string_lossy());
+        eprintln!("Parsing {}", entry.to_string_lossy());
 
         let result = savvy_bindgen::parse_file(&entry);
 

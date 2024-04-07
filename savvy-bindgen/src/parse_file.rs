@@ -130,6 +130,7 @@ fn parse_doctests(file_content: &str) -> Vec<String> {
                 ignore = match code_attr {
                     "ignore" => true,
                     "no_run" => true,
+                    "text" => true,
                     "" => false,
                     _ => {
                         eprintln!(
