@@ -40,8 +40,8 @@ enum Commands {
 
     /// Extract doctests and test modules
     ExtractTests {
-        /// Path to the root of an R package
-        r_pkg_dir: PathBuf,
+        /// Path to the lib.rs of the library
+        lib_rs: PathBuf,
     },
 }
 
@@ -297,7 +297,7 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
-        Commands::ExtractTests { r_pkg_dir } => extract_tests(&r_pkg_dir),
+        Commands::ExtractTests { lib_rs: r_pkg_dir } => extract_tests(&r_pkg_dir),
     }
 }
 
@@ -307,12 +307,49 @@ fn extract_tests(path: &Path) {
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
+            // Add indent
+            let test = test
+                .lines()
+                .map(|x| format!("    {x}"))
+                .collect::<Vec<String>>()
+                .join("\n");
+
             i += 1;
             println!(
-                "
-fn test_{i} {{
+                r#"
+#[savvy]
+fn test_{i}() -> savvy::Result<()> {{
+    std::panic::set_hook(Box::new(|panic_info| {{
+        let mut msg: Vec<String> = Vec::new();
+        let orig_msg = panic_info.to_string();
+        let mut lines = orig_msg.lines();
+        
+        lines.next(); // remove location
+        
+        for line in lines {{
+            msg.push(format!("    {{}}", line));
+        }}
+    
+        savvy::r_eprintln!("CODE:
 {test}
-}}"
+
+ERROR:
+{{}}
+", msg.join("\n"));
+    }}));
+
+    let test = || -> savvy::Result<()> {{
+        {test}
+        Ok(())
+    }};
+    let result = std::panic::catch_unwind(||test().expect("some error"));
+    
+    match result {{
+    Ok(_) => Ok(()),
+    Err(_) => Err("test failed".into())
+    }}
+}}
+"#
             );
         }
     }
