@@ -316,6 +316,8 @@ fn extract_tests(path: &Path) {
                 .collect::<Vec<String>>()
                 .join("\n");
 
+            let test_escaped = test.replace('{', "{{").replace('}', "}}");
+
             i += 1;
             println!(
                 r###"
@@ -333,7 +335,7 @@ fn test_{i}() -> savvy::Result<()> {{
         }}
     
         savvy::r_eprintln!(r##"CODE (location: {location}):
-{test}
+{test_escaped}
 
 ERROR:
 {{}}
@@ -341,7 +343,7 @@ ERROR:
     }}));
 
     let test = || -> savvy::Result<()> {{
-        {test}
+{test}
         Ok(())
     }};
     let result = std::panic::catch_unwind(||test().expect("some error"));
