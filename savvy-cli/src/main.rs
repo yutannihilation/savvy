@@ -304,6 +304,8 @@ fn main() {
 fn extract_tests(path: &Path) {
     let parsed = parse_crate(path);
 
+    let location = path.to_string_lossy().replace('\\', "/");
+
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
@@ -316,7 +318,7 @@ fn extract_tests(path: &Path) {
 
             i += 1;
             println!(
-                r#"
+                r###"
 #[savvy]
 fn test_{i}() -> savvy::Result<()> {{
     std::panic::set_hook(Box::new(|panic_info| {{
@@ -330,12 +332,12 @@ fn test_{i}() -> savvy::Result<()> {{
             msg.push(format!("    {{}}", line));
         }}
     
-        savvy::r_eprintln!("CODE:
+        savvy::r_eprintln!(r##"CODE (location: {location}):
 {test}
 
 ERROR:
 {{}}
-", msg.join("\n"));
+"##, msg.join("\n"));
     }}));
 
     let test = || -> savvy::Result<()> {{
@@ -349,7 +351,7 @@ ERROR:
     Err(_) => Err("test failed".into())
     }}
 }}
-"#
+"###
             );
         }
     }

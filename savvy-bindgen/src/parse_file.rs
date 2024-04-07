@@ -113,6 +113,7 @@ fn parse_doctests(file_content: &str) -> Vec<String> {
     let mut ignore = false;
     let mut code_block: Vec<String> = Vec::new();
     for line in file_content.lines() {
+        let line = line.trim_start();
         if !line.starts_with("///") && !line.starts_with("//!") {
             continue;
         }
