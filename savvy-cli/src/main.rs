@@ -301,6 +301,13 @@ fn main() {
     }
 }
 
+fn add_indent(x: &str, indent: usize) -> String {
+    x.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = indent))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
 fn extract_tests(path: &Path) {
     let parsed = parse_crate(path);
 
@@ -310,13 +317,9 @@ fn extract_tests(path: &Path) {
     for result in parsed {
         for test in result.tests {
             // Add indent
-            let test = test
-                .lines()
-                .map(|x| format!("    {x}"))
-                .collect::<Vec<String>>()
-                .join("\n");
+            let test_code = add_indent(&test, 8);
 
-            let test_escaped = test.replace('{', "{{").replace('}', "}}");
+            let test_escaped = add_indent(&test, 4).replace('{', "{{").replace('}', "}}");
 
             i += 1;
             println!(
@@ -343,7 +346,7 @@ ERROR:
     }}));
 
     let test = || -> savvy::Result<()> {{
-{test}
+{test_code}
         Ok(())
     }};
     let result = std::panic::catch_unwind(||test().expect("some error"));

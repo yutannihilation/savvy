@@ -91,6 +91,8 @@ impl ParsedResult {
                         .push(SavvyImpl::new(item_impl).expect("Failed to parse impl"))
                 }
 
+                item_impl.items.iter().for_each(|x| self.parse_impl_item(x));
+
                 self.tests
                     .append(&mut parse_doctests(&extract_docs(&item_impl.attrs)))
             }
@@ -116,13 +118,32 @@ impl ParsedResult {
             }
 
             syn::Item::Mod(item_mod) => {
-                // ignore mod inside the file (e.g. mod test { .. })
-                if item_mod.content.is_none() {
-                    self.mods.push(item_mod.ident.to_string())
+                if let Some((_, items)) = &item_mod.content {
+                    items.iter().for_each(|i| self.parse_item(i));
+                } else {
+                    self.mods.push(item_mod.ident.to_string());
                 }
             }
+
+            syn::Item::Macro(item_macro) => self
+                .tests
+                .append(&mut parse_doctests(&extract_docs(&item_macro.attrs))),
+
             _ => {}
         };
+    }
+
+    fn parse_impl_item(&mut self, item: &syn::ImplItem) {
+        let attrs = match item {
+            syn::ImplItem::Const(c) => &c.attrs,
+            syn::ImplItem::Fn(f) => &f.attrs,
+            syn::ImplItem::Type(t) => &t.attrs,
+            syn::ImplItem::Macro(m) => &m.attrs,
+            syn::ImplItem::Verbatim(_) => return,
+            _ => return,
+        };
+
+        self.tests.append(&mut parse_doctests(&extract_docs(attrs)))
     }
 }
 
@@ -132,17 +153,18 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T]) -> Vec<String> {
     let mut in_code_block = false;
     let mut ignore = false;
     let mut code_block: Vec<String> = Vec::new();
-    for line in lines {
-        let line = line.as_ref().trim_start_matches(['#', ' ']);
+    let mut spaces = 0;
+    for line_orig in lines {
+        let line = line_orig.as_ref();
 
-        eprintln!("{}", line);
-
-        if line.starts_with("```") {
+        if line.trim().starts_with("```") {
             if !in_code_block {
                 // start of the code block
 
+                spaces = line.len() - line.trim().len();
+
                 in_code_block = true;
-                let code_attr = line.strip_prefix("```").unwrap().trim();
+                let code_attr = line.trim().strip_prefix("```").unwrap().trim();
                 ignore = match code_attr {
                     "ignore" | "no_run" | "text" => true,
                     "" => false,
@@ -166,11 +188,17 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T]) -> Vec<String> {
                 // reset
                 in_code_block = false;
                 ignore = false;
+                spaces = 0;
             }
             continue;
         }
 
         if in_code_block {
+            let line = if line.len() <= spaces {
+                ""
+            } else {
+                line.split_at(spaces).1
+            };
             code_block.push(line.to_string());
         }
     }
