@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use syn::parse_quote;
 
-use crate::{ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
+use crate::{extract_docs, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
@@ -34,7 +34,13 @@ pub fn read_file(path: &Path) -> String {
 pub fn parse_file(path: &Path) -> ParsedResult {
     let file_content = read_file(path);
 
-    let tests = parse_doctests(&file_content);
+    let module_level_docs: Vec<&str> = file_content
+        .lines()
+        .filter(|x| x.trim().starts_with("//!"))
+        .map(|x| x.split_at(3).1.trim())
+        .collect();
+
+    let tests = parse_doctests(&module_level_docs);
     // TODO
     // tests.append(parse_test_mods(&file_content));
 
@@ -60,66 +66,76 @@ pub fn parse_file(path: &Path) -> ParsedResult {
     };
 
     for item in ast.items {
-        match item {
-            syn::Item::Fn(item_fn) => {
-                if is_marked(item_fn.attrs.as_slice()) {
-                    result
-                        .bare_fns
-                        .push(SavvyFn::from_fn(&item_fn).expect("Failed to parse function"))
-                }
-            }
-
-            syn::Item::Impl(item_impl) => {
-                if is_marked(item_impl.attrs.as_slice()) {
-                    result
-                        .impls
-                        .push(SavvyImpl::new(&item_impl).expect("Failed to parse impl"))
-                }
-            }
-
-            syn::Item::Struct(item_struct) => {
-                if is_marked(item_struct.attrs.as_slice()) {
-                    result
-                        .structs
-                        .push(SavvyStruct::new(&item_struct).expect("Failed to parse struct"))
-                }
-            }
-
-            syn::Item::Enum(item_enum) => {
-                if is_marked(item_enum.attrs.as_slice()) {
-                    result
-                        .enums
-                        .push(SavvyEnum::new(&item_enum).expect("Failed to parse enum"))
-                }
-            }
-
-            syn::Item::Mod(item_mod) => {
-                // ignore mod inside the file (e.g. mod test { .. })
-                if item_mod.content.is_none() {
-                    result.mods.push(item_mod.ident.to_string())
-                }
-            }
-            _ => continue,
-        };
+        result.parse_item(&item)
     }
 
     result
 }
 
-fn parse_doctests(file_content: &str) -> Vec<String> {
+impl ParsedResult {
+    fn parse_item(&mut self, item: &syn::Item) {
+        match item {
+            syn::Item::Fn(item_fn) => {
+                if is_marked(item_fn.attrs.as_slice()) {
+                    self.bare_fns
+                        .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
+                }
+
+                self.tests
+                    .append(&mut parse_doctests(&extract_docs(&item_fn.attrs)))
+            }
+
+            syn::Item::Impl(item_impl) => {
+                if is_marked(item_impl.attrs.as_slice()) {
+                    self.impls
+                        .push(SavvyImpl::new(item_impl).expect("Failed to parse impl"))
+                }
+
+                self.tests
+                    .append(&mut parse_doctests(&extract_docs(&item_impl.attrs)))
+            }
+
+            syn::Item::Struct(item_struct) => {
+                if is_marked(item_struct.attrs.as_slice()) {
+                    self.structs
+                        .push(SavvyStruct::new(item_struct).expect("Failed to parse struct"))
+                }
+
+                self.tests
+                    .append(&mut parse_doctests(&extract_docs(&item_struct.attrs)))
+            }
+
+            syn::Item::Enum(item_enum) => {
+                if is_marked(item_enum.attrs.as_slice()) {
+                    self.enums
+                        .push(SavvyEnum::new(item_enum).expect("Failed to parse enum"))
+                }
+
+                self.tests
+                    .append(&mut parse_doctests(&extract_docs(&item_enum.attrs)))
+            }
+
+            syn::Item::Mod(item_mod) => {
+                // ignore mod inside the file (e.g. mod test { .. })
+                if item_mod.content.is_none() {
+                    self.mods.push(item_mod.ident.to_string())
+                }
+            }
+            _ => {}
+        };
+    }
+}
+
+fn parse_doctests<T: AsRef<str>>(lines: &[T]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
 
     let mut in_code_block = false;
     let mut ignore = false;
     let mut code_block: Vec<String> = Vec::new();
-    for line in file_content.lines() {
-        let line = line.trim_start();
-        if !line.starts_with("///") && !line.starts_with("//!") {
-            continue;
-        }
+    for line in lines {
+        let line = line.as_ref().trim_start_matches(['#', ' ']);
 
-        let (_, line) = line.split_at(3);
-        let line = line.trim_start();
+        eprintln!("{}", line);
 
         if line.starts_with("```") {
             if !in_code_block {
@@ -128,9 +144,7 @@ fn parse_doctests(file_content: &str) -> Vec<String> {
                 in_code_block = true;
                 let code_attr = line.strip_prefix("```").unwrap().trim();
                 ignore = match code_attr {
-                    "ignore" => true,
-                    "no_run" => true,
-                    "text" => true,
+                    "ignore" | "no_run" | "text" => true,
                     "" => false,
                     _ => {
                         eprintln!(
