@@ -102,6 +102,11 @@ impl OwnedIntegerSexp {
     }
 
     /// Constructs a new, initialized integer vector.
+    ///
+    /// ```
+    /// let out = savvy::OwnedIntegerSexp::new(3)?;
+    /// assert_eq!(out.as_slice(), &[0, 0, 0]);
+    /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }
@@ -114,7 +119,9 @@ impl OwnedIntegerSexp {
     ///
     /// For example, you can use this in `TryFrom` implementation.
     ///
-    /// ``` no_run
+    /// ```
+    /// use savvy::{Sexp, OwnedIntegerSexp};
+    ///
     /// struct Pair {
     ///     x: i32,
     ///     y: i32

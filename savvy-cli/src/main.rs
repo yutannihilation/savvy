@@ -16,6 +16,8 @@ use savvy_bindgen::{
     generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
 
+const DEFAULT_LIB_RS: &str = "./src/lib.rs";
+
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
 #[command(about, version, long_about = None)]
@@ -36,6 +38,18 @@ enum Commands {
     Init {
         /// Path to the root of an R package
         r_pkg_dir: PathBuf,
+    },
+
+    /// Run tests within an R session
+    Test {
+        /// Path to the lib.rs of the library (default: ./src/lib.rs)
+        lib_rs: Option<PathBuf>,
+    },
+
+    /// Extract doctests and test modules
+    ExtractTests {
+        /// Path to the lib.rs of the library (default: ./src/lib.rs)
+        lib_rs: Option<PathBuf>,
     },
 }
 
@@ -163,18 +177,15 @@ to set the configure script as executable
     );
 }
 
-fn update(path: &Path) {
-    let pkg_metadata = get_pkg_metadata(path);
-
+fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
-    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
     if !lib_rs.exists() {
         eprintln!("{} doesn't exist!", lib_rs.to_string_lossy());
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([lib_rs]);
+    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
 
     while !queue.is_empty() {
         let mut entry = queue.pop_front().unwrap();
@@ -184,29 +195,36 @@ fn update(path: &Path) {
         // - foo/bar/mod.rs
         // - foo/bar.rs
 
-        // if it's a directory, parse the mod.rs file first
+        // if it's a directory, parse the mod.rs file
         if entry.is_dir() {
-            queue.push_back(entry.join("mod.rs"));
-        }
+            entry.push("mod.rs")
+        } else {
+            entry.set_extension("rs");
 
-        entry.set_extension("rs");
+            if !entry.exists() || !entry.is_file() {
+                continue;
+            }
+        };
 
-        if !entry.exists() || !entry.is_file() {
-            continue;
-        }
-
-        println!("Parsing {}", entry.to_string_lossy());
+        eprintln!("Parsing {}", entry.to_string_lossy());
 
         let result = savvy_bindgen::parse_file(&entry);
 
         // if the file has `mod` declarations, add the files to the queue.
-        result
-            .mod_dirs()
-            .into_iter()
-            .for_each(|x| queue.push_back(x));
+        result.mod_dirs().into_iter().for_each(|d| {
+            queue.push_back(d);
+        });
 
         parsed.push(result);
     }
+    parsed
+}
+
+fn update(path: &Path) {
+    let pkg_metadata = get_pkg_metadata(path);
+    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+
+    let parsed = parse_crate(&lib_rs);
 
     let merged = merge_parsed_results(parsed);
 
@@ -286,5 +304,138 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::Test { lib_rs } => {
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            run_test(tests);
+        }
+        Commands::ExtractTests { lib_rs } => {
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            println!("{tests}");
+        }
     }
+}
+
+fn run_test(tests: String) {
+    let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
+    write_file(
+        &temp_r,
+        &format!(
+            r###"
+e <- new.env()
+savvy::savvy_source(r"(
+{tests}
+)", use_cache_dir = TRUE, env = e)
+for (f in ls(e)) {{
+    f <- get(f, e, inherits = FALSE)
+    f()
+}}
+
+cat("test result: ok\n")
+"###
+        ),
+    );
+
+    eprintln!("\n--------------------------------------------\n");
+
+    let res = std::process::Command::new("R")
+        .args(["-q", "-f", &temp_r.to_string_lossy()])
+        .output();
+
+    match &res {
+        Ok(output) => {
+            if !output.status.success() {
+                eprintln!("Test failed with status code {}", output.status);
+                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
+                std::process::exit(1);
+            }
+            eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+        }
+        Err(e) => match e.kind() {
+            std::io::ErrorKind::NotFound => {
+                eprintln!("`R` is not found on PATH. Please add R to PATH.");
+                std::process::exit(1);
+            }
+            _ => {
+                panic!("{e}");
+            }
+        },
+    };
+}
+
+fn add_indent(x: &str, indent: usize) -> String {
+    x.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = indent))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn extract_tests(path: &Path) -> String {
+    let parsed = parse_crate(path);
+
+    let mut out = "use savvy::savvy;\n\n".to_string();
+
+    let mut i = 0;
+    for result in parsed {
+        for test in result.tests {
+            let label = test.label;
+            let location = test.location;
+
+            // Add indent
+            let test_code = add_indent(&test.code, 8);
+
+            let test_escaped = add_indent(&test.code, 4)
+                .replace('{', "{{")
+                .replace('}', "}}");
+
+            i += 1;
+            out.push_str(&format!(
+                r###"#[savvy]
+fn test_{i}() -> savvy::Result<()> {{
+    eprint!(r##"testing {label} (file: {location}) ..."##);
+
+    std::panic::set_hook(Box::new(|panic_info| {{
+        let mut msg: Vec<String> = Vec::new();
+        let orig_msg = panic_info.to_string();
+        let mut lines = orig_msg.lines();
+        
+        lines.next(); // remove location
+        
+        for line in lines {{
+            msg.push(format!("    {{}}", line));
+        }}
+    
+        savvy::r_eprintln!(r##"
+
+
+Location:
+    {label} (file: {location})
+
+Code:
+{test_escaped}
+
+Error:
+{{}}
+"##, msg.join("\n"));
+    }}));
+
+    let test = || -> savvy::Result<()> {{
+{test_code}
+        Ok(())
+    }};
+    let result = std::panic::catch_unwind(||test().expect("some error"));
+    
+    match result {{
+        Ok(_) => {{
+            eprintln!("ok");
+            Ok(())
+        }},
+        Err(_) => Err("test failed".into()),
+    }}
+}}
+"###,
+            ));
+        }
+    }
+
+    out
 }

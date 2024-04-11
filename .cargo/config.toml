@@ -1,5 +1,6 @@
 [alias]
 xtask = "run --package xtask --"
+r-test = "run --manifest-path ./savvy-cli/Cargo.toml -- test"
 
 # On Windows, link.exe fails when the artifact contains unresolved symbols
 # (i.e., R's API, which cannot be used without a real R session). This option
