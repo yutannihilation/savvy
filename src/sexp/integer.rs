@@ -104,7 +104,7 @@ impl OwnedIntegerSexp {
     /// Constructs a new, initialized integer vector.
     ///
     /// ```
-    /// let mut out = savvy::OwnedIntegerSexp::new(3)?;
+    /// let out = savvy::OwnedIntegerSexp::new(3)?;
     /// assert_eq!(out.as_slice(), &[0, 0, 0]);
     /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
