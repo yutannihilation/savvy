@@ -33,7 +33,8 @@ pub fn read_file(path: &Path) -> String {
     content
 }
 
-pub fn parse_file(path: &Path, cur_mod: &str) -> ParsedResult {
+pub fn parse_file(path: &Path) -> ParsedResult {
+    let location = &path.to_string_lossy();
     let file_content = read_file(path);
 
     let module_level_docs: Vec<&str> = file_content
@@ -42,7 +43,7 @@ pub fn parse_file(path: &Path, cur_mod: &str) -> ParsedResult {
         .map(|x| x.split_at(3).1.trim())
         .collect();
 
-    let tests = parse_doctests(&module_level_docs, cur_mod);
+    let tests = parse_doctests(&module_level_docs, "module-level doc", location);
     // TODO
     // tests.append(parse_test_mods(&file_content));
 
@@ -64,19 +65,18 @@ pub fn parse_file(path: &Path, cur_mod: &str) -> ParsedResult {
         structs: Vec::new(),
         enums: Vec::new(),
         mods: Vec::new(),
-        cur_mod: cur_mod.to_string(),
         tests,
     };
 
     for item in ast.items {
-        result.parse_item(&item)
+        result.parse_item(&item, location)
     }
 
     result
 }
 
 impl ParsedResult {
-    fn parse_item(&mut self, item: &syn::Item) {
+    fn parse_item(&mut self, item: &syn::Item, location: &str) {
         match item {
             syn::Item::Fn(item_fn) => {
                 if is_marked(item_fn.attrs.as_slice()) {
@@ -84,10 +84,13 @@ impl ParsedResult {
                         .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
                 }
 
-                let label = format!("{}::{}", self.cur_mod, item_fn.sig.ident);
+                let label = format!("fn {}", item_fn.sig.ident);
 
-                self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_fn.attrs), &label))
+                self.tests.append(&mut parse_doctests(
+                    &extract_docs(&item_fn.attrs),
+                    &label,
+                    location,
+                ))
             }
 
             syn::Item::Impl(item_impl) => {
@@ -100,15 +103,18 @@ impl ParsedResult {
                     syn::Type::Path(p) => p.path.segments.last().unwrap().ident.to_string(),
                     _ => "(unknown)".to_string(),
                 };
-                let label = format!("{}::{}", self.cur_mod, self_ty);
+                let label = format!("impl {}", self_ty);
 
                 item_impl
                     .items
                     .iter()
-                    .for_each(|x| self.parse_impl_item(x, &label));
+                    .for_each(|x| self.parse_impl_item(x, &label, location));
 
-                self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_impl.attrs), &label))
+                self.tests.append(&mut parse_doctests(
+                    &extract_docs(&item_impl.attrs),
+                    &label,
+                    location,
+                ))
             }
 
             syn::Item::Struct(item_struct) => {
@@ -117,11 +123,12 @@ impl ParsedResult {
                         .push(SavvyStruct::new(item_struct).expect("Failed to parse struct"))
                 }
 
-                let label = format!("{}::{}", self.cur_mod, item_struct.ident);
+                let label = format!("struct {}", item_struct.ident);
 
                 self.tests.append(&mut parse_doctests(
                     &extract_docs(&item_struct.attrs),
                     &label,
+                    location,
                 ))
             }
 
@@ -131,15 +138,18 @@ impl ParsedResult {
                         .push(SavvyEnum::new(item_enum).expect("Failed to parse enum"))
                 }
 
-                let label = format!("{}::{}", self.cur_mod, item_enum.ident);
+                let label = format!("enum {}", item_enum.ident);
 
-                self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_enum.attrs), &label))
+                self.tests.append(&mut parse_doctests(
+                    &extract_docs(&item_enum.attrs),
+                    &label,
+                    location,
+                ))
             }
 
             syn::Item::Mod(item_mod) => {
                 if let Some((_, items)) = &item_mod.content {
-                    items.iter().for_each(|i| self.parse_item(i));
+                    items.iter().for_each(|i| self.parse_item(i, location));
                 } else {
                     self.mods.push(item_mod.ident.to_string());
                 }
@@ -150,11 +160,12 @@ impl ParsedResult {
                     Some(i) => i.to_string(),
                     None => "unknown".to_string(),
                 };
-                let label = format!("{}::{}", self.cur_mod, ident);
+                let label = format!("macro {}", ident);
 
                 self.tests.append(&mut parse_doctests(
                     &extract_docs(&item_macro.attrs),
                     &label,
+                    location,
                 ))
             }
 
@@ -162,7 +173,7 @@ impl ParsedResult {
         };
     }
 
-    fn parse_impl_item(&mut self, item: &syn::ImplItem, label: &str) {
+    fn parse_impl_item(&mut self, item: &syn::ImplItem, label: &str, location: &str) {
         let attrs = match item {
             syn::ImplItem::Const(c) => &c.attrs,
             syn::ImplItem::Fn(f) => &f.attrs,
@@ -173,11 +184,11 @@ impl ParsedResult {
         };
 
         self.tests
-            .append(&mut parse_doctests(&extract_docs(attrs), label))
+            .append(&mut parse_doctests(&extract_docs(attrs), label, location))
     }
 }
 
-fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str) -> Vec<ParsedTestCase> {
+fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Vec<ParsedTestCase> {
     let mut out: Vec<ParsedTestCase> = Vec::new();
 
     let mut in_code_block = false;
@@ -213,6 +224,7 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str) -> Vec<ParsedTestCase
                     out.push(ParsedTestCase {
                         code: code_block.join("\n"),
                         label: label.to_string(),
+                        location: location.to_string(),
                     });
                 }
 

@@ -10,6 +10,7 @@ pub mod savvy_struct;
 pub struct ParsedTestCase {
     pub label: String,
     pub code: String,
+    pub location: String,
 }
 
 // For main.rs
@@ -20,7 +21,6 @@ pub struct ParsedResult {
     pub structs: Vec<SavvyStruct>,
     pub enums: Vec<SavvyEnum>,
     pub mods: Vec<String>,
-    pub cur_mod: String,
     pub tests: Vec<ParsedTestCase>,
 }
 

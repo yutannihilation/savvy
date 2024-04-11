@@ -185,10 +185,10 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([("".to_string(), lib_rs.to_path_buf())]);
+    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
 
     while !queue.is_empty() {
-        let (cur_mod, mut entry) = queue.pop_front().unwrap();
+        let mut entry = queue.pop_front().unwrap();
 
         // there can be two patterns for a module named "bar"
         //
@@ -208,16 +208,11 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
 
         eprintln!("Parsing {}", entry.to_string_lossy());
 
-        let result = savvy_bindgen::parse_file(&entry, &cur_mod);
+        let result = savvy_bindgen::parse_file(&entry);
 
         // if the file has `mod` declarations, add the files to the queue.
-        result.mods.iter().for_each(|m| {
-            let next_mod = if cur_mod.is_empty() {
-                m.clone()
-            } else {
-                format!("{cur_mod}::{m}")
-            };
-            queue.push_back((next_mod, result.base_path.join(m)));
+        result.mod_dirs().into_iter().for_each(|d| {
+            queue.push_back(d);
         });
 
         parsed.push(result);
@@ -331,7 +326,6 @@ savvy::savvy_source(r"(
 {tests}
 )", use_cache_dir = TRUE, env = e)
 for (f in ls(e)) {{
-    cat(sprintf("testing %s\n", f))
     f <- get(f, e, inherits = FALSE)
     f()
 }}
@@ -340,6 +334,9 @@ cat("test result: ok\n")
 "###
         ),
     );
+
+    eprintln!("\n--------------------------------------------\n");
+
     let res = std::process::Command::new("R")
         .args(["-q", "-f", &temp_r.to_string_lossy()])
         .output();
@@ -379,7 +376,8 @@ fn extract_tests(path: &Path) -> String {
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
-            let location = test.label;
+            let label = test.label;
+            let location = test.location;
 
             // Add indent
             let test_code = add_indent(&test.code, 8);
@@ -392,6 +390,8 @@ fn extract_tests(path: &Path) -> String {
             out.push_str(&format!(
                 r###"#[savvy]
 fn test_{i}() -> savvy::Result<()> {{
+    eprint!(r##"testing {label} (file: {location}) ..."##);
+
     std::panic::set_hook(Box::new(|panic_info| {{
         let mut msg: Vec<String> = Vec::new();
         let orig_msg = panic_info.to_string();
@@ -404,8 +404,10 @@ fn test_{i}() -> savvy::Result<()> {{
         }}
     
         savvy::r_eprintln!(r##"
+
+
 Location:
-    {location}
+    {label} (file: {location})
 
 Code:
 {test_escaped}
@@ -422,8 +424,11 @@ Error:
     let result = std::panic::catch_unwind(||test().expect("some error"));
     
     match result {{
-    Ok(_) => Ok(()),
-    Err(_) => Err("test failed".into())
+        Ok(_) => {{
+            eprintln!("ok");
+            Ok(())
+        }},
+        Err(_) => Err("test failed".into()),
     }}
 }}
 "###,
