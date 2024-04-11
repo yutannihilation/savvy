@@ -105,7 +105,7 @@ impl OwnedIntegerSexp {
     ///
     /// ```
     /// let out = savvy::OwnedIntegerSexp::new(3)?;
-    /// assert_eq!(out.as_slice(), &[0, 0, 0]);
+    /// assert_eq!(out.as_slice(), &[0, 1, 0]);
     /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)

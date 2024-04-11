@@ -2,7 +2,9 @@ use std::{fs::File, io::Read, path::Path};
 
 use syn::parse_quote;
 
-use crate::{extract_docs, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
+use crate::{
+    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct,
+};
 
 fn is_marked(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
@@ -31,7 +33,7 @@ pub fn read_file(path: &Path) -> String {
     content
 }
 
-pub fn parse_file(path: &Path) -> ParsedResult {
+pub fn parse_file(path: &Path, cur_mod: &str) -> ParsedResult {
     let file_content = read_file(path);
 
     let module_level_docs: Vec<&str> = file_content
@@ -40,7 +42,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         .map(|x| x.split_at(3).1.trim())
         .collect();
 
-    let tests = parse_doctests(&module_level_docs);
+    let tests = parse_doctests(&module_level_docs, cur_mod);
     // TODO
     // tests.append(parse_test_mods(&file_content));
 
@@ -62,6 +64,7 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         structs: Vec::new(),
         enums: Vec::new(),
         mods: Vec::new(),
+        cur_mod: cur_mod.to_string(),
         tests,
     };
 
@@ -81,8 +84,10 @@ impl ParsedResult {
                         .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
                 }
 
+                let label = format!("{}::{}", self.cur_mod, item_fn.sig.ident);
+
                 self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_fn.attrs)))
+                    .append(&mut parse_doctests(&extract_docs(&item_fn.attrs), &label))
             }
 
             syn::Item::Impl(item_impl) => {
@@ -91,10 +96,19 @@ impl ParsedResult {
                         .push(SavvyImpl::new(item_impl).expect("Failed to parse impl"))
                 }
 
-                item_impl.items.iter().for_each(|x| self.parse_impl_item(x));
+                let self_ty = match item_impl.self_ty.as_ref() {
+                    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.to_string(),
+                    _ => "(unknown)".to_string(),
+                };
+                let label = format!("{}::{}", self.cur_mod, self_ty);
+
+                item_impl
+                    .items
+                    .iter()
+                    .for_each(|x| self.parse_impl_item(x, &label));
 
                 self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_impl.attrs)))
+                    .append(&mut parse_doctests(&extract_docs(&item_impl.attrs), &label))
             }
 
             syn::Item::Struct(item_struct) => {
@@ -103,8 +117,12 @@ impl ParsedResult {
                         .push(SavvyStruct::new(item_struct).expect("Failed to parse struct"))
                 }
 
-                self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_struct.attrs)))
+                let label = format!("{}::{}", self.cur_mod, item_struct.ident);
+
+                self.tests.append(&mut parse_doctests(
+                    &extract_docs(&item_struct.attrs),
+                    &label,
+                ))
             }
 
             syn::Item::Enum(item_enum) => {
@@ -113,8 +131,10 @@ impl ParsedResult {
                         .push(SavvyEnum::new(item_enum).expect("Failed to parse enum"))
                 }
 
+                let label = format!("{}::{}", self.cur_mod, item_enum.ident);
+
                 self.tests
-                    .append(&mut parse_doctests(&extract_docs(&item_enum.attrs)))
+                    .append(&mut parse_doctests(&extract_docs(&item_enum.attrs), &label))
             }
 
             syn::Item::Mod(item_mod) => {
@@ -125,15 +145,24 @@ impl ParsedResult {
                 }
             }
 
-            syn::Item::Macro(item_macro) => self
-                .tests
-                .append(&mut parse_doctests(&extract_docs(&item_macro.attrs))),
+            syn::Item::Macro(item_macro) => {
+                let ident = match &item_macro.ident {
+                    Some(i) => i.to_string(),
+                    None => "unknown".to_string(),
+                };
+                let label = format!("{}::{}", self.cur_mod, ident);
+
+                self.tests.append(&mut parse_doctests(
+                    &extract_docs(&item_macro.attrs),
+                    &label,
+                ))
+            }
 
             _ => {}
         };
     }
 
-    fn parse_impl_item(&mut self, item: &syn::ImplItem) {
+    fn parse_impl_item(&mut self, item: &syn::ImplItem, label: &str) {
         let attrs = match item {
             syn::ImplItem::Const(c) => &c.attrs,
             syn::ImplItem::Fn(f) => &f.attrs,
@@ -143,12 +172,13 @@ impl ParsedResult {
             _ => return,
         };
 
-        self.tests.append(&mut parse_doctests(&extract_docs(attrs)))
+        self.tests
+            .append(&mut parse_doctests(&extract_docs(attrs), label))
     }
 }
 
-fn parse_doctests<T: AsRef<str>>(lines: &[T]) -> Vec<String> {
-    let mut out: Vec<String> = Vec::new();
+fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str) -> Vec<ParsedTestCase> {
+    let mut out: Vec<ParsedTestCase> = Vec::new();
 
     let mut in_code_block = false;
     let mut ignore = false;
@@ -180,7 +210,10 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T]) -> Vec<String> {
                 // end of the code block
 
                 if !ignore {
-                    out.push(code_block.join("\n"));
+                    out.push(ParsedTestCase {
+                        code: code_block.join("\n"),
+                        label: label.to_string(),
+                    });
                 }
 
                 code_block.truncate(0);

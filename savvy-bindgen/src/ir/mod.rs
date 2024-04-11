@@ -7,6 +7,11 @@ pub mod savvy_fn;
 pub mod savvy_impl;
 pub mod savvy_struct;
 
+pub struct ParsedTestCase {
+    pub label: String,
+    pub code: String,
+}
+
 // For main.rs
 pub struct ParsedResult {
     pub base_path: std::path::PathBuf,
@@ -15,7 +20,8 @@ pub struct ParsedResult {
     pub structs: Vec<SavvyStruct>,
     pub enums: Vec<SavvyEnum>,
     pub mods: Vec<String>,
-    pub tests: Vec<String>,
+    pub cur_mod: String,
+    pub tests: Vec<ParsedTestCase>,
 }
 
 impl ParsedResult {

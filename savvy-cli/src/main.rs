@@ -185,36 +185,40 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
+    let mut queue = VecDeque::from([("".to_string(), lib_rs.to_path_buf())]);
 
     while !queue.is_empty() {
-        let mut entry = queue.pop_front().unwrap();
+        let (cur_mod, mut entry) = queue.pop_front().unwrap();
 
         // there can be two patterns for a module named "bar"
         //
         // - foo/bar/mod.rs
         // - foo/bar.rs
 
-        // if it's a directory, parse the mod.rs file first
+        // if it's a directory, parse the mod.rs file
         if entry.is_dir() {
-            queue.push_back(entry.join("mod.rs"));
-        }
+            entry.push("mod.rs")
+        } else {
+            entry.set_extension("rs");
 
-        entry.set_extension("rs");
-
-        if !entry.exists() || !entry.is_file() {
-            continue;
-        }
+            if !entry.exists() || !entry.is_file() {
+                continue;
+            }
+        };
 
         eprintln!("Parsing {}", entry.to_string_lossy());
 
-        let result = savvy_bindgen::parse_file(&entry);
+        let result = savvy_bindgen::parse_file(&entry, &cur_mod);
 
         // if the file has `mod` declarations, add the files to the queue.
-        result
-            .mod_dirs()
-            .into_iter()
-            .for_each(|x| queue.push_back(x));
+        result.mods.iter().for_each(|m| {
+            let next_mod = if cur_mod.is_empty() {
+                m.clone()
+            } else {
+                format!("{cur_mod}::{m}")
+            };
+            queue.push_back((next_mod, result.base_path.join(m)));
+        });
 
         parsed.push(result);
     }
@@ -369,17 +373,19 @@ fn add_indent(x: &str, indent: usize) -> String {
 fn extract_tests(path: &Path) -> String {
     let parsed = parse_crate(path);
 
-    let location = path.to_string_lossy().replace('\\', "/");
-
     let mut out = "use savvy::savvy;\n\n".to_string();
 
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
-            // Add indent
-            let test_code = add_indent(&test, 8);
+            let location = test.label;
 
-            let test_escaped = add_indent(&test, 4).replace('{', "{{").replace('}', "}}");
+            // Add indent
+            let test_code = add_indent(&test.code, 8);
+
+            let test_escaped = add_indent(&test.code, 4)
+                .replace('{', "{{")
+                .replace('}', "}}");
 
             i += 1;
             out.push_str(&format!(
@@ -396,10 +402,14 @@ fn test_{i}() -> savvy::Result<()> {{
             msg.push(format!("    {{}}", line));
         }}
     
-        savvy::r_eprintln!(r##"CODE (location: {location}):
+        savvy::r_eprintln!(r##"
+Location:
+    {location}
+
+Code:
 {test_escaped}
 
-ERROR:
+Error:
 {{}}
 "##, msg.join("\n"));
     }}));
