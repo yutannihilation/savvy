@@ -40,10 +40,20 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::rcmdcheck
+            github::yutannihilation/savvy-helper-R-package
+          needs: check
+          working-directory: R-package
+  
+
       - name: Run cargo test
         run: |
           cargo test --manifest-path=./savvy-macro/Cargo.toml
-          cargo test --manifest-path=./savvy-bindgen/Cargo.toml  
+          cargo test --manifest-path=./savvy-bindgen/Cargo.toml
+          cargo r-test
 
       - name: Tweak
         run: |
@@ -78,20 +88,8 @@ jobs:
       - name: Run cargo test of the R package
         run: cargo test --manifest-path=./R-package/src/rust/Cargo.toml
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::rcmdcheck
-            github::yutannihilation/savvy-helper-R-package
-            
-          needs: check
-          working-directory: R-package
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual")'  # no --as-cran
           upload-snapshots: true
           working-directory: R-package
-
-      - name: Run doctests and tests
-        run: cargo r-test
