@@ -16,6 +16,8 @@ use savvy_bindgen::{
     generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
 
+const DEFAULT_LIB_RS: &str = "./src/lib.rs";
+
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
 #[command(about, version, long_about = None)]
@@ -36,6 +38,12 @@ enum Commands {
     Init {
         /// Path to the root of an R package
         r_pkg_dir: PathBuf,
+    },
+
+    /// Run tests within an R session
+    Test {
+        /// Path to the lib.rs of the library (default: ./src/lib.rs)
+        lib_rs: Option<PathBuf>,
     },
 
     /// Extract doctests and test modules
@@ -297,10 +305,58 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::Test { lib_rs } => {
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            run_test(tests);
+        }
         Commands::ExtractTests { lib_rs } => {
-            extract_tests(&lib_rs.unwrap_or("./src/lib.rs".into()))
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            println!("{tests}");
         }
     }
+}
+
+fn run_test(tests: String) {
+    let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
+    write_file(
+        &temp_r,
+        &format!(
+            r###"
+e <- new.env()
+savvy::savvy_source(r"(
+{tests}
+)", use_cache_dir = TRUE, env = e)
+for (f in ls(e)) {{
+    cat(sprintf("testing %s\n", f))
+    f <- get(f, e, inherits = FALSE)
+    f()
+}}
+
+cat("test result: ok\n")
+"###
+        ),
+    );
+    let res = std::process::Command::new("R")
+        .args(["-q", "-f", &temp_r.to_string_lossy()])
+        .output();
+
+    match &res {
+        Ok(output) => {
+            if !output.status.success() {
+                eprintln!("Test failed with status code {}", output.status);
+                eprintln!("stderr: \n{}\n", String::from_utf8_lossy(&output.stderr));
+            }
+        }
+        Err(e) => match e.kind() {
+            std::io::ErrorKind::NotFound => {
+                eprintln!("`R` is not found on PATH. Please add R to PATH.");
+                std::process::exit(1);
+            }
+            _ => {
+                panic!("{e}");
+            }
+        },
+    };
 }
 
 fn add_indent(x: &str, indent: usize) -> String {
@@ -310,12 +366,12 @@ fn add_indent(x: &str, indent: usize) -> String {
         .join("\n")
 }
 
-fn extract_tests(path: &Path) {
+fn extract_tests(path: &Path) -> String {
     let parsed = parse_crate(path);
 
     let location = path.to_string_lossy().replace('\\', "/");
 
-    println!("use savvy::savvy;");
+    let mut out = "use savvy::savvy;\n\n".to_string();
 
     let mut i = 0;
     for result in parsed {
@@ -326,7 +382,7 @@ fn extract_tests(path: &Path) {
             let test_escaped = add_indent(&test, 4).replace('{', "{{").replace('}', "}}");
 
             i += 1;
-            println!(
+            out.push_str(&format!(
                 r###"#[savvy]
 fn test_{i}() -> savvy::Result<()> {{
     std::panic::set_hook(Box::new(|panic_info| {{
@@ -359,8 +415,10 @@ ERROR:
     Err(_) => Err("test failed".into())
     }}
 }}
-"###
-            );
+"###,
+            ));
         }
     }
+
+    out
 }
