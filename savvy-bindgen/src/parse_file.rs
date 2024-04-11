@@ -174,17 +174,20 @@ impl ParsedResult {
     }
 
     fn parse_impl_item(&mut self, item: &syn::ImplItem, label: &str, location: &str) {
-        let attrs = match item {
-            syn::ImplItem::Const(c) => &c.attrs,
-            syn::ImplItem::Fn(f) => &f.attrs,
-            syn::ImplItem::Type(t) => &t.attrs,
-            syn::ImplItem::Macro(m) => &m.attrs,
+        let (attrs, label) = match item {
+            syn::ImplItem::Const(c) => (&c.attrs, format!("{}::{}", label, c.ident)),
+            syn::ImplItem::Fn(f) => (&f.attrs, format!("{}::{}", label, f.sig.ident)),
+            syn::ImplItem::Type(t) => (&t.attrs, format!("{}::{}", label, t.ident)),
+            syn::ImplItem::Macro(m) => (
+                &m.attrs,
+                format!("{}::{}", label, m.mac.path.segments.last().unwrap().ident),
+            ),
             syn::ImplItem::Verbatim(_) => return,
             _ => return,
         };
 
         self.tests
-            .append(&mut parse_doctests(&extract_docs(attrs), label, location))
+            .append(&mut parse_doctests(&extract_docs(attrs), &label, location))
     }
 }
 

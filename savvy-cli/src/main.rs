@@ -345,9 +345,10 @@ cat("test result: ok\n")
         Ok(output) => {
             if !output.status.success() {
                 eprintln!("Test failed with status code {}", output.status);
-                eprintln!("stderr: \n{}\n", String::from_utf8_lossy(&output.stderr));
+                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
                 std::process::exit(1);
             }
+            eprintln!("{}", String::from_utf8_lossy(&output.stderr));
         }
         Err(e) => match e.kind() {
             std::io::ErrorKind::NotFound => {
