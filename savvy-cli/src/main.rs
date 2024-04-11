@@ -40,8 +40,8 @@ enum Commands {
 
     /// Extract doctests and test modules
     ExtractTests {
-        /// Path to the lib.rs of the library
-        lib_rs: PathBuf,
+        /// Path to the lib.rs of the library (default: ./src/lib.rs)
+        lib_rs: Option<PathBuf>,
     },
 }
 
@@ -297,7 +297,9 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
-        Commands::ExtractTests { lib_rs: r_pkg_dir } => extract_tests(&r_pkg_dir),
+        Commands::ExtractTests { lib_rs } => {
+            extract_tests(&lib_rs.unwrap_or("./src/lib.rs".into()))
+        }
     }
 }
 
@@ -313,6 +315,8 @@ fn extract_tests(path: &Path) {
 
     let location = path.to_string_lossy().replace('\\', "/");
 
+    println!("use savvy::savvy;");
+
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
@@ -323,8 +327,7 @@ fn extract_tests(path: &Path) {
 
             i += 1;
             println!(
-                r###"
-#[savvy]
+                r###"#[savvy]
 fn test_{i}() -> savvy::Result<()> {{
     std::panic::set_hook(Box::new(|panic_info| {{
         let mut msg: Vec<String> = Vec::new();
