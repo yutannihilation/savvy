@@ -280,8 +280,8 @@ fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> Stri
         .replace('{', "{{")
         .replace('}', "}}");
     format!(
-                r###"#[savvy]
-fn test_{i}() -> savvy::Result<()> {{
+        r###"#[savvy]
+fn @FUNCTION_NAME@() -> savvy::Result<()> {{
     eprint!(r##"running doctest of {label} (file: {location}) ..."##);
 
     std::panic::set_hook(Box::new(|panic_info| {{
@@ -323,6 +323,6 @@ Error:
         Err(_) => Err("test failed".into()),
     }}
 }}
-"###,,
+"###
     )
 }
