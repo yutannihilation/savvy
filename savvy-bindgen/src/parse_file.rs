@@ -280,26 +280,26 @@ fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> Stri
         .replace('{', "{{")
         .replace('}', "}}");
     format!(
-        r###"#[savvy]
-fn @FUNCTION_NAME@() -> savvy::Result<()> {{
-eprint!(r##"running doctest of {label} (file: {location}) ..."##);
+                r###"#[savvy]
+fn test_{i}() -> savvy::Result<()> {{
+    eprint!(r##"running doctest of {label} (file: {location}) ..."##);
 
-std::panic::set_hook(Box::new(|panic_info| {{
-let mut msg: Vec<String> = Vec::new();
-let orig_msg = panic_info.to_string();
-let mut lines = orig_msg.lines();
-
-lines.next(); // remove location
-
-for line in lines {{
-    msg.push(format!("    {{}}", line));
-}}
-
-savvy::r_eprintln!(r##"
+    std::panic::set_hook(Box::new(|panic_info| {{
+        let mut msg: Vec<String> = Vec::new();
+        let orig_msg = panic_info.to_string();
+        let mut lines = orig_msg.lines();
+        
+        lines.next(); // remove location
+        
+        for line in lines {{
+            msg.push(format!("    {{}}", line));
+        }}
+    
+        savvy::r_eprintln!(r##"
 
 
 Location:
-{label} (file: {location})
+    {label} (file: {location})
 
 Code:
 {test_escaped}
@@ -307,22 +307,22 @@ Code:
 Error:
 {{}}
 "##, msg.join("\n"));
-}}));
+    }}));
 
-let test = || -> savvy::Result<()> {{
+    let test = || -> savvy::Result<()> {{
 {test_code}
-Ok(())
-}};
-let result = std::panic::catch_unwind(||test().expect("some error"));
-
-match result {{
-Ok(_) => {{
-    eprintln!("ok");
-    Ok(())
-}},
-Err(_) => Err("test failed".into()),
+        Ok(())
+    }};
+    let result = std::panic::catch_unwind(||test().expect("some error"));
+    
+    match result {{
+        Ok(_) => {{
+            eprintln!("ok");
+            Ok(())
+        }},
+        Err(_) => Err("test failed".into()),
+    }}
 }}
-}}
-"###,
+"###,,
     )
 }
