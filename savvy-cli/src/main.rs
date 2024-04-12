@@ -301,84 +301,6 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
     update(path);
 }
 
-fn main() {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
-        Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
-        Commands::Test { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
-            match futures_lite::future::block_on(run_test(tests)) {
-                Ok(_) => {}
-                Err(_) => std::process::exit(1),
-            }
-        }
-        Commands::ExtractTests { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
-            println!("{tests}");
-        }
-    }
-}
-
-async fn run_test(tests: String) -> std::io::Result<()> {
-    let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
-    write_file(
-        &temp_r,
-        &format!(
-            r###"
-e <- new.env()
-savvy::savvy_source(r"(
-{tests}
-)", use_cache_dir = TRUE, env = e)
-write("\n\n", stderr())
-for (f in ls(e)) {{
-    f <- get(f, e, inherits = FALSE)
-    f()
-}}
-
-cat("test result: ok\n")
-"###
-        ),
-    );
-
-    eprintln!("\n--------------------------------------------\n");
-
-    let mut cmd = async_process::Command::new("R")
-        .args(["-q", "--no-echo", "-f", &temp_r.to_string_lossy()])
-        .stdout(Stdio::piped())
-        .spawn()?;
-
-    let mut lines = BufReader::new(cmd.stdout.take().unwrap()).lines();
-
-    while let Some(line) = lines.next().await {
-        eprintln!("{}", line?);
-    }
-
-    let res = cmd.output().await;
-
-    match &res {
-        Ok(output) => {
-            if !output.status.success() {
-                eprintln!("Test failed with status code {}", output.status);
-                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
-                std::process::exit(1);
-            }
-        }
-        Err(e) => match e.kind() {
-            std::io::ErrorKind::NotFound => {
-                eprintln!("`R` is not found on PATH. Please add R to PATH.");
-                std::process::exit(1);
-            }
-            _ => {
-                panic!("{e}");
-            }
-        },
-    };
-
-    Ok(())
-}
-
 fn add_indent(x: &str, indent: usize) -> String {
     x.lines()
         .map(|x| format!("{:indent$}{x}", "", indent = indent))
@@ -455,4 +377,82 @@ Error:
     }
 
     out
+}
+
+async fn run_test(tests: String) -> std::io::Result<()> {
+    let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
+    write_file(
+        &temp_r,
+        &format!(
+            r###"
+e <- new.env()
+savvy::savvy_source(r"(
+{tests}
+)", use_cache_dir = TRUE, env = e)
+write("\n\n", stderr())
+for (f in ls(e)) {{
+    f <- get(f, e, inherits = FALSE)
+    f()
+}}
+
+cat("test result: ok\n")
+"###
+        ),
+    );
+
+    eprintln!("\n--------------------------------------------\n");
+
+    let mut cmd = async_process::Command::new("R")
+        .args(["-q", "--no-echo", "-f", &temp_r.to_string_lossy()])
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let mut lines = BufReader::new(cmd.stdout.take().unwrap()).lines();
+
+    while let Some(line) = lines.next().await {
+        eprintln!("{}", line?);
+    }
+
+    let res = cmd.output().await;
+
+    match &res {
+        Ok(output) => {
+            if !output.status.success() {
+                eprintln!("Test failed with status code {}", output.status);
+                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
+                std::process::exit(1);
+            }
+        }
+        Err(e) => match e.kind() {
+            std::io::ErrorKind::NotFound => {
+                eprintln!("`R` is not found on PATH. Please add R to PATH.");
+                std::process::exit(1);
+            }
+            _ => {
+                panic!("{e}");
+            }
+        },
+    };
+
+    Ok(())
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
+        Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::Test { lib_rs } => {
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            match futures_lite::future::block_on(run_test(tests)) {
+                Ok(_) => {}
+                Err(_) => std::process::exit(1),
+            }
+        }
+        Commands::ExtractTests { lib_rs } => {
+            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+            println!("{tests}");
+        }
+    }
 }
