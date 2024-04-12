@@ -1,11 +1,15 @@
 TARGET = @TARGET@
 
+# catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
+PROFILE = $(subst x,release,$(subst truex,dev,$(DEBUG)x))
+PROFILE_UPPERCASE = $(subst x,RELEASE,$(subst truex,DEV,$(DEBUG)x))
+
 TARGET_DIR = $(CURDIR)/rust/target
-LIBDIR = $(TARGET_DIR)/$(TARGET)/release
+LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
 STATLIB = $(LIBDIR)/libsimple_savvy.a
 PKG_LIBS = -L$(LIBDIR) -lsimple_savvy
 
-CARGO_BUILD_ARGS = --lib --release --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
+CARGO_BUILD_ARGS = --lib --profile $(PROFILE) --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 all: C_clean
 
@@ -21,7 +25,7 @@ $(STATLIB):
 	  else \
 	    export CC="$(CC)" && \
 	    export CFLAGS="$(CFLAGS)" && \
-	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
+	    export CARGO_PROFILE_$(PROFILE_UPPERCASE)_PANIC="abort" && \
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
 	  fi
 
