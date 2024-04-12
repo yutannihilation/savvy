@@ -148,8 +148,16 @@ impl ParsedResult {
             }
 
             syn::Item::Mod(item_mod) => {
+                let is_test_mod = item_mod
+                    .attrs
+                    .iter()
+                    .any(|attr| attr == &parse_quote!(#[cfg(test)]));
+
                 if let Some((_, items)) = &item_mod.content {
-                    items.iter().for_each(|i| self.parse_item(i, location));
+                    if is_test_mod {
+                    } else {
+                        items.iter().for_each(|i| self.parse_item(i, location));
+                    }
                 } else {
                     self.mods.push(item_mod.ident.to_string());
                 }
@@ -224,10 +232,13 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
                 // end of the code block
 
                 if !ignore {
+                    let orig_code = code_block.join("\n");
+                    let code = wrap_with_test_function(&orig_code, label, location);
                     out.push(ParsedTestCase {
-                        code: code_block.join("\n"),
+                        orig_code,
                         label: label.to_string(),
                         location: location.to_string(),
+                        code,
                     });
                 }
 
@@ -252,4 +263,66 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
     }
 
     out
+}
+
+fn add_indent(x: &str, indent: usize) -> String {
+    x.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = indent))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> String {
+    // Add indent
+    let test_code = add_indent(orig_code, 8);
+
+    let test_escaped = add_indent(orig_code, 4)
+        .replace('{', "{{")
+        .replace('}', "}}");
+    format!(
+        r###"#[savvy]
+fn @FUNCTION_NAME@() -> savvy::Result<()> {{
+eprint!(r##"running doctest of {label} (file: {location}) ..."##);
+
+std::panic::set_hook(Box::new(|panic_info| {{
+let mut msg: Vec<String> = Vec::new();
+let orig_msg = panic_info.to_string();
+let mut lines = orig_msg.lines();
+
+lines.next(); // remove location
+
+for line in lines {{
+    msg.push(format!("    {{}}", line));
+}}
+
+savvy::r_eprintln!(r##"
+
+
+Location:
+{label} (file: {location})
+
+Code:
+{test_escaped}
+
+Error:
+{{}}
+"##, msg.join("\n"));
+}}));
+
+let test = || -> savvy::Result<()> {{
+{test_code}
+Ok(())
+}};
+let result = std::panic::catch_unwind(||test().expect("some error"));
+
+match result {{
+Ok(_) => {{
+    eprintln!("ok");
+    Ok(())
+}},
+Err(_) => Err("test failed".into()),
+}}
+}}
+"###,
+    )
 }

@@ -9,8 +9,9 @@ pub mod savvy_struct;
 
 pub struct ParsedTestCase {
     pub label: String,
-    pub code: String,
+    pub orig_code: String,
     pub location: String,
+    pub code: String,
 }
 
 // For main.rs

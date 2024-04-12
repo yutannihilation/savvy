@@ -301,13 +301,6 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
     update(path);
 }
 
-fn add_indent(x: &str, indent: usize) -> String {
-    x.lines()
-        .map(|x| format!("{:indent$}{x}", "", indent = indent))
-        .collect::<Vec<String>>()
-        .join("\n")
-}
-
 fn extract_tests(path: &Path) -> String {
     let parsed = parse_crate(path);
 
@@ -316,63 +309,8 @@ fn extract_tests(path: &Path) -> String {
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
-            let label = test.label;
-            let location = test.location;
-
-            // Add indent
-            let test_code = add_indent(&test.code, 8);
-
-            let test_escaped = add_indent(&test.code, 4)
-                .replace('{', "{{")
-                .replace('}', "}}");
-
             i += 1;
-            out.push_str(&format!(
-                r###"#[savvy]
-fn test_{i}() -> savvy::Result<()> {{
-    eprint!(r##"running doctest of {label} (file: {location}) ..."##);
-
-    std::panic::set_hook(Box::new(|panic_info| {{
-        let mut msg: Vec<String> = Vec::new();
-        let orig_msg = panic_info.to_string();
-        let mut lines = orig_msg.lines();
-        
-        lines.next(); // remove location
-        
-        for line in lines {{
-            msg.push(format!("    {{}}", line));
-        }}
-    
-        savvy::r_eprintln!(r##"
-
-
-Location:
-    {label} (file: {location})
-
-Code:
-{test_escaped}
-
-Error:
-{{}}
-"##, msg.join("\n"));
-    }}));
-
-    let test = || -> savvy::Result<()> {{
-{test_code}
-        Ok(())
-    }};
-    let result = std::panic::catch_unwind(||test().expect("some error"));
-    
-    match result {{
-        Ok(_) => {{
-            eprintln!("ok");
-            Ok(())
-        }},
-        Err(_) => Err("test failed".into()),
-    }}
-}}
-"###,
-            ));
+            out.push_str(&test.code.replace("@FUNCTION_NAME@", &format!("test_{i}")));
         }
     }
 
