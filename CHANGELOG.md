@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* `savvy-cli init` now generates `Makevars` that supports debug build when
+  `DEBUG` envvar is set to `true` (i.e., in `devtools::load_all()`).
+
 ## [v0.5.0] (2024-04-05)
 
 ### Breaking change
