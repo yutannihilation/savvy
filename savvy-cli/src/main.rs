@@ -1,4 +1,5 @@
 mod utils;
+use async_process::Stdio;
 use savvy_bindgen::merge_parsed_results;
 use utils::*;
 
@@ -9,6 +10,8 @@ use clap::{Parser, Subcommand};
 
 use std::path::Path;
 use std::path::PathBuf;
+
+use futures_lite::{io::BufReader, prelude::*};
 
 use savvy_bindgen::{
     generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
@@ -306,7 +309,10 @@ fn main() {
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
         Commands::Test { lib_rs } => {
             let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
-            run_test(tests);
+            match futures_lite::future::block_on(run_test(tests)) {
+                Ok(_) => {}
+                Err(_) => std::process::exit(1),
+            }
         }
         Commands::ExtractTests { lib_rs } => {
             let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
@@ -315,7 +321,7 @@ fn main() {
     }
 }
 
-fn run_test(tests: String) {
+async fn run_test(tests: String) -> std::io::Result<()> {
     let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
     write_file(
         &temp_r,
@@ -325,6 +331,7 @@ e <- new.env()
 savvy::savvy_source(r"(
 {tests}
 )", use_cache_dir = TRUE, env = e)
+write("\n\n", stderr())
 for (f in ls(e)) {{
     f <- get(f, e, inherits = FALSE)
     f()
@@ -337,9 +344,18 @@ cat("test result: ok\n")
 
     eprintln!("\n--------------------------------------------\n");
 
-    let res = std::process::Command::new("R")
-        .args(["-q", "-f", &temp_r.to_string_lossy()])
-        .output();
+    let mut cmd = async_process::Command::new("R")
+        .args(["-q", "--no-echo", "-f", &temp_r.to_string_lossy()])
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let mut lines = BufReader::new(cmd.stdout.take().unwrap()).lines();
+
+    while let Some(line) = lines.next().await {
+        eprintln!("{}", line?);
+    }
+
+    let res = cmd.output().await;
 
     match &res {
         Ok(output) => {
@@ -348,7 +364,6 @@ cat("test result: ok\n")
                 eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
                 std::process::exit(1);
             }
-            eprintln!("{}", String::from_utf8_lossy(&output.stderr));
         }
         Err(e) => match e.kind() {
             std::io::ErrorKind::NotFound => {
@@ -360,6 +375,8 @@ cat("test result: ok\n")
             }
         },
     };
+
+    Ok(())
 }
 
 fn add_indent(x: &str, indent: usize) -> String {
@@ -391,7 +408,7 @@ fn extract_tests(path: &Path) -> String {
             out.push_str(&format!(
                 r###"#[savvy]
 fn test_{i}() -> savvy::Result<()> {{
-    eprint!(r##"testing {label} (file: {location}) ..."##);
+    eprint!(r##"running doctest of {label} (file: {location}) ..."##);
 
     std::panic::set_hook(Box::new(|panic_info| {{
         let mut msg: Vec<String> = Vec::new();
