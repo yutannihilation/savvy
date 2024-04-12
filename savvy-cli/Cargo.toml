@@ -16,8 +16,10 @@ rust-version = "1.74"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+async-process = "2"
+futures-lite = "2"
+
 savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
-walkdir = "2"
 
 [package.metadata.dist]
 dist = true
