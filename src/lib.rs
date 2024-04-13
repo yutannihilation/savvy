@@ -56,6 +56,7 @@
 pub mod error;
 pub mod ffi;
 pub mod io;
+pub mod panic_hook;
 pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;

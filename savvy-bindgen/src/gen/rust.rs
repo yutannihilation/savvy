@@ -21,16 +21,7 @@ impl SavvyFn {
 
         let ret_ty = self.return_type.inner();
 
-        // If the original return type is not wrapped with Result, it needs to be wrapped with Ok()
-        let wrapped_with_result = match &self.return_type {
-            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                wrapped_with_result,
-                ..
-            }) => *wrapped_with_result,
-            _ => true,
-        };
-
-        let out: syn::ItemFn = match &self.fn_type {
+        let mut out: syn::ItemFn = match &self.fn_type {
             // A bare function
             SavvyFnType::BareFunction => parse_quote!(
                 #(#attrs)*
@@ -50,29 +41,16 @@ impl SavvyFn {
                 } else {
                     None
                 };
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                        let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
+                        #(#stmts_additional)*
 
-                            self__.#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
-
-                            Ok(self__.#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        self__.#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
             // A method with self
             SavvyFnType::Method {
@@ -80,57 +58,74 @@ impl SavvyFn {
                 mutability: _,
                 reference: false,
             } => {
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                        let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
+                        #(#stmts_additional)*
 
-                            self__.#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
-
-                            Ok(self__.#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        self__.#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
 
             // An associated function
             SavvyFnType::AssociatedFunction(ty) => {
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                        #(#stmts_additional)*
 
-                            #ty::#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                            #(#stmts_additional)*
-
-                            Ok(#ty::#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        #ty::#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
         };
 
+        // If the original return type is not wrapped with Result, it needs to be wrapped with Ok()
+
+        let wrapped_with_result = match &self.return_type {
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                wrapped_with_result,
+                ..
+            }) => *wrapped_with_result,
+            _ => true,
+        };
+
+        if !wrapped_with_result {
+            let return_expr = out.block.stmts.pop().unwrap();
+            let new_return_expr: syn::Expr = parse_quote!(Ok(#return_expr));
+            out.block.stmts.push(syn::Stmt::Expr(new_return_expr, None));
+        }
+
+        // Wrap with catch_unwind(). This is needed not only for catching panic
+        // gracefully on debug build, but also for preventing the unwinding over
+        // the FFI boundary between Rust and C (= R API). Since the
+        // cross-language unwind is undefined behavior, abort the process here.
+        // This makes the R session crash.
+
+        #[cfg(debug_assertions)]
+        let error_handler: syn::Expr = parse_quote!(Err("panic happened".into()));
+        #[cfg(not(debug_assertions))]
+        let error_handler: syn::Expr = parse_quote!(std::process::abort());
+
+        let orig_body = &mut out.block;
+        let new_body: syn::Block = parse_quote!({
+            let orig_hook = std::panic::take_hook();
+            std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+
+            let result = std::panic::catch_unwind(|| #orig_body);
+
+            std::panic::set_hook(orig_hook);
+
+            match result {
+                Ok(orig_result) => orig_result,
+                Err(_) => #error_handler,
+            }
+        });
+        out.block = Box::new(new_body);
         out
     }
 

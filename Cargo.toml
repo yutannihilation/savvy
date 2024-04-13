@@ -10,7 +10,7 @@ readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
 # Determined by `cargo msrv`
-rust-version = "1.64.0"
+rust-version = "1.65.0"
 
 [dependencies]
 savvy-ffi = { version = "0.5.1", path = "./savvy-ffi" }

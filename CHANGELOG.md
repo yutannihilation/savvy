@@ -3,6 +3,15 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* Now savvy's debug build (when `DEBUG` envvar is set to `true`, i.e.,
+  `devtools::load_all()`), panic doesn't crash R session and shows bactrace.
+  This is useful for investigating what's the cause of the panic.
+
+  Please keep in mind that, in Rust, panic is an **unrecoverable error**. So,
+  not crashing doesn't mean you are saved.
+
 ## [v0.5.1] (2024-04-13)
 
 ### New features
