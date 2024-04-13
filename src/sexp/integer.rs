@@ -331,12 +331,26 @@ impl IndexMut<usize> for OwnedIntegerSexp {
 
 #[cfg(test)]
 mod test {
-    use crate::OwnedIntegerSexp;
+    use super::OwnedIntegerSexp;
+    use crate::NotAvailableValue;
 
     #[test]
     fn test_integer() -> crate::Result<()> {
-        let x = OwnedIntegerSexp::new(3)?;
+        let mut x = OwnedIntegerSexp::new(3)?;
         assert_eq!(x.as_slice(), &[0, 0, 0]);
+
+        // set_elt()
+        x.set_elt(0, 1)?;
+        assert_eq!(x.as_slice(), &[1, 0, 0]);
+
+        // IndexMut
+        x[1] = 2;
+        assert_eq!(x.as_slice(), &[1, 2, 0]);
+
+        // set_na
+        x.set_na(2)?;
+        assert!(x[2].is_na());
+
         Ok(())
     }
 }
