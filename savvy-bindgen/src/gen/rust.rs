@@ -50,29 +50,16 @@ impl SavvyFn {
                 } else {
                     None
                 };
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                        let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
+                        #(#stmts_additional)*
 
-                            self__.#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <&#mut_token #ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
-
-                            Ok(self__.#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        self__.#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
             // A method with self
             SavvyFnType::Method {
@@ -80,56 +67,37 @@ impl SavvyFn {
                 mutability: _,
                 reference: false,
             } => {
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
+                        let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
+                        #(#stmts_additional)*
 
-                            self__.#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) #ret_ty {
-                            let self__ = <#ty>::try_from(savvy::Sexp(self__))?;
-                            #(#stmts_additional)*
-
-                            Ok(self__.#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        self__.#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
 
             // An associated function
             SavvyFnType::AssociatedFunction(ty) => {
-                if wrapped_with_result {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                            #(#stmts_additional)*
+                parse_quote!(
+                    #(#attrs)*
+                    #[allow(non_snake_case)]
+                    unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
+                        #(#stmts_additional)*
 
-                            #ty::#fn_name_orig(#(#args_pat),*)
-                        }
-                    )
-                } else {
-                    parse_quote!(
-                        #(#attrs)*
-                        #[allow(non_snake_case)]
-                        unsafe fn #fn_name_inner(#(#args_pat: #args_ty),* ) #ret_ty {
-                            #(#stmts_additional)*
-
-                            Ok(#ty::#fn_name_orig(#(#args_pat),*))
-                        }
-                    )
-                }
+                        #ty::#fn_name_orig(#(#args_pat),*)
+                    }
+                )
             }
         };
+
+        if !wrapped_with_result {
+            let return_expr = out.block.stmts.pop().unwrap();
+            let new_return_expr: syn::Expr = parse_quote!(Ok(#return_expr));
+            out.block.stmts.push(syn::Stmt::Expr(new_return_expr, None));
+        }
 
         #[cfg(debug_assertions)]
         let error_handler: syn::Expr = parse_quote!(Err("panic happened".into()));
