@@ -91,33 +91,72 @@ mod tests {
     use prettyplease::unparse;
     use syn::parse_quote;
 
-    fn assert_snapshot_inner(orig: syn::ItemFn) {
+    fn assert_eq_inner(orig: syn::ItemFn, expected: syn::ItemFn) {
         let result = SavvyFn::from_fn(&orig)
             .expect("Failed to parse a function")
             .generate_inner_fn();
-        let formatted = unparse(&parse_quote!(#result));
-        let lines = formatted.lines().collect::<Vec<&str>>();
-        insta::assert_yaml_snapshot!(lines);
+        assert_eq!(
+            unparse(&parse_quote!(#result)),
+            unparse(&parse_quote!(#expected))
+        );
     }
 
     #[test]
     fn test_generate_inner_fn() {
-        assert_snapshot_inner(parse_quote!(
-            #[savvy]
-            fn foo() -> savvy::Result<savvy::Sexp> {
-                bar()
-            }
-        ));
+        #[rustfmt::skip]
+        assert_eq_inner(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<savvy::Sexp> {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                unsafe fn savvy_foo_inner() -> savvy::Result<savvy::Sexp> {
+                    let orig_hook = std::panic::take_hook();
+                    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
 
-        assert_snapshot_inner(parse_quote!(
-            #[savvy]
-            fn foo() -> savvy::Result<()> {
-                bar();
-                Ok(())
-            }
-        ));
+                    let result = std::panic::catch_unwind(|| { bar() });
 
-        assert_snapshot_inner(
+                    std::panic::set_hook(orig_hook);
+
+                    match result {
+                        Ok(orig_result) => orig_result,
+                        Err(_) => Err("panic happened".into()),
+                    }
+                }
+            ),
+        );
+
+        assert_eq_inner(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<()> {
+                    bar();
+                    Ok(())
+                }
+            ),
+            parse_quote!(
+                unsafe fn savvy_foo_inner() -> savvy::Result<()> {
+                    let orig_hook = std::panic::take_hook();
+                    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+
+                    let result = std::panic::catch_unwind(|| {
+                        bar();
+                        Ok(())
+                    });
+
+                    std::panic::set_hook(orig_hook);
+
+                    match result {
+                        Ok(orig_result) => orig_result,
+                        Err(_) => Err("panic happened".into()),
+                    }
+                }
+            ),
+        );
+
+        assert_eq_inner(
             // The qualified form (with `savvy::`) and non-qualified form is
             // kept between conversions.
             parse_quote!(
@@ -126,62 +165,144 @@ mod tests {
                     bar()
                 }
             ),
+            parse_quote!(
+                unsafe fn savvy_foo_inner(
+                    x: savvy::ffi::SEXP,
+                    y: savvy::ffi::SEXP,
+                ) -> savvy::Result<savvy::Sexp> {
+                    let orig_hook = std::panic::take_hook();
+                    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+
+                    let result = std::panic::catch_unwind(|| {
+                        let x = <RealSexp>::try_from(savvy::Sexp(x))?;
+                        let y = <savvy::IntegerSexp>::try_from(savvy::Sexp(y))?;
+                        bar()
+                    });
+
+                    std::panic::set_hook(orig_hook);
+
+                    match result {
+                        Ok(orig_result) => orig_result,
+                        Err(_) => Err("panic happened".into()),
+                    }
+                }
+            ),
         );
 
-        assert_snapshot_inner(parse_quote!(
-            #[savvy]
-            fn foo(x: f64) -> savvy::Result<savvy::Sexp> {
-                bar()
-            }
-        ));
+        assert_eq_inner(
+            parse_quote!(
+                #[savvy]
+                fn foo(x: f64) -> savvy::Result<savvy::Sexp> {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                unsafe fn savvy_foo_inner(x: savvy::ffi::SEXP) -> savvy::Result<savvy::Sexp> {
+                    let orig_hook = std::panic::take_hook();
+                    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+
+                    let result = std::panic::catch_unwind(|| {
+                        let x = <f64>::try_from(savvy::Sexp(x))?;
+                        bar()
+                    });
+
+                    std::panic::set_hook(orig_hook);
+
+                    match result {
+                        Ok(orig_result) => orig_result,
+                        Err(_) => Err("panic happened".into()),
+                    }
+                }
+            ),
+        );
     }
 
-    fn assert_snapshot_outer(orig: syn::ItemFn) {
+    fn assert_eq_outer(orig: syn::ItemFn, expected: syn::ItemFn) {
         let result = SavvyFn::from_fn(&orig)
             .expect("Failed to parse an impl")
             .generate_outer_fn();
-        let formatted = unparse(&parse_quote!(#result));
-        let lines = formatted.lines().collect::<Vec<&str>>();
-        insta::assert_yaml_snapshot!(lines);
+        assert_eq!(
+            unparse(&parse_quote!(#result)),
+            unparse(&parse_quote!(#expected))
+        );
     }
 
     #[test]
     fn test_generate_outer_fn() {
-        assert_snapshot_outer(parse_quote!(
-            #[savvy]
-            fn foo() -> savvy::Result<savvy::Sexp> {
-                bar()
-            }
-        ));
+        assert_eq_outer(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<savvy::Sexp> {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn foo() -> savvy::ffi::SEXP {
+                    match savvy_foo_inner() {
+                        Ok(result) => result.0,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+        );
 
-        assert_snapshot_outer(parse_quote!(
-            #[savvy]
-            fn foo() -> savvy::Result<()> {
-                bar();
-                Ok(())
-            }
-        ));
+        assert_eq_outer(
+            parse_quote!(
+                #[savvy]
+                fn foo() -> savvy::Result<()> {
+                    bar();
+                    Ok(())
+                }
+            ),
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn foo() -> savvy::ffi::SEXP {
+                    match savvy_foo_inner() {
+                        Ok(_) => savvy::sexp::null::null(),
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+        );
 
-        assert_snapshot_outer(parse_quote!(
-            #[savvy]
-            fn foo(x: RealSexp, y: savvy::RealSexp) -> savvy::Result<savvy::Sexp> {
-                bar()
-            }
-        ));
+        assert_eq_outer(
+            parse_quote!(
+                #[savvy]
+                fn foo(x: RealSexp, y: savvy::RealSexp) -> savvy::Result<savvy::Sexp> {
+                    bar()
+                }
+            ),
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn foo(
+                    x: savvy::ffi::SEXP,
+                    y: savvy::ffi::SEXP,
+                ) -> savvy::ffi::SEXP {
+                    match savvy_foo_inner(x, y) {
+                        Ok(result) => result.0,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+        );
     }
 
-    fn assert_snapshot_outer_impl(orig: &syn::ItemImpl) {
-        for item_fn in SavvyImpl::new(orig).expect("Failed to parse an impl").fns {
-            let result = item_fn.generate_outer_fn();
-            let formatted = unparse(&parse_quote!(#result));
-            let lines = formatted.lines().collect::<Vec<&str>>();
-            insta::assert_yaml_snapshot!(lines);
-        }
+    fn assert_eq_outer_impl(orig: &syn::ItemImpl, expected: syn::ItemFn, i: usize) {
+        let result =
+            SavvyImpl::new(orig).expect("Failed to parse an impl").fns[i].generate_outer_fn();
+        assert_eq!(
+            unparse(&parse_quote!(#result)),
+            unparse(&parse_quote!(#expected))
+        );
     }
 
     #[test]
     fn test_generate_outer_fn_impl() {
-        assert_snapshot_outer_impl(&parse_quote!(
+        let impl1: syn::ItemImpl = parse_quote!(
             #[savvy]
             impl Person {
                 fn new() -> Self {
@@ -197,6 +318,75 @@ mod tests {
                     Ok(())
                 }
             }
-        ));
+        );
+
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_new() -> savvy::ffi::SEXP {
+                    match savvy_Person_new_inner() {
+                        Ok(result) => match <savvy::Sexp>::try_from(result) {
+                            Ok(sexp) => sexp.0,
+                            Err(e) => savvy::handle_error(e),
+                        },
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            0,
+        );
+
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_new2() -> savvy::ffi::SEXP {
+                    match savvy_Person_new2_inner() {
+                        Ok(result) => match <savvy::Sexp>::try_from(result) {
+                            Ok(sexp) => sexp.0,
+                            Err(e) => savvy::handle_error(e),
+                        },
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            1,
+        );
+
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_name(self__: savvy::ffi::SEXP) -> savvy::ffi::SEXP {
+                    match savvy_Person_name_inner(self__) {
+                        Ok(result) => result.0,
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            2,
+        );
+
+        assert_eq_outer_impl(
+            &impl1,
+            parse_quote!(
+                #[allow(clippy::missing_safety_doc)]
+                #[no_mangle]
+                pub unsafe extern "C" fn Person_set_name(
+                    self__: savvy::ffi::SEXP,
+                    name: savvy::ffi::SEXP,
+                ) -> savvy::ffi::SEXP {
+                    match savvy_Person_set_name_inner(self__, name) {
+                        Ok(_) => savvy::sexp::null::null(),
+                        Err(e) => savvy::handle_error(e),
+                    }
+                }
+            ),
+            3,
+        );
     }
 }
