@@ -53,7 +53,7 @@ jobs:
         run: |
           cargo test --manifest-path=./savvy-macro/Cargo.toml
           cargo test --manifest-path=./savvy-bindgen/Cargo.toml
-          # cargo r-test
+          cargo r-test
 
       - name: Tweak
         run: |
