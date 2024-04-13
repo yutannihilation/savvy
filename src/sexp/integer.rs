@@ -328,3 +328,15 @@ impl IndexMut<usize> for OwnedIntegerSexp {
         unsafe { &mut *(self.raw.add(index)) }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::OwnedIntegerSexp;
+
+    #[test]
+    fn test_integer() -> crate::Result<()> {
+        let x = OwnedIntegerSexp::new(3)?;
+        assert_eq!(x.as_slice(), &[0, 0, 0]);
+        Ok(())
+    }
+}
