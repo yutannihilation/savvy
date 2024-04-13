@@ -11,6 +11,9 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
+    defaults:
+      run:
+        shell: bash
 
     name: "${{ matrix.config.os }} (R: ${{ matrix.config.r }}, rust: ${{ matrix.config.rust }})"
 
@@ -83,7 +86,6 @@ jobs:
           mv savvy-macro/ ./R-package/src/savvy/
           mv savvy-bindgen/ ./R-package/src/savvy/
           mv savvy-ffi/ ./R-package/src/savvy/
-        shell: bash
 
       - name: Run cargo test of the R package
         run: cargo test --manifest-path=./R-package/src/rust/Cargo.toml
