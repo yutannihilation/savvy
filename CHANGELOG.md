@@ -7,9 +7,13 @@
 
 ### New features
 
-* An experimental new subcommand `savvy-cli test` runs tests by wrapping the
-  test code with a temporary R package. `cargo test` doesn't work on savvy because
-  savvy always requires a real R session, so you can use this instead.
+* An experimental new subcommand `savvy-cli test` runs tests by extracting and
+  wrapping the test code with a temporary R package. This is because savvy
+  always requires a real R session, which means `cargo test` doesn't work. Note
+  that this relies on the savvy R package. Please install it before trying this.
+  ```r
+  install.packages("savvy", repos = c("https://yutannihilation.r-universe.dev", "https://cloud.r-project.org"))
+  ```
 
 * `savvy-cli init` now generates `Makevars` that supports debug build when
   `DEBUG` envvar is set to `true` (i.e., in `devtools::load_all()`).
