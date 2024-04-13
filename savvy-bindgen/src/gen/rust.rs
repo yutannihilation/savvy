@@ -113,7 +113,12 @@ impl SavvyFn {
 
         let orig_body = &mut out.block;
         let new_body: syn::Block = parse_quote!({
+            let orig_hook = std::panic::take_hook();
+            std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+
             let result = std::panic::catch_unwind(|| #orig_body);
+
+            std::panic::set_hook(orig_hook);
 
             match result {
                 Ok(orig_result) => orig_result,
