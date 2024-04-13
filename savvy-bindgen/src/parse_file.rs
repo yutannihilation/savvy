@@ -300,11 +300,16 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
     out
 }
 
-// TODO: make prettyplease optional
+#[cfg(feature = "use_formatter")]
 fn unparse<T: quote::ToTokens>(item: &T) -> String {
     let code_parsed: syn::File = parse_quote!(#item);
     // replace() is needed for replacing the linebreaks inside string literals
     prettyplease::unparse(&code_parsed).replace(r#"\n"#, "\n")
+}
+
+#[cfg(not(feature = "use_formatter"))]
+fn unparse<T: quote::ToTokens>(item: &T) -> String {
+    quote::quote!(#item).to_string()
 }
 
 fn transform_test_mod(
