@@ -273,8 +273,8 @@ fn add_indent(x: &str, indent: usize) -> String {
         .join("\n")
 }
 
-pub fn common_test_code() -> String {
-    quote::quote! {
+pub fn generate_test_code(parsed_results: &Vec<ParsedResult>) -> String {
+    let mut out = quote::quote! {
         use savvy::savvy;
 
         fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
@@ -304,7 +304,20 @@ Error:
             ");
         }
     }
-    .to_string()
+    .to_string();
+
+    out.push_str("\n\n");
+
+    let mut i = 0;
+    for result in parsed_results {
+        for test in &result.tests {
+            i += 1;
+            out.push_str(&test.code.replace("__FUNCTION_NAME__", &format!("test_{i}")));
+            out.push_str("\n\n");
+        }
+    }
+
+    out
 }
 
 fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> String {
@@ -330,6 +343,8 @@ fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> Stri
         Span::call_site(),
     );
 
+    // Note: it's hard to determine the unique function name at this point.
+    //       So, put a placeholder here and replace it in the parent function.
     quote::quote! {
         #[savvy]
         fn __FUNCTION_NAME__() -> savvy::Result<()> {

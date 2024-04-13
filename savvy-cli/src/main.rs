@@ -1,5 +1,6 @@
 mod utils;
 use async_process::Stdio;
+use savvy_bindgen::generate_test_code;
 use savvy_bindgen::merge_parsed_results;
 use utils::*;
 
@@ -302,21 +303,8 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
 }
 
 fn extract_tests(path: &Path) -> String {
-    let parsed = parse_crate(path);
-
-    let mut out = savvy_bindgen::common_test_code();
-    out.push_str("\n\n");
-
-    let mut i = 0;
-    for result in parsed {
-        for test in result.tests {
-            i += 1;
-            out.push_str(&test.code.replace("__FUNCTION_NAME__", &format!("test_{i}")));
-            out.push_str("\n\n");
-        }
-    }
-
-    out
+    let parsed_results = parse_crate(path);
+    generate_test_code(&parsed_results)
 }
 
 async fn run_test(tests: String) -> std::io::Result<()> {
