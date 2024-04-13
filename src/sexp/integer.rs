@@ -104,8 +104,8 @@ impl OwnedIntegerSexp {
     /// Constructs a new, initialized integer vector.
     ///
     /// ```
-    /// let out = savvy::OwnedIntegerSexp::new(3)?;
-    /// assert_eq!(out.as_slice(), &[0, 0, 0]);
+    /// let x = savvy::OwnedIntegerSexp::new(3)?;
+    /// assert_eq!(x.as_slice(), &[0, 0, 0]);
     /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
@@ -138,6 +138,9 @@ impl OwnedIntegerSexp {
     ///         out.into()
     ///     }
     /// }
+    ///
+    /// let pair = Pair { x: 1, y: 2 };
+    /// let _ = <Sexp>::try_from(pair)?;
     /// ````
     ///
     /// # Safety
@@ -323,5 +326,31 @@ impl IndexMut<usize> for OwnedIntegerSexp {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         assert_len(self.len, index).unwrap();
         unsafe { &mut *(self.raw.add(index)) }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::OwnedIntegerSexp;
+    use crate::NotAvailableValue;
+
+    #[test]
+    fn test_integer() -> crate::Result<()> {
+        let mut x = OwnedIntegerSexp::new(3)?;
+        assert_eq!(x.as_slice(), &[0, 0, 0]);
+
+        // set_elt()
+        x.set_elt(0, 1)?;
+        assert_eq!(x.as_slice(), &[1, 0, 0]);
+
+        // IndexMut
+        x[1] = 2;
+        assert_eq!(x.as_slice(), &[1, 2, 0]);
+
+        // set_na
+        x.set_na(2)?;
+        assert!(x[2].is_na());
+
+        Ok(())
     }
 }

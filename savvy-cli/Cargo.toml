@@ -19,7 +19,9 @@ clap = { version = "4", features = ["derive"] }
 async-process = "2"
 futures-lite = "2"
 
-savvy-bindgen = { version = "0", path = "../savvy-bindgen" }
+savvy-bindgen = { version = "0", path = "../savvy-bindgen", features = [
+    "use_formatter",
+] }
 
 [package.metadata.dist]
 dist = true

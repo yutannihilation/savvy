@@ -1,5 +1,6 @@
 mod utils;
 use async_process::Stdio;
+use savvy_bindgen::generate_test_code;
 use savvy_bindgen::merge_parsed_results;
 use utils::*;
 
@@ -18,8 +19,6 @@ use savvy_bindgen::{
     generate_configure, generate_example_lib_rs, generate_gitignore, generate_makevars_in,
     generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
-
-const DEFAULT_LIB_RS: &str = "./src/lib.rs";
 
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
@@ -46,13 +45,13 @@ enum Commands {
     /// Run tests within an R session
     Test {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
-        lib_rs: Option<PathBuf>,
+        crate_dir: Option<PathBuf>,
     },
 
     /// Extract doctests and test modules
     ExtractTests {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
-        lib_rs: Option<PathBuf>,
+        crate_dir: Option<PathBuf>,
     },
 }
 
@@ -100,6 +99,36 @@ fn parse_description(path: &Path) -> PackageDescription {
         package_name: package_name_orig.to_string(),
         has_sysreq,
     }
+}
+
+// Parse Cargo.toml and get the crate name.
+fn parse_cargo_toml(path: &Path) -> String {
+    let content = savvy_bindgen::read_file(path);
+
+    let mut in_package_section = false;
+    for line in content.lines() {
+        if line.trim_start().starts_with('[') {
+            in_package_section = line.trim() == "[package]";
+            continue;
+        }
+
+        if !in_package_section {
+            continue;
+        }
+
+        let mut s = line.split('=');
+        if let Some(key) = s.next() {
+            if key.trim() != "name" {
+                continue;
+            }
+        }
+        if let Some(value) = s.next() {
+            return value.trim().trim_matches(['"', '\'']).to_string();
+        }
+    }
+
+    eprintln!("Cargo.toml doesn't have package name!");
+    std::process::exit(10);
 }
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
@@ -180,7 +209,7 @@ to set the configure script as executable
     );
 }
 
-fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
+fn parse_crate(lib_rs: &Path, crate_name: &str) -> Vec<ParsedResult> {
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
     if !lib_rs.exists() {
@@ -188,10 +217,11 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
+    // (file path, module path)
+    let mut queue = VecDeque::from([(lib_rs.to_path_buf(), vec![crate_name.to_string()])]);
 
     while !queue.is_empty() {
-        let mut entry = queue.pop_front().unwrap();
+        let (mut entry, mod_path) = queue.pop_front().unwrap();
 
         // there can be two patterns for a module named "bar"
         //
@@ -200,22 +230,24 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
 
         // if it's a directory, parse the mod.rs file
         if entry.is_dir() {
-            entry.push("mod.rs")
+            entry.push("mod.rs");
         } else {
             entry.set_extension("rs");
 
             if !entry.exists() || !entry.is_file() {
                 continue;
             }
-        };
+        }
 
         eprintln!("Parsing {}", entry.to_string_lossy());
 
-        let result = savvy_bindgen::parse_file(&entry);
+        let result = savvy_bindgen::parse_file(&entry, &mod_path);
 
         // if the file has `mod` declarations, add the files to the queue.
-        result.mod_dirs().into_iter().for_each(|d| {
-            queue.push_back(d);
+        result.child_mods.iter().for_each(|m| {
+            let mut next_mod_path = mod_path.clone();
+            next_mod_path.push(m.clone());
+            queue.push_back((result.base_path.join(m), next_mod_path));
         });
 
         parsed.push(result);
@@ -226,8 +258,9 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+    let crate_name = parse_cargo_toml(&path.join(PATH_CARGO_TOML));
 
-    let parsed = parse_crate(&lib_rs);
+    let parsed = parse_crate(&lib_rs, &crate_name);
 
     let merged = merge_parsed_results(parsed);
 
@@ -301,24 +334,9 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
     update(path);
 }
 
-fn main() {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
-        Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
-        Commands::Test { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
-            match futures_lite::future::block_on(run_test(tests)) {
-                Ok(_) => {}
-                Err(_) => std::process::exit(1),
-            }
-        }
-        Commands::ExtractTests { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
-            println!("{tests}");
-        }
-    }
+fn extract_tests(path: &Path, crate_name: &str) -> String {
+    let parsed_results = parse_crate(path, crate_name);
+    generate_test_code(&parsed_results)
 }
 
 async fn run_test(tests: String) -> std::io::Result<()> {
@@ -355,104 +373,44 @@ cat("test result: ok\n")
         eprintln!("{}", line?);
     }
 
-    let res = cmd.output().await;
+    let output = cmd.output().await?;
 
-    match &res {
-        Ok(output) => {
-            if !output.status.success() {
-                eprintln!("Test failed with status code {}", output.status);
-                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
-                std::process::exit(1);
-            }
-        }
-        Err(e) => match e.kind() {
-            std::io::ErrorKind::NotFound => {
-                eprintln!("`R` is not found on PATH. Please add R to PATH.");
-                std::process::exit(1);
-            }
-            _ => {
-                panic!("{e}");
-            }
-        },
-    };
+    if !output.status.success() {
+        eprintln!("Test failed with status code {}", output.status);
+        std::process::exit(1);
+    }
 
     Ok(())
 }
 
-fn add_indent(x: &str, indent: usize) -> String {
-    x.lines()
-        .map(|x| format!("{:indent$}{x}", "", indent = indent))
-        .collect::<Vec<String>>()
-        .join("\n")
-}
+fn main() {
+    let cli = Cli::parse();
 
-fn extract_tests(path: &Path) -> String {
-    let parsed = parse_crate(path);
-
-    let mut out = "use savvy::savvy;\n\n".to_string();
-
-    let mut i = 0;
-    for result in parsed {
-        for test in result.tests {
-            let label = test.label;
-            let location = test.location;
-
-            // Add indent
-            let test_code = add_indent(&test.code, 8);
-
-            let test_escaped = add_indent(&test.code, 4)
-                .replace('{', "{{")
-                .replace('}', "}}");
-
-            i += 1;
-            out.push_str(&format!(
-                r###"#[savvy]
-fn test_{i}() -> savvy::Result<()> {{
-    eprint!(r##"running doctest of {label} (file: {location}) ..."##);
-
-    std::panic::set_hook(Box::new(|panic_info| {{
-        let mut msg: Vec<String> = Vec::new();
-        let orig_msg = panic_info.to_string();
-        let mut lines = orig_msg.lines();
-        
-        lines.next(); // remove location
-        
-        for line in lines {{
-            msg.push(format!("    {{}}", line));
-        }}
-    
-        savvy::r_eprintln!(r##"
-
-
-Location:
-    {label} (file: {location})
-
-Code:
-{test_escaped}
-
-Error:
-{{}}
-"##, msg.join("\n"));
-    }}));
-
-    let test = || -> savvy::Result<()> {{
-{test_code}
-        Ok(())
-    }};
-    let result = std::panic::catch_unwind(||test().expect("some error"));
-    
-    match result {{
-        Ok(_) => {{
-            eprintln!("ok");
-            Ok(())
-        }},
-        Err(_) => Err("test failed".into()),
-    }}
-}}
-"###,
-            ));
+    match cli.command {
+        Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
+        Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::Test { crate_dir } => {
+            let dir = crate_dir.unwrap_or(".".into());
+            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
+            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
+            match futures_lite::future::block_on(run_test(tests)) {
+                Ok(_) => {}
+                Err(e) => match e.kind() {
+                    std::io::ErrorKind::NotFound => {
+                        eprintln!("`R` is not found on PATH. Please add R to PATH.");
+                        std::process::exit(1);
+                    }
+                    _ => {
+                        panic!("{e:#?}");
+                    }
+                },
+            }
+        }
+        Commands::ExtractTests { crate_dir } => {
+            let dir = crate_dir.unwrap_or(".".into());
+            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
+            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
+            println!("{tests}");
         }
     }
-
-    out
 }

@@ -1,5 +1,7 @@
 use std::{fs::File, io::Read, path::Path};
 
+use proc_macro2::Span;
+use quote::format_ident;
 use syn::parse_quote;
 
 use crate::{
@@ -33,9 +35,13 @@ pub fn read_file(path: &Path) -> String {
     content
 }
 
-pub fn parse_file(path: &Path) -> ParsedResult {
+pub fn parse_file(path: &Path, mod_path: &[String]) -> ParsedResult {
     let location = &path.to_string_lossy();
     let file_content = read_file(path);
+
+    // First, parse doctests in the module level document because they are not
+    // the part of the AST tree (at least I cannot find the way to treat it as a
+    // AST). So, this cannot catch the documents in the form `#[doc = include_str!("path/to/README.md")]`.
 
     let module_level_docs: Vec<&str> = file_content
         .lines()
@@ -44,16 +50,6 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         .collect();
 
     let tests = parse_doctests(&module_level_docs, "module-level doc", location);
-    // TODO
-    // tests.append(parse_test_mods(&file_content));
-
-    let ast = match syn::parse_str::<syn::File>(&file_content) {
-        Ok(ast) => ast,
-        Err(_) => {
-            eprintln!("Failed to parse the specified file");
-            std::process::exit(3);
-        }
-    };
 
     let mut result = ParsedResult {
         base_path: path
@@ -64,13 +60,22 @@ pub fn parse_file(path: &Path) -> ParsedResult {
         impls: Vec::new(),
         structs: Vec::new(),
         enums: Vec::new(),
-        mods: Vec::new(),
+        mod_path: mod_path.to_vec(),
+        child_mods: Vec::new(),
         tests,
     };
 
-    for item in ast.items {
-        result.parse_item(&item, location)
-    }
+    match syn::parse_str::<syn::File>(&file_content) {
+        Ok(file) => {
+            for item in file.items {
+                result.parse_item(&item, location)
+            }
+        }
+        Err(_) => {
+            eprintln!("Failed to parse the specified file");
+            std::process::exit(3);
+        }
+    };
 
     result
 }
@@ -148,10 +153,31 @@ impl ParsedResult {
             }
 
             syn::Item::Mod(item_mod) => {
-                if let Some((_, items)) = &item_mod.content {
-                    items.iter().for_each(|i| self.parse_item(i, location));
-                } else {
-                    self.mods.push(item_mod.ident.to_string());
+                let is_test_mod = item_mod
+                    .attrs
+                    .iter()
+                    .any(|attr| attr == &parse_quote!(#[cfg(test)]));
+
+                match (&item_mod.content, is_test_mod) {
+                    (None, false) => {
+                        self.child_mods.push(item_mod.ident.to_string());
+                    }
+                    (None, true) => {}
+                    (Some((_, items)), false) => {
+                        items.iter().for_each(|i| self.parse_item(i, location));
+                    }
+                    (Some(_), true) => {
+                        let label = self.mod_path.join("::");
+                        let mut cur_mod_path = self.mod_path.clone();
+                        cur_mod_path.push(item_mod.ident.to_string());
+
+                        self.tests.push(transform_test_mod(
+                            item_mod,
+                            &label,
+                            location,
+                            &cur_mod_path,
+                        ))
+                    }
                 }
             }
 
@@ -224,10 +250,30 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
                 // end of the code block
 
                 if !ignore {
+                    let orig_code = code_block.join("\n");
+                    let code_parsed =
+                        match syn::parse_str::<syn::Block>(&format!("{{ {orig_code} }}")) {
+                            Ok(block) => block.stmts,
+                            Err(_) => {
+                                eprintln!("Failed to parse the specified file");
+                                std::process::exit(3);
+                            }
+                        };
+
+                    let test_fn = wrap_with_test_function(
+                        &orig_code,
+                        &code_parsed,
+                        &format_ident!("doctest"),
+                        label,
+                        location,
+                        true,
+                    );
+
                     out.push(ParsedTestCase {
-                        code: code_block.join("\n"),
+                        orig_code,
                         label: label.to_string(),
                         location: location.to_string(),
+                        code: unparse(&test_fn),
                     });
                 }
 
@@ -252,4 +298,194 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
     }
 
     out
+}
+
+#[cfg(feature = "use_formatter")]
+fn unparse<T: quote::ToTokens>(item: &T) -> String {
+    let code_parsed: syn::File = parse_quote!(#item);
+    // replace() is needed for replacing the linebreaks inside string literals
+    prettyplease::unparse(&code_parsed).replace(r#"\n"#, "\n")
+}
+
+#[cfg(not(feature = "use_formatter"))]
+fn unparse<T: quote::ToTokens>(item: &T) -> String {
+    quote::quote!(#item).to_string()
+}
+
+fn transform_test_mod(
+    item_mod: &syn::ItemMod,
+    label: &str,
+    location: &str,
+    mod_path: &[String],
+) -> ParsedTestCase {
+    let mut item_mod = item_mod.clone();
+
+    // Remove #[cfg(test)]
+    item_mod
+        .attrs
+        .retain(|attr| attr != &parse_quote!(#[cfg(test)]));
+
+    item_mod.ident = format_ident!("__UNIQUE_PREFIX__mod_{}", item_mod.ident);
+
+    if let Some((_, items)) = &mut item_mod.content {
+        items.insert(
+            0,
+            parse_quote!(
+                use savvy::savvy;
+            ),
+        );
+
+        for item in items {
+            if let syn::Item::Fn(item_fn) = item {
+                let orig_code = unparse(&item_fn);
+                let orig_len = item_fn.attrs.len();
+
+                item_fn.attrs.retain(|attr| attr != &parse_quote!(#[test]));
+
+                // if it's marked with #[test], add tweaks to the function.
+                if item_fn.attrs.len() < orig_len {
+                    item_fn.attrs.push(parse_quote!(#[savvy]));
+                    item_fn.sig.ident = format_ident!("__UNIQUE_PREFIX__fn_{}", item_fn.sig.ident);
+
+                    *item_fn = wrap_with_test_function(
+                        &orig_code,
+                        &item_fn.block.stmts,
+                        &item_fn.sig.ident,
+                        label,
+                        location,
+                        false,
+                    );
+                }
+            }
+        }
+    }
+
+    let (_last, rest) = mod_path.split_last().unwrap();
+    let code = unparse(&item_mod)
+        // Replace super and crate with the actual crate name
+        .replace("super::", &format!("{}::", rest.join("::")))
+        .replace("crate::", &format!("{}::", mod_path.first().unwrap()))
+        // since savvy_show_error is defined in the parent space, add crate::
+        .replace("savvy_show_error", "crate::savvy_show_error");
+
+    ParsedTestCase {
+        label: label.to_string(),
+        orig_code: "".to_string(),
+        location: location.to_string(),
+        code,
+    }
+}
+
+pub fn generate_test_code(parsed_results: &Vec<ParsedResult>) -> String {
+    let header: syn::File = parse_quote! {
+        use savvy::savvy;
+
+        pub(crate) fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
+            let mut msg: Vec<String> = Vec::new();
+            let orig_msg = panic_info.to_string();
+            let mut lines = orig_msg.lines();
+
+            lines.next(); // remove location
+
+            for line in lines {
+                msg.push(format!("    {}", line));
+            }
+
+            let error = msg.join("\n");
+
+            savvy::r_eprintln!(
+                "
+
+Location:
+    {label} (file: {location})
+    
+Code:
+{code}
+    
+Error:
+{error}
+            ");
+        }
+    };
+
+    let mut out = unparse(&header);
+    out.push_str("\n\n");
+
+    let mut i = 0;
+    for result in parsed_results {
+        for test in &result.tests {
+            i += 1;
+            out.push_str(
+                &test
+                    .code
+                    .replace("__UNIQUE_PREFIX__", &format!("test_{i}_")),
+            );
+            out.push_str("\n\n");
+        }
+    }
+
+    out
+}
+
+fn add_indent(x: &str, indent: usize) -> String {
+    x.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = indent))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn wrap_with_test_function(
+    orig_code: &str,
+    code_parsed: &[syn::Stmt],
+    orig_ident: &syn::Ident,
+    label: &str,
+    location: &str,
+    is_doctest: bool,
+) -> syn::ItemFn {
+    let test_type = if is_doctest { "doctest" } else { "test" };
+    let msg_lit = syn::LitStr::new(
+        &format!("running {test_type} of {label} (file: {location}) ..."),
+        Span::call_site(),
+    );
+
+    let label_lit = syn::LitStr::new(label, Span::call_site());
+    let location_lit = syn::LitStr::new(location, Span::call_site());
+    let code_lit = syn::LitStr::new(&add_indent(orig_code, 4), Span::call_site());
+    let ident = format_ident!("__UNIQUE_PREFIX__{}", orig_ident);
+
+    let mut code = code_parsed.to_vec();
+    if !code.is_empty() {
+        // Add return value Ok(()) unless the original statement has return value.
+        match code.last().unwrap() {
+            syn::Stmt::Expr(_, None) => {}
+            _ => {
+                let last_line: syn::Expr = parse_quote!(Ok(()));
+                code.push(syn::Stmt::Expr(last_line, None));
+            }
+        }
+    }
+
+    // Note: it's hard to determine the unique function name at this point.
+    //       So, put a placeholder here and replace it in the parent function.
+    parse_quote! {
+        #[savvy]
+        fn #ident() -> savvy::Result<()> {
+            eprint!(#msg_lit);
+
+            std::panic::set_hook(Box::new(|panic_info| savvy_show_error(#code_lit, #label_lit, #location_lit, panic_info)));
+
+            let test = || -> savvy::Result<()> {
+                #(#code)*
+            };
+            let result = std::panic::catch_unwind(|| test().expect("some error"));
+
+            match result {
+                Ok(_) => {
+                    eprintln!("ok");
+                    Ok(())
+                }
+                Err(_) => Err("test failed".into()),
+            }
+        }
+    }
 }
