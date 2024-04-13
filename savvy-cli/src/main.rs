@@ -304,13 +304,15 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
 fn extract_tests(path: &Path) -> String {
     let parsed = parse_crate(path);
 
-    let mut out = "use savvy::savvy;\n\n".to_string();
+    let mut out = savvy_bindgen::common_test_code();
+    out.push_str("\n\n");
 
     let mut i = 0;
     for result in parsed {
         for test in result.tests {
             i += 1;
             out.push_str(&test.code.replace("__FUNCTION_NAME__", &format!("test_{i}")));
+            out.push_str("\n\n");
         }
     }
 

@@ -273,6 +273,40 @@ fn add_indent(x: &str, indent: usize) -> String {
         .join("\n")
 }
 
+pub fn common_test_code() -> String {
+    quote::quote! {
+        use savvy::savvy;
+
+        fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
+            let mut msg: Vec<String> = Vec::new();
+            let orig_msg = panic_info.to_string();
+            let mut lines = orig_msg.lines();
+
+            lines.next(); // remove location
+
+            for line in lines {
+                msg.push(format!("    {}", line));
+            }
+
+            let error = msg.join("\n");
+
+            savvy::r_eprintln!(
+                "
+
+Location:
+    {label} (file: {location})
+    
+Code:
+{code}
+    
+Error:
+{error}
+            ");
+        }
+    }
+    .to_string()
+}
+
 fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> String {
     let test_code = match syn::parse_str::<syn::Block>(&format!("{{ {orig_code} }}")) {
         Ok(ast) => ast,
@@ -282,53 +316,26 @@ fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> Stri
         }
     };
 
-    let test_escaped = add_indent(orig_code, 4)
-        .replace('{', "{{")
-        .replace('}', "}}");
-
-    let msg = syn::LitStr::new(
+    let msg_lit = syn::LitStr::new(
         &format!("running doctest of {label} (file: {location}) ..."),
         Span::call_site(),
     );
 
-    let err_msg = syn::LitStr::new(
-        &format!(
-            "
-
-Location:
-    {label} (file: {location})
-    
-Code:
-{test_escaped}
-    
-Error:
-{{}}
-"
-        ),
+    let label_lit = syn::LitStr::new(label, Span::call_site());
+    let location_lit = syn::LitStr::new(location, Span::call_site());
+    let code_lit = syn::LitStr::new(
+        &add_indent(orig_code, 4)
+            .replace('{', "{{")
+            .replace('}', "}}"),
         Span::call_site(),
     );
 
     quote::quote! {
         #[savvy]
         fn __FUNCTION_NAME__() -> savvy::Result<()> {
-            eprint!(#msg);
+            eprint!(#msg_lit);
 
-            std::panic::set_hook(Box::new(|panic_info| {
-                let mut msg: Vec<String> = Vec::new();
-                let orig_msg = panic_info.to_string();
-                let mut lines = orig_msg.lines();
-
-                lines.next(); // remove location
-
-                for line in lines {
-                    msg.push(format!("    {}", line));
-                }
-
-                savvy::r_eprintln!(
-                    #err_msg,
-                    msg.join("\n")
-                );
-            }));
+            std::panic::set_hook(Box::new(|panic_info| savvy_show_error(#code_lit, #label_lit, #location_lit, panic_info)));
 
             let test = || -> savvy::Result<()> {
                 #test_code

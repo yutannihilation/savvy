@@ -17,4 +17,4 @@ pub use ir::{merge_parsed_results, MergedResult, ParsedResult};
 
 pub use utils::extract_docs;
 
-pub use parse_file::{parse_file, read_file};
+pub use parse_file::{common_test_code, parse_file, read_file};
