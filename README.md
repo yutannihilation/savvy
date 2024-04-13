@@ -62,6 +62,10 @@ to_upper(c("a", "b", "c"))
 
 <https://yutannihilation.github.io/savvy/guide/>
 
+## Contributing
+
+[CONTRIBUTING.md](./CONTRIBUTING.md)
+
 ## Examples
 
 A toy example R package can be found in [`R-package/`

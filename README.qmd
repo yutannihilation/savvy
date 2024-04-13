@@ -76,6 +76,9 @@ to_upper(c("a", "b", "c"))
 
 <https://yutannihilation.github.io/savvy/guide/>
 
+## Contributing
+
+[CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## Examples
 
