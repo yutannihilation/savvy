@@ -20,8 +20,6 @@ use savvy_bindgen::{
     generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
 };
 
-const DEFAULT_LIB_RS: &str = "./src/lib.rs";
-
 /// Generate C bindings and R bindings for a Rust library
 #[derive(Parser, Debug)]
 #[command(about, version, long_about = None)]
@@ -47,13 +45,13 @@ enum Commands {
     /// Run tests within an R session
     Test {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
-        lib_rs: Option<PathBuf>,
+        crate_dir: Option<PathBuf>,
     },
 
     /// Extract doctests and test modules
     ExtractTests {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
-        lib_rs: Option<PathBuf>,
+        crate_dir: Option<PathBuf>,
     },
 }
 
@@ -101,6 +99,36 @@ fn parse_description(path: &Path) -> PackageDescription {
         package_name: package_name_orig.to_string(),
         has_sysreq,
     }
+}
+
+// Parse Cargo.toml and get the crate name.
+fn parse_cargo_toml(path: &Path) -> String {
+    let content = savvy_bindgen::read_file(path);
+
+    let mut in_package_section = false;
+    for line in content.lines() {
+        if line.trim_start().starts_with('[') {
+            in_package_section = line.trim() == "[package]";
+            continue;
+        }
+
+        if !in_package_section {
+            continue;
+        }
+
+        let mut s = line.split('=');
+        if let Some(key) = s.next() {
+            if key.trim() != "name" {
+                continue;
+            }
+        }
+        if let Some(value) = s.next() {
+            return value.trim().trim_matches(['"', '\'']).to_string();
+        }
+    }
+
+    eprintln!("Cargo.toml doesn't have package name!");
+    std::process::exit(10);
 }
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
@@ -181,7 +209,7 @@ to set the configure script as executable
     );
 }
 
-fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
+fn parse_crate(lib_rs: &Path, crate_name: &str) -> Vec<ParsedResult> {
     let mut parsed: Vec<ParsedResult> = Vec::new();
 
     if !lib_rs.exists() {
@@ -190,8 +218,7 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
     }
 
     // (file path, module path)
-    let mut queue: VecDeque<(PathBuf, Vec<String>)> =
-        VecDeque::from([(lib_rs.to_path_buf(), vec![])]);
+    let mut queue = VecDeque::from([(lib_rs.to_path_buf(), vec![crate_name.to_string()])]);
 
     while !queue.is_empty() {
         let (mut entry, mod_path) = queue.pop_front().unwrap();
@@ -231,8 +258,9 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
+    let crate_name = parse_cargo_toml(&path.join(PATH_CARGO_TOML));
 
-    let parsed = parse_crate(&lib_rs);
+    let parsed = parse_crate(&lib_rs, &crate_name);
 
     let merged = merge_parsed_results(parsed);
 
@@ -306,8 +334,8 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
     update(path);
 }
 
-fn extract_tests(path: &Path) -> String {
-    let parsed_results = parse_crate(path);
+fn extract_tests(path: &Path, crate_name: &str) -> String {
+    let parsed_results = parse_crate(path, crate_name);
     generate_test_code(&parsed_results)
 }
 
@@ -317,6 +345,7 @@ async fn run_test(tests: String) -> std::io::Result<()> {
         &temp_r,
         &format!(
             r###"
+options("savvy.use_installed_cli" = TRUE)
 e <- new.env()
 savvy::savvy_source(r"(
 {tests}
@@ -361,8 +390,10 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
-        Commands::Test { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+        Commands::Test { crate_dir } => {
+            let dir = crate_dir.unwrap_or(".".into());
+            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
+            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
             match futures_lite::future::block_on(run_test(tests)) {
                 Ok(_) => {}
                 Err(e) => match e.kind() {
@@ -376,8 +407,10 @@ fn main() {
                 },
             }
         }
-        Commands::ExtractTests { lib_rs } => {
-            let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
+        Commands::ExtractTests { crate_dir } => {
+            let dir = crate_dir.unwrap_or(".".into());
+            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
+            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
             println!("{tests}");
         }
     }

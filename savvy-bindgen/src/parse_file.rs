@@ -1,7 +1,7 @@
 use std::{fs::File, io::Read, path::Path};
 
 use proc_macro2::Span;
-use quote::{format_ident, quote};
+use quote::format_ident;
 use syn::parse_quote;
 
 use crate::{
@@ -168,8 +168,15 @@ impl ParsedResult {
                     }
                     (Some(_), true) => {
                         let label = self.mod_path.join("::");
-                        self.tests
-                            .push(transform_test_mod(item_mod, &label, location))
+                        let mut cur_mod_path = self.mod_path.clone();
+                        cur_mod_path.push(item_mod.ident.to_string());
+
+                        self.tests.push(transform_test_mod(
+                            item_mod,
+                            &label,
+                            location,
+                            &cur_mod_path,
+                        ))
                     }
                 }
             }
@@ -300,7 +307,12 @@ fn unparse<T: quote::ToTokens>(item: &T) -> String {
     prettyplease::unparse(&code_parsed).replace(r#"\n"#, "\n")
 }
 
-fn transform_test_mod(item_mod: &syn::ItemMod, label: &str, location: &str) -> ParsedTestCase {
+fn transform_test_mod(
+    item_mod: &syn::ItemMod,
+    label: &str,
+    location: &str,
+    mod_path: &[String],
+) -> ParsedTestCase {
     let mut item_mod = item_mod.clone();
 
     // Remove #[cfg(test)]
@@ -343,10 +355,11 @@ fn transform_test_mod(item_mod: &syn::ItemMod, label: &str, location: &str) -> P
         }
     }
 
+    let (_last, rest) = mod_path.split_last().unwrap();
     let code = unparse(&item_mod)
         // Replace super and crate with the actual crate name
-        .replace("super::", &format!("{}::", "savvy"))
-        .replace("crate::", &format!("{}::", "savvy"))
+        .replace("super::", &format!("{}::", rest.join("::")))
+        .replace("crate::", &format!("{}::", mod_path.first().unwrap()))
         // since savvy_show_error is defined in the parent space, add crate::
         .replace("savvy_show_error", "crate::savvy_show_error");
 
@@ -359,7 +372,7 @@ fn transform_test_mod(item_mod: &syn::ItemMod, label: &str, location: &str) -> P
 }
 
 pub fn generate_test_code(parsed_results: &Vec<ParsedResult>) -> String {
-    let mut out = quote! {
+    let header: syn::File = parse_quote! {
         use savvy::savvy;
 
         pub(crate) fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
@@ -388,9 +401,9 @@ Error:
 {error}
             ");
         }
-    }
-    .to_string();
+    };
 
+    let mut out = unparse(&header);
     out.push_str("\n\n");
 
     let mut i = 0;
