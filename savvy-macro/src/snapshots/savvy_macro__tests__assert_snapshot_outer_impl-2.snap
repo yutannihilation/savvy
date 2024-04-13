@@ -1,0 +1,17 @@
+---
+source: savvy-macro/src/lib.rs
+expression: lines
+---
+- "#[allow(clippy::missing_safety_doc)]"
+- "#[no_mangle]"
+- "pub unsafe extern \"C\" fn Person_new2() -> savvy::ffi::SEXP {"
+- "    match savvy_Person_new2_inner() {"
+- "        Ok(result) => {"
+- "            match <savvy::Sexp>::try_from(result) {"
+- "                Ok(sexp) => sexp.0,"
+- "                Err(e) => savvy::handle_error(e),"
+- "            }"
+- "        }"
+- "        Err(e) => savvy::handle_error(e),"
+- "    }"
+- "}"

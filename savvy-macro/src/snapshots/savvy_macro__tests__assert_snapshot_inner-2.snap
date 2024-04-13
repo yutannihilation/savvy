@@ -1,0 +1,17 @@
+---
+source: savvy-macro/src/lib.rs
+expression: lines
+---
+- "unsafe fn savvy_foo_inner() -> savvy::Result<()> {"
+- "    let orig_hook = std::panic::take_hook();"
+- "    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));"
+- "    let result = std::panic::catch_unwind(|| {"
+- "        bar();"
+- "        Ok(())"
+- "    });"
+- "    std::panic::set_hook(orig_hook);"
+- "    match result {"
+- "        Ok(orig_result) => orig_result,"
+- "        Err(_) => Err(\"panic happened\".into()),"
+- "    }"
+- "}"
