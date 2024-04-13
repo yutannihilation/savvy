@@ -30,7 +30,7 @@ impl SavvyFn {
             _ => true,
         };
 
-        let out: syn::ItemFn = match &self.fn_type {
+        let mut out: syn::ItemFn = match &self.fn_type {
             // A bare function
             SavvyFnType::BareFunction => parse_quote!(
                 #(#attrs)*
@@ -131,6 +131,21 @@ impl SavvyFn {
             }
         };
 
+        #[cfg(debug_assertions)]
+        let error_handler: syn::Expr = parse_quote!(Err("panic happened".into()));
+        #[cfg(not(debug_assertions))]
+        let error_handler: syn::Expr = parse_quote!(std::process::abort());
+
+        let orig_body = &mut out.block;
+        let new_body: syn::Block = parse_quote!({
+            let result = std::panic::catch_unwind(|| #orig_body);
+
+            match result {
+                Ok(orig_result) => orig_result,
+                Err(_) => #error_handler,
+            }
+        });
+        out.block = Box::new(new_body);
         out
     }
 
