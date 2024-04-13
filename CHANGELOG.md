@@ -5,6 +5,10 @@
 
 ### New features
 
+* An experimental new subcommand `savvy-cli test` runs tests by wrapping the
+  test code with a temporary R package. `cargo test` doesn't work on savvy because
+  savvy always requires a real R session, so you can use this instead.
+
 * `savvy-cli init` now generates `Makevars` that supports debug build when
   `DEBUG` envvar is set to `true` (i.e., in `devtools::load_all()`).
 
