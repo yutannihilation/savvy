@@ -310,7 +310,7 @@ fn extract_tests(path: &Path) -> String {
     for result in parsed {
         for test in result.tests {
             i += 1;
-            out.push_str(&test.code.replace("@FUNCTION_NAME@", &format!("test_{i}")));
+            out.push_str(&test.code.replace("__FUNCTION_NAME__", &format!("test_{i}")));
         }
     }
 
@@ -351,26 +351,12 @@ cat("test result: ok\n")
         eprintln!("{}", line?);
     }
 
-    let res = cmd.output().await;
+    let output = cmd.output().await?;
 
-    match &res {
-        Ok(output) => {
-            if !output.status.success() {
-                eprintln!("Test failed with status code {}", output.status);
-                eprintln!("stderr: \n{}", String::from_utf8_lossy(&output.stderr));
-                std::process::exit(1);
-            }
-        }
-        Err(e) => match e.kind() {
-            std::io::ErrorKind::NotFound => {
-                eprintln!("`R` is not found on PATH. Please add R to PATH.");
-                std::process::exit(1);
-            }
-            _ => {
-                panic!("{e}");
-            }
-        },
-    };
+    if !output.status.success() {
+        eprintln!("Test failed with status code {}", output.status);
+        std::process::exit(1);
+    }
 
     Ok(())
 }
@@ -385,7 +371,15 @@ fn main() {
             let tests = extract_tests(&lib_rs.unwrap_or(DEFAULT_LIB_RS.into()));
             match futures_lite::future::block_on(run_test(tests)) {
                 Ok(_) => {}
-                Err(_) => std::process::exit(1),
+                Err(e) => match e.kind() {
+                    std::io::ErrorKind::NotFound => {
+                        eprintln!("`R` is not found on PATH. Please add R to PATH.");
+                        std::process::exit(1);
+                    }
+                    _ => {
+                        panic!("{e:#?}");
+                    }
+                },
             }
         }
         Commands::ExtractTests { lib_rs } => {

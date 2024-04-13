@@ -1,5 +1,6 @@
 use std::{fs::File, io::Read, path::Path};
 
+use proc_macro2::Span;
 use syn::parse_quote;
 
 use crate::{
@@ -273,56 +274,76 @@ fn add_indent(x: &str, indent: usize) -> String {
 }
 
 fn wrap_with_test_function(orig_code: &str, label: &str, location: &str) -> String {
-    // Add indent
-    let test_code = add_indent(orig_code, 8);
+    let test_code = match syn::parse_str::<syn::Block>(&format!("{{ {orig_code} }}")) {
+        Ok(ast) => ast,
+        Err(_) => {
+            eprintln!("Failed to parse the specified file");
+            std::process::exit(3);
+        }
+    };
 
     let test_escaped = add_indent(orig_code, 4)
         .replace('{', "{{")
         .replace('}', "}}");
-    format!(
-        r###"#[savvy]
-fn @FUNCTION_NAME@() -> savvy::Result<()> {{
-    eprint!(r##"running doctest of {label} (file: {location}) ..."##);
 
-    std::panic::set_hook(Box::new(|panic_info| {{
-        let mut msg: Vec<String> = Vec::new();
-        let orig_msg = panic_info.to_string();
-        let mut lines = orig_msg.lines();
-        
-        lines.next(); // remove location
-        
-        for line in lines {{
-            msg.push(format!("    {{}}", line));
-        }}
-    
-        savvy::r_eprintln!(r##"
+    let msg = syn::LitStr::new(
+        &format!("running doctest of {label} (file: {location}) ..."),
+        Span::call_site(),
+    );
 
+    let err_msg = syn::LitStr::new(
+        &format!(
+            "
 
 Location:
     {label} (file: {location})
-
+    
 Code:
 {test_escaped}
-
+    
 Error:
 {{}}
-"##, msg.join("\n"));
-    }}));
+"
+        ),
+        Span::call_site(),
+    );
 
-    let test = || -> savvy::Result<()> {{
-{test_code}
-        Ok(())
-    }};
-    let result = std::panic::catch_unwind(||test().expect("some error"));
-    
-    match result {{
-        Ok(_) => {{
-            eprintln!("ok");
-            Ok(())
-        }},
-        Err(_) => Err("test failed".into()),
-    }}
-}}
-"###
-    )
+    quote::quote! {
+        #[savvy]
+        fn __FUNCTION_NAME__() -> savvy::Result<()> {
+            eprint!(#msg);
+
+            std::panic::set_hook(Box::new(|panic_info| {
+                let mut msg: Vec<String> = Vec::new();
+                let orig_msg = panic_info.to_string();
+                let mut lines = orig_msg.lines();
+
+                lines.next(); // remove location
+
+                for line in lines {
+                    msg.push(format!("    {}", line));
+                }
+
+                savvy::r_eprintln!(
+                    #err_msg,
+                    msg.join("\n")
+                );
+            }));
+
+            let test = || -> savvy::Result<()> {
+                #test_code
+                Ok(())
+            };
+            let result = std::panic::catch_unwind(|| test().expect("some error"));
+
+            match result {
+                Ok(_) => {
+                    eprintln!("ok");
+                    Ok(())
+                }
+                Err(_) => Err("test failed".into()),
+            }
+        }
+    }
+    .to_string()
 }
