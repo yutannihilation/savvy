@@ -22,6 +22,12 @@ savvy-bindgen = { version = "0.5.1", path = "../savvy-bindgen" }
 [dev-dependencies]
 trybuild = "1"
 prettyplease = "0.2"
+insta = { version = "1.38.0", features = ["yaml"] }
 
 [package.metadata.dist]
 dist = false
+
+# c.f. https://insta.rs/docs/quickstart/#optional-faster-runs
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3
