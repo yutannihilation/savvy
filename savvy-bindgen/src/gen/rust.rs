@@ -21,15 +21,6 @@ impl SavvyFn {
 
         let ret_ty = self.return_type.inner();
 
-        // If the original return type is not wrapped with Result, it needs to be wrapped with Ok()
-        let wrapped_with_result = match &self.return_type {
-            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                wrapped_with_result,
-                ..
-            }) => *wrapped_with_result,
-            _ => true,
-        };
-
         let mut out: syn::ItemFn = match &self.fn_type {
             // A bare function
             SavvyFnType::BareFunction => parse_quote!(
@@ -93,11 +84,27 @@ impl SavvyFn {
             }
         };
 
+        // If the original return type is not wrapped with Result, it needs to be wrapped with Ok()
+
+        let wrapped_with_result = match &self.return_type {
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
+                wrapped_with_result,
+                ..
+            }) => *wrapped_with_result,
+            _ => true,
+        };
+
         if !wrapped_with_result {
             let return_expr = out.block.stmts.pop().unwrap();
             let new_return_expr: syn::Expr = parse_quote!(Ok(#return_expr));
             out.block.stmts.push(syn::Stmt::Expr(new_return_expr, None));
         }
+
+        // Wrap with catch_unwind(). This is needed not only for catching panic
+        // gracefully on debug build, but also for preventing the unwinding over
+        // the FFI boundary between Rust and C (= R API). Since the
+        // cross-language unwind is undefined behavior, abort the process here.
+        // This makes the R session crash.
 
         #[cfg(debug_assertions)]
         let error_handler: syn::Expr = parse_quote!(Err("panic happened".into()));
