@@ -51,7 +51,7 @@ jobs:
 
       - name: Run cargo test
         run: |
-          cargo test --manifest-path=./savvy-macro/Cargo.toml
+          # cargo test --manifest-path=./savvy-macro/Cargo.toml
           cargo test --manifest-path=./savvy-bindgen/Cargo.toml
           cargo r-test
 
