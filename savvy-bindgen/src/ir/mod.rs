@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::collections::HashMap;
 
 use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
@@ -21,14 +21,9 @@ pub struct ParsedResult {
     pub impls: Vec<SavvyImpl>,
     pub structs: Vec<SavvyStruct>,
     pub enums: Vec<SavvyEnum>,
-    pub mods: Vec<String>,
+    pub mod_path: Vec<String>,
+    pub child_mods: Vec<String>,
     pub tests: Vec<ParsedTestCase>,
-}
-
-impl ParsedResult {
-    pub fn mod_dirs(&self) -> Vec<PathBuf> {
-        self.mods.iter().map(|x| self.base_path.join(x)).collect()
-    }
 }
 
 pub struct SavvyMergedImpl {

@@ -189,10 +189,12 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
         std::process::exit(1);
     }
 
-    let mut queue = VecDeque::from([lib_rs.to_path_buf()]);
+    // (file path, module path)
+    let mut queue: VecDeque<(PathBuf, Vec<String>)> =
+        VecDeque::from([(lib_rs.to_path_buf(), vec![])]);
 
     while !queue.is_empty() {
-        let mut entry = queue.pop_front().unwrap();
+        let (mut entry, mod_path) = queue.pop_front().unwrap();
 
         // there can be two patterns for a module named "bar"
         //
@@ -201,22 +203,24 @@ fn parse_crate(lib_rs: &Path) -> Vec<ParsedResult> {
 
         // if it's a directory, parse the mod.rs file
         if entry.is_dir() {
-            entry.push("mod.rs")
+            entry.push("mod.rs");
         } else {
             entry.set_extension("rs");
 
             if !entry.exists() || !entry.is_file() {
                 continue;
             }
-        };
+        }
 
         eprintln!("Parsing {}", entry.to_string_lossy());
 
-        let result = savvy_bindgen::parse_file(&entry);
+        let result = savvy_bindgen::parse_file(&entry, &mod_path);
 
         // if the file has `mod` declarations, add the files to the queue.
-        result.mod_dirs().into_iter().for_each(|d| {
-            queue.push_back(d);
+        result.child_mods.iter().for_each(|m| {
+            let mut next_mod_path = mod_path.clone();
+            next_mod_path.push(m.clone());
+            queue.push_back((result.base_path.join(m), next_mod_path));
         });
 
         parsed.push(result);
