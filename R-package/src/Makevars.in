@@ -24,7 +24,7 @@ $(STATLIB):
 	  else \
 	    export CC="$(CC)" && \
 	    export CFLAGS="$(CFLAGS)" && \
-	    export CARGO_PROFILE_DEBUG_PANIC="abort" && \
+	    export CARGO_PROFILE_DEV_PANIC="abort" && \
 	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
 	  fi
