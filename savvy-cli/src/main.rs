@@ -345,9 +345,6 @@ async fn run_test(tests: String) -> std::io::Result<()> {
         &temp_r,
         &format!(
             r###"
-# TODO: Remove this tweak
-options("savvy.use_installed_cli" = TRUE)
-
 e <- new.env()
 savvy::savvy_source(r"(
 {tests}

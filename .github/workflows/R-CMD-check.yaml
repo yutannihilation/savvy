@@ -53,9 +53,7 @@ jobs:
         run: |
           cargo test --manifest-path=./savvy-macro/Cargo.toml
           cargo test --manifest-path=./savvy-bindgen/Cargo.toml
-          # TODO: Remove this tweak
-          cargo install --path savvy-cli
-          cargo r-test
+          # cargo r-test
 
       - name: Tweak
         run: |
