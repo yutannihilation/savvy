@@ -127,10 +127,12 @@ impl OwnedStringSexp {
                     last_index = i;
                 }
 
-                if last_index + 1 != upper {
+                let new_len = last_index + 1;
+                if new_len != upper {
                     unsafe {
-                        savvy_ffi::SETLENGTH(out.inner, (last_index + 1) as _);
+                        savvy_ffi::SETLENGTH(out.inner, new_len as _);
                     }
+                    out.len = new_len;
                 }
 
                 Ok(out)
