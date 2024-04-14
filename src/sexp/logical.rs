@@ -149,7 +149,7 @@ impl OwnedLogicalSexp {
     ///         out.into()
     ///     }
     /// }
-    /// ````
+    /// ```
     ///
     /// # Safety
     ///
