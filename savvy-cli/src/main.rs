@@ -339,16 +339,23 @@ fn extract_tests(path: &Path, crate_name: &str) -> String {
     generate_test_code(&parsed_results)
 }
 
-async fn run_test(tests: String) -> std::io::Result<()> {
+async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io::Result<()> {
+    let crate_dir_abs = crate_dir.canonicalize()?;
+    let crate_dir_abs = crate_dir_abs
+        .to_string_lossy()
+        .trim_start_matches("\\\\?\\") // Tweak for Windows
+        .replace('\\', "/");
     let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
     write_file(
         &temp_r,
         &format!(
             r###"
 e <- new.env()
-savvy::savvy_source(r"(
+code <- r"(
 {tests}
-)", use_cache_dir = TRUE, env = e)
+)"
+dep <- list({crate_name} = list(path = "{crate_dir_abs}"))
+savvy::savvy_source(code, use_cache_dir = TRUE, env = e, dependencies = dep)
 write("\n\n", stderr())
 for (f in ls(e)) {{
     f <- get(f, e, inherits = FALSE)
@@ -393,7 +400,7 @@ fn main() {
             let dir = crate_dir.unwrap_or(".".into());
             let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
             let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
-            match futures_lite::future::block_on(run_test(tests)) {
+            match futures_lite::future::block_on(run_test(tests, &crate_name, &dir)) {
                 Ok(_) => {}
                 Err(e) => match e.kind() {
                     std::io::ErrorKind::NotFound => {

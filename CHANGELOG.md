@@ -17,6 +17,9 @@
 * Fixed a bug in `try_from_iter()` when the actual length is different than the
   size reported by `size_hint()`.
 
+* `savvy-cli test` now uses the local crate as the path dependency, instead of
+  using the savvy crate fixedly.
+
 ## [v0.5.1] (2024-04-13)
 
 ### New features
