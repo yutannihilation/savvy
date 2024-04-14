@@ -149,11 +149,13 @@ impl OwnedRealSexp {
         })
     }
 
-    /// Constructs a new real vector from an iterator.
+    /// Constructs a new complex vector from an iterator.
     ///
-    /// Note that, if you already have a slice or vec, [`try_from_slice`] is
-    /// what you want. `try_from_slice` is more performant than `try_from_iter`
-    /// because it copies the underlying memory directly.
+    /// Note that, if you already have a slice or vec, [`try_from_slice()`][1]
+    /// is what you want. `try_from_slice` is more performant than
+    /// `try_from_iter` because it copies the underlying memory directly.
+    ///
+    /// [1]: `Self::try_from_slice()`
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = f64>,

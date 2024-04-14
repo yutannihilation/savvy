@@ -152,7 +152,9 @@ impl OwnedLogicalSexp {
     /// Constructs a new logical vector from an iterator.
     ///
     /// Note that, if you already have a slice or vec, you can also use
-    /// [`try_from_slice`].
+    /// [`try_from_slice`][1].
+    ///
+    /// [1]: `Self::try_from_slice()`
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = bool>,
