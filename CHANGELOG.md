@@ -12,6 +12,11 @@
   Please keep in mind that, in Rust, panic is an **unrecoverable error**. So,
   not crashing doesn't mean you are saved.
 
+### Fixed bugs
+
+* Fixed a bug in `try_from_iter()` when the actual length is different than the
+  size reported by `size_hint()`.
+
 ## [v0.5.1] (2024-04-13)
 
 ### New features
