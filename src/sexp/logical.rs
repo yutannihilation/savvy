@@ -26,10 +26,13 @@ impl LogicalSexp {
     /// # Examples
     ///
     /// ```
-    /// # let lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, false])?.as_read_only();
-    /// // `lgl_sexp` is c(TRUE, FALSE).
-    /// // Note that logical's NA is the same value as integer (`<i32>::na()`).
-    /// assert_eq!(lgl_sexp.as_slice_raw(), &[1, 0]);
+    /// # use savvy::NotAvailableValue;
+    /// # let mut lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, false, true])?;
+    /// # lgl_sexp.set_na(2)?;
+    /// # let lgl_sexp = lgl_sexp.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, FALSE, NA).
+    /// // Note that logical's NA is the same value as integer.
+    /// assert_eq!(lgl_sexp.as_slice_raw(), &[1, 0, <i32>::na()]);
     /// ```
     pub fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
@@ -130,7 +133,18 @@ impl OwnedLogicalSexp {
         unsafe { SET_LOGICAL_ELT(self.inner, i as _, v) };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut lgl_sexp = OwnedLogicalSexp::new(3)?;
+    /// lgl_sexp.set_na(2)?;
+    /// assert_eq!(lgl_sexp.as_read_only().as_slice_raw(), &[0, 0, <i32>::na()]);
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 

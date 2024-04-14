@@ -62,6 +62,18 @@ impl OwnedStringSexp {
         StringSexp(self.inner)
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    ///
+    /// let str_sexp = OwnedStringSexp::try_from_slice(["a", "b", "c"])?;
+    /// let mut iter = str_sexp.iter();
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.collect::<Vec<&str>>(), vec!["b", "c"]);
+    /// ```
     pub fn iter(&self) -> StringSexpIter {
         StringSexpIter {
             sexp: &self.inner,
@@ -70,11 +82,22 @@ impl OwnedStringSexp {
         }
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<&'static str> {
         self.iter().collect()
     }
 
-    /// Set the value of the `i`-th element.
+    /// Set the value of the `i`-th element. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    ///
+    /// let mut str_sexp = OwnedStringSexp::new(3)?;
+    /// str_sexp.set_elt(2, "foo")?;
+    /// assert_eq!(str_sexp.to_vec(), &["", "", "foo"]);
+    /// ```
     pub fn set_elt(&mut self, i: usize, v: &str) -> crate::error::Result<()> {
         assert_len(self.len, i)?;
         unsafe { self.set_elt_unchecked(i, str_to_charsxp(v)?) };
@@ -89,7 +112,18 @@ impl OwnedStringSexp {
         unsafe { SET_STRING_ELT(self.inner, i as _, v) };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut str_sexp = OwnedStringSexp::new(3)?;
+    /// str_sexp.set_na(2)?;
+    /// assert_eq!(str_sexp.to_vec(), vec!["", "", <&str>::na()]);
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         assert_len(self.len, i)?;
 
@@ -99,6 +133,11 @@ impl OwnedStringSexp {
     }
 
     /// Constructs a new string vector.
+    ///
+    /// ```
+    /// let x = savvy::OwnedStringSexp::new(3)?;
+    /// assert_eq!(x.to_vec(), vec!["", "", ""]);
+    /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         let inner = crate::alloc_vector(STRSXP, len as _)?;
         Self::new_from_raw_sexp(inner, len)
@@ -124,6 +163,16 @@ impl OwnedStringSexp {
     /// [`try_from_slice`][1].
     ///
     /// [1]: `Self::try_from_slice()`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    ///
+    /// let iter = ["foo", "❤", "bar"].into_iter().filter(|x| x.is_ascii());
+    /// let str_sexp = OwnedStringSexp::try_from_iter(iter)?;
+    /// assert_eq!(str_sexp.to_vec(), vec!["foo", "bar"]);
+    /// ```
     pub fn try_from_iter<I, U>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = U>,
@@ -171,6 +220,15 @@ impl OwnedStringSexp {
     }
 
     /// Constructs a new string vector from a slice or vec.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    ///
+    /// let str_sexp = OwnedStringSexp::try_from_slice(["foo", "❤", "bar"])?;
+    /// assert_eq!(str_sexp.to_vec(), vec!["foo", "❤", "bar"]);
+    /// ```
     pub fn try_from_slice<S, U>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[U]>,
@@ -186,6 +244,15 @@ impl OwnedStringSexp {
     }
 
     /// Constructs a new string vector from a scalar value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedStringSexp;
+    ///
+    /// let str_sexp = OwnedStringSexp::try_from_scalar("❤")?;
+    /// assert_eq!(str_sexp.to_vec(), vec!["❤"]);
+    /// ```
     pub fn try_from_scalar<T: AsRef<str>>(value: T) -> crate::error::Result<Self> {
         let sexp = unsafe {
             // Note: unlike `new()`, this allocates a STRSXP after creating a
