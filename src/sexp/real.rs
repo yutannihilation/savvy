@@ -79,27 +79,72 @@ impl OwnedRealSexp {
         RealSexp(self.inner)
     }
 
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let real_sexp = OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?;
+    /// assert_eq!(real_sexp.to_vec(), vec![1.0, 2.0, 3.0]);
+    /// ```
     pub fn as_slice(&self) -> &[f64] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
+    /// Extracts a mutable slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let mut real_sexp = OwnedRealSexp::new(3)?;
+    /// let s = real_sexp.as_mut_slice();
+    /// s[2] = 10.0;
+    /// assert_eq!(real_sexp.as_slice(), &[0.0, 0.0, 10.0]);
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut [f64] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
     pub fn iter(&self) -> std::slice::Iter<f64> {
         self.as_slice().iter()
     }
 
+    /// Returns a mutable iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let mut real_sexp = OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?;
+    /// real_sexp.iter_mut().for_each(|x| *x = *x * 2.0);
+    /// assert_eq!(real_sexp.as_slice(), &[2.0, 4.0, 6.0]);
+    /// ```
     pub fn iter_mut(&mut self) -> std::slice::IterMut<f64> {
         self.as_mut_slice().iter_mut()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<f64> {
         self.as_slice().to_vec()
     }
 
-    /// Set the value of the `i`-th element.
+    /// Set the value of the `i`-th element. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let mut real_sexp = OwnedRealSexp::new(3)?;
+    /// real_sexp.set_elt(2, 10.0)?;
+    /// assert_eq!(real_sexp.as_slice(), &[0.0, 0.0, 10.0]);
+    /// ```
     pub fn set_elt(&mut self, i: usize, v: f64) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -113,7 +158,21 @@ impl OwnedRealSexp {
         unsafe { *(self.raw.add(i)) = v };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut real_sexp = OwnedRealSexp::new(3)?;
+    /// real_sexp.set_na(2)?;
+    ///
+    /// // R's NA is one of NaN values, and cannot be easily asserted
+    /// // (e.g. NaN == NaN is false).
+    /// assert!(real_sexp[2].is_na());
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -136,6 +195,11 @@ impl OwnedRealSexp {
     }
 
     /// Constructs a new, initialized real vector.
+    ///
+    /// ```
+    /// let x = savvy::OwnedRealSexp::new(3)?;
+    /// assert_eq!(x.as_slice(), &[0.0, 0.0, 0.0]);
+    /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }
@@ -148,13 +212,15 @@ impl OwnedRealSexp {
     ///
     /// For example, you can use this in `TryFrom` implementation.
     ///
-    /// ``` no_run
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
     /// struct Pair {
     ///     x: f64,
     ///     y: f64
     /// }
     ///
-    /// impl TryFrom<Pair> for Sexp {
+    /// impl TryFrom<Pair> for OwnedRealSexp {
     ///     type Error = savvy::Error;
     ///
     ///     fn try_from(value: Pair) -> savvy::Result<Self> {
@@ -162,10 +228,14 @@ impl OwnedRealSexp {
     ///         out[0] = value.x;
     ///         out[1] = value.y;
     ///         
-    ///         out.into()
+    ///         Ok(out)
     ///     }
     /// }
-    /// ````
+    ///
+    /// let pair = Pair { x: 1.0, y: 2.0 };
+    /// let real_sexp = <OwnedRealSexp>::try_from(pair)?;
+    /// assert_eq!(real_sexp.as_slice(), &[1.0, 2.0]);
+    /// ```
     ///
     /// # Safety
     ///
@@ -194,6 +264,16 @@ impl OwnedRealSexp {
     /// `try_from_iter` because it copies the underlying memory directly.
     ///
     /// [1]: `Self::try_from_slice()`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let iter = [-2.0, 0.0, 2.0, -5.0, 3.0].into_iter().filter(|x| *x > 0.0);
+    /// let real_sexp = OwnedRealSexp::try_from_iter(iter)?;
+    /// assert_eq!(real_sexp.as_slice(), &[2.0, 3.0]);
+    /// ```
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = f64>,
@@ -239,6 +319,15 @@ impl OwnedRealSexp {
     }
 
     /// Constructs a new real vector from a slice or vec.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let real_sexp = OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?;
+    /// assert_eq!(real_sexp.as_slice(), &[1.0, 2.0, 3.0]);
+    /// ```
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[f64]>,
@@ -250,6 +339,15 @@ impl OwnedRealSexp {
     }
 
     /// Constructs a new integer vector from a scalar value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedRealSexp;
+    ///
+    /// let real_sexp = OwnedRealSexp::try_from_scalar(1.0)?;
+    /// assert_eq!(real_sexp.as_slice(), &[1.0]);
+    /// ```
     pub fn try_from_scalar(value: f64) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarReal(value))? };
         Self::new_from_raw_sexp(sexp, 1)
