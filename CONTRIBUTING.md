@@ -26,9 +26,9 @@ also install it via `cargo install`.
 Currently, it also requires
 
 * `R` is on PATH
-* [savvy R package][R-pkg] is installed
+* [pkgbuild R package][pkgbuild] is installed
 
-[R-pkg]: [`savvy-cli`][release]
+[okgbuild]: https://pkgbuild.r-lib.org/
 
 #### R package for testing
 
