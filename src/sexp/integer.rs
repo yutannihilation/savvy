@@ -23,10 +23,33 @@ impl_common_sexp_ops!(IntegerSexp);
 impl_common_sexp_ops_owned!(OwnedIntegerSexp);
 
 impl IntegerSexp {
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```
     pub fn as_slice(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// let mut iter = int_sexp.iter();
+    /// assert_eq!(iter.next(), Some(&1));
+    /// assert_eq!(iter.as_slice(), &[2, 3]);
+    /// ```
+    ///
+    /// # Technical Note
+    ///
     /// If the input is an ALTREP, this materialize it first, so it might not be
     /// most efficient. However, it seems Rust's slice implementation is very
     /// fast, so probably being efficient for ALTREP is not worth giving up the
@@ -35,6 +58,15 @@ impl IntegerSexp {
         self.as_slice().iter()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(int_sexp.to_vec(), vec![1, 2, 3]);
+    /// ```
     pub fn to_vec(&self) -> Vec<i32> {
         self.as_slice().to_vec()
     }
@@ -163,11 +195,13 @@ impl OwnedIntegerSexp {
         })
     }
 
-    /// Constructs a new integer vector from an iterator.
+    /// Constructs a new complex vector from an iterator.
     ///
-    /// Note that, if you already have a slice or vec, [`try_from_slice`] is
-    /// what you want. `try_from_slice` is more performant than `try_from_iter`
-    /// because it copies the underlying memory directly.
+    /// Note that, if you already have a slice or vec, [`try_from_slice()`][1]
+    /// is what you want. `try_from_slice` is more performant than
+    /// `try_from_iter` because it copies the underlying memory directly.
+    ///
+    /// [1]: `Self::try_from_slice()`
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = i32>,
