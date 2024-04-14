@@ -79,27 +79,65 @@ impl OwnedIntegerSexp {
         IntegerSexp(self.inner)
     }
 
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```
     pub fn as_slice(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
+    /// Extracts a mutable slice containing the underlying data of the SEXP.
     pub fn as_mut_slice(&mut self) -> &mut [i32] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
     pub fn iter(&self) -> std::slice::Iter<i32> {
         self.as_slice().iter()
     }
 
+    /// Returns a mutable iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// int_sexp.iter_mut().for_each(|x| *x = *x *2);
+    /// assert_eq!(int_sexp.as_slice(), &[2, 4, 6]);
+    /// ```    
     pub fn iter_mut(&mut self) -> std::slice::IterMut<i32> {
         self.as_mut_slice().iter_mut()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<i32> {
         self.as_slice().to_vec()
     }
 
-    /// Set the value of the `i`-th element.
+    /// Set the value of the `i`-th element. `i` starts from `0`.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the index is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// int_sexp.set_elt(2, 10)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// ```    
     pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -113,7 +151,22 @@ impl OwnedIntegerSexp {
         unsafe { *(self.raw.add(i)) = v };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the index is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// int_sexp.set_na(2)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, <i32>::na()]);
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -204,6 +257,16 @@ impl OwnedIntegerSexp {
     /// `try_from_iter` because it copies the underlying memory directly.
     ///
     /// [1]: `Self::try_from_slice()`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let iter = (0..10).filter(|x| x % 2 == 0);
+    /// let int_sexp = OwnedIntegerSexp::try_from_iter(iter)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 2, 4, 6, 8]);
+    /// ```    
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = i32>,
@@ -247,6 +310,15 @@ impl OwnedIntegerSexp {
     }
 
     /// Constructs a new integer vector from a slice or vec.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```    
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[i32]>,
