@@ -19,25 +19,59 @@ impl_common_sexp_ops!(LogicalSexp);
 impl_common_sexp_ops_owned!(OwnedLogicalSexp);
 
 impl LogicalSexp {
-    /// Returns the internal representation, `&[i32]`, not `&[bool]`. This is an
-    /// expert-only function which might be found useful when you really need to
-    /// distinguish NAs.
+    /// Returns the internal representation, **`&[i32]`, not `&[bool]`**. This
+    /// is an expert-only function which might be found useful when you really
+    /// need to distinguish NAs.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use savvy::NotAvailableValue;
+    /// # let mut lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, false, true])?;
+    /// # lgl_sexp.set_na(2)?;
+    /// # let lgl_sexp = lgl_sexp.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, FALSE, NA).
+    /// // Note that logical's NA is the same value as integer.
+    /// assert_eq!(lgl_sexp.as_slice_raw(), &[1, 0, <i32>::na()]);
+    /// ```
     pub fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, true, false])?.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, TRUE, FALSE)
+    /// let mut iter = lgl_sexp.iter();
+    /// assert_eq!(iter.next(), Some(true));
+    /// assert_eq!(iter.collect::<Vec<bool>>(), vec![true, false]);
+    /// ```
     pub fn iter(&self) -> LogicalSexpIter {
         LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, true, false])?.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, TRUE, FALSE)
+    /// assert_eq!(lgl_sexp.to_vec(), vec![true, true, false]);
+    /// ```
     pub fn to_vec(&self) -> Vec<bool> {
         self.iter().collect()
     }
 }
 
 impl OwnedLogicalSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> LogicalSexp {
         LogicalSexp(self.inner)
     }
@@ -49,17 +83,41 @@ impl OwnedLogicalSexp {
         unsafe { std::slice::from_raw_parts(self.raw, self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
+    /// let lgl_sexp = OwnedLogicalSexp::try_from_slice([true, true, false])?;
+    /// // `lgl_sexp` is c(TRUE, TRUE, FALSE)
+    /// let mut iter = lgl_sexp.iter();
+    /// assert_eq!(iter.next(), Some(true));
+    /// assert_eq!(iter.collect::<Vec<bool>>(), vec![true, false]);
+    /// ```
     pub fn iter(&self) -> LogicalSexpIter {
         LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<bool> {
         self.iter().collect()
     }
 
-    /// Set the value of the `i`-th element.
+    /// Set the value of the `i`-th element. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
+    /// let mut lgl_sexp = OwnedLogicalSexp::new(3)?;
+    /// lgl_sexp.set_elt(2, true)?;
+    /// assert_eq!(lgl_sexp.to_vec(), vec![false, false, true]);
+    /// ```
     pub fn set_elt(&mut self, i: usize, v: bool) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -75,7 +133,18 @@ impl OwnedLogicalSexp {
         unsafe { SET_LOGICAL_ELT(self.inner, i as _, v) };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut lgl_sexp = OwnedLogicalSexp::new(3)?;
+    /// lgl_sexp.set_na(2)?;
+    /// assert_eq!(lgl_sexp.as_read_only().as_slice_raw(), &[0, 0, <i32>::na()]);
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -98,6 +167,11 @@ impl OwnedLogicalSexp {
     }
 
     /// Constructs a new, initialized logical vector.
+    ///
+    /// ```
+    /// let x = savvy::OwnedLogicalSexp::new(3)?;
+    /// assert_eq!(x.to_vec(), vec![false, false, false]);
+    /// ```
     pub fn new(len: usize) -> crate::error::Result<Self> {
         Self::new_inner(len, true)
     }
@@ -110,24 +184,30 @@ impl OwnedLogicalSexp {
     ///
     /// For example, you can use this in `TryFrom` implementation.
     ///
-    /// ``` no_run
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
     /// struct Pair {
     ///     x: bool,
     ///     y: bool
     /// }
     ///
-    /// impl TryFrom<Pair> for Sexp {
+    /// impl TryFrom<Pair> for OwnedLogicalSexp {
     ///     type Error = savvy::Error;
     ///
     ///     fn try_from(value: Pair) -> savvy::Result<Self> {
     ///         let mut out = unsafe { OwnedLogicalSexp::new_without_init(2)? };
     ///         out.set_elt(0, value.x)?;
-    ///         out.set_elt(1, value.x)?;
+    ///         out.set_elt(1, value.y)?;
     ///         
-    ///         out.into()
+    ///         Ok(out)
     ///     }
     /// }
-    /// ````
+    ///
+    /// let pair = Pair { x: true, y: false };
+    /// let lgl_sexp = <OwnedLogicalSexp>::try_from(pair)?;
+    /// assert_eq!(lgl_sexp.to_vec(), vec![true, false]);
+    /// ```
     ///
     /// # Safety
     ///
@@ -152,7 +232,19 @@ impl OwnedLogicalSexp {
     /// Constructs a new logical vector from an iterator.
     ///
     /// Note that, if you already have a slice or vec, you can also use
-    /// [`try_from_slice`].
+    /// [`try_from_slice`][1].
+    ///
+    /// [1]: `Self::try_from_slice()`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
+    /// let iter = [true, false, true, false].into_iter().filter(|x| *x);
+    /// let lgl_sexp = OwnedLogicalSexp::try_from_iter(iter)?;
+    /// assert_eq!(lgl_sexp.to_vec(), vec![true, true]);
+    /// ```
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = bool>,
@@ -198,6 +290,15 @@ impl OwnedLogicalSexp {
     }
 
     /// Constructs a new logical vector from a slice or vec.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
+    /// let lgl_sexp = OwnedLogicalSexp::try_from_slice([false, true, true])?;
+    /// assert_eq!(lgl_sexp.to_vec(), vec![false, true, true]);
+    /// ```
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[bool]>,
@@ -212,6 +313,15 @@ impl OwnedLogicalSexp {
     }
 
     /// Constructs a new logical vector from a scalar value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedLogicalSexp;
+    ///
+    /// let lgl_sexp = OwnedLogicalSexp::try_from_scalar(true)?;
+    /// assert_eq!(lgl_sexp.to_vec(), vec![true]);
+    /// ```
     pub fn try_from_scalar(value: bool) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarLogical(value as i32))? };
         Self::new_from_raw_sexp(sexp, 1)
@@ -301,7 +411,7 @@ impl From<OwnedLogicalSexp> for crate::error::Result<Sexp> {
     }
 }
 
-// Index for OwnedIntegerSexp ***************
+// Index for OwnedLogicalSexp ***************
 
 pub struct LogicalSexpIter<'a> {
     iter_raw: std::slice::Iter<'a, i32>,

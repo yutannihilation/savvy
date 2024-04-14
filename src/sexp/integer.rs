@@ -10,7 +10,7 @@ use crate::NotAvailableValue; // for na()
 /// An external SEXP of an integer vector.
 pub struct IntegerSexp(pub SEXP);
 
-/// A newly-created SEXP of an integer vector
+/// A newly-created SEXP of an integer vector.
 pub struct OwnedIntegerSexp {
     inner: SEXP,
     token: SEXP,
@@ -23,10 +23,33 @@ impl_common_sexp_ops!(IntegerSexp);
 impl_common_sexp_ops_owned!(OwnedIntegerSexp);
 
 impl IntegerSexp {
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```
     pub fn as_slice(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// let mut iter = int_sexp.iter();
+    /// assert_eq!(iter.next(), Some(&1));
+    /// assert_eq!(iter.as_slice(), &[2, 3]);
+    /// ```
+    ///
+    /// # Technical Note
+    ///
     /// If the input is an ALTREP, this materialize it first, so it might not be
     /// most efficient. However, it seems Rust's slice implementation is very
     /// fast, so probably being efficient for ALTREP is not worth giving up the
@@ -35,37 +58,93 @@ impl IntegerSexp {
         self.as_slice().iter()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// // `int_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(int_sexp.to_vec(), vec![1, 2, 3]);
+    /// ```
     pub fn to_vec(&self) -> Vec<i32> {
         self.as_slice().to_vec()
     }
 }
 
 impl OwnedIntegerSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> IntegerSexp {
         IntegerSexp(self.inner)
     }
 
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```
     pub fn as_slice(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
+    /// Extracts a mutable slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// let s = int_sexp.as_mut_slice();
+    /// s[2] = 10;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut [i32] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
     pub fn iter(&self) -> std::slice::Iter<i32> {
         self.as_slice().iter()
     }
 
+    /// Returns a mutable iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// int_sexp.iter_mut().for_each(|x| *x = *x * 2);
+    /// assert_eq!(int_sexp.as_slice(), &[2, 4, 6]);
+    /// ```
     pub fn iter_mut(&mut self) -> std::slice::IterMut<i32> {
         self.as_mut_slice().iter_mut()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<i32> {
         self.as_slice().to_vec()
     }
 
-    /// Set the value of the `i`-th element.
+    /// Set the value of the `i`-th element. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// int_sexp.set_elt(2, 10)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// ```
     pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -79,7 +158,18 @@ impl OwnedIntegerSexp {
         unsafe { *(self.raw.add(i)) = v };
     }
 
-    /// Set the `i`-th element to NA.
+    /// Set the `i`-th element to NA. `i` starts from `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    /// use savvy::NotAvailableValue;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// int_sexp.set_na(2)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, <i32>::na()]);
+    /// ```
     pub fn set_na(&mut self, i: usize) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -120,14 +210,14 @@ impl OwnedIntegerSexp {
     /// For example, you can use this in `TryFrom` implementation.
     ///
     /// ```
-    /// use savvy::{Sexp, OwnedIntegerSexp};
+    /// use savvy::OwnedIntegerSexp;
     ///
     /// struct Pair {
     ///     x: i32,
     ///     y: i32
     /// }
     ///
-    /// impl TryFrom<Pair> for Sexp {
+    /// impl TryFrom<Pair> for OwnedIntegerSexp {
     ///     type Error = savvy::Error;
     ///
     ///     fn try_from(value: Pair) -> savvy::Result<Self> {
@@ -135,13 +225,14 @@ impl OwnedIntegerSexp {
     ///         out[0] = value.x;
     ///         out[1] = value.y;
     ///         
-    ///         out.into()
+    ///         Ok(out)
     ///     }
     /// }
     ///
     /// let pair = Pair { x: 1, y: 2 };
-    /// let _ = <Sexp>::try_from(pair)?;
-    /// ````
+    /// let int_sexp = <OwnedIntegerSexp>::try_from(pair)?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2]);
+    /// ```
     ///
     /// # Safety
     ///
@@ -163,11 +254,23 @@ impl OwnedIntegerSexp {
         })
     }
 
-    /// Constructs a new integer vector from an iterator.
+    /// Constructs a new complex vector from an iterator.
     ///
-    /// Note that, if you already have a slice or vec, [`try_from_slice`] is
-    /// what you want. `try_from_slice` is more performant than `try_from_iter`
-    /// because it copies the underlying memory directly.
+    /// Note that, if you already have a slice or vec, [`try_from_slice()`][1]
+    /// is what you want. `try_from_slice` is more performant than
+    /// `try_from_iter` because it copies the underlying memory directly.
+    ///
+    /// [1]: `Self::try_from_slice()`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let iter = (0..10).filter(|x| x % 2 == 0);
+    /// let int_sexp = OwnedIntegerSexp::try_from_iter(iter)?;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 2, 4, 6, 8]);
+    /// ```
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = i32>,
@@ -213,6 +316,15 @@ impl OwnedIntegerSexp {
     }
 
     /// Constructs a new integer vector from a slice or vec.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// ```
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[i32]>,
@@ -224,6 +336,15 @@ impl OwnedIntegerSexp {
     }
 
     /// Constructs a new integer vector from a scalar value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_scalar(1)?;
+    /// assert_eq!(int_sexp.as_slice(), &[1]);
+    /// ```
     pub fn try_from_scalar(value: i32) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
         Self::new_from_raw_sexp(sexp, 1)

@@ -65,6 +65,8 @@ case for now for simplicity.)
 
 ### Rust functions
 
+(The actual code is a bit more complex to handle possible `panic!` properly.)
+
 ```rust
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]

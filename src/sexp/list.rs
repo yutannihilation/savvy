@@ -102,6 +102,8 @@ impl OwnedListSexp {
         self.len == 0
     }
 
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> ListSexp {
         ListSexp(self.inner())
     }

@@ -71,8 +71,10 @@ pub fn parse_file(path: &Path, mod_path: &[String]) -> ParsedResult {
                 result.parse_item(&item, location)
             }
         }
-        Err(_) => {
-            eprintln!("Failed to parse the specified file");
+        Err(e) => {
+            eprintln!("Failed to parse the specified file: {location}\n");
+            eprintln!("Error:\n{e}\n");
+            eprintln!("Code:\n{file_content}\n");
             std::process::exit(3);
         }
     };
@@ -254,8 +256,10 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
                     let code_parsed =
                         match syn::parse_str::<syn::Block>(&format!("{{ {orig_code} }}")) {
                             Ok(block) => block.stmts,
-                            Err(_) => {
-                                eprintln!("Failed to parse the specified file");
+                            Err(e) => {
+                                eprintln!("Failed to parse the specified file: {location}\n");
+                                eprintln!("Error:\n{e}\n");
+                                eprintln!("Code:\n{orig_code}\n");
                                 std::process::exit(3);
                             }
                         };
@@ -293,6 +297,17 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
             } else {
                 line.split_at(spaces).1
             };
+
+            // doctest can use # to the line from the document. But, it still
+            // needs to be evaluated as a complete Rust code.
+            //
+            // cf. https://doc.rust-lang.org/rustdoc/write-documentation/documentation-tests.html#hiding-portions-of-the-example
+            let line = if line.trim_start().starts_with('#') {
+                line.trim_start_matches(|c: char| c.is_whitespace() || c == '#')
+            } else {
+                line
+            };
+
             code_block.push(line.to_string());
         }
     }
