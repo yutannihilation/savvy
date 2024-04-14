@@ -332,6 +332,15 @@ impl OwnedIntegerSexp {
     }
 
     /// Constructs a new integer vector from a scalar value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let int_sexp = OwnedIntegerSexp::try_from_scalar(1)?;
+    /// assert_eq!(int_sexp.as_slice(), &[1]);
+    /// ```   
     pub fn try_from_scalar(value: i32) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
         Self::new_from_raw_sexp(sexp, 1)
