@@ -94,6 +94,17 @@ impl OwnedIntegerSexp {
     }
 
     /// Extracts a mutable slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::OwnedIntegerSexp;
+    ///
+    /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
+    /// let s = int_sexp.as_mut_slice();
+    /// s[2] = 10;
+    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut [i32] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
@@ -111,9 +122,9 @@ impl OwnedIntegerSexp {
     /// use savvy::OwnedIntegerSexp;
     ///
     /// let mut int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
-    /// int_sexp.iter_mut().for_each(|x| *x = *x *2);
+    /// int_sexp.iter_mut().for_each(|x| *x = *x * 2);
     /// assert_eq!(int_sexp.as_slice(), &[2, 4, 6]);
-    /// ```    
+    /// ```
     pub fn iter_mut(&mut self) -> std::slice::IterMut<i32> {
         self.as_mut_slice().iter_mut()
     }
@@ -125,10 +136,6 @@ impl OwnedIntegerSexp {
 
     /// Set the value of the `i`-th element. `i` starts from `0`.
     ///
-    /// # Panics
-    ///
-    /// May panic if the index is out of bounds.
-    ///
     /// # Examples
     ///
     /// ```
@@ -137,7 +144,7 @@ impl OwnedIntegerSexp {
     /// let mut int_sexp = OwnedIntegerSexp::new(3)?;
     /// int_sexp.set_elt(2, 10)?;
     /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
-    /// ```    
+    /// ```
     pub fn set_elt(&mut self, i: usize, v: i32) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
 
@@ -152,10 +159,6 @@ impl OwnedIntegerSexp {
     }
 
     /// Set the `i`-th element to NA. `i` starts from `0`.
-    ///
-    /// # Panics
-    ///
-    /// May panic if the index is out of bounds.
     ///
     /// # Examples
     ///
@@ -207,14 +210,14 @@ impl OwnedIntegerSexp {
     /// For example, you can use this in `TryFrom` implementation.
     ///
     /// ```
-    /// use savvy::{Sexp, OwnedIntegerSexp};
+    /// use savvy::OwnedIntegerSexp;
     ///
     /// struct Pair {
     ///     x: i32,
     ///     y: i32
     /// }
     ///
-    /// impl TryFrom<Pair> for Sexp {
+    /// impl TryFrom<Pair> for OwnedIntegerSexp {
     ///     type Error = savvy::Error;
     ///
     ///     fn try_from(value: Pair) -> savvy::Result<Self> {
@@ -222,13 +225,14 @@ impl OwnedIntegerSexp {
     ///         out[0] = value.x;
     ///         out[1] = value.y;
     ///         
-    ///         out.into()
+    ///         Ok(out)
     ///     }
     /// }
     ///
     /// let pair = Pair { x: 1, y: 2 };
-    /// let _ = <Sexp>::try_from(pair)?;
-    /// ````
+    /// let int_sexp = <OwnedIntegerSexp>::try_from(pair)?;
+    /// assert_eq!(int_sexp.as_slice(), &[1, 2]);
+    /// ```
     ///
     /// # Safety
     ///
@@ -266,7 +270,7 @@ impl OwnedIntegerSexp {
     /// let iter = (0..10).filter(|x| x % 2 == 0);
     /// let int_sexp = OwnedIntegerSexp::try_from_iter(iter)?;
     /// assert_eq!(int_sexp.as_slice(), &[0, 2, 4, 6, 8]);
-    /// ```    
+    /// ```
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
         I: IntoIterator<Item = i32>,
@@ -320,7 +324,7 @@ impl OwnedIntegerSexp {
     ///
     /// let int_sexp = OwnedIntegerSexp::try_from_slice([1, 2, 3])?;
     /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
-    /// ```    
+    /// ```
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
         S: AsRef<[i32]>,
@@ -340,7 +344,7 @@ impl OwnedIntegerSexp {
     ///
     /// let int_sexp = OwnedIntegerSexp::try_from_scalar(1)?;
     /// assert_eq!(int_sexp.as_slice(), &[1]);
-    /// ```   
+    /// ```
     pub fn try_from_scalar(value: i32) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarInteger(value))? };
         Self::new_from_raw_sexp(sexp, 1)
