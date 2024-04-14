@@ -1,35 +1,66 @@
 pub fn panic_hook(panic_info: &std::panic::PanicInfo) {
-    // Forcibly captures a full backtrace regardless of RUST_BACKTRACE
-    let bt = std::backtrace::Backtrace::force_capture().to_string();
-
-    // Since savvy generates many wrappers, the backtrace is boringly deep. Try
-    // cutting the uninteresting part.
-    let bt_short = bt
+    // Add indent
+    let panic_info_indented = format!("{panic_info}")
         .lines()
-        .skip_while(|line| !line.contains("std::panic::catch_unwind"))
-        // C stacks are not visible from Rust's side and shown as `<unknown>`.
-        .take_while(|line| !line.contains("<unknown>"))
-        .collect::<Vec<&str>>()
+        .map(|x| format!("{:indent$}{x}", "", indent = 4))
+        .collect::<Vec<String>>()
         .join("\n");
 
-    let bt = if bt_short.is_empty() { bt } else { bt_short };
+    // Forcibly captures a full backtrace regardless of RUST_BACKTRACE
+    let bt = std::backtrace::Backtrace::force_capture().to_string();
+    let bt_indented = cut_and_indent_backtrace(&bt);
 
     crate::io::r_eprint(
         &format!(
             "panic occured!
 
 Original message:
-{panic_info}
+{panic_info_indented}
 
 Backtrace:
-
-...snip... (frames of savvy framework)
-
-{bt}
-
-...snip... (frames of R)
+{bt_indented}
 "
         ),
         true,
     );
+}
+
+// Since savvy generates many wrappers, the backtrace is boringly deep. Try
+// cutting the uninteresting part.
+fn cut_and_indent_backtrace(bt: &str) -> String {
+    let show_full = if let Ok(v) = std::env::var("RUST_BACKTRACE") {
+        &v == "1"
+    } else {
+        false
+    };
+
+    // try to shorten if the user doesn't require the full backtrace
+    if !show_full {
+        let bt_short = bt
+            .lines()
+            .skip_while(|line| !line.contains("std::panic::catch_unwind"))
+            // C stacks are not visible from Rust's side and shown as `<unknown>`.
+            .take_while(|line| !line.contains("<unknown>"))
+            // Add indent
+            .map(|x| format!("{:indent$}{x}", "", indent = 4))
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        if !bt_short.is_empty() {
+            return format!(
+                "    ...
+{bt_short}
+    ...
+
+note: Run with `RUST_BACKTRACE=1` for a full backtrace.
+"
+            );
+        }
+    }
+
+    // if the user require the full backtrace or the shortened backtrace became mistakenly empty string, show the full backtrace.
+    bt.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = 4))
+        .collect::<Vec<String>>()
+        .join("\n")
 }
