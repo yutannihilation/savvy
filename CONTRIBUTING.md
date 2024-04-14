@@ -8,17 +8,15 @@ Contributing to savvy
 ### savvy crate
 
 As savvy framework requires a real R session to work, `cargo test` doesn't work.
-Instead, please use `savvy-cli test`.
+Instead, please use `savvy-cli test`. This extracts test code and creates a
+temporary R package on-the-fly to run these tests.
 
-```console
+```sh
 savvy-cli test .
-
-# if you want to use the dev version of savvy-cli
-cargo r-test
 ```
 
-This extracts test code and creates a
-temporary R package on-the-fly to run these tests.
+if you want to use the dev version of savvy-cli, you can run `cargo r-test`,
+which is an alias of `cargo run --manifest-path ./savvy-cli/Cargo.toml -- test`.
 
 The binary of [`savvy-cli`] is found on the [GitHub Releases][release]. You can
 also install it via `cargo install`.
@@ -34,7 +32,8 @@ Currently, it also requires
 
 #### R package for testing
 
-`R-package/` directory contains the R package for testing.
+`R-package/` directory contains the R package for testing. You can run
+`devtools::check()` on the directory.
 
 ### savvy-macro crate
 
@@ -47,7 +46,7 @@ Getting Started][insta-install].
 If you create a new snapshot or modify an existing snapshot, you can review and
 accept the changes with:
 
-```console
+```sh
 cargo insta review
 ```
 
@@ -55,6 +54,6 @@ cargo insta review
 
 You can just run `cargo test`.
 
-```console
+```sh
 cargo test --manifest-path=./savvy-bindgen/Cargo.toml
 ```
