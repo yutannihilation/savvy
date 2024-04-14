@@ -12,6 +12,8 @@
   Please keep in mind that, in Rust, panic is an **unrecoverable error**. So,
   not crashing doesn't mean you are saved.
 
+* `savvy-cli test` no longer relies on the savvy R package.
+
 ### Fixed bugs
 
 * Fixed a bug in `try_from_iter()` when the actual length is different than the

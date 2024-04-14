@@ -24,8 +24,11 @@ pub fn generate_gitignore() -> String {
     include_str!("./templates/gitignore").to_string()
 }
 
-pub fn generate_cargo_toml(crate_name: &str) -> String {
-    format!(include_str!("./templates/Cargo_toml"), crate_name)
+pub fn generate_cargo_toml(crate_name: &str, dependencies: &str) -> String {
+    format!(
+        include_str!("./templates/Cargo_toml"),
+        crate_name, dependencies
+    )
 }
 
 pub fn generate_config_toml() -> String {

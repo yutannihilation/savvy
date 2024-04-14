@@ -70,7 +70,7 @@ impl PackageDescription {
     }
 }
 
-// Parse DESCRIPTION file and get the package name
+// Parse DESCRIPTION file and get the package name in a dirty way
 fn parse_description(path: &Path) -> PackageDescription {
     let content = savvy_bindgen::read_file(path);
     let mut package_name_orig = "";
@@ -101,7 +101,7 @@ fn parse_description(path: &Path) -> PackageDescription {
     }
 }
 
-// Parse Cargo.toml and get the crate name.
+// Parse Cargo.toml and get the crate name in a dirty way
 fn parse_cargo_toml(path: &Path) -> String {
     let content = savvy_bindgen::read_file(path);
 
@@ -132,6 +132,7 @@ fn parse_cargo_toml(path: &Path) -> String {
 }
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
+const PATH_NAMESPACE: &str = "NAMESPACE";
 const PATH_SRC_DIR: &str = "src/rust/src";
 const PATH_DOT_CARGO_DIR: &str = "src/rust/.cargo";
 const PATH_CARGO_TOML: &str = "src/rust/Cargo.toml";
@@ -170,10 +171,10 @@ fn write_file_inner(path: &Path, contents: &str, open_opts: std::fs::OpenOptions
         .unwrap_or_else(|_| panic!("Failed to write {}", path_str));
 }
 
-fn write_file(path: &Path, contents: &str) {
+fn write_file(path: &Path, content: &str) {
     let mut opts = std::fs::OpenOptions::new();
     opts.create(true).write(true).truncate(true);
-    write_file_inner(path, contents, opts);
+    write_file_inner(path, content, opts);
 }
 
 fn append_file(path: &Path, contents: &str) {
@@ -275,7 +276,7 @@ fn update(path: &Path) {
     );
 }
 
-fn init(path: &Path) {
+fn init(path: &Path, skip_update: bool) {
     let pkg_metadata = get_pkg_metadata(path);
 
     if path.join("src").exists() {
@@ -288,7 +289,7 @@ fn init(path: &Path) {
 
     write_file(
         &path.join(PATH_CARGO_TOML),
-        &generate_cargo_toml(&pkg_metadata.package_name_for_rust()),
+        &generate_cargo_toml(&pkg_metadata.package_name_for_rust(), r#"savvy = "*""#),
     );
     write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
@@ -331,7 +332,9 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
         );
     }
 
-    update(path);
+    if !skip_update {
+        update(path);
+    }
 }
 
 fn extract_tests(path: &Path, crate_name: &str) -> String {
@@ -339,24 +342,117 @@ fn extract_tests(path: &Path, crate_name: &str) -> String {
     generate_test_code(&parsed_results)
 }
 
-async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io::Result<()> {
-    let crate_dir_abs = crate_dir.canonicalize()?;
-    let crate_dir_abs = crate_dir_abs
-        .to_string_lossy()
-        .trim_start_matches("\\\\?\\") // Tweak for Windows
-        .replace('\\', "/");
-    let temp_r = std::env::temp_dir().join("savvy-extracted-tests.R");
+fn create_empty_r_pkg(r_pkg_dir: &Path) -> std::io::Result<()> {
+    let r_dir = r_pkg_dir.join("R");
+    let namespace = r_pkg_dir.join(PATH_NAMESPACE);
+    let description = r_pkg_dir.join(PATH_DESCRIPTION);
+
+    // Create a minimal empty R package
+
+    std::fs::create_dir_all(r_dir)?;
+
+    std::fs::File::create(namespace)?;
+
     write_file(
-        &temp_r,
+        &description,
+        "Package: SavvyRPkgForExtractedTests
+Version: 0.0.0
+Encoding: UTF-8
+",
+    );
+
+    // Add files necessary for savvy
+
+    if !r_pkg_dir.join("src").exists() {
+        init(r_pkg_dir, true);
+    }
+
+    Ok(())
+}
+
+// The original wrapper expects the package is installed so that the symbols
+// exist. But, when loaded externally, the symbol needs to be a character and
+// `PACKAGE = ` specification.
+fn tweak_wrapper_r(path: &Path) {
+    let orig_content = savvy_bindgen::read_file(path);
+    let mut content = orig_content.replace(".Call", ".Call_savvy_test");
+    content.push_str(
+        r#"
+.Call_savvy_test <- function(symbol, ...) {
+  symbol_string <- deparse(substitute(symbol))
+  .Call(symbol_string, ..., PACKAGE = "SavvyRPkgForExtractedTests")
+}
+"#,
+    );
+
+    write_file(path, &content);
+}
+
+fn path_to_str(x: &Path) -> String {
+    x.to_string_lossy()
+        .trim_start_matches("\\\\?\\") // Tweak for Windows
+        .replace('\\', "/")
+}
+
+async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io::Result<()> {
+    let tmp_r_pkg_dir = crate_dir.join(".savvy/temporary-R-package-for-tests");
+    create_empty_r_pkg(&tmp_r_pkg_dir)?;
+
+    // Make git ignore all the files in .savvy/ directory
+    write_file(&crate_dir.join(".savvy/.gitignore"), "*");
+
+    // Inject the test code into lib.rs and add necessary dependencies into the crate.
+
+    let pkg = get_pkg_metadata(&tmp_r_pkg_dir);
+    let rust_pkg_name = pkg.package_name_for_rust();
+    let r_pkg_name = pkg.package_name_for_r();
+
+    // Specify the crate to test as a path dependency.
+    write_file(
+        &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
+        &generate_cargo_toml(
+            &rust_pkg_name,
+            // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
+            &format!(r#"{crate_name} = {{ path = "../../../../" }}"#),
+        ),
+    );
+    // Since this can be within the workspace of a Rust package, clarify this is
+    // not the part of it, otherwise the compilation will fail.
+    append_file(&tmp_r_pkg_dir.join(PATH_CARGO_TOML), "[workspace]\n");
+
+    write_file(&tmp_r_pkg_dir.join(PATH_LIB_RS), &tests);
+
+    // Generate wrapper files
+    update(&tmp_r_pkg_dir);
+
+    let wrapper_r = tmp_r_pkg_dir.join(PATH_R_IMPL);
+    tweak_wrapper_r(&wrapper_r);
+
+    let wrapper_r_str = path_to_str(&wrapper_r);
+    let tmp_r_pkg_dir_str = path_to_str(&tmp_r_pkg_dir);
+
+    let tmp_r_script = tmp_r_pkg_dir.join("savvy-extracted-tests.R");
+    write_file(
+        &tmp_r_script,
         &format!(
             r###"
+# Check if necessary package is installed
+if (!"pkgbuild" %in% rownames(installed.packages())) {{
+    stop("Please install the pkgbuild package to run tests\n", call. = FALSE)
+}}
+
+# Compile
+pkgbuild::compile_dll("{tmp_r_pkg_dir_str}")
+
+# Load the DLL
+dll_file <- file.path("{tmp_r_pkg_dir_str}", "src", sprintf("%s%s", "{r_pkg_name}", .Platform$dynlib.ext))
+dyn.load(dll_file)
+
+# Load the wrapper R functions into an environment
 e <- new.env()
-code <- r"(
-{tests}
-)"
-dep <- list({crate_name} = list(path = "{crate_dir_abs}"))
-savvy::savvy_source(code, use_cache_dir = TRUE, env = e, dependencies = dep)
-write("\n\n", stderr())
+source("{wrapper_r_str}", local = e)
+
+# Run test functions
 for (f in ls(e)) {{
     f <- get(f, e, inherits = FALSE)
     f()
@@ -370,7 +466,7 @@ cat("test result: ok\n")
     eprintln!("\n--------------------------------------------\n");
 
     let mut cmd = async_process::Command::new("R")
-        .args(["-q", "--no-echo", "-f", &temp_r.to_string_lossy()])
+        .args(["-q", "--no-echo", "-f", &tmp_r_script.to_string_lossy()])
         .stdout(Stdio::piped())
         .spawn()?;
 
@@ -395,7 +491,7 @@ fn main() {
 
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
-        Commands::Init { r_pkg_dir } => init(&r_pkg_dir),
+        Commands::Init { r_pkg_dir } => init(&r_pkg_dir, false),
         Commands::Test { crate_dir } => {
             let dir = crate_dir.unwrap_or(".".into());
             let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
