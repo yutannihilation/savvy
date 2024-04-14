@@ -24,20 +24,75 @@ impl_common_sexp_ops!(ComplexSexp);
 impl_common_sexp_ops_owned!(OwnedComplexSexp);
 
 impl ComplexSexp {
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ``` no_run
+    /// use num_complex::Complex64;
+    /// # let x = [
+    /// #     Complex64 { re: 1.0, im: 1.0 },
+    /// #     Complex64 { re: 2.0, im: 2.0 },
+    /// #     Complex64 { re: 3.0, im: 3.0 },
+    /// # ];
+    /// # let complex_sexp = savvy::OwnedComplexSexp::try_from_slice(x)?.as_read_only();
+    /// // `complex_sexp` is c(1+1i, 2+2i, 3+3i)
+    /// assert_eq!(
+    ///     complex_sexp.as_slice(),
+    ///     &[
+    ///         Complex64 { re: 1.0, im: 1.0 },
+    ///         Complex64 { re: 2.0, im: 2.0 },
+    ///         Complex64 { re: 3.0, im: 3.0 },
+    ///     ]
+    /// );
+    /// ```
     pub fn as_slice(&self) -> &[Complex64] {
         unsafe { std::slice::from_raw_parts(COMPLEX(self.inner()) as _, self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ``` no_run
+    /// use num_complex::Complex64;
+    /// # let x = [
+    /// #     Complex64 { re: 1.0, im: 1.0 },
+    /// #     Complex64 { re: 2.0, im: 2.0 },
+    /// #     Complex64 { re: 3.0, im: 3.0 },
+    /// # ];
+    /// # let complex_sexp = savvy::OwnedComplexSexp::try_from_slice(x)?.as_read_only();
+    /// // `complex_sexp` is c(1+1i, 2+2i, 3+3i)
+    /// let mut iter = cplx_sexp.iter();
+    /// assert_eq!(iter.next(), Some(&Complex64 { re: 1.0, im: 1.0 }));
+    /// assert_eq!(
+    ///     iter.as_slice(),
+    ///     &[
+    ///         Complex64 { re: 2.0, im: 2.0 },
+    ///         Complex64 { re: 3.0, im: 3.0 },
+    ///     ]
+    /// );
+    /// ```
+    ///
+    /// # Technical Note
+    ///
+    /// If the input is an ALTREP, this materialize it first, so it might not be
+    /// most efficient. However, it seems Rust's slice implementation is very
+    /// fast, so probably being efficient for ALTREP is not worth giving up the
+    /// benefit.
     pub fn iter(&self) -> std::slice::Iter<Complex64> {
         self.as_slice().iter()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
     pub fn to_vec(&self) -> Vec<Complex64> {
         self.as_slice().to_vec()
     }
 }
 
 impl OwnedComplexSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> ComplexSexp {
         ComplexSexp(self.inner)
     }

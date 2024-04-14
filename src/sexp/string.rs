@@ -22,6 +22,17 @@ impl_common_sexp_ops!(StringSexp);
 impl_common_sexp_ops_owned!(OwnedStringSexp);
 
 impl StringSexp {
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let str_sexp = savvy::OwnedStringSexp::try_from_slice(["a", "b", "c"])?.as_read_only();
+    /// // `str_sexp` is c("a", "b", "c")
+    /// let mut iter = str_sexp.iter();
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.collect::<Vec<&str>>(), vec!["b", "c"]);
+    /// ```
     pub fn iter(&self) -> StringSexpIter {
         StringSexpIter {
             sexp: &self.0,
@@ -30,12 +41,23 @@ impl StringSexp {
         }
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let str_sexp = savvy::OwnedStringSexp::try_from_slice(["a", "b", "c"])?.as_read_only();
+    /// // `str_sexp` is c("a", "b", "c")
+    /// assert_eq!(str_sexp.to_vec(), vec!["a", "b", "c"]);
+    /// ```
     pub fn to_vec(&self) -> Vec<&'static str> {
         self.iter().collect()
     }
 }
 
 impl OwnedStringSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> StringSexp {
         StringSexp(self.inner)
     }

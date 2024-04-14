@@ -19,25 +19,47 @@ impl_common_sexp_ops!(LogicalSexp);
 impl_common_sexp_ops_owned!(OwnedLogicalSexp);
 
 impl LogicalSexp {
-    /// Returns the internal representation, `&[i32]`, not `&[bool]`. This is an
-    /// expert-only function which might be found useful when you really need to
-    /// distinguish NAs.
+    /// Returns the internal representation, **`&[i32]`, not `&[bool]`**. This
+    /// is an expert-only function which might be found useful when you really
+    /// need to distinguish NAs.
     pub fn as_slice_raw(&self) -> &[i32] {
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, true, false])?.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, TRUE, FALSE)
+    /// let mut iter = lgl_sexp.iter();
+    /// assert_eq!(iter.next(), Some(true));
+    /// assert_eq!(iter.collect::<Vec<bool>>(), vec![true, false]);
+    /// ```
     pub fn iter(&self) -> LogicalSexpIter {
         LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let lgl_sexp = savvy::OwnedLogicalSexp::try_from_slice([true, true, false])?.as_read_only();
+    /// // `lgl_sexp` is c(TRUE, TRUE, FALSE)
+    /// assert_eq!(lgl_sexp.to_vec(), vec![true, true, false]);
+    /// ```
     pub fn to_vec(&self) -> Vec<bool> {
         self.iter().collect()
     }
 }
 
 impl OwnedLogicalSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> LogicalSexp {
         LogicalSexp(self.inner)
     }

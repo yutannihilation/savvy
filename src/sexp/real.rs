@@ -23,20 +23,58 @@ impl_common_sexp_ops!(RealSexp);
 impl_common_sexp_ops_owned!(OwnedRealSexp);
 
 impl RealSexp {
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let real_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?.as_read_only();
+    /// // `real_sexp` is c(1.0, 2.0, 3.0)
+    /// assert_eq!(real_sexp.as_slice(), &[1.0, 2.0, 3.0]);
+    /// ```
     pub fn as_slice(&self) -> &[f64] {
         unsafe { std::slice::from_raw_parts(REAL(self.0), self.len()) }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let real_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?.as_read_only();
+    /// // `real_sexp` is c(1.0, 2.0, 3.0)
+    /// let mut iter = real_sexp.iter();
+    /// assert_eq!(iter.next(), Some(&1.0));
+    /// assert_eq!(iter.as_slice(), &[2.0, 3.0]);
+    /// ```
+    ///
+    /// # Technical Note
+    ///
+    /// If the input is an ALTREP, this materialize it first, so it might not be
+    /// most efficient. However, it seems Rust's slice implementation is very
+    /// fast, so probably being efficient for ALTREP is not worth giving up the
+    /// benefit.
     pub fn iter(&self) -> std::slice::Iter<f64> {
         self.as_slice().iter()
     }
 
+    /// Copies the underlying data of the SEXP into a new `Vec`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let real_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?.as_read_only();
+    /// // `real_sexp` is c(1.0, 2.0, 3.0)
+    /// assert_eq!(real_sexp.to_vec(), vec![1.0, 2.0, 3.0]);
+    /// ```
     pub fn to_vec(&self) -> Vec<f64> {
         self.as_slice().to_vec()
     }
 }
 
 impl OwnedRealSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> RealSexp {
         RealSexp(self.inner)
     }

@@ -10,7 +10,7 @@ use crate::NotAvailableValue; // for na()
 /// An external SEXP of an integer vector.
 pub struct IntegerSexp(pub SEXP);
 
-/// A newly-created SEXP of an integer vector
+/// A newly-created SEXP of an integer vector.
 pub struct OwnedIntegerSexp {
     inner: SEXP,
     token: SEXP,
@@ -73,6 +73,8 @@ impl IntegerSexp {
 }
 
 impl OwnedIntegerSexp {
+    /// Returns the read-only version of the wrapper. This is mainly for testing
+    /// purposes.
     pub fn as_read_only(&self) -> IntegerSexp {
         IntegerSexp(self.inner)
     }
