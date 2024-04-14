@@ -357,7 +357,8 @@ fn create_empty_r_pkg(r_pkg_dir: &Path) -> std::io::Result<()> {
         &description,
         "Package: SavvyRPkgForExtractedTests
 Version: 0.0.0
-Encoding: UTF-8",
+Encoding: UTF-8
+",
     );
 
     // Add files necessary for savvy
