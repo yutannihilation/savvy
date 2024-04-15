@@ -106,26 +106,28 @@ impl SavvyFn {
         // cross-language unwind is undefined behavior, abort the process here.
         // This makes the R session crash.
 
-        #[cfg(debug_assertions)]
-        let error_handler: syn::Expr = parse_quote!(Err("panic happened".into()));
-        #[cfg(not(debug_assertions))]
-        let error_handler: syn::Expr = parse_quote!(std::process::abort());
+        // If a panic unwinds, catch it before the unwinding cross the FFI
+        // boundary and throw a usual error, which will be an R error on the C
+        // wrapper function's side.
+        #[cfg(panic = "unwind")]
+        {
+            let orig_body = &mut out.block;
+            let new_body: syn::Block = parse_quote!({
+                let orig_hook = std::panic::take_hook();
+                std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
 
-        let orig_body = &mut out.block;
-        let new_body: syn::Block = parse_quote!({
-            let orig_hook = std::panic::take_hook();
-            std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));
+                let result = std::panic::catch_unwind(|| #orig_body);
 
-            let result = std::panic::catch_unwind(|| #orig_body);
+                std::panic::set_hook(orig_hook);
 
-            std::panic::set_hook(orig_hook);
+                match result {
+                    Ok(orig_result) => orig_result,
+                    Err(_) => Err("panic happened".into()),
+                }
+            });
+            out.block = Box::new(new_body);
+        }
 
-            match result {
-                Ok(orig_result) => orig_result,
-                Err(_) => #error_handler,
-            }
-        });
-        out.block = Box::new(new_body);
         out
     }
 
