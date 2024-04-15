@@ -266,10 +266,28 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
         .map(|(i, v)| format!(r#"{class_r}${v} <- .savvy_wrap_{class_r}({i}L)"#))
         .collect::<Vec<String>>()
         .join("\n");
+
+    let variant_labels = e
+        .variants
+        .iter()
+        .map(|x| format!(r#""{x}""#))
+        .collect::<Vec<String>>()
+        .join(", ");
+
     format!(
-        "{class_r} <- new.env(parent = emptyenv())
+        r#"{class_r} <- new.env(parent = emptyenv())
 {variants}
-"
+
+#' @export
+print.{class_r} <- function(x, ...) {{
+  idx <- x$.ptr + 1L
+  label <- c({variant_labels})[idx]
+  if (is.na(label)) {{
+    stop("Unexpected value for {class_r}", call. = TRUE)
+  }}
+  cat("{class_r}::", label, sep = "")
+}}
+"#
     )
 }
 
