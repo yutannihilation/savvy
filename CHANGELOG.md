@@ -13,6 +13,11 @@
 * `savvy-cli update` now ensures `.Rbuildignore` contains `^src/rust/.cargo$`
   and `^src/rust/target$`.
 
+* `savvy-cli test` now uses OS's cache dir instead of the `.savvy` directory.
+
+### Fixed bugs
+
+* Now `savvy-cli test` works for other crates than savvy.
 
 ## [v0.5.2] (2024-04-14)
 
