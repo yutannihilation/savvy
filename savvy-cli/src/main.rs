@@ -47,6 +47,10 @@ enum Commands {
     Test {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
         crate_dir: Option<PathBuf>,
+        /// Path to the cache directory for placing a temporary R package for
+        /// testing (default: <OS's cache dir>/savvy-cli-test/<crate name>)
+        #[arg(long)]
+        cache_dir: Option<PathBuf>,
     },
 
     /// Extract doctests and test modules
@@ -415,21 +419,34 @@ fn path_to_str(x: &Path) -> String {
         .replace('\\', "/")
 }
 
-async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io::Result<()> {
-    let tmp_r_pkg_dir = crate_dir.join(".savvy/temporary-R-package-for-tests");
-    create_empty_r_pkg(&tmp_r_pkg_dir)?;
-
-    // Make git ignore all the files in .savvy/ directory
-    write_file(&crate_dir.join(".savvy/.gitignore"), "*");
+async fn run_test(
+    tests: String,
+    crate_name: &str,
+    crate_dir: &Path,
+    tmp_r_pkg_dir: &Path,
+) -> std::io::Result<()> {
+    eprintln!(
+        "\nUsing {} as the cache dir for testing...\n",
+        tmp_r_pkg_dir.to_string_lossy()
+    );
+    create_empty_r_pkg(tmp_r_pkg_dir)?;
 
     // Inject the test code into lib.rs and add necessary dependencies into the crate.
 
-    let pkg = get_pkg_metadata(&tmp_r_pkg_dir);
+    let pkg = get_pkg_metadata(tmp_r_pkg_dir);
     let rust_pkg_name = pkg.package_name_for_rust();
     let r_pkg_name = pkg.package_name_for_r();
 
     // Specify the crate to test as a path dependency.
-    let mut additional_deps = format!(r#"{crate_name} = {{ path = "../../../../" }}"#);
+    let crate_dir_abs = crate_dir.canonicalize()?;
+    let crate_dir_abs = crate_dir_abs.to_string_lossy();
+    #[cfg(windows)]
+    let crate_dir_abs = if crate_dir_abs.starts_with(r#"\\?\"#) {
+        crate_dir_abs.get(4..).unwrap().replace('\\', "/")
+    } else {
+        crate_dir_abs.replace('\\', "/")
+    };
+    let mut additional_deps = format!(r#"{crate_name} = {{ path = "{crate_dir_abs}" }}"#);
     if crate_name != "savvy" {
         additional_deps.push('\n');
         additional_deps.push_str(r#"savvy ="*""#);
@@ -449,13 +466,13 @@ async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io:
     write_file(&tmp_r_pkg_dir.join(PATH_LIB_RS), &tests);
 
     // Generate wrapper files
-    update(&tmp_r_pkg_dir);
+    update(tmp_r_pkg_dir);
 
     let wrapper_r = tmp_r_pkg_dir.join(PATH_R_IMPL);
     tweak_wrapper_r(&wrapper_r);
 
     let wrapper_r_str = path_to_str(&wrapper_r);
-    let tmp_r_pkg_dir_str = path_to_str(&tmp_r_pkg_dir);
+    let tmp_r_pkg_dir_str = path_to_str(tmp_r_pkg_dir);
 
     let tmp_r_script = tmp_r_pkg_dir.join("savvy-extracted-tests.R");
     write_file(
@@ -518,11 +535,31 @@ fn main() {
     match cli.command {
         Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir, false),
-        Commands::Test { crate_dir } => {
-            let dir = crate_dir.unwrap_or(".".into());
-            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
-            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
-            match futures_lite::future::block_on(run_test(tests, &crate_name, &dir)) {
+        Commands::Test {
+            crate_dir,
+            cache_dir,
+        } => {
+            // Use the current dir as default
+            let crate_dir = crate_dir.unwrap_or(".".into());
+            let crate_name = parse_cargo_toml(&crate_dir.join("Cargo.toml"));
+
+            // Use the OS's cache dir as default
+            let cache_dir = match (cache_dir, dirs::cache_dir()) {
+                (Some(p), _) => p,
+                (None, Some(p)) => p.join("savvy-cli-test").join(&crate_name),
+                (None, None) => {
+                    eprintln!("No cache dir is available");
+                    std::process::exit(1);
+                }
+            };
+
+            let tests = extract_tests(&crate_dir.join("src/lib.rs"), &crate_name);
+            match futures_lite::future::block_on(run_test(
+                tests,
+                &crate_name,
+                &crate_dir,
+                &cache_dir,
+            )) {
                 Ok(_) => {}
                 Err(e) => match e.kind() {
                     std::io::ErrorKind::NotFound => {
