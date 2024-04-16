@@ -6,9 +6,11 @@ pub fn panic_hook(panic_info: &std::panic::PanicInfo) {
         .collect::<Vec<String>>()
         .join("\n");
 
-    // Forcibly captures a full backtrace regardless of RUST_BACKTRACE
-    let bt = std::backtrace::Backtrace::force_capture().to_string();
-    let bt_indented = cut_and_indent_backtrace(&bt);
+    // Backtrace is available only when the debug info is available.
+    #[cfg(debug_assertions)]
+    let bt = get_backtrace();
+    #[cfg(not(debug_assertions))]
+    let bt = "    (Backtrace is not available on the release build)";
 
     crate::io::r_eprint(
         &format!(
@@ -18,7 +20,7 @@ Original message:
 {panic_info_indented}
 
 Backtrace:
-{bt_indented}
+{bt}
 "
         ),
         true,
@@ -27,12 +29,16 @@ Backtrace:
 
 // Since savvy generates many wrappers, the backtrace is boringly deep. Try
 // cutting the uninteresting part.
-fn cut_and_indent_backtrace(bt: &str) -> String {
+#[cfg(debug_assertions)]
+fn get_backtrace() -> String {
     let show_full = if let Ok(v) = std::env::var("RUST_BACKTRACE") {
         &v == "1"
     } else {
         false
     };
+
+    // Forcibly captures a full backtrace regardless of RUST_BACKTRACE
+    let bt = std::backtrace::Backtrace::force_capture().to_string();
 
     // try to shorten if the user doesn't require the full backtrace
     if !show_full {

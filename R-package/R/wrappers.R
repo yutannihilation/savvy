@@ -310,6 +310,11 @@ raise_error <- function() {
 }
 
 
+must_panic <- function() {
+  invisible(.Call(must_panic__impl))
+}
+
+
 new_int <- function(size) {
   .Call(new_int__impl, size)
 }

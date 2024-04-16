@@ -1,17 +1,6 @@
-# test_that("panic doesn't crash R session", {
-#   code <- r"(
-# use savvy::savvy;
-#
-# #[allow(unreachable_code)]
-# #[savvy]
-# fn try_panic() -> savvy::Result<()> {
-#    panic!("safe");
-#    Ok(())
-# }
-# )"
-#
-#   savvy_override <- list(savvy = list(path = file.path(getwd(), "../../../")))
-#   savvy::savvy_source(code, use_cache_dir = TRUE, dependencies = savvy_override)
-#
-#   expect_error(try_panic())
-# })
+# it seems devtools::test() re-compiles the source code with DEBUG=true, so, at
+# least on GitHub CI, this test should succeed. When this test is executed on
+# local after the package is build with release profile, this fails.
+test_that("panic doesn't crash R session", {
+  expect_error(must_panic())
+})
