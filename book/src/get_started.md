@@ -67,6 +67,7 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 
 ```
 .
+├── .Rbuildignore
 ├── DESCRIPTION
 ├── NAMESPACE
 ├── R

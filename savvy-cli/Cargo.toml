@@ -22,6 +22,7 @@ futures-lite = "2"
 savvy-bindgen = { version = "0", path = "../savvy-bindgen", features = [
     "use_formatter",
 ] }
+dirs = "5.0.1"
 
 [package.metadata.dist]
 dist = true
