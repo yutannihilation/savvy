@@ -25,3 +25,10 @@ fn safe_stop() -> savvy::Result<()> {
 fn raise_error() -> savvy::Result<savvy::Sexp> {
     Err(savvy::Error::new("This is my custom error"))
 }
+
+#[savvy]
+fn must_panic() -> savvy::Result<()> {
+    let x = &[1];
+    let _ = x[1];
+    Ok(())
+}

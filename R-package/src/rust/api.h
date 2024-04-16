@@ -49,6 +49,7 @@ SEXP rep_str_vec(SEXP x);
 SEXP rep_str_slice(SEXP x);
 SEXP safe_stop(void);
 SEXP raise_error(void);
+SEXP must_panic(void);
 SEXP new_int(SEXP size);
 SEXP new_real(SEXP size);
 SEXP new_bool(SEXP size);
