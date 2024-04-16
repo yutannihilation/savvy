@@ -408,12 +408,17 @@ async fn run_test(tests: String, crate_name: &str, crate_dir: &Path) -> std::io:
     let r_pkg_name = pkg.package_name_for_r();
 
     // Specify the crate to test as a path dependency.
+    let mut additional_deps = format!(r#"{crate_name} = {{ path = "../../../../" }}"#);
+    if crate_name != "savvy" {
+        additional_deps.push('\n');
+        additional_deps.push_str(r#"savvy ="*""#);
+    }
     write_file(
         &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
             &rust_pkg_name,
             // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
-            &format!(r#"{crate_name} = {{ path = "../../../../" }}"#),
+            &additional_deps,
         ),
     );
     // Since this can be within the workspace of a Rust package, clarify this is
