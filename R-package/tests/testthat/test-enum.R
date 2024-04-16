@@ -4,4 +4,12 @@ test_that("enum works", {
   expect_output(a$print(), "A")
   expect_output(print_foo_enum(a), "A")
   expect_output(print_foo_enum_ref(a), "A")
+
+  # print method
+  expect_output(print(FooEnum$A), "FooEnum::A")
+  expect_output(print(FooEnum$B), "FooEnum::B")
+
+  # corrupt
+  FooEnum$B$.ptr <- 3L
+  expect_error(print(FooEnum$B))
 })

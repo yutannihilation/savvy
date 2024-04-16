@@ -438,6 +438,16 @@ FooEnum <- new.env(parent = emptyenv())
 FooEnum$A <- .savvy_wrap_FooEnum(0L)
 FooEnum$B <- .savvy_wrap_FooEnum(1L)
 
+#' @export
+print.FooEnum <- function(x, ...) {
+  idx <- x$.ptr + 1L
+  label <- c("A", "B")[idx]
+  if (is.na(label)) {
+    stop("Unexpected value for FooEnum", call. = TRUE)
+  }
+  cat("FooEnum::", label, sep = "")
+}
+
 
 ### associated functions for FooEnum
 
