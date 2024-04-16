@@ -10,6 +10,10 @@
   `Cargo.toml` with a release profile of `panic = "abort"`. You need to modify
   this setting if you really want to catch panics on the release build.
 
+* `savvy-cli update` now ensures `.Rbuildignore` contains `^src/rust/.cargo$`
+  and `^src/rust/target$`.
+
+
 ## [v0.5.2] (2024-04-14)
 
 ### New features
