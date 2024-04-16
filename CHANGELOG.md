@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.5.3] (2024-04-16)
+
 ### New features
 
 * Savvy now catches crash not only on the debug build, but also on the release
@@ -467,7 +469,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.5.3...HEAD
+[v0.5.3]: https://github.com/yutannihilation/savvy/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/yutannihilation/savvy/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/yutannihilation/savvy/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/yutannihilation/savvy/compare/v0.4.2...v0.5.0
