@@ -2,6 +2,7 @@ mod utils;
 use async_process::Stdio;
 use savvy_bindgen::generate_test_code;
 use savvy_bindgen::merge_parsed_results;
+use savvy_bindgen::read_file;
 use utils::*;
 
 use std::collections::VecDeque;
@@ -145,6 +146,7 @@ const PATH_GITIGNORE: &str = "src/.gitignore";
 const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
 const PATH_R_IMPL: &str = "R/wrappers.R";
+const PATH_R_BUILDIGNORE: &str = ".Rbuildignore";
 
 fn get_pkg_metadata(path: &Path) -> PackageDescription {
     if !path.exists() {
@@ -256,6 +258,24 @@ fn parse_crate(lib_rs: &Path, crate_name: &str) -> Vec<ParsedResult> {
     parsed
 }
 
+fn tweak_r_buildignore(path: &Path) {
+    let ignores = ["^src/rust/.cargo$", "^src/rust/target$"];
+    let r_buildignore = path.join(PATH_R_BUILDIGNORE);
+    if !r_buildignore.exists() {
+        write_file(&r_buildignore, &format!("{}\n", ignores.join("\n")));
+    } else {
+        let content = read_file(&r_buildignore);
+        let rest = ignores
+            .into_iter()
+            .filter(|&i| !content.contains(i))
+            .collect::<Vec<&str>>()
+            .join("\n");
+        if !rest.is_empty() {
+            append_file(&r_buildignore, &format!("\n{rest}\n"));
+        }
+    }
+}
+
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
@@ -274,6 +294,7 @@ fn update(path: &Path) {
         &path.join(PATH_R_IMPL),
         &generate_r_impl_file(&merged, &pkg_metadata.package_name_for_r()),
     );
+    tweak_r_buildignore(path);
 }
 
 fn init(path: &Path, skip_update: bool) {
