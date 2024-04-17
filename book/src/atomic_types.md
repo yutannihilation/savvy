@@ -1,4 +1,4 @@
-# Integer, Real, String, Bool, And Complex
+# Integer, Real, String, Logical, And Complex
 
 ## Integer and real
 

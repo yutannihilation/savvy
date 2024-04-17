@@ -117,5 +117,5 @@ identity_logical(c(TRUE, FALSE, NA))
 ```
 
 The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
-See "Logical" section of [Integer, Real, String, And Bool](./atomic_types.md)
+See "Logical" section of [Integer, Real, String, Logical, And Complex](./atomic_types.md)
 for the details.

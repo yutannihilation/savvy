@@ -79,3 +79,17 @@ identity_int_wrapper <- function(x) {
   identity_int(x)
 }
 ```
+
+Alternatively, you can use a general type `Sexp` as input and switch the
+function to apply depending on whether it's integer or real.
+
+```rust
+#[savvy]
+fn identity_num(x: Sexp) -> savvy::Result<savvy::Sexp> {
+    match x.into_typed() {
+        TypedSexp::Integer(i) => identity_int(i),
+        TypedSexp::Real(r) => identity_real(r),
+        _ => Err("Expected integer or numeric".into()),
+    }
+}
+```
