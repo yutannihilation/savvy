@@ -3,6 +3,14 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* `savvy-cli test` now picks `[dev-dependencies]` from the crate's `Cargo.toml`
+  as the dependencies to be used for testing.
+
+* `savvy-cli test` got `--features` argument to add features to be used for
+  testing.
+
 ## [v0.5.3] (2024-04-16)
 
 ### New features
