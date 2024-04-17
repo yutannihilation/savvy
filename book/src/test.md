@@ -13,7 +13,7 @@ The sad news is that `cargo test` doesn't work with savvy. This is because savvy
 always requires a real R session to work. But, don't worry, `savvy-cli test` is
 the tool for this. `savvy-cli test` does
 
-1. extract the Rust code of the doctests and test modules
+1. extract the Rust code of the test modules and the doc tests
 2. create a temporary R package[^1] and inject the extracted Rust code
 3. build and run the test functions via the R package
 
@@ -27,35 +27,11 @@ package.
 savvy-cli test path/to/your_crate
 ```
 
-### Doc tests
-
-You can write doc tests like this. `savvy-cli test` wraps it with a function
-with the return value of `savvy::Result<()>`, you can use `?` to extract the
-`Result` value in the code.
-
-```rust
-/// ```
-/// let x = savvy::OwnedIntegerSexp::new(3)?;
-/// assert_eq!(x.as_slice(), &[0, 0, 0]);
-/// ```
-```
-
-To test a function that takes non-owned SEXP types like `IntegerSexp`, you can
-use `.as_read_only()` to convert from the corresponding `Owned-` type.
-
-```rust
-/// ```
-/// let x = savvy::OwnedIntegerSexp::new(3)?;
-/// let x_ro = x.as_read_only();
-/// assert!(your_fn(x_ro).is_ok());
-/// ```
-```
-
 ### Test module
 
-You can also write tests under `#[cfg(test)]`. A `#[test]` function needs to
-have the return value of `savvy::Result<()>`, which is the same convention as
-`#[savvy]`.
+You can write tests under a module marked with `#[cfg(test)]`. A `#[test]`
+function needs to have the return value of `savvy::Result<()>`, which is the
+same convention as `#[savvy]`.
 
 ```rust
 #[cfg(test)]
@@ -69,6 +45,44 @@ mod test {
         Ok(())
     }
 }
+```
+
+To test a function that takes user-supplied SEXPs like `IntegerSexp`, you can
+use `.as_read_only()` to convert from the corresponding `Owned-` type. For
+example, if you have a function `your_fn()` that accepts `IntegerSexp`, you can
+construct an `OwnedIntegerSexp` and convert it to `IntegerSexp` before passing
+it to `your_fn()`.
+
+```rust
+fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
+    // ...snip...
+}
+
+#[cfg(test)]
+mod test {
+    use savvy::OwnedIntegerSexp;
+
+    #[test]
+    fn test_integer() -> savvy::Result<()> {
+        let x = savvy::OwnedIntegerSexp::new(3)?;
+        let x_ro = x.as_read_only();
+        assert!(super::your_fn(x_ro).is_ok());
+        Ok(())
+    }
+}
+```
+
+### Doc tests
+
+You can also write doc tests. `savvy-cli test` wraps it with a function with the
+return value of `savvy::Result<()>`, you can use `?` to extract the `Result`
+value in the code.
+
+```rust
+/// ```
+/// let x = savvy::OwnedIntegerSexp::new(3)?;
+/// assert_eq!(x.as_slice(), &[0, 0, 0]);
+/// ```
 ```
 
 ### Features and dependencies
