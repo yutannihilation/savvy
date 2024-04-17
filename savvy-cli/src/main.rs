@@ -53,7 +53,7 @@ enum Commands {
         #[arg(long)]
         cache_dir: Option<PathBuf>,
 
-        /// Features
+        /// Features to use for testing
         #[arg(long)]
         features: Vec<String>,
     },

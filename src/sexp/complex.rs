@@ -28,8 +28,8 @@ impl ComplexSexp {
     ///
     /// # Examples
     ///
-    /// ``` no_run
-    /// use num_complex::Complex64;
+    /// ```
+    /// use savvy::Complex64;
     /// # let x = [
     /// #     Complex64 { re: 1.0, im: 1.0 },
     /// #     Complex64 { re: 2.0, im: 2.0 },
@@ -54,8 +54,8 @@ impl ComplexSexp {
     ///
     /// # Examples
     ///
-    /// ``` no_run
-    /// use num_complex::Complex64;
+    /// ```
+    /// use savvy::Complex64;
     /// # let x = [
     /// #     Complex64 { re: 1.0, im: 1.0 },
     /// #     Complex64 { re: 2.0, im: 2.0 },
@@ -63,7 +63,7 @@ impl ComplexSexp {
     /// # ];
     /// # let complex_sexp = savvy::OwnedComplexSexp::try_from_slice(x)?.as_read_only();
     /// // `complex_sexp` is c(1+1i, 2+2i, 3+3i)
-    /// let mut iter = cplx_sexp.iter();
+    /// let mut iter = complex_sexp.iter();
     /// assert_eq!(iter.next(), Some(&Complex64 { re: 1.0, im: 1.0 }));
     /// assert_eq!(
     ///     iter.as_slice(),
