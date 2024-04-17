@@ -18,7 +18,5 @@ crate-type = ["staticlib"]
 # 
 # However, it's possible that the panic is thrown by some of the dependency
 # crate and there's little you can do. In such cases, you can change the
-# following line to `panic = "unwind"` to always catch a panic. Or,
-# altenatively, you can wrap the part of your code by std::panic::catch_unwind
-# by yourself.
+# following line to `panic = "unwind"` to always catch a panic.
 panic = "abort"
