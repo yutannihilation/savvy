@@ -47,10 +47,15 @@ enum Commands {
     Test {
         /// Path to the lib.rs of the library (default: ./src/lib.rs)
         crate_dir: Option<PathBuf>,
+
         /// Path to the cache directory for placing a temporary R package for
         /// testing (default: <OS's cache dir>/savvy-cli-test/<crate name>)
         #[arg(long)]
         cache_dir: Option<PathBuf>,
+
+        /// Features
+        #[arg(long)]
+        features: Vec<String>,
     },
 
     /// Extract doctests and test modules
@@ -392,6 +397,7 @@ fn path_to_str(x: &Path) -> String {
 async fn run_test(
     tests: String,
     crate_name: &str,
+    features: &[String],
     dev_dependencies: &str,
     crate_dir: &Path,
     tmp_r_pkg_dir: &Path,
@@ -417,12 +423,23 @@ async fn run_test(
     } else {
         crate_dir_abs.replace('\\', "/")
     };
-    let mut additional_dependencies = format!(r#"{crate_name} = {{ path = "{crate_dir_abs}" }}"#);
+
+    let features = if features.is_empty() {
+        "".to_string()
+    } else {
+        format!(r#", features = ["{}"]"#, features.join(r#"", ""#))
+    };
+
+    let mut additional_dependencies =
+        format!(r#"{crate_name} = {{ path = "{crate_dir_abs}"{features} }}"#);
     additional_dependencies.push('\n');
     if crate_name != "savvy" {
         additional_dependencies.push_str(r#"savvy ="*"\n"#);
     }
+
+    // Add dev-dependencies
     additional_dependencies.push_str(dev_dependencies);
+
     write_file(
         &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
@@ -510,6 +527,7 @@ fn main() {
         Commands::Test {
             crate_dir,
             cache_dir,
+            features,
         } => {
             // Use the current dir as default
             let crate_dir = crate_dir.unwrap_or(".".into());
@@ -529,6 +547,7 @@ fn main() {
             match futures_lite::future::block_on(run_test(
                 tests,
                 &crate_name,
+                &features,
                 &dev_dependencies,
                 &crate_dir,
                 &cache_dir,
