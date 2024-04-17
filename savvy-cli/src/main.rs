@@ -106,36 +106,6 @@ fn parse_description(path: &Path) -> PackageDescription {
     }
 }
 
-// Parse Cargo.toml and get the crate name in a dirty way
-fn parse_cargo_toml(path: &Path) -> String {
-    let content = savvy_bindgen::read_file(path);
-
-    let mut in_package_section = false;
-    for line in content.lines() {
-        if line.trim_start().starts_with('[') {
-            in_package_section = line.trim() == "[package]";
-            continue;
-        }
-
-        if !in_package_section {
-            continue;
-        }
-
-        let mut s = line.split('=');
-        if let Some(key) = s.next() {
-            if key.trim() != "name" {
-                continue;
-            }
-        }
-        if let Some(value) = s.next() {
-            return value.trim().trim_matches(['"', '\'']).to_string();
-        }
-    }
-
-    eprintln!("Cargo.toml doesn't have package name!");
-    std::process::exit(10);
-}
-
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_NAMESPACE: &str = "NAMESPACE";
 const PATH_SRC_DIR: &str = "src/rust/src";
@@ -283,7 +253,7 @@ fn tweak_r_buildignore(path: &Path) {
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
-    let crate_name = parse_cargo_toml(&path.join(PATH_CARGO_TOML));
+    let (crate_name, _) = parse_cargo_toml(&path.join(PATH_CARGO_TOML));
 
     let parsed = parse_crate(&lib_rs, &crate_name);
 
@@ -422,6 +392,7 @@ fn path_to_str(x: &Path) -> String {
 async fn run_test(
     tests: String,
     crate_name: &str,
+    dev_dependencies: &str,
     crate_dir: &Path,
     tmp_r_pkg_dir: &Path,
 ) -> std::io::Result<()> {
@@ -446,17 +417,18 @@ async fn run_test(
     } else {
         crate_dir_abs.replace('\\', "/")
     };
-    let mut additional_deps = format!(r#"{crate_name} = {{ path = "{crate_dir_abs}" }}"#);
+    let mut additional_dependencies = format!(r#"{crate_name} = {{ path = "{crate_dir_abs}" }}"#);
+    additional_dependencies.push('\n');
     if crate_name != "savvy" {
-        additional_deps.push('\n');
-        additional_deps.push_str(r#"savvy ="*""#);
+        additional_dependencies.push_str(r#"savvy ="*"\n"#);
     }
+    additional_dependencies.push_str(dev_dependencies);
     write_file(
         &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
             &rust_pkg_name,
             // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
-            &additional_deps,
+            &additional_dependencies,
         ),
     );
     // Since this can be within the workspace of a Rust package, clarify this is
@@ -541,7 +513,7 @@ fn main() {
         } => {
             // Use the current dir as default
             let crate_dir = crate_dir.unwrap_or(".".into());
-            let crate_name = parse_cargo_toml(&crate_dir.join("Cargo.toml"));
+            let (crate_name, dev_dependencies) = parse_cargo_toml(&crate_dir.join("Cargo.toml"));
 
             // Use the OS's cache dir as default
             let cache_dir = match (cache_dir, dirs::cache_dir()) {
@@ -557,6 +529,7 @@ fn main() {
             match futures_lite::future::block_on(run_test(
                 tests,
                 &crate_name,
+                &dev_dependencies,
                 &crate_dir,
                 &cache_dir,
             )) {
@@ -574,7 +547,7 @@ fn main() {
         }
         Commands::ExtractTests { crate_dir } => {
             let dir = crate_dir.unwrap_or(".".into());
-            let crate_name = parse_cargo_toml(&dir.join("Cargo.toml"));
+            let (crate_name, _) = parse_cargo_toml(&dir.join("Cargo.toml"));
             let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
             println!("{tests}");
         }
