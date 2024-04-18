@@ -17,50 +17,19 @@ pub(crate) fn to_snake_case(x: &str) -> String {
     out
 }
 
-// Parse Cargo.toml and get the crate name in a dirty way
-pub(crate) fn parse_cargo_toml(path: &Path) -> (String, String) {
-    let content = savvy_bindgen::read_file(path);
-
-    let mut dev_dependencies = vec![];
-    let mut crate_name = "";
-
-    let mut section = "";
-    for line in content.lines() {
-        if line.trim_start().starts_with('[') {
-            section = line.trim();
-            continue;
-        }
-
-        match section {
-            // find crate name
-            "[package]" => {
-                let mut s = line.split('=');
-
-                // if the line contains = and the key is "name", return the
-                // value as crate_name otherwise, skip the line.
-                match s.next() {
-                    Some(key) if key.trim() == "name" => {
-                        if let Some(value) = s.next() {
-                            crate_name = value.trim().trim_matches(['"', '\'']);
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            "[dev-dependencies]" => {
-                dev_dependencies.push(line);
-            }
-            _ => {}
-        }
-    }
-
-    if crate_name.is_empty() {
-        eprintln!("Cargo.toml doesn't have package name!");
-        std::process::exit(10);
-    }
-
-    (crate_name.to_string(), dev_dependencies.join("\n"))
+pub(crate) fn canonicalize(path: &Path) -> Result<String, std::io::Error> {
+    let crate_dir_abs = path.canonicalize()?;
+    let crate_dir_abs = crate_dir_abs.to_string_lossy();
+    #[cfg(windows)]
+    let crate_dir_abs = if crate_dir_abs.starts_with(r#"\\?\"#) {
+        crate_dir_abs.get(4..).unwrap().replace('\\', "/")
+    } else {
+        crate_dir_abs.replace('\\', "/")
+    };
+    Ok(crate_dir_abs)
 }
+
+// Parse Cargo.toml and get the crate name in a dirty way
 
 #[cfg(test)]
 mod tests {
