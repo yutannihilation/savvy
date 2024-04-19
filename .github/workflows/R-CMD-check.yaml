@@ -57,7 +57,12 @@ jobs:
           cargo test --manifest-path=./savvy-macro/Cargo.toml
           cargo test --manifest-path=./savvy-bindgen/Cargo.toml
           cargo test --manifest-path=./savvy-cli/Cargo.toml
+
+          # run `savvy-cli test` to test savvy itself
           cargo r-test --features complex
+
+          # run `savvy-cli test` on R-package to test `savvy-cli test`
+          cargo r-test ./R-package/src/rust/
 
       - name: Tweak
         run: |
