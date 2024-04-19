@@ -14,4 +14,5 @@ fn main() {
     }
 
     println!("cargo:rerun-if-changed=src/unwind_protect_wrapper.c");
+    println!("cargo:rerun-if-env-changed=R_INCLUDE_DIR");
 }
