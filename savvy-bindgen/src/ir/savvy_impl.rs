@@ -73,7 +73,7 @@ impl SavvyImpl {
     }
 
     #[allow(dead_code)]
-    pub fn generate_outer_fns(&self) -> Vec<syn::ItemFn> {
+    pub fn generate_ffi_fns(&self) -> Vec<syn::ItemFn> {
         self.fns.iter().map(|f| f.generate_ffi_fn()).collect()
     }
 }

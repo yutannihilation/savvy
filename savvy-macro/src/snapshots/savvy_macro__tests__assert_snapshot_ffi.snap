@@ -4,8 +4,8 @@ expression: lines
 ---
 - "#[allow(clippy::missing_safety_doc)]"
 - "#[no_mangle]"
-- "pub unsafe extern \"C\" fn Person_name(self__: savvy::ffi::SEXP) -> savvy::ffi::SEXP {"
-- "    match savvy_Person_name_inner(self__) {"
+- "pub unsafe extern \"C\" fn savvy_foo__ffi() -> savvy::ffi::SEXP {"
+- "    match savvy_foo_inner() {"
 - "        Ok(result) => result.0,"
 - "        Err(e) => savvy::handle_error(e),"
 - "    }"
