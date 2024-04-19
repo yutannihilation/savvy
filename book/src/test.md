@@ -27,13 +27,28 @@ package.
 savvy-cli test path/to/your_crate
 ```
 
-In order to run tests, you need to add `"lib"` to the `crate-type`. This is
-because your crate is used as a Rust library when run by `savvy-cli test`.
+### Limitations
+
+`savvy-cli test` tries to mimic what `cargo test` does as much as possible, but
+there's some limitations.
+
+First, in order to run tests, you need to add `"lib"` to the `crate-type`. This
+is because your crate is used as a Rust library when run by `savvy-cli test`.
 
 ```toml
 [lib]
 crate-type = ["staticlib", "lib"]
-#                          ^^^^^
+                           ^^^^^
+```
+
+Second, if you want to test a function or a struct, it must be public. This is
+because `savvy-cli test` has to build the crate in the `dev` profile or the
+`release` profile, not the test profile, in order to link with the R package.
+So, the visibility is kept as it is unlike `cargo test`.
+
+```rs
+pub fn foo() -> savvy::Result<()> {
+^^^
 ```
 
 ### Test module
@@ -63,7 +78,8 @@ construct an `OwnedIntegerSexp` and convert it to `IntegerSexp` before passing
 it to `your_fn()`.
 
 ```rust
-fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
+#[savvy]
+pub fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
     // ...snip...
 }
 
