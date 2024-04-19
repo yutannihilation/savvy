@@ -533,7 +533,7 @@ fn main() {
             let crate_dir = crate_dir.unwrap_or(".".into());
             let mut manifest = Manifest::new(&crate_dir.join("Cargo.toml"), &features);
 
-            if !manifest.crate_types.contains(&"lib".to_string()) {
+            if !manifest.crate_types.iter().any(|s| s == "lib") {
                 eprintln!(
                     r#"To run `savvy-cli test`, please add "lib" to the crate-type.
 

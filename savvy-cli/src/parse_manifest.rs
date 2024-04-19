@@ -31,16 +31,20 @@ impl Manifest {
             .expect("Cargo.toml have an invalid `name` key in the [package] section")
             .to_string();
 
-        let crate_types = parsed
-            .get("lib")
-            .expect("Cargo.toml doesn't have a [lib] section")
-            .get("crate-type")
-            .expect("Cargo.toml doesn't have the `crate-type` key in the [lib] section")
-            .as_array()
-            .expect("Cargo.toml have an invalid `crate-type` key in the [lib] section")
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<String>>();
+        let crate_types = if let Some(lib_section) = parsed.get("lib") {
+            if let Some(crate_types) = lib_section.get("crate-type") {
+                crate_types
+                    .as_array()
+                    .expect("Cargo.toml have an invalid `crate-type` key in the [lib] section")
+                    .iter()
+                    .map(|x| x.as_str().unwrap().to_string())
+                    .collect::<Vec<String>>()
+            } else {
+                vec!["lib".to_string()]
+            }
+        } else {
+            vec!["lib".to_string()]
+        };
 
         let deps = parsed.get_mut("dependencies").map(|d| {
             d.as_table()
@@ -151,9 +155,6 @@ mod tests {
 [package]
 name = "test"
 
-[lib]
-crate-type = ["staticlib", "lib"]
-
 [dependencies]
 dep1 = "1.2.3"
         "#,
@@ -171,9 +172,6 @@ dep1 = "1.2.3"
             r#"
 [package]
 name = "test"
-
-[lib]
-crate-type = ["staticlib", "lib"]
 
 [dependencies]
 dep1 = "1.2.3"
@@ -196,9 +194,6 @@ dep2 = "4.5.6"
             r#"
 [package]
 name = "test"
-
-[lib]
-crate-type = ["staticlib", "lib"]
 
 [dependencies]
 dep1 = "1.2.3"
