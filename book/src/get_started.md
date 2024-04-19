@@ -71,7 +71,7 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 ├── DESCRIPTION
 ├── NAMESPACE
 ├── R
-│   └── wrappers.R          <-------(1)
+│   └── 000-wrappers.R      <-------(1)
 ├── configure               <-------(2)
 ├── foofoofoofoo.Rproj
 └── src
@@ -88,7 +88,7 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
             └── lib.rs      <-------(5)
 ```
 
-1. `wrappers.R`: R functions for the corresponding Rust functions
+1. `000-wrappers.R`: R functions for the corresponding Rust functions
 2. `configure`, `Makevars.in`, and `Makevars.win`: Necessary build settings for compiling Rust code
 3. `init.c` and `api.h`: C functions for the corresponding Rust functions
 4. `<your package>-win.def` and `.cargo/config.toml`: These are tricks to avoid

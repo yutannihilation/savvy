@@ -128,8 +128,12 @@ const PATH_MAKEVARS_WIN: &str = "src/Makevars.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
 const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
-const PATH_R_IMPL: &str = "R/wrappers.R";
 const PATH_R_BUILDIGNORE: &str = ".Rbuildignore";
+
+// In order to let users override the functions provided by the savvy framework
+// (e.g. print() method for enum), this wrapper file needs to be loaded first,
+// so add `000` at the head.
+const PATH_R_IMPL: &str = "R/000-wrappers.R";
 
 fn get_pkg_metadata(path: &Path) -> PackageDescription {
     if !path.exists() {
@@ -259,6 +263,25 @@ fn tweak_r_buildignore(path: &Path) {
     }
 }
 
+fn remove_old_wrapper_r(path: &Path) -> std::io::Result<()> {
+    let old = path.join("R/wrappers.R");
+    if old.exists() {
+        eprintln!(
+            "
+
+  !!! WARNING !!!
+  Now the savvy framework generates `000-wrappers.R` instead of `wrappers.R`.
+  Deleting the old wrapper file ({})...
+
+",
+            old.to_string_lossy()
+        );
+
+        std::fs::remove_file(&old)?;
+    }
+    Ok(())
+}
+
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
@@ -273,6 +296,10 @@ fn update(path: &Path) {
         &path.join(PATH_C_IMPL),
         &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
     );
+
+    // TODO: remove this tweak
+    remove_old_wrapper_r(path).expect("Failed to remove the old wrapper.R");
+
     write_file(
         &path.join(PATH_R_IMPL),
         &generate_r_impl_file(&merged, &pkg_metadata.package_name_for_r()),
