@@ -44,9 +44,8 @@ fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
-    let savvy_impl = SavvyImpl::new(item_impl)?;
-    let orig = savvy_impl.orig.clone();
+fn savvy_impl(orig: &syn::ItemImpl) -> syn::Result<TokenStream> {
+    let savvy_impl = SavvyImpl::new(orig)?;
 
     let list_fn_inner = savvy_impl.generate_inner_fns();
     let list_fn_ffi = savvy_impl.generate_ffi_fns();
@@ -60,9 +59,8 @@ fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
-    let savvy_struct = SavvyStruct::new(item_struct)?;
-    let orig = &savvy_struct.orig;
+fn savvy_struct(orig: &syn::ItemStruct) -> syn::Result<TokenStream> {
+    let savvy_struct = SavvyStruct::new(orig)?;
     let try_from_impls = savvy_struct.generate_try_from_impls();
 
     Ok(quote!(
@@ -73,8 +71,8 @@ fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
-    let savvy_enum = SavvyEnum::new(item_enum)?;
+fn savvy_enum(orig: &syn::ItemEnum) -> syn::Result<TokenStream> {
+    let savvy_enum = SavvyEnum::new(orig)?;
     let enum_with_discriminant = savvy_enum.generate_enum_with_discriminant();
     let try_from_impls = savvy_enum.generate_try_from_impls();
 

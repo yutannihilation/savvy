@@ -12,8 +12,6 @@ pub struct SavvyImpl {
     pub ty: syn::Ident,
     /// Methods and accociated functions
     pub fns: Vec<SavvyFn>,
-    /// Original body of the impl
-    pub orig: syn::ItemImpl,
 }
 
 impl SavvyImpl {
@@ -63,7 +61,6 @@ impl SavvyImpl {
             attrs,
             ty,
             fns,
-            orig: orig.clone(),
         })
     }
 
