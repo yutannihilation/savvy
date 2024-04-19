@@ -18,7 +18,7 @@ the tool for this. `savvy-cli test` does
 3. build and run the test functions via the R package
 
 [^1]: The R package is created in the OS's cache dir by default, but you can
-    specify the location by `--cache_dir`.
+    specify the location by `--cache-dir`.
 
 Note that, this takes the path to the root of **a crate**, not that of an R
 package.
