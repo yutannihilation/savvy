@@ -151,6 +151,9 @@ mod tests {
 [package]
 name = "test"
 
+[lib]
+crate-type = ["staticlib", "lib"]
+
 [dependencies]
 dep1 = "1.2.3"
         "#,
@@ -168,6 +171,9 @@ dep1 = "1.2.3"
             r#"
 [package]
 name = "test"
+
+[lib]
+crate-type = ["staticlib", "lib"]
 
 [dependencies]
 dep1 = "1.2.3"
@@ -190,6 +196,9 @@ dep2 = "4.5.6"
             r#"
 [package]
 name = "test"
+
+[lib]
+crate-type = ["staticlib", "lib"]
 
 [dependencies]
 dep1 = "1.2.3"
