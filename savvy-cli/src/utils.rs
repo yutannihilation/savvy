@@ -26,7 +26,7 @@ pub(crate) fn canonicalize(path: &Path) -> Result<String, std::io::Error> {
     } else {
         crate_dir_abs.replace('\\', "/")
     };
-    Ok(crate_dir_abs)
+    Ok(crate_dir_abs.to_string())
 }
 
 // Parse Cargo.toml and get the crate name in a dirty way
