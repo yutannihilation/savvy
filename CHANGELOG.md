@@ -9,7 +9,7 @@
   previously, the original function name is used for the FFI functions, but now
   it's `savvy_{original}_ffi`. This change shouldn't affect ordinary users.
   
-  This change was necessary to let `#[savvy]` preserves the original function so
+  This change was necessary to let `#[savvy]` preserve the original function so
   that we can write unit tests on the function easily. For more details, please
   read the [Testing section](https://yutannihilation.github.io/savvy/guide/test.html) in the guide.
 
