@@ -1,4 +1,4 @@
-use syn::{parse_quote, ItemStruct};
+use syn::parse_quote;
 
 use crate::extract_docs;
 
@@ -9,8 +9,6 @@ pub struct SavvyStruct {
     pub attrs: Vec<syn::Attribute>,
     /// Original struct name
     pub ty: syn::Ident,
-    /// Original code
-    pub orig: ItemStruct,
 }
 
 impl SavvyStruct {
@@ -22,12 +20,7 @@ impl SavvyStruct {
         let docs = extract_docs(attrs.as_slice());
         let ty = orig.ident.clone();
 
-        Ok(Self {
-            docs,
-            attrs,
-            ty,
-            orig: orig.clone(),
-        })
+        Ok(Self { docs, attrs, ty })
     }
 
     pub fn generate_try_from_impls(&self) -> Vec<syn::ItemImpl> {

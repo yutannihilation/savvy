@@ -12,8 +12,6 @@ pub struct SavvyImpl {
     pub ty: syn::Ident,
     /// Methods and accociated functions
     pub fns: Vec<SavvyFn>,
-    /// Original body of the impl
-    pub orig: syn::ItemImpl,
 }
 
 impl SavvyImpl {
@@ -63,7 +61,6 @@ impl SavvyImpl {
             attrs,
             ty,
             fns,
-            orig: orig.clone(),
         })
     }
 
@@ -73,8 +70,8 @@ impl SavvyImpl {
     }
 
     #[allow(dead_code)]
-    pub fn generate_outer_fns(&self) -> Vec<syn::ItemFn> {
-        self.fns.iter().map(|f| f.generate_outer_fn()).collect()
+    pub fn generate_ffi_fns(&self) -> Vec<syn::ItemFn> {
+        self.fns.iter().map(|f| f.generate_ffi_fn()).collect()
     }
 }
 

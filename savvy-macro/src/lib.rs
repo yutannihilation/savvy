@@ -30,38 +30,38 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
-    let savvy_fn = SavvyFn::from_fn(item_fn)?;
+fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
+    let savvy_fn = SavvyFn::from_fn(orig)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
-    let item_fn_outer = savvy_fn.generate_outer_fn();
+    let item_fn_ffi = savvy_fn.generate_ffi_fn();
 
     Ok(quote! {
+        #orig
+
         #item_fn_inner
-        #item_fn_outer
+        #item_fn_ffi
     }
     .into())
 }
 
-fn savvy_impl(item_impl: &syn::ItemImpl) -> syn::Result<TokenStream> {
-    let savvy_impl = SavvyImpl::new(item_impl)?;
-    let orig = savvy_impl.orig.clone();
+fn savvy_impl(orig: &syn::ItemImpl) -> syn::Result<TokenStream> {
+    let savvy_impl = SavvyImpl::new(orig)?;
 
     let list_fn_inner = savvy_impl.generate_inner_fns();
-    let list_fn_outer = savvy_impl.generate_outer_fns();
+    let list_fn_ffi = savvy_impl.generate_ffi_fns();
 
     Ok(quote! {
         #orig
 
         #(#list_fn_inner)*
-        #(#list_fn_outer)*
+        #(#list_fn_ffi)*
     }
     .into())
 }
 
-fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
-    let savvy_struct = SavvyStruct::new(item_struct)?;
-    let orig = &savvy_struct.orig;
+fn savvy_struct(orig: &syn::ItemStruct) -> syn::Result<TokenStream> {
+    let savvy_struct = SavvyStruct::new(orig)?;
     let try_from_impls = savvy_struct.generate_try_from_impls();
 
     Ok(quote!(
@@ -72,8 +72,8 @@ fn savvy_struct(item_struct: &syn::ItemStruct) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_enum(item_enum: &syn::ItemEnum) -> syn::Result<TokenStream> {
-    let savvy_enum = SavvyEnum::new(item_enum)?;
+fn savvy_enum(orig: &syn::ItemEnum) -> syn::Result<TokenStream> {
+    let savvy_enum = SavvyEnum::new(orig)?;
     let enum_with_discriminant = savvy_enum.generate_enum_with_discriminant();
     let try_from_impls = savvy_enum.generate_try_from_impls();
 
@@ -136,25 +136,25 @@ mod tests {
         ));
     }
 
-    fn assert_snapshot_outer(orig: syn::ItemFn) {
+    fn assert_snapshot_ffi(orig: syn::ItemFn) {
         let result = SavvyFn::from_fn(&orig)
             .expect("Failed to parse an impl")
-            .generate_outer_fn();
+            .generate_ffi_fn();
         let formatted = unparse(&parse_quote!(#result));
         let lines = formatted.lines().collect::<Vec<&str>>();
         insta::assert_yaml_snapshot!(lines);
     }
 
     #[test]
-    fn test_generate_outer_fn() {
-        assert_snapshot_outer(parse_quote!(
+    fn test_generate_ffi_fn() {
+        assert_snapshot_ffi(parse_quote!(
             #[savvy]
             fn foo() -> savvy::Result<savvy::Sexp> {
                 bar()
             }
         ));
 
-        assert_snapshot_outer(parse_quote!(
+        assert_snapshot_ffi(parse_quote!(
             #[savvy]
             fn foo() -> savvy::Result<()> {
                 bar();
@@ -162,7 +162,7 @@ mod tests {
             }
         ));
 
-        assert_snapshot_outer(parse_quote!(
+        assert_snapshot_ffi(parse_quote!(
             #[savvy]
             fn foo(x: RealSexp, y: savvy::RealSexp) -> savvy::Result<savvy::Sexp> {
                 bar()
@@ -170,9 +170,9 @@ mod tests {
         ));
     }
 
-    fn assert_snapshot_outer_impl(orig: &syn::ItemImpl) {
+    fn assert_snapshot_ffi_impl(orig: &syn::ItemImpl) {
         for item_fn in SavvyImpl::new(orig).expect("Failed to parse an impl").fns {
-            let result = item_fn.generate_outer_fn();
+            let result = item_fn.generate_ffi_fn();
             let formatted = unparse(&parse_quote!(#result));
             let lines = formatted.lines().collect::<Vec<&str>>();
             insta::assert_yaml_snapshot!(lines);
@@ -180,8 +180,8 @@ mod tests {
     }
 
     #[test]
-    fn test_generate_outer_fn_impl() {
-        assert_snapshot_outer_impl(&parse_quote!(
+    fn test_generate_ffi_fn_impl() {
+        assert_snapshot_ffi_impl(&parse_quote!(
             #[savvy]
             impl Person {
                 fn new() -> Self {

@@ -11,7 +11,7 @@ expression: lines
 - "    let result = std::panic::catch_unwind(|| {"
 - "        let x = <RealSexp>::try_from(savvy::Sexp(x))?;"
 - "        let y = <savvy::IntegerSexp>::try_from(savvy::Sexp(y))?;"
-- "        bar()"
+- "        foo(x, y)"
 - "    });"
 - "    std::panic::set_hook(orig_hook);"
 - "    match result {"

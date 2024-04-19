@@ -7,7 +7,7 @@ expression: lines
 - "    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));"
 - "    let result = std::panic::catch_unwind(|| {"
 - "        let x = <f64>::try_from(savvy::Sexp(x))?;"
-- "        bar()"
+- "        foo(x)"
 - "    });"
 - "    std::panic::set_hook(orig_hook);"
 - "    match result {"

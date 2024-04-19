@@ -32,542 +32,542 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
-SEXP to_upper__impl(SEXP x) {
-    SEXP res = to_upper(x);
+SEXP savvy_to_upper__impl(SEXP x) {
+    SEXP res = savvy_to_upper__ffi(x);
     return handle_result(res);
 }
 
-SEXP add_suffix__impl(SEXP x, SEXP y) {
-    SEXP res = add_suffix(x, y);
+SEXP savvy_add_suffix__impl(SEXP x, SEXP y) {
+    SEXP res = savvy_add_suffix__ffi(x, y);
     return handle_result(res);
 }
 
-SEXP times_two_int__impl(SEXP x) {
-    SEXP res = times_two_int(x);
+SEXP savvy_times_two_int__impl(SEXP x) {
+    SEXP res = savvy_times_two_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP times_any_int__impl(SEXP x, SEXP y) {
-    SEXP res = times_any_int(x, y);
+SEXP savvy_times_any_int__impl(SEXP x, SEXP y) {
+    SEXP res = savvy_times_any_int__ffi(x, y);
     return handle_result(res);
 }
 
-SEXP times_two_numeric__impl(SEXP x) {
-    SEXP res = times_two_numeric(x);
+SEXP savvy_times_two_numeric__impl(SEXP x) {
+    SEXP res = savvy_times_two_numeric__ffi(x);
     return handle_result(res);
 }
 
-SEXP times_any_numeric__impl(SEXP x, SEXP y) {
-    SEXP res = times_any_numeric(x, y);
+SEXP savvy_times_any_numeric__impl(SEXP x, SEXP y) {
+    SEXP res = savvy_times_any_numeric__ffi(x, y);
     return handle_result(res);
 }
 
-SEXP flip_logical__impl(SEXP x) {
-    SEXP res = flip_logical(x);
+SEXP savvy_flip_logical__impl(SEXP x) {
+    SEXP res = savvy_flip_logical__ffi(x);
     return handle_result(res);
 }
 
-SEXP flip_logical_expert_only__impl(SEXP x) {
-    SEXP res = flip_logical_expert_only(x);
+SEXP savvy_flip_logical_expert_only__impl(SEXP x) {
+    SEXP res = savvy_flip_logical_expert_only__ffi(x);
     return handle_result(res);
 }
 
-SEXP or_logical__impl(SEXP x, SEXP y) {
-    SEXP res = or_logical(x, y);
+SEXP savvy_or_logical__impl(SEXP x, SEXP y) {
+    SEXP res = savvy_or_logical__ffi(x, y);
     return handle_result(res);
 }
 
-SEXP print_list__impl(SEXP x) {
-    SEXP res = print_list(x);
+SEXP savvy_print_list__impl(SEXP x) {
+    SEXP res = savvy_print_list__ffi(x);
     return handle_result(res);
 }
 
-SEXP list_with_no_values__impl(void) {
-    SEXP res = list_with_no_values();
+SEXP savvy_list_with_no_values__impl(void) {
+    SEXP res = savvy_list_with_no_values__ffi();
     return handle_result(res);
 }
 
-SEXP list_with_no_names__impl(void) {
-    SEXP res = list_with_no_names();
+SEXP savvy_list_with_no_names__impl(void) {
+    SEXP res = savvy_list_with_no_names__ffi();
     return handle_result(res);
 }
 
-SEXP list_with_names_and_values__impl(void) {
-    SEXP res = list_with_names_and_values();
+SEXP savvy_list_with_names_and_values__impl(void) {
+    SEXP res = savvy_list_with_names_and_values__ffi();
     return handle_result(res);
 }
 
-SEXP external_person_new__impl(void) {
-    SEXP res = external_person_new();
+SEXP savvy_external_person_new__impl(void) {
+    SEXP res = savvy_external_person_new__ffi();
     return handle_result(res);
 }
 
-SEXP get_name_external__impl(SEXP x) {
-    SEXP res = get_name_external(x);
+SEXP savvy_get_name_external__impl(SEXP x) {
+    SEXP res = savvy_get_name_external__ffi(x);
     return handle_result(res);
 }
 
-SEXP set_name_external__impl(SEXP x, SEXP name) {
-    SEXP res = set_name_external(x, name);
+SEXP savvy_set_name_external__impl(SEXP x, SEXP name) {
+    SEXP res = savvy_set_name_external__ffi(x, name);
     return handle_result(res);
 }
 
-SEXP get_class_int__impl(SEXP x) {
-    SEXP res = get_class_int(x);
+SEXP savvy_get_class_int__impl(SEXP x) {
+    SEXP res = savvy_get_class_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP get_names_int__impl(SEXP x) {
-    SEXP res = get_names_int(x);
+SEXP savvy_get_names_int__impl(SEXP x) {
+    SEXP res = savvy_get_names_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP get_dim_int__impl(SEXP x) {
-    SEXP res = get_dim_int(x);
+SEXP savvy_get_dim_int__impl(SEXP x) {
+    SEXP res = savvy_get_dim_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP get_attr_int__impl(SEXP x, SEXP attr) {
-    SEXP res = get_attr_int(x, attr);
+SEXP savvy_get_attr_int__impl(SEXP x, SEXP attr) {
+    SEXP res = savvy_get_attr_int__ffi(x, attr);
     return handle_result(res);
 }
 
-SEXP set_class_int__impl(void) {
-    SEXP res = set_class_int();
+SEXP savvy_set_class_int__impl(void) {
+    SEXP res = savvy_set_class_int__ffi();
     return handle_result(res);
 }
 
-SEXP set_names_int__impl(void) {
-    SEXP res = set_names_int();
+SEXP savvy_set_names_int__impl(void) {
+    SEXP res = savvy_set_names_int__ffi();
     return handle_result(res);
 }
 
-SEXP set_dim_int__impl(void) {
-    SEXP res = set_dim_int();
+SEXP savvy_set_dim_int__impl(void) {
+    SEXP res = savvy_set_dim_int__ffi();
     return handle_result(res);
 }
 
-SEXP set_attr_int__impl(SEXP attr, SEXP value) {
-    SEXP res = set_attr_int(attr, value);
+SEXP savvy_set_attr_int__impl(SEXP attr, SEXP value) {
+    SEXP res = savvy_set_attr_int__ffi(attr, value);
     return handle_result(res);
 }
 
-SEXP scalar_input_int__impl(SEXP x) {
-    SEXP res = scalar_input_int(x);
+SEXP savvy_scalar_input_int__impl(SEXP x) {
+    SEXP res = savvy_scalar_input_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP scalar_input_usize__impl(SEXP x) {
-    SEXP res = scalar_input_usize(x);
+SEXP savvy_scalar_input_usize__impl(SEXP x) {
+    SEXP res = savvy_scalar_input_usize__ffi(x);
     return handle_result(res);
 }
 
-SEXP scalar_input_real__impl(SEXP x) {
-    SEXP res = scalar_input_real(x);
+SEXP savvy_scalar_input_real__impl(SEXP x) {
+    SEXP res = savvy_scalar_input_real__ffi(x);
     return handle_result(res);
 }
 
-SEXP scalar_input_logical__impl(SEXP x) {
-    SEXP res = scalar_input_logical(x);
+SEXP savvy_scalar_input_logical__impl(SEXP x) {
+    SEXP res = savvy_scalar_input_logical__ffi(x);
     return handle_result(res);
 }
 
-SEXP scalar_input_string__impl(SEXP x) {
-    SEXP res = scalar_input_string(x);
+SEXP savvy_scalar_input_string__impl(SEXP x) {
+    SEXP res = savvy_scalar_input_string__ffi(x);
     return handle_result(res);
 }
 
-SEXP scalar_output_int__impl(void) {
-    SEXP res = scalar_output_int();
+SEXP savvy_scalar_output_int__impl(void) {
+    SEXP res = savvy_scalar_output_int__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_int2__impl(void) {
-    SEXP res = scalar_output_int2();
+SEXP savvy_scalar_output_int2__impl(void) {
+    SEXP res = savvy_scalar_output_int2__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_real__impl(void) {
-    SEXP res = scalar_output_real();
+SEXP savvy_scalar_output_real__impl(void) {
+    SEXP res = savvy_scalar_output_real__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_real2__impl(void) {
-    SEXP res = scalar_output_real2();
+SEXP savvy_scalar_output_real2__impl(void) {
+    SEXP res = savvy_scalar_output_real2__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_logical__impl(void) {
-    SEXP res = scalar_output_logical();
+SEXP savvy_scalar_output_logical__impl(void) {
+    SEXP res = savvy_scalar_output_logical__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_logical2__impl(void) {
-    SEXP res = scalar_output_logical2();
+SEXP savvy_scalar_output_logical2__impl(void) {
+    SEXP res = savvy_scalar_output_logical2__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_string__impl(void) {
-    SEXP res = scalar_output_string();
+SEXP savvy_scalar_output_string__impl(void) {
+    SEXP res = savvy_scalar_output_string__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_string2__impl(void) {
-    SEXP res = scalar_output_string2();
+SEXP savvy_scalar_output_string2__impl(void) {
+    SEXP res = savvy_scalar_output_string2__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_complex__impl(void) {
-    SEXP res = scalar_output_complex();
+SEXP savvy_scalar_output_complex__impl(void) {
+    SEXP res = savvy_scalar_output_complex__ffi();
     return handle_result(res);
 }
 
-SEXP scalar_output_complex2__impl(void) {
-    SEXP res = scalar_output_complex2();
+SEXP savvy_scalar_output_complex2__impl(void) {
+    SEXP res = savvy_scalar_output_complex2__ffi();
     return handle_result(res);
 }
 
-SEXP sum_int__impl(SEXP x) {
-    SEXP res = sum_int(x);
+SEXP savvy_sum_int__impl(SEXP x) {
+    SEXP res = savvy_sum_int__ffi(x);
     return handle_result(res);
 }
 
-SEXP sum_real__impl(SEXP x) {
-    SEXP res = sum_real(x);
+SEXP savvy_sum_real__impl(SEXP x) {
+    SEXP res = savvy_sum_real__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_int_vec__impl(SEXP x) {
-    SEXP res = rep_int_vec(x);
+SEXP savvy_rep_int_vec__impl(SEXP x) {
+    SEXP res = savvy_rep_int_vec__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_int_slice__impl(SEXP x) {
-    SEXP res = rep_int_slice(x);
+SEXP savvy_rep_int_slice__impl(SEXP x) {
+    SEXP res = savvy_rep_int_slice__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_real_vec__impl(SEXP x) {
-    SEXP res = rep_real_vec(x);
+SEXP savvy_rep_real_vec__impl(SEXP x) {
+    SEXP res = savvy_rep_real_vec__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_real_slice__impl(SEXP x) {
-    SEXP res = rep_real_slice(x);
+SEXP savvy_rep_real_slice__impl(SEXP x) {
+    SEXP res = savvy_rep_real_slice__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_bool_vec__impl(SEXP x) {
-    SEXP res = rep_bool_vec(x);
+SEXP savvy_rep_bool_vec__impl(SEXP x) {
+    SEXP res = savvy_rep_bool_vec__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_bool_slice__impl(SEXP x) {
-    SEXP res = rep_bool_slice(x);
+SEXP savvy_rep_bool_slice__impl(SEXP x) {
+    SEXP res = savvy_rep_bool_slice__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_str_vec__impl(SEXP x) {
-    SEXP res = rep_str_vec(x);
+SEXP savvy_rep_str_vec__impl(SEXP x) {
+    SEXP res = savvy_rep_str_vec__ffi(x);
     return handle_result(res);
 }
 
-SEXP rep_str_slice__impl(SEXP x) {
-    SEXP res = rep_str_slice(x);
+SEXP savvy_rep_str_slice__impl(SEXP x) {
+    SEXP res = savvy_rep_str_slice__ffi(x);
     return handle_result(res);
 }
 
-SEXP safe_stop__impl(void) {
-    SEXP res = safe_stop();
+SEXP savvy_safe_stop__impl(void) {
+    SEXP res = savvy_safe_stop__ffi();
     return handle_result(res);
 }
 
-SEXP raise_error__impl(void) {
-    SEXP res = raise_error();
+SEXP savvy_raise_error__impl(void) {
+    SEXP res = savvy_raise_error__ffi();
     return handle_result(res);
 }
 
-SEXP must_panic__impl(void) {
-    SEXP res = must_panic();
+SEXP savvy_must_panic__impl(void) {
+    SEXP res = savvy_must_panic__ffi();
     return handle_result(res);
 }
 
-SEXP new_int__impl(SEXP size) {
-    SEXP res = new_int(size);
+SEXP savvy_new_int__impl(SEXP size) {
+    SEXP res = savvy_new_int__ffi(size);
     return handle_result(res);
 }
 
-SEXP new_real__impl(SEXP size) {
-    SEXP res = new_real(size);
+SEXP savvy_new_real__impl(SEXP size) {
+    SEXP res = savvy_new_real__ffi(size);
     return handle_result(res);
 }
 
-SEXP new_bool__impl(SEXP size) {
-    SEXP res = new_bool(size);
+SEXP savvy_new_bool__impl(SEXP size) {
+    SEXP res = savvy_new_bool__ffi(size);
     return handle_result(res);
 }
 
-SEXP do_call__impl(SEXP fun, SEXP args) {
-    SEXP res = do_call(fun, args);
+SEXP savvy_do_call__impl(SEXP fun, SEXP args) {
+    SEXP res = savvy_do_call__ffi(fun, args);
     return handle_result(res);
 }
 
-SEXP call_with_args__impl(SEXP fun) {
-    SEXP res = call_with_args(fun);
+SEXP savvy_call_with_args__impl(SEXP fun) {
+    SEXP res = savvy_call_with_args__ffi(fun);
     return handle_result(res);
 }
 
-SEXP get_args__impl(SEXP args) {
-    SEXP res = get_args(args);
+SEXP savvy_get_args__impl(SEXP args) {
+    SEXP res = savvy_get_args__ffi(args);
     return handle_result(res);
 }
 
-SEXP new_complex__impl(SEXP size) {
-    SEXP res = new_complex(size);
+SEXP savvy_new_complex__impl(SEXP size) {
+    SEXP res = savvy_new_complex__ffi(size);
     return handle_result(res);
 }
 
-SEXP first_complex__impl(SEXP x) {
-    SEXP res = first_complex(x);
+SEXP savvy_first_complex__impl(SEXP x) {
+    SEXP res = savvy_first_complex__ffi(x);
     return handle_result(res);
 }
 
-SEXP abs_complex__impl(SEXP x) {
-    SEXP res = abs_complex(x);
+SEXP savvy_abs_complex__impl(SEXP x) {
+    SEXP res = savvy_abs_complex__ffi(x);
     return handle_result(res);
 }
 
-SEXP new_value_pair__impl(SEXP a, SEXP b) {
-    SEXP res = new_value_pair(a, b);
+SEXP savvy_new_value_pair__impl(SEXP a, SEXP b) {
+    SEXP res = savvy_new_value_pair__ffi(a, b);
     return handle_result(res);
 }
 
-SEXP filter_integer_odd__impl(SEXP x) {
-    SEXP res = filter_integer_odd(x);
+SEXP savvy_filter_integer_odd__impl(SEXP x) {
+    SEXP res = savvy_filter_integer_odd__ffi(x);
     return handle_result(res);
 }
 
-SEXP filter_real_negative__impl(SEXP x) {
-    SEXP res = filter_real_negative(x);
+SEXP savvy_filter_real_negative__impl(SEXP x) {
+    SEXP res = savvy_filter_real_negative__ffi(x);
     return handle_result(res);
 }
 
-SEXP filter_complex_without_im__impl(SEXP x) {
-    SEXP res = filter_complex_without_im(x);
+SEXP savvy_filter_complex_without_im__impl(SEXP x) {
+    SEXP res = savvy_filter_complex_without_im__ffi(x);
     return handle_result(res);
 }
 
-SEXP filter_logical_duplicates__impl(SEXP x) {
-    SEXP res = filter_logical_duplicates(x);
+SEXP savvy_filter_logical_duplicates__impl(SEXP x) {
+    SEXP res = savvy_filter_logical_duplicates__ffi(x);
     return handle_result(res);
 }
 
-SEXP filter_string_ascii__impl(SEXP x) {
-    SEXP res = filter_string_ascii(x);
+SEXP savvy_filter_string_ascii__impl(SEXP x) {
+    SEXP res = savvy_filter_string_ascii__ffi(x);
     return handle_result(res);
 }
 
-SEXP print_foo_enum__impl(SEXP x) {
-    SEXP res = print_foo_enum(x);
+SEXP savvy_print_foo_enum__impl(SEXP x) {
+    SEXP res = savvy_print_foo_enum__ffi(x);
     return handle_result(res);
 }
 
-SEXP print_foo_enum_ref__impl(SEXP x) {
-    SEXP res = print_foo_enum_ref(x);
+SEXP savvy_print_foo_enum_ref__impl(SEXP x) {
+    SEXP res = savvy_print_foo_enum_ref__ffi(x);
     return handle_result(res);
 }
 
-SEXP foo_a__impl(void) {
-    SEXP res = foo_a();
+SEXP savvy_foo_a__impl(void) {
+    SEXP res = savvy_foo_a__ffi();
     return handle_result(res);
 }
 
-SEXP fun_mod1__impl(void) {
-    SEXP res = fun_mod1();
+SEXP savvy_fun_mod1__impl(void) {
+    SEXP res = savvy_fun_mod1__ffi();
     return handle_result(res);
 }
 
-SEXP fun_mod1_1_foo__impl(void) {
-    SEXP res = fun_mod1_1_foo();
+SEXP savvy_fun_mod1_1_foo__impl(void) {
+    SEXP res = savvy_fun_mod1_1_foo__ffi();
     return handle_result(res);
 }
 
-SEXP FooEnum_print__impl(SEXP self__) {
-    SEXP res = FooEnum_print(self__);
+SEXP savvy_FooEnum_print__impl(SEXP self__) {
+    SEXP res = savvy_FooEnum_print__ffi(self__);
     return handle_result(res);
 }
 
-SEXP Person_new__impl(void) {
-    SEXP res = Person_new();
+SEXP savvy_Person_new__impl(void) {
+    SEXP res = savvy_Person_new__ffi();
     return handle_result(res);
 }
 
-SEXP Person_new2__impl(void) {
-    SEXP res = Person_new2();
+SEXP savvy_Person_new2__impl(void) {
+    SEXP res = savvy_Person_new2__ffi();
     return handle_result(res);
 }
 
-SEXP Person_new_fallible__impl(void) {
-    SEXP res = Person_new_fallible();
+SEXP savvy_Person_new_fallible__impl(void) {
+    SEXP res = savvy_Person_new_fallible__ffi();
     return handle_result(res);
 }
 
-SEXP Person_another_person__impl(SEXP self__) {
-    SEXP res = Person_another_person(self__);
+SEXP savvy_Person_another_person__impl(SEXP self__) {
+    SEXP res = savvy_Person_another_person__ffi(self__);
     return handle_result(res);
 }
 
-SEXP Person_new_with_name__impl(SEXP name) {
-    SEXP res = Person_new_with_name(name);
+SEXP savvy_Person_new_with_name__impl(SEXP name) {
+    SEXP res = savvy_Person_new_with_name__ffi(name);
     return handle_result(res);
 }
 
-SEXP Person_set_name__impl(SEXP self__, SEXP name) {
-    SEXP res = Person_set_name(self__, name);
+SEXP savvy_Person_set_name__impl(SEXP self__, SEXP name) {
+    SEXP res = savvy_Person_set_name__ffi(self__, name);
     return handle_result(res);
 }
 
-SEXP Person_name__impl(SEXP self__) {
-    SEXP res = Person_name(self__);
+SEXP savvy_Person_name__impl(SEXP self__) {
+    SEXP res = savvy_Person_name__ffi(self__);
     return handle_result(res);
 }
 
-SEXP Person_associated_function__impl(void) {
-    SEXP res = Person_associated_function();
+SEXP savvy_Person_associated_function__impl(void) {
+    SEXP res = savvy_Person_associated_function__ffi();
     return handle_result(res);
 }
 
-SEXP Person2_name__impl(SEXP self__) {
-    SEXP res = Person2_name(self__);
+SEXP savvy_Person2_name__impl(SEXP self__) {
+    SEXP res = savvy_Person2_name__ffi(self__);
     return handle_result(res);
 }
 
-SEXP Value_new__impl(SEXP x) {
-    SEXP res = Value_new(x);
+SEXP savvy_Value_new__impl(SEXP x) {
+    SEXP res = savvy_Value_new__ffi(x);
     return handle_result(res);
 }
 
-SEXP Value_pair__impl(SEXP self__, SEXP b) {
-    SEXP res = Value_pair(self__, b);
+SEXP savvy_Value_pair__impl(SEXP self__, SEXP b) {
+    SEXP res = savvy_Value_pair__ffi(self__, b);
     return handle_result(res);
 }
 
-SEXP Value_get__impl(SEXP self__) {
-    SEXP res = Value_get(self__);
+SEXP savvy_Value_get__impl(SEXP self__) {
+    SEXP res = savvy_Value_get__ffi(self__);
     return handle_result(res);
 }
 
-SEXP Value_get2__impl(SEXP self__) {
-    SEXP res = Value_get2(self__);
+SEXP savvy_Value_get2__impl(SEXP self__) {
+    SEXP res = savvy_Value_get2__ffi(self__);
     return handle_result(res);
 }
 
-SEXP ValuePair_new__impl(SEXP a, SEXP b) {
-    SEXP res = ValuePair_new(a, b);
+SEXP savvy_ValuePair_new__impl(SEXP a, SEXP b) {
+    SEXP res = savvy_ValuePair_new__ffi(a, b);
     return handle_result(res);
 }
 
-SEXP ValuePair_new_copy__impl(SEXP a, SEXP b) {
-    SEXP res = ValuePair_new_copy(a, b);
+SEXP savvy_ValuePair_new_copy__impl(SEXP a, SEXP b) {
+    SEXP res = savvy_ValuePair_new_copy__ffi(a, b);
     return handle_result(res);
 }
 
-SEXP ValuePair_print__impl(SEXP self__) {
-    SEXP res = ValuePair_print(self__);
+SEXP savvy_ValuePair_print__impl(SEXP self__) {
+    SEXP res = savvy_ValuePair_print__ffi(self__);
     return handle_result(res);
 }
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"to_upper__impl", (DL_FUNC) &to_upper__impl, 1},
-    {"add_suffix__impl", (DL_FUNC) &add_suffix__impl, 2},
-    {"times_two_int__impl", (DL_FUNC) &times_two_int__impl, 1},
-    {"times_any_int__impl", (DL_FUNC) &times_any_int__impl, 2},
-    {"times_two_numeric__impl", (DL_FUNC) &times_two_numeric__impl, 1},
-    {"times_any_numeric__impl", (DL_FUNC) &times_any_numeric__impl, 2},
-    {"flip_logical__impl", (DL_FUNC) &flip_logical__impl, 1},
-    {"flip_logical_expert_only__impl", (DL_FUNC) &flip_logical_expert_only__impl, 1},
-    {"or_logical__impl", (DL_FUNC) &or_logical__impl, 2},
-    {"print_list__impl", (DL_FUNC) &print_list__impl, 1},
-    {"list_with_no_values__impl", (DL_FUNC) &list_with_no_values__impl, 0},
-    {"list_with_no_names__impl", (DL_FUNC) &list_with_no_names__impl, 0},
-    {"list_with_names_and_values__impl", (DL_FUNC) &list_with_names_and_values__impl, 0},
-    {"external_person_new__impl", (DL_FUNC) &external_person_new__impl, 0},
-    {"get_name_external__impl", (DL_FUNC) &get_name_external__impl, 1},
-    {"set_name_external__impl", (DL_FUNC) &set_name_external__impl, 2},
-    {"get_class_int__impl", (DL_FUNC) &get_class_int__impl, 1},
-    {"get_names_int__impl", (DL_FUNC) &get_names_int__impl, 1},
-    {"get_dim_int__impl", (DL_FUNC) &get_dim_int__impl, 1},
-    {"get_attr_int__impl", (DL_FUNC) &get_attr_int__impl, 2},
-    {"set_class_int__impl", (DL_FUNC) &set_class_int__impl, 0},
-    {"set_names_int__impl", (DL_FUNC) &set_names_int__impl, 0},
-    {"set_dim_int__impl", (DL_FUNC) &set_dim_int__impl, 0},
-    {"set_attr_int__impl", (DL_FUNC) &set_attr_int__impl, 2},
-    {"scalar_input_int__impl", (DL_FUNC) &scalar_input_int__impl, 1},
-    {"scalar_input_usize__impl", (DL_FUNC) &scalar_input_usize__impl, 1},
-    {"scalar_input_real__impl", (DL_FUNC) &scalar_input_real__impl, 1},
-    {"scalar_input_logical__impl", (DL_FUNC) &scalar_input_logical__impl, 1},
-    {"scalar_input_string__impl", (DL_FUNC) &scalar_input_string__impl, 1},
-    {"scalar_output_int__impl", (DL_FUNC) &scalar_output_int__impl, 0},
-    {"scalar_output_int2__impl", (DL_FUNC) &scalar_output_int2__impl, 0},
-    {"scalar_output_real__impl", (DL_FUNC) &scalar_output_real__impl, 0},
-    {"scalar_output_real2__impl", (DL_FUNC) &scalar_output_real2__impl, 0},
-    {"scalar_output_logical__impl", (DL_FUNC) &scalar_output_logical__impl, 0},
-    {"scalar_output_logical2__impl", (DL_FUNC) &scalar_output_logical2__impl, 0},
-    {"scalar_output_string__impl", (DL_FUNC) &scalar_output_string__impl, 0},
-    {"scalar_output_string2__impl", (DL_FUNC) &scalar_output_string2__impl, 0},
-    {"scalar_output_complex__impl", (DL_FUNC) &scalar_output_complex__impl, 0},
-    {"scalar_output_complex2__impl", (DL_FUNC) &scalar_output_complex2__impl, 0},
-    {"sum_int__impl", (DL_FUNC) &sum_int__impl, 1},
-    {"sum_real__impl", (DL_FUNC) &sum_real__impl, 1},
-    {"rep_int_vec__impl", (DL_FUNC) &rep_int_vec__impl, 1},
-    {"rep_int_slice__impl", (DL_FUNC) &rep_int_slice__impl, 1},
-    {"rep_real_vec__impl", (DL_FUNC) &rep_real_vec__impl, 1},
-    {"rep_real_slice__impl", (DL_FUNC) &rep_real_slice__impl, 1},
-    {"rep_bool_vec__impl", (DL_FUNC) &rep_bool_vec__impl, 1},
-    {"rep_bool_slice__impl", (DL_FUNC) &rep_bool_slice__impl, 1},
-    {"rep_str_vec__impl", (DL_FUNC) &rep_str_vec__impl, 1},
-    {"rep_str_slice__impl", (DL_FUNC) &rep_str_slice__impl, 1},
-    {"safe_stop__impl", (DL_FUNC) &safe_stop__impl, 0},
-    {"raise_error__impl", (DL_FUNC) &raise_error__impl, 0},
-    {"must_panic__impl", (DL_FUNC) &must_panic__impl, 0},
-    {"new_int__impl", (DL_FUNC) &new_int__impl, 1},
-    {"new_real__impl", (DL_FUNC) &new_real__impl, 1},
-    {"new_bool__impl", (DL_FUNC) &new_bool__impl, 1},
-    {"do_call__impl", (DL_FUNC) &do_call__impl, 2},
-    {"call_with_args__impl", (DL_FUNC) &call_with_args__impl, 1},
-    {"get_args__impl", (DL_FUNC) &get_args__impl, 1},
-    {"new_complex__impl", (DL_FUNC) &new_complex__impl, 1},
-    {"first_complex__impl", (DL_FUNC) &first_complex__impl, 1},
-    {"abs_complex__impl", (DL_FUNC) &abs_complex__impl, 1},
-    {"new_value_pair__impl", (DL_FUNC) &new_value_pair__impl, 2},
-    {"filter_integer_odd__impl", (DL_FUNC) &filter_integer_odd__impl, 1},
-    {"filter_real_negative__impl", (DL_FUNC) &filter_real_negative__impl, 1},
-    {"filter_complex_without_im__impl", (DL_FUNC) &filter_complex_without_im__impl, 1},
-    {"filter_logical_duplicates__impl", (DL_FUNC) &filter_logical_duplicates__impl, 1},
-    {"filter_string_ascii__impl", (DL_FUNC) &filter_string_ascii__impl, 1},
-    {"print_foo_enum__impl", (DL_FUNC) &print_foo_enum__impl, 1},
-    {"print_foo_enum_ref__impl", (DL_FUNC) &print_foo_enum_ref__impl, 1},
-    {"foo_a__impl", (DL_FUNC) &foo_a__impl, 0},
-    {"fun_mod1__impl", (DL_FUNC) &fun_mod1__impl, 0},
-    {"fun_mod1_1_foo__impl", (DL_FUNC) &fun_mod1_1_foo__impl, 0},
-    {"FooEnum_print__impl", (DL_FUNC) &FooEnum_print__impl, 1},
-    {"Person_new__impl", (DL_FUNC) &Person_new__impl, 0},
-    {"Person_new2__impl", (DL_FUNC) &Person_new2__impl, 0},
-    {"Person_new_fallible__impl", (DL_FUNC) &Person_new_fallible__impl, 0},
-    {"Person_another_person__impl", (DL_FUNC) &Person_another_person__impl, 1},
-    {"Person_new_with_name__impl", (DL_FUNC) &Person_new_with_name__impl, 1},
-    {"Person_set_name__impl", (DL_FUNC) &Person_set_name__impl, 2},
-    {"Person_name__impl", (DL_FUNC) &Person_name__impl, 1},
-    {"Person_associated_function__impl", (DL_FUNC) &Person_associated_function__impl, 0},
-    {"Person2_name__impl", (DL_FUNC) &Person2_name__impl, 1},
-    {"Value_new__impl", (DL_FUNC) &Value_new__impl, 1},
-    {"Value_pair__impl", (DL_FUNC) &Value_pair__impl, 2},
-    {"Value_get__impl", (DL_FUNC) &Value_get__impl, 1},
-    {"Value_get2__impl", (DL_FUNC) &Value_get2__impl, 1},
-    {"ValuePair_new__impl", (DL_FUNC) &ValuePair_new__impl, 2},
-    {"ValuePair_new_copy__impl", (DL_FUNC) &ValuePair_new_copy__impl, 2},
-    {"ValuePair_print__impl", (DL_FUNC) &ValuePair_print__impl, 1},
+    {"savvy_to_upper__impl", (DL_FUNC) &savvy_to_upper__impl, 1},
+    {"savvy_add_suffix__impl", (DL_FUNC) &savvy_add_suffix__impl, 2},
+    {"savvy_times_two_int__impl", (DL_FUNC) &savvy_times_two_int__impl, 1},
+    {"savvy_times_any_int__impl", (DL_FUNC) &savvy_times_any_int__impl, 2},
+    {"savvy_times_two_numeric__impl", (DL_FUNC) &savvy_times_two_numeric__impl, 1},
+    {"savvy_times_any_numeric__impl", (DL_FUNC) &savvy_times_any_numeric__impl, 2},
+    {"savvy_flip_logical__impl", (DL_FUNC) &savvy_flip_logical__impl, 1},
+    {"savvy_flip_logical_expert_only__impl", (DL_FUNC) &savvy_flip_logical_expert_only__impl, 1},
+    {"savvy_or_logical__impl", (DL_FUNC) &savvy_or_logical__impl, 2},
+    {"savvy_print_list__impl", (DL_FUNC) &savvy_print_list__impl, 1},
+    {"savvy_list_with_no_values__impl", (DL_FUNC) &savvy_list_with_no_values__impl, 0},
+    {"savvy_list_with_no_names__impl", (DL_FUNC) &savvy_list_with_no_names__impl, 0},
+    {"savvy_list_with_names_and_values__impl", (DL_FUNC) &savvy_list_with_names_and_values__impl, 0},
+    {"savvy_external_person_new__impl", (DL_FUNC) &savvy_external_person_new__impl, 0},
+    {"savvy_get_name_external__impl", (DL_FUNC) &savvy_get_name_external__impl, 1},
+    {"savvy_set_name_external__impl", (DL_FUNC) &savvy_set_name_external__impl, 2},
+    {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},
+    {"savvy_get_names_int__impl", (DL_FUNC) &savvy_get_names_int__impl, 1},
+    {"savvy_get_dim_int__impl", (DL_FUNC) &savvy_get_dim_int__impl, 1},
+    {"savvy_get_attr_int__impl", (DL_FUNC) &savvy_get_attr_int__impl, 2},
+    {"savvy_set_class_int__impl", (DL_FUNC) &savvy_set_class_int__impl, 0},
+    {"savvy_set_names_int__impl", (DL_FUNC) &savvy_set_names_int__impl, 0},
+    {"savvy_set_dim_int__impl", (DL_FUNC) &savvy_set_dim_int__impl, 0},
+    {"savvy_set_attr_int__impl", (DL_FUNC) &savvy_set_attr_int__impl, 2},
+    {"savvy_scalar_input_int__impl", (DL_FUNC) &savvy_scalar_input_int__impl, 1},
+    {"savvy_scalar_input_usize__impl", (DL_FUNC) &savvy_scalar_input_usize__impl, 1},
+    {"savvy_scalar_input_real__impl", (DL_FUNC) &savvy_scalar_input_real__impl, 1},
+    {"savvy_scalar_input_logical__impl", (DL_FUNC) &savvy_scalar_input_logical__impl, 1},
+    {"savvy_scalar_input_string__impl", (DL_FUNC) &savvy_scalar_input_string__impl, 1},
+    {"savvy_scalar_output_int__impl", (DL_FUNC) &savvy_scalar_output_int__impl, 0},
+    {"savvy_scalar_output_int2__impl", (DL_FUNC) &savvy_scalar_output_int2__impl, 0},
+    {"savvy_scalar_output_real__impl", (DL_FUNC) &savvy_scalar_output_real__impl, 0},
+    {"savvy_scalar_output_real2__impl", (DL_FUNC) &savvy_scalar_output_real2__impl, 0},
+    {"savvy_scalar_output_logical__impl", (DL_FUNC) &savvy_scalar_output_logical__impl, 0},
+    {"savvy_scalar_output_logical2__impl", (DL_FUNC) &savvy_scalar_output_logical2__impl, 0},
+    {"savvy_scalar_output_string__impl", (DL_FUNC) &savvy_scalar_output_string__impl, 0},
+    {"savvy_scalar_output_string2__impl", (DL_FUNC) &savvy_scalar_output_string2__impl, 0},
+    {"savvy_scalar_output_complex__impl", (DL_FUNC) &savvy_scalar_output_complex__impl, 0},
+    {"savvy_scalar_output_complex2__impl", (DL_FUNC) &savvy_scalar_output_complex2__impl, 0},
+    {"savvy_sum_int__impl", (DL_FUNC) &savvy_sum_int__impl, 1},
+    {"savvy_sum_real__impl", (DL_FUNC) &savvy_sum_real__impl, 1},
+    {"savvy_rep_int_vec__impl", (DL_FUNC) &savvy_rep_int_vec__impl, 1},
+    {"savvy_rep_int_slice__impl", (DL_FUNC) &savvy_rep_int_slice__impl, 1},
+    {"savvy_rep_real_vec__impl", (DL_FUNC) &savvy_rep_real_vec__impl, 1},
+    {"savvy_rep_real_slice__impl", (DL_FUNC) &savvy_rep_real_slice__impl, 1},
+    {"savvy_rep_bool_vec__impl", (DL_FUNC) &savvy_rep_bool_vec__impl, 1},
+    {"savvy_rep_bool_slice__impl", (DL_FUNC) &savvy_rep_bool_slice__impl, 1},
+    {"savvy_rep_str_vec__impl", (DL_FUNC) &savvy_rep_str_vec__impl, 1},
+    {"savvy_rep_str_slice__impl", (DL_FUNC) &savvy_rep_str_slice__impl, 1},
+    {"savvy_safe_stop__impl", (DL_FUNC) &savvy_safe_stop__impl, 0},
+    {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
+    {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
+    {"savvy_new_int__impl", (DL_FUNC) &savvy_new_int__impl, 1},
+    {"savvy_new_real__impl", (DL_FUNC) &savvy_new_real__impl, 1},
+    {"savvy_new_bool__impl", (DL_FUNC) &savvy_new_bool__impl, 1},
+    {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
+    {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
+    {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
+    {"savvy_new_complex__impl", (DL_FUNC) &savvy_new_complex__impl, 1},
+    {"savvy_first_complex__impl", (DL_FUNC) &savvy_first_complex__impl, 1},
+    {"savvy_abs_complex__impl", (DL_FUNC) &savvy_abs_complex__impl, 1},
+    {"savvy_new_value_pair__impl", (DL_FUNC) &savvy_new_value_pair__impl, 2},
+    {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
+    {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
+    {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},
+    {"savvy_filter_logical_duplicates__impl", (DL_FUNC) &savvy_filter_logical_duplicates__impl, 1},
+    {"savvy_filter_string_ascii__impl", (DL_FUNC) &savvy_filter_string_ascii__impl, 1},
+    {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
+    {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
+    {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
+    {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
+    {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
+    {"savvy_FooEnum_print__impl", (DL_FUNC) &savvy_FooEnum_print__impl, 1},
+    {"savvy_Person_new__impl", (DL_FUNC) &savvy_Person_new__impl, 0},
+    {"savvy_Person_new2__impl", (DL_FUNC) &savvy_Person_new2__impl, 0},
+    {"savvy_Person_new_fallible__impl", (DL_FUNC) &savvy_Person_new_fallible__impl, 0},
+    {"savvy_Person_another_person__impl", (DL_FUNC) &savvy_Person_another_person__impl, 1},
+    {"savvy_Person_new_with_name__impl", (DL_FUNC) &savvy_Person_new_with_name__impl, 1},
+    {"savvy_Person_set_name__impl", (DL_FUNC) &savvy_Person_set_name__impl, 2},
+    {"savvy_Person_name__impl", (DL_FUNC) &savvy_Person_name__impl, 1},
+    {"savvy_Person_associated_function__impl", (DL_FUNC) &savvy_Person_associated_function__impl, 0},
+    {"savvy_Person2_name__impl", (DL_FUNC) &savvy_Person2_name__impl, 1},
+    {"savvy_Value_new__impl", (DL_FUNC) &savvy_Value_new__impl, 1},
+    {"savvy_Value_pair__impl", (DL_FUNC) &savvy_Value_pair__impl, 2},
+    {"savvy_Value_get__impl", (DL_FUNC) &savvy_Value_get__impl, 1},
+    {"savvy_Value_get2__impl", (DL_FUNC) &savvy_Value_get2__impl, 1},
+    {"savvy_ValuePair_new__impl", (DL_FUNC) &savvy_ValuePair_new__impl, 2},
+    {"savvy_ValuePair_new_copy__impl", (DL_FUNC) &savvy_ValuePair_new_copy__impl, 2},
+    {"savvy_ValuePair_print__impl", (DL_FUNC) &savvy_ValuePair_print__impl, 1},
     {NULL, NULL, 0}
 };
 

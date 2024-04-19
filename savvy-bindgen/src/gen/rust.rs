@@ -16,7 +16,6 @@ impl SavvyFn {
             .collect();
 
         let stmts_additional = &self.stmts_additional;
-        let stmts_orig = &self.stmts_orig;
         let attrs = &self.attrs;
 
         let ret_ty = self.return_type.inner();
@@ -27,7 +26,7 @@ impl SavvyFn {
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) #ret_ty {
                     #(#stmts_additional)*
-                    #(#stmts_orig)*
+                    #fn_name_orig(#(#args_pat),*)
                 }
             ),
             // A method with &self or &mut self
@@ -131,9 +130,9 @@ impl SavvyFn {
         out
     }
 
-    pub fn generate_outer_fn(&self) -> syn::ItemFn {
+    pub fn generate_ffi_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
-        let fn_name_outer = self.fn_name_outer();
+        let fn_name_ffi = self.fn_name_c_header();
 
         let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat()).collect();
         let args_ty: Vec<syn::Type> = self
@@ -174,7 +173,7 @@ impl SavvyFn {
                     parse_quote!(
                         #[allow(clippy::missing_safety_doc)]
                         #[no_mangle]
-                        pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
+                        pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                             match #fn_name_inner(self__, #(#args_pat),*) {
                                 Ok(#ok_lhs) => #ok_rhs,
                                 Err(e) => savvy::handle_error(e),
@@ -185,7 +184,7 @@ impl SavvyFn {
                     parse_quote!(
                         #[allow(clippy::missing_safety_doc)]
                         #[no_mangle]
-                        pub unsafe extern "C" fn #fn_name_outer(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
+                        pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                             #fn_name_inner(self__, #(#args_pat),*)
                         }
                     )
@@ -194,7 +193,7 @@ impl SavvyFn {
             _ => parse_quote!(
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
-                pub unsafe extern "C" fn #fn_name_outer( #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
+                pub unsafe extern "C" fn #fn_name_ffi( #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                     match #fn_name_inner(#(#args_pat),*) {
                         Ok(#ok_lhs) => #ok_rhs,
                         Err(e) => savvy::handle_error(e),

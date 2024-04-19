@@ -35,6 +35,7 @@ jobs:
           Rscript -e "usethis::create_package('${{ runner.temp }}/sawy')"
           cargo run --manifest-path ./savvy-cli/Cargo.toml -- init ${{ runner.temp }}/sawy
           cd ${{ runner.temp }}/sawy
+          sed -i '/savvy/ s|".*"|{ path = "${{ github.workspace }}" }|' src/rust/Cargo.toml
           Rscript -e "usethis::use_mit_license('foo')"
           Rscript -e "devtools::document()"
 

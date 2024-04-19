@@ -4,7 +4,7 @@ expression: lines
 ---
 - "#[allow(clippy::missing_safety_doc)]"
 - "#[no_mangle]"
-- "pub unsafe extern \"C\" fn foo("
+- "pub unsafe extern \"C\" fn savvy_foo__ffi("
 - "    x: savvy::ffi::SEXP,"
 - "    y: savvy::ffi::SEXP,"
 - ") -> savvy::ffi::SEXP {"

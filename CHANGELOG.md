@@ -3,6 +3,16 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+* Savvy now generates different names of Rust functions and C functions;
+  previously, the original function name is used for the FFI functions, but now
+  it's `savvy_{original}_ffi`. This change shouldn't affect ordinary users.
+  
+  This change was necessary to let `#[savvy]` preserves the original function so
+  that we can write unit tests on the function easily. For more details, please
+  read the [Testing section](https://yutannihilation.github.io/savvy/guide/test.html) in the guide.
+
 ### New features
 
 * `savvy-cli test` now picks `[dev-dependencies]` from the crate's `Cargo.toml`
@@ -67,7 +77,7 @@
 
 ## [v0.5.0] (2024-04-05)
 
-### Breaking change
+### Breaking changes
 
 * To support enum properly (the details follow), now savvy requires to put
   `#[savvy]` macro also on `struct`.

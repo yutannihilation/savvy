@@ -1,5 +1,5 @@
 use quote::format_ident;
-use syn::{parse_quote, Attribute, Block, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
+use syn::{parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::utils::extract_docs;
 
@@ -206,8 +206,6 @@ pub struct SavvyFn {
     pub args: Vec<SavvyFnArg>,
     /// Return type of the function
     pub return_type: SavvyFnReturnType,
-    /// Original body of the function
-    pub stmts_orig: Vec<syn::Stmt>,
     /// Additional lines to convert `SEXP` to the specific types
     pub stmts_additional: Vec<syn::Stmt>,
 }
@@ -241,21 +239,24 @@ impl SavvyFn {
         }
     }
 
-    pub fn fn_name_outer(&self) -> syn::Ident {
+    /// Returns a function name to be exported from Rust to C
+    pub fn fn_name_c_header(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
-            Some(ty) => format_ident!("{}_{}", ty, self.fn_name),
-            None => self.fn_name.clone(),
+            Some(ty) => format_ident!("savvy_{}_{}__ffi", ty, self.fn_name),
+            None => format_ident!("savvy_{}__ffi", self.fn_name),
+        }
+    }
+
+    /// Returns a function name to be exported from C to R
+    pub fn fn_name_c_impl(&self) -> syn::Ident {
+        match self.get_self_ty_ident() {
+            Some(ty) => format_ident!("savvy_{}_{}__impl", ty, self.fn_name),
+            None => format_ident!("savvy_{}__impl", self.fn_name),
         }
     }
 
     pub fn from_fn(orig: &syn::ItemFn) -> syn::Result<Self> {
-        Self::new(
-            &orig.attrs,
-            &orig.sig,
-            orig.block.as_ref(),
-            SavvyFnType::BareFunction,
-            None,
-        )
+        Self::new(&orig.attrs, &orig.sig, SavvyFnType::BareFunction, None)
     }
 
     pub fn from_impl_fn(
@@ -263,13 +264,12 @@ impl SavvyFn {
         fn_type: SavvyFnType,
         self_ty: &syn::Type,
     ) -> syn::Result<Self> {
-        Self::new(&orig.attrs, &orig.sig, &orig.block, fn_type, Some(self_ty))
+        Self::new(&orig.attrs, &orig.sig, fn_type, Some(self_ty))
     }
 
     pub fn new(
         attrs: &[Attribute],
         sig: &Signature,
-        block: &Block,
         fn_type: SavvyFnType,
         self_ty: Option<&syn::Type>,
     ) -> syn::Result<Self> {
@@ -284,7 +284,6 @@ impl SavvyFn {
 
         let fn_name = sig.ident.clone();
 
-        let stmts_orig = block.stmts.clone();
         let mut stmts_additional: Vec<Stmt> = Vec::new();
 
         let args_new = sig
@@ -326,7 +325,6 @@ impl SavvyFn {
             fn_type,
             args: args_new,
             return_type: get_savvy_return_type(&sig.output, self_ty)?,
-            stmts_orig,
             stmts_additional,
         })
     }

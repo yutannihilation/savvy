@@ -20,7 +20,7 @@ impl SavvyFn {
 
     /// Generate C function signature
     fn to_c_function_for_header(&self) -> String {
-        let fn_name = self.fn_name_outer();
+        let fn_name = self.fn_name_c_header();
         let args = self.get_c_args();
 
         let args_sig = if args.is_empty() {
@@ -37,7 +37,8 @@ impl SavvyFn {
 
     /// Generate C function implementation
     fn to_c_function_impl(&self) -> String {
-        let fn_name = self.fn_name_outer();
+        let fn_name_ffi = self.fn_name_c_header();
+        let fn_name_c = self.fn_name_c_impl();
         let args = self.get_c_args();
 
         let (args_sig, args_call) = if args.is_empty() {
@@ -59,8 +60,8 @@ impl SavvyFn {
         };
 
         format!(
-            "SEXP {fn_name}__impl({args_sig}) {{
-    SEXP res = {fn_name}({args_call});
+            "SEXP {fn_name_c}({args_sig}) {{
+    SEXP res = {fn_name_ffi}({args_call});
     return handle_result(res);
 }}
 "
@@ -69,9 +70,9 @@ impl SavvyFn {
 
     /// Generate C function call entry
     fn to_c_function_call_entry(&self) -> String {
-        let fn_name = self.fn_name_outer();
+        let fn_name_c = self.fn_name_c_impl();
         let n_args = self.get_c_args().len();
-        format!(r#"    {{"{fn_name}__impl", (DL_FUNC) &{fn_name}__impl, {n_args}}},"#)
+        format!(r#"    {{"{fn_name_c}", (DL_FUNC) &{fn_name_c}, {n_args}}},"#)
     }
 }
 
