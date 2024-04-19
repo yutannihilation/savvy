@@ -38,6 +38,7 @@ fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         #orig
+
         #item_fn_inner
         #item_fn_ffi
     }
