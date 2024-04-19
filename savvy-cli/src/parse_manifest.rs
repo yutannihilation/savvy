@@ -54,12 +54,6 @@ impl Manifest {
             }
         };
 
-        // Add savvy as the dependency
-
-        if crate_name != "savvy" {
-            dependency_list.insert("savvy".to_string(), toml::Value::String("*".to_string()));
-        }
-
         // Add the crate itself as a dependency
 
         let mut self_crate_spec = toml::Table::new();
@@ -117,7 +111,24 @@ mod tests {
     ) {
         let actual = Manifest::from_str(actual, base_dir, &[]);
         assert_eq!(actual.crate_name, expected_crate_name);
-        assert_eq!(actual.dependencies, expected_dependencies);
+        assert_eq!(
+            actual
+                .dependencies
+                .get("dependencies")
+                .unwrap()
+                .as_table()
+                .unwrap(),
+            &expected_dependencies
+        );
+    }
+
+    fn common_dep(path: &str) -> toml::Value {
+        let mut common_dep = Table::new();
+        common_dep.insert(
+            "path".to_string(),
+            toml::Value::String(canonicalize(Path::new(path)).unwrap()),
+        );
+        toml::Value::Table(common_dep)
     }
 
     #[test]
@@ -134,6 +145,7 @@ dep1 = "1.2.3"
             "test",
             {
                 let mut expected = Table::new();
+                expected.insert("test".to_string(), common_dep("."));
                 expected.insert("dep1".to_string(), toml::Value::String("1.2.3".to_string()));
                 expected
             },
@@ -154,6 +166,7 @@ dep2 = "4.5.6"
             "test",
             {
                 let mut expected = Table::new();
+                expected.insert("test".to_string(), common_dep("."));
                 expected.insert("dep1".to_string(), toml::Value::String("1.2.3".to_string()));
                 expected.insert("dep2".to_string(), toml::Value::String("4.5.6".to_string()));
                 expected
@@ -173,6 +186,7 @@ dep2 = { path = "./savvy-cli/src" }
             "test",
             {
                 let mut expected = Table::new();
+                expected.insert("test".to_string(), common_dep("../"));
                 expected.insert("dep1".to_string(), toml::Value::String("1.2.3".to_string()));
                 let mut tbl2 = Table::new();
                 tbl2.insert(
