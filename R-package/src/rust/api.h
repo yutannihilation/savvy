@@ -1,3 +1,4 @@
+SEXP savvy_is_built_with_debug__ffi(void);
 SEXP savvy_to_upper__ffi(SEXP x);
 SEXP savvy_add_suffix__ffi(SEXP x, SEXP y);
 SEXP savvy_times_two_int__ffi(SEXP x);

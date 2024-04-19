@@ -19,6 +19,11 @@ NULL
   }
 }
 
+
+is_built_with_debug <- function() {
+  .Call(savvy_is_built_with_debug__impl)
+}
+
 #' Convert Input To Upper-Case
 #'
 #' @param x A character vector.

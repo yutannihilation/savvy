@@ -50,6 +50,11 @@ use savvy::{
 
 use savvy::sexp::na::NotAvailableValue;
 
+#[savvy]
+fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
+    cfg!(debug_assertions).try_into()
+}
+
 /// Convert Input To Upper-Case
 ///
 /// @param x A character vector.

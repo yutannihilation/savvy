@@ -32,6 +32,11 @@ SEXP handle_result(SEXP res_) {
     return (SEXP)res;
 }
 
+SEXP savvy_is_built_with_debug__impl(void) {
+    SEXP res = savvy_is_built_with_debug__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_to_upper__impl(SEXP x) {
     SEXP res = savvy_to_upper__ffi(x);
     return handle_result(res);
@@ -479,6 +484,7 @@ SEXP savvy_ValuePair_print__impl(SEXP self__) {
 
 
 static const R_CallMethodDef CallEntries[] = {
+    {"savvy_is_built_with_debug__impl", (DL_FUNC) &savvy_is_built_with_debug__impl, 0},
     {"savvy_to_upper__impl", (DL_FUNC) &savvy_to_upper__impl, 1},
     {"savvy_add_suffix__impl", (DL_FUNC) &savvy_add_suffix__impl, 2},
     {"savvy_times_two_int__impl", (DL_FUNC) &savvy_times_two_int__impl, 1},
