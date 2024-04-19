@@ -13,6 +13,12 @@
   that we can write unit tests on the function easily. For more details, please
   read the [Testing section](https://yutannihilation.github.io/savvy/guide/test.html) in the guide.
 
+* The generated R wrapper file is now named as `000-wrappers.R` instead of
+  `wrappers.R`. This makes the file is loaded first so that you can override
+  some of the R functions (e.g., a `print()` method for an enum) in another R
+  file. The old wrapper file `wrappers.R` is automatically deleted by `savvy-cli
+  update`
+
 ### New features
 
 * `savvy-cli test` now picks `[dev-dependencies]` from the crate's `Cargo.toml`
