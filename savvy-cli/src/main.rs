@@ -208,7 +208,7 @@ fn parse_crate(lib_rs: &Path, crate_name: &str) -> Vec<ParsedResult> {
     }
 
     // (file path, module path)
-    let mut queue = VecDeque::from([(lib_rs.to_path_buf(), vec![crate_name.to_string()])]);
+    let mut queue = VecDeque::from([(lib_rs.to_path_buf(), vec![crate_name.replace('-', "_")])]);
 
     while !queue.is_empty() {
         let (mut entry, mod_path) = queue.pop_front().unwrap();
