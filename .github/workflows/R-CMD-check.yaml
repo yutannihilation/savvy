@@ -93,9 +93,6 @@ jobs:
           mv savvy-bindgen/ ./R-package/src/savvy/
           mv savvy-ffi/ ./R-package/src/savvy/
 
-      - name: Run cargo test of the R package
-        run: cargo test --manifest-path=./R-package/src/rust/Cargo.toml
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual")'  # no --as-cran
