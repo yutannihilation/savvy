@@ -133,7 +133,7 @@ impl SavvyFn {
 
     pub fn generate_outer_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
-        let fn_name_outer = self.fn_name_outer();
+        let fn_name_outer = self.fn_name_c_header();
 
         let args_pat: Vec<syn::Ident> = self.args.iter().map(|arg| arg.pat()).collect();
         let args_ty: Vec<syn::Type> = self

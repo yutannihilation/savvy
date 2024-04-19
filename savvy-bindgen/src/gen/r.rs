@@ -43,7 +43,7 @@ impl SavvyFn {
 
     fn to_r_function(&self) -> String {
         let fn_name = self.fn_name_r();
-        let fn_name_c = self.fn_name_outer();
+        let fn_name_c = self.fn_name_c_impl();
 
         let doc_comments = get_r_doc_comment(self.docs.as_slice());
 
@@ -54,7 +54,7 @@ impl SavvyFn {
             .collect::<Vec<String>>();
 
         let mut args_call = args.clone();
-        args_call.insert(0, format!("{fn_name_c}__impl"));
+        args_call.insert(0, format!("{fn_name_c}"));
 
         let args = args.join(", ");
         let args_call = args_call.join(", ");
@@ -125,7 +125,7 @@ fn generate_r_impl_for_impl(
         .iter()
         .map(|x| {
             let fn_name = x.fn_name_r();
-            let fn_name_c = x.fn_name_outer();
+            let fn_name_c = x.fn_name_c_impl();
 
             let mut args = x.get_r_args();
             // Remove self from arguments for R
@@ -136,7 +136,7 @@ fn generate_r_impl_for_impl(
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            args.insert(0, format!("{fn_name_c}__impl"));
+            args.insert(0, format!("{fn_name_c}"));
             let args_call = args.join(", ");
 
             let mut body_lines = x.get_extractions();
@@ -194,13 +194,13 @@ fn generate_r_impl_for_impl(
         .iter()
         .map(|x| {
             let fn_name = x.fn_name.clone();
-            let fn_name_c = x.fn_name_outer();
+            let fn_name_c = x.fn_name_c_impl();
 
             let mut args = x.get_r_args();
 
             let args_r = args.join(", ");
 
-            args.insert(0, format!("{fn_name_c}__impl"));
+            args.insert(0, format!("{fn_name_c}"));
             let args_call = args.join(", ");
 
             let mut body_lines = x.get_extractions();

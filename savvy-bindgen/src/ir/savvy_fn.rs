@@ -241,10 +241,19 @@ impl SavvyFn {
         }
     }
 
-    pub fn fn_name_outer(&self) -> syn::Ident {
+    /// Returns a function name to be exported from Rust to C
+    pub fn fn_name_c_header(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
-            Some(ty) => format_ident!("{}_{}", ty, self.fn_name),
-            None => self.fn_name.clone(),
+            Some(ty) => format_ident!("savvy_{}_{}__ffi", ty, self.fn_name),
+            None => format_ident!("savvy_{}__ffi", self.fn_name),
+        }
+    }
+
+    /// Returns a function name to be exported from C to R
+    pub fn fn_name_c_impl(&self) -> syn::Ident {
+        match self.get_self_ty_ident() {
+            Some(ty) => format_ident!("savvy_{}_{}__impl", ty, self.fn_name),
+            None => format_ident!("savvy_{}__impl", self.fn_name),
         }
     }
 
