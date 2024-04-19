@@ -93,6 +93,7 @@ If you need to specify some features for testing, use `--features` argument.
 savvy-cli test --features foo path/to/your_crate
 ```
 
-If you need some other crate for the test code, you can just use
-`[dev-dependencies]` section of the `Cargo.toml` then `savvy-cli test` will pick
-it.
+For dependencies, `savvy-cli test` picks all dependencies in `[dependencies]`
+and `[dev-dependencies]`. If you need some additional crate for the test code,
+you can just use `[dev-dependencies]` section of the `Cargo.toml` just as you do
+when you do `cargo test`.
