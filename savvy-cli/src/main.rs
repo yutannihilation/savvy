@@ -1,9 +1,13 @@
+mod parse_manifest;
 mod utils;
+
+use parse_manifest::*;
+use utils::*;
+
 use async_process::Stdio;
 use savvy_bindgen::generate_test_code;
 use savvy_bindgen::merge_parsed_results;
 use savvy_bindgen::read_file;
-use utils::*;
 
 use std::collections::VecDeque;
 use std::io::Write;
@@ -258,9 +262,9 @@ fn tweak_r_buildignore(path: &Path) {
 fn update(path: &Path) {
     let pkg_metadata = get_pkg_metadata(path);
     let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
-    let (crate_name, _) = parse_cargo_toml(&path.join(PATH_CARGO_TOML));
+    let manifest = Manifest::new(&path.join(PATH_CARGO_TOML), &[]);
 
-    let parsed = parse_crate(&lib_rs, &crate_name);
+    let parsed = parse_crate(&lib_rs, &manifest.crate_name);
 
     let merged = merge_parsed_results(parsed);
 
@@ -289,7 +293,11 @@ fn init(path: &Path, skip_update: bool) {
 
     write_file(
         &path.join(PATH_CARGO_TOML),
-        &generate_cargo_toml(&pkg_metadata.package_name_for_rust(), r#"savvy = "*""#),
+        &generate_cargo_toml(
+            &pkg_metadata.package_name_for_rust(),
+            r#"[dependencies]
+savvy = "*""#,
+        ),
     );
     write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
@@ -388,18 +396,9 @@ fn tweak_wrapper_r(path: &Path) {
     write_file(path, &content);
 }
 
-fn path_to_str(x: &Path) -> String {
-    x.to_string_lossy()
-        .trim_start_matches("\\\\?\\") // Tweak for Windows
-        .replace('\\', "/")
-}
-
 async fn run_test(
     tests: String,
-    crate_name: &str,
-    features: &[String],
-    dev_dependencies: &str,
-    crate_dir: &Path,
+    manifest: &mut Manifest,
     tmp_r_pkg_dir: &Path,
 ) -> std::io::Result<()> {
     eprintln!(
@@ -414,38 +413,12 @@ async fn run_test(
     let rust_pkg_name = pkg.package_name_for_rust();
     let r_pkg_name = pkg.package_name_for_r();
 
-    // Specify the crate to test as a path dependency.
-    let crate_dir_abs = crate_dir.canonicalize()?;
-    let crate_dir_abs = crate_dir_abs.to_string_lossy();
-    #[cfg(windows)]
-    let crate_dir_abs = if crate_dir_abs.starts_with(r#"\\?\"#) {
-        crate_dir_abs.get(4..).unwrap().replace('\\', "/")
-    } else {
-        crate_dir_abs.replace('\\', "/")
-    };
-
-    let features = if features.is_empty() {
-        "".to_string()
-    } else {
-        format!(r#", features = ["{}"]"#, features.join(r#"", ""#))
-    };
-
-    let mut additional_dependencies =
-        format!(r#"{crate_name} = {{ path = "{crate_dir_abs}"{features} }}"#);
-    additional_dependencies.push('\n');
-    if crate_name != "savvy" {
-        additional_dependencies.push_str(r#"savvy ="*"\n"#);
-    }
-
-    // Add dev-dependencies
-    additional_dependencies.push_str(dev_dependencies);
-
     write_file(
         &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
             &rust_pkg_name,
             // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
-            &additional_dependencies,
+            &manifest.dependencies.to_string(),
         ),
     );
     // Since this can be within the workspace of a Rust package, clarify this is
@@ -460,8 +433,8 @@ async fn run_test(
     let wrapper_r = tmp_r_pkg_dir.join(PATH_R_IMPL);
     tweak_wrapper_r(&wrapper_r);
 
-    let wrapper_r_str = path_to_str(&wrapper_r);
-    let tmp_r_pkg_dir_str = path_to_str(tmp_r_pkg_dir);
+    let wrapper_r_str = canonicalize(&wrapper_r)?;
+    let tmp_r_pkg_dir_str = canonicalize(tmp_r_pkg_dir)?;
 
     let tmp_r_script = tmp_r_pkg_dir.join("savvy-extracted-tests.R");
     write_file(
@@ -531,27 +504,20 @@ fn main() {
         } => {
             // Use the current dir as default
             let crate_dir = crate_dir.unwrap_or(".".into());
-            let (crate_name, dev_dependencies) = parse_cargo_toml(&crate_dir.join("Cargo.toml"));
+            let mut manifest = Manifest::new(&crate_dir.join("Cargo.toml"), &features);
 
             // Use the OS's cache dir as default
             let cache_dir = match (cache_dir, dirs::cache_dir()) {
                 (Some(p), _) => p,
-                (None, Some(p)) => p.join("savvy-cli-test").join(&crate_name),
+                (None, Some(p)) => p.join("savvy-cli-test").join(&manifest.crate_name),
                 (None, None) => {
                     eprintln!("No cache dir is available");
                     std::process::exit(1);
                 }
             };
 
-            let tests = extract_tests(&crate_dir.join("src/lib.rs"), &crate_name);
-            match futures_lite::future::block_on(run_test(
-                tests,
-                &crate_name,
-                &features,
-                &dev_dependencies,
-                &crate_dir,
-                &cache_dir,
-            )) {
+            let tests = extract_tests(&crate_dir.join("src/lib.rs"), &manifest.crate_name);
+            match futures_lite::future::block_on(run_test(tests, &mut manifest, &cache_dir)) {
                 Ok(_) => {}
                 Err(e) => match e.kind() {
                     std::io::ErrorKind::NotFound => {
@@ -566,8 +532,8 @@ fn main() {
         }
         Commands::ExtractTests { crate_dir } => {
             let dir = crate_dir.unwrap_or(".".into());
-            let (crate_name, _) = parse_cargo_toml(&dir.join("Cargo.toml"));
-            let tests = extract_tests(&dir.join("src/lib.rs"), &crate_name);
+            let manifest = Manifest::new(&dir.join("Cargo.toml"), &[]);
+            let tests = extract_tests(&dir.join("src/lib.rs"), &manifest.crate_name);
             println!("{tests}");
         }
     }
