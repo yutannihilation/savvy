@@ -27,6 +27,15 @@ package.
 savvy-cli test path/to/your_crate
 ```
 
+In order to run tests, you need to add `"lib"` to the `crate-type`. This is
+because your crate is used as a Rust library when run by `savvy-cli test`.
+
+```toml
+[lib]
+crate-type = ["staticlib", "lib"]
+#                          ^^^^^
+```
+
 ### Test module
 
 You can write tests under a module marked with `#[cfg(test)]`. A `#[test]`
