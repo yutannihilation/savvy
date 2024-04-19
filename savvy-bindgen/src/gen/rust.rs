@@ -131,7 +131,7 @@ impl SavvyFn {
         out
     }
 
-    pub fn generate_outer_fn(&self) -> syn::ItemFn {
+    pub fn generate_ffi_fn(&self) -> syn::ItemFn {
         let fn_name_inner = self.fn_name_inner();
         let fn_name_outer = self.fn_name_c_header();
 

@@ -34,7 +34,7 @@ fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
     let savvy_fn = SavvyFn::from_fn(item_fn)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
-    let item_fn_outer = savvy_fn.generate_outer_fn();
+    let item_fn_outer = savvy_fn.generate_ffi_fn();
 
     Ok(quote! {
         #item_fn_inner
@@ -139,7 +139,7 @@ mod tests {
     fn assert_snapshot_outer(orig: syn::ItemFn) {
         let result = SavvyFn::from_fn(&orig)
             .expect("Failed to parse an impl")
-            .generate_outer_fn();
+            .generate_ffi_fn();
         let formatted = unparse(&parse_quote!(#result));
         let lines = formatted.lines().collect::<Vec<&str>>();
         insta::assert_yaml_snapshot!(lines);
@@ -172,7 +172,7 @@ mod tests {
 
     fn assert_snapshot_outer_impl(orig: &syn::ItemImpl) {
         for item_fn in SavvyImpl::new(orig).expect("Failed to parse an impl").fns {
-            let result = item_fn.generate_outer_fn();
+            let result = item_fn.generate_ffi_fn();
             let formatted = unparse(&parse_quote!(#result));
             let lines = formatted.lines().collect::<Vec<&str>>();
             insta::assert_yaml_snapshot!(lines);
