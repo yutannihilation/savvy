@@ -30,13 +30,14 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-fn savvy_fn(item_fn: &syn::ItemFn) -> syn::Result<TokenStream> {
-    let savvy_fn = SavvyFn::from_fn(item_fn)?;
+fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
+    let savvy_fn = SavvyFn::from_fn(orig)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
     let item_fn_ffi = savvy_fn.generate_ffi_fn();
 
     Ok(quote! {
+        #orig
         #item_fn_inner
         #item_fn_ffi
     }
