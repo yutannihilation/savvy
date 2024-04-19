@@ -4,6 +4,7 @@ use crate::canonicalize;
 
 pub(crate) struct Manifest {
     pub(crate) crate_name: String,
+    pub(crate) crate_types: Vec<String>,
     pub(crate) dependencies: toml::Table,
 }
 
@@ -29,6 +30,17 @@ impl Manifest {
             .as_str()
             .expect("Cargo.toml have an invalid `name` key in the [package] section")
             .to_string();
+
+        let crate_types = parsed
+            .get("lib")
+            .expect("Cargo.toml doesn't have a [lib] section")
+            .get("crate-type")
+            .expect("Cargo.toml doesn't have the `crate-type` key in the [lib] section")
+            .as_array()
+            .expect("Cargo.toml have an invalid `crate-type` key in the [lib] section")
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>();
 
         let deps = parsed.get_mut("dependencies").map(|d| {
             d.as_table()
@@ -92,6 +104,7 @@ impl Manifest {
 
         Self {
             crate_name,
+            crate_types,
             dependencies,
         }
     }

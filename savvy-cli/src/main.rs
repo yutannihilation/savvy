@@ -533,6 +533,18 @@ fn main() {
             let crate_dir = crate_dir.unwrap_or(".".into());
             let mut manifest = Manifest::new(&crate_dir.join("Cargo.toml"), &features);
 
+            if !manifest.crate_types.contains(&"lib".to_string()) {
+                eprintln!(
+                    r#"To run `savvy-cli test`, please add "lib" to the crate-type.
+
+    [lib]
+    crate-type = ["staticlib", "lib"]
+                               ^^^^^
+"#
+                );
+                std::process::exit(1);
+            }
+
             // Use the OS's cache dir as default
             let cache_dir = match (cache_dir, dirs::cache_dir()) {
                 (Some(p), _) => p,
