@@ -13,10 +13,12 @@ impl Drop for Foo {
 fn safe_stop() -> savvy::Result<()> {
     let _ = Foo {};
 
-    savvy::unwind_protect::unwind_protect(|| unsafe {
-        let msg = CString::new("Error!").unwrap();
-        savvy_ffi::Rf_errorcall(savvy_ffi::R_NilValue, msg.as_ptr());
-    })?;
+    unsafe {
+        savvy::unwind_protect::unwind_protect(|| {
+            let msg = CString::new("Error!").unwrap();
+            savvy_ffi::Rf_errorcall(savvy_ffi::R_NilValue, msg.as_ptr());
+        })?;
+    }
 
     Ok(())
 }
