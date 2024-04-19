@@ -56,7 +56,7 @@ use savvy::sexp::na::NotAvailableValue;
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
+pub fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -419,12 +419,15 @@ fn set_name_external(x: &mut Person, name: &str) -> savvy::Result<()> {
     x.set_name(name)
 }
 
-// Make sure cargo test runs without linking errors
 #[cfg(test)]
 mod tests {
+    use savvy::StringSexp;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn test_functions() -> savvy::Result<()> {
+        let x = savvy::OwnedStringSexp::try_from_slice(["foo", "bar"])?;
+        let result = super::to_upper(x.as_read_only())?;
+        assert_eq!(StringSexp::try_from(result)?.to_vec(), vec!["FOO", "BAR"]);
+        Ok(())
     }
 }
