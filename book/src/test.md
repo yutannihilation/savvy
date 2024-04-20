@@ -55,16 +55,19 @@ pub fn foo() -> savvy::Result<()> {
 You can write tests under a module marked with `#[cfg(savvy_test)]` instead of
 `#[cfg(test)]`. A `#[test]` function needs to have the return value of
 `savvy::Result<()>`, which is the same convention as `#[savvy]`.
+To check if an SEXP contains the expected data, `assert_eq_r_code` is convenient.
 
 ```rust
 #[cfg(savvy_test)]
 mod test {
-    use savvy::OwnedIntegerSexp;
+    use savvy::{OwnedIntegerSexp, assert_eq_r_code};
 
     #[test]
     fn test_integer() -> savvy::Result<()> {
         let mut x = OwnedIntegerSexp::new(3)?;
-        assert_eq!(x.as_slice(), &[0, 0, 0]);
+
+        assert_eq_r_code(x, "c(0L, 0L, 0L)");
+
         Ok(())
     }
 }
@@ -90,7 +93,10 @@ mod test {
     fn test_integer() -> savvy::Result<()> {
         let x = savvy::OwnedIntegerSexp::new(3)?;
         let x_ro = x.as_read_only();
-        assert!(super::your_fn(x_ro).is_ok());
+        let result = super::your_fn(x_ro);
+
+        assert_eq_r_code(result, "...");
+        
         Ok(())
     }
 }
