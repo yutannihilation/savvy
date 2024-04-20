@@ -380,6 +380,9 @@ fn transform_test_mod(
         // Replace super and crate with the actual crate name
         .replace("super::", &format!("{}::", rest.join("::")))
         .replace("crate::", &format!("{}::", mod_path.first().unwrap()))
+        // TODO: for some reason, prettyplease adds a space before ::
+        .replace("super ::", &format!("{}::", rest.join("::")))
+        .replace("crate ::", &format!("{}::", mod_path.first().unwrap()))
         // since savvy_show_error is defined in the parent space, add crate::
         .replace("savvy_show_error", "crate::savvy_show_error");
 

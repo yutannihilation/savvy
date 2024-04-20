@@ -54,6 +54,7 @@
 //! <https://yutannihilation.github.io/savvy/guide/>
 
 pub mod error;
+pub mod eval_parse_text;
 pub mod ffi;
 pub mod io;
 pub mod panic_hook;
@@ -84,6 +85,8 @@ pub use sexp::complex::{ComplexSexp, OwnedComplexSexp};
 pub use savvy_ffi::Complex64;
 
 pub use unwind_protect::unwind_protect;
+
+pub use eval_parse_text::eval_parse_text;
 
 // re-export
 pub use savvy_macro::savvy;
