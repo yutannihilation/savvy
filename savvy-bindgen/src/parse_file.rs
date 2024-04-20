@@ -158,7 +158,7 @@ impl ParsedResult {
                 let is_test_mod = item_mod
                     .attrs
                     .iter()
-                    .any(|attr| attr == &parse_quote!(#[cfg(test)]));
+                    .any(|attr| attr == &parse_quote!(#[cfg(savvy_test)]));
 
                 match (&item_mod.content, is_test_mod) {
                     (None, false) => {
@@ -335,10 +335,10 @@ fn transform_test_mod(
 ) -> ParsedTestCase {
     let mut item_mod = item_mod.clone();
 
-    // Remove #[cfg(test)]
+    // Remove #[cfg(savvy_test)]
     item_mod
         .attrs
-        .retain(|attr| attr != &parse_quote!(#[cfg(test)]));
+        .retain(|attr| attr != &parse_quote!(#[cfg(savvy_test)]));
 
     item_mod.ident = format_ident!("__UNIQUE_PREFIX__mod_{}", item_mod.ident);
 

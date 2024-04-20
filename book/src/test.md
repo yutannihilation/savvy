@@ -52,12 +52,12 @@ pub fn foo() -> savvy::Result<()> {
 
 ### Test module
 
-You can write tests under a module marked with `#[cfg(test)]`. A `#[test]`
+You can write tests under a module marked with `#[cfg(savvy_test)]`. A `#[test]`
 function needs to have the return value of `savvy::Result<()>`, which is the
 same convention as `#[savvy]`.
 
 ```rust
-#[cfg(test)]
+#[cfg(savvy_test)]
 mod test {
     use savvy::OwnedIntegerSexp;
 
@@ -82,7 +82,7 @@ pub fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
     // ...snip...
 }
 
-#[cfg(test)]
+#[cfg(savvy_test)]
 mod test {
     use savvy::OwnedIntegerSexp;
 
