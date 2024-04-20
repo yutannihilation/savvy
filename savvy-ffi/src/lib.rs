@@ -203,6 +203,8 @@ extern "C" {
         arg3: *mut ParseStatus,
         arg4: SEXP,
     ) -> SEXP;
+
+    pub fn R_compute_identical(arg1: SEXP, arg2: SEXP, arg3: ::std::os::raw::c_int) -> Rboolean;
 }
 
 // Protection
