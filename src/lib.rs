@@ -86,7 +86,7 @@ pub use savvy_ffi::Complex64;
 
 pub use unwind_protect::unwind_protect;
 
-pub use eval::{eval_parse_text, EvalResult};
+pub use eval::{assert_eq_r_code, eval_parse_text, EvalResult};
 
 // re-export
 pub use savvy_macro::savvy;

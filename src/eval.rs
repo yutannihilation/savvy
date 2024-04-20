@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use savvy_ffi::{R_NilValue, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
+use savvy_ffi::{R_NilValue, R_compute_identical, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
 
 use crate::{protect, sexp::utils::str_to_charsxp, unwind_protect, Sexp};
 
@@ -36,14 +36,20 @@ impl From<EvalResult> for crate::error::Result<Sexp> {
     }
 }
 
-/// Parse R code. This is equivalent to `parse(text = )`.
+/// Parse and evaluate an R code. This is equivalent to `eval(parse(text = ))`.
+///
+/// For simplicity, this function accept only a single line of R code.
+///
 pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResult> {
     let parse_status: Cell<savvy_ffi::ParseStatus> = Cell::new(savvy_ffi::ParseStatus_PARSE_NULL);
 
     unsafe {
         let charsxp = str_to_charsxp(text.as_ref())?;
         savvy_ffi::Rf_protect(charsxp);
-        let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
+        let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp));
+        // need to unprotect first before extracting the result by ?
+        savvy_ffi::Rf_unprotect(1);
+        let text_sexp = text_sexp?;
 
         // According to WRE (https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Parsing-R-code-from-C),
         //
@@ -72,29 +78,56 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResul
         savvy_ffi::Rf_protect(parsed);
 
         if parse_status.get() != savvy_ffi::ParseStatus_PARSE_OK {
+            savvy_ffi::Rf_unprotect(1);
             return Err(crate::error::Error::InvalidRCode(text.as_ref().to_string()));
         }
 
         // For simplicity, accept only a single line of R code.
         if Rf_xlength(parsed) != 1 {
+            savvy_ffi::Rf_unprotect(1);
             return Err(crate::error::Error::GeneralError(format!(
                 "eval_parse_text() accepts only a single expression, but got: {}",
                 text.as_ref(),
             )));
         }
 
-        let eval_result =
-            unwind_protect(|| Rf_eval(VECTOR_ELT(parsed, 0), savvy_ffi::R_GlobalEnv))?;
+        let eval_result = unwind_protect(|| Rf_eval(VECTOR_ELT(parsed, 0), savvy_ffi::R_GlobalEnv));
+        savvy_ffi::Rf_unprotect(1);
+        let eval_result = eval_result?;
+
         let token = protect::insert_to_preserved_list(eval_result);
         let out = EvalResult {
             inner: eval_result,
             token,
         };
 
-        savvy_ffi::Rf_unprotect(2);
-
         Ok(out)
     }
+}
+
+/// Check if the two SEXPs are identical in the sense that the R function
+/// `identical()` returns `TRUE`.
+pub fn is_r_identical<T1: Into<Sexp>, T2: Into<Sexp>>(x: T1, y: T2) -> bool {
+    let x_sexp: Sexp = x.into();
+    let y_sexp: Sexp = y.into();
+    // They say 16 is the same as identical()'s default
+    unsafe { R_compute_identical(x_sexp.0, y_sexp.0, 16) == 1 }
+}
+
+/// Assert that the SEXPs have the same data inside. The second argument is a
+/// string of R code.
+///
+/// ```
+/// use savvy::assert_eq_r_code;
+///
+/// let mut x = savvy::OwnedRealSexp::new(3)?;
+/// x[1] = 1.0;
+/// x[2] = 2.0;
+/// assert_eq_r_code(x, "c(0.0, 1.0, 2.0)");
+/// ```
+pub fn assert_eq_r_code<T1: Into<Sexp>, T2: AsRef<str>>(actual: T1, expected: T2) {
+    let parsed = eval_parse_text(expected).expect("Failed to parse R code");
+    assert!(is_r_identical(actual, parsed));
 }
 
 #[cfg(test)]
