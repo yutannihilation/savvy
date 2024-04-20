@@ -41,10 +41,9 @@ crate-type = ["staticlib", "lib"]
                            ^^^^^
 ```
 
-Second, if you want to test a function or a struct, it must be public. This is
-because `savvy-cli test` has to build the crate in the `dev` profile or the
-`release` profile, not the test profile, in order to link with the R package.
-So, the visibility is kept as it is unlike `cargo test`.
+Second, if you want to test a function or a struct, it must be public. For the
+ones marked with `#[savvy]` are automatically made public, but, if you want to
+test other functions, you need to add `pub` to it by yourself.
 
 ```rs
 pub fn foo() -> savvy::Result<()> {
