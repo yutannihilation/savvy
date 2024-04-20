@@ -21,6 +21,24 @@
 
 ### New features
 
+* Added a function `eval_parse_text()`, which is an equivalent to R's idiom
+  `eval(parse(text = ))`. This is mainly for testing purposes.
+
+* Added a function `is_r_identical()`, which is an equivalent to R's
+  `identical()`. This is mainly for testing purposes.
+
+* Added a function `assert_eq_r_code()` if the first argument has the same data
+  as the result of the R code of the second argument.
+
+  Example:
+
+  ```rust
+  let mut x = savvy::OwnedRealSexp::new(3)?;
+  x[1] = 1.0;
+  x[2] = 2.0;
+  assert_eq_r_code(x, "c(0.0, 1.0, 2.0)");
+  ```
+
 * `savvy-cli test` now picks `[dev-dependencies]` from the crate's `Cargo.toml`
   as the dependencies to be used for testing.
 
