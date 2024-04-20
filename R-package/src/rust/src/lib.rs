@@ -84,7 +84,7 @@ pub fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
+pub fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -426,13 +426,19 @@ fn set_name_external(x: &mut Person, name: &str) -> savvy::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use savvy::StringSexp;
+    #[test]
+    fn test_to_upper() -> savvy::Result<()> {
+        let x = savvy::OwnedStringSexp::try_from_slice(["foo", "bar", "BAZ", "ハート"])?;
+        let result = super::to_upper(x.as_read_only())?;
+        savvy::assert_eq_r_code(result, r#"c("FOO", "BAR", "BAZ", "ハート")"#);
+        Ok(())
+    }
 
     #[test]
-    fn test_functions() -> savvy::Result<()> {
+    fn test_add_suffix() -> savvy::Result<()> {
         let x = savvy::OwnedStringSexp::try_from_slice(["foo", "bar"])?;
-        let result = super::to_upper(x.as_read_only())?;
-        assert_eq!(StringSexp::try_from(result)?.to_vec(), vec!["FOO", "BAR"]);
+        let result = super::add_suffix(x.as_read_only(), "Dr. ")?;
+        savvy::assert_eq_r_code(result, r#"c("Dr.foo", "Dr.bar")"#);
         Ok(())
     }
 }
