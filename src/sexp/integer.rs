@@ -452,7 +452,7 @@ impl IndexMut<usize> for OwnedIntegerSexp {
     }
 }
 
-#[cfg(test)]
+#[cfg(savvy_test)]
 mod test {
     use super::OwnedIntegerSexp;
     use crate::NotAvailableValue;

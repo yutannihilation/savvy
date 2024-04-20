@@ -52,12 +52,12 @@ pub fn foo() -> savvy::Result<()> {
 
 ### Test module
 
-You can write tests under a module marked with `#[cfg(test)]`. A `#[test]`
-function needs to have the return value of `savvy::Result<()>`, which is the
-same convention as `#[savvy]`.
+You can write tests under a module marked with `#[cfg(savvy_test)]` instead of
+`#[cfg(test)]`. A `#[test]` function needs to have the return value of
+`savvy::Result<()>`, which is the same convention as `#[savvy]`.
 
 ```rust
-#[cfg(test)]
+#[cfg(savvy_test)]
 mod test {
     use savvy::OwnedIntegerSexp;
 
@@ -82,7 +82,7 @@ pub fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
     // ...snip...
 }
 
-#[cfg(test)]
+#[cfg(savvy_test)]
 mod test {
     use savvy::OwnedIntegerSexp;
 
@@ -121,3 +121,50 @@ For dependencies, `savvy-cli test` picks all dependencies in `[dependencies]`
 and `[dev-dependencies]`. If you need some additional crate for the test code,
 you can just use `[dev-dependencies]` section of the `Cargo.toml` just as you do
 when you do `cargo test`.
+
+
+### Reminder: You can use `cargo test`
+
+While `#[savvy]` requires a real session, you can utilize `cargo test` by
+separating the actual logic to a function that doesn't rely on savvy. For
+example, suppose you have the following function `times_two_int()` that doubles
+the input numbers.
+
+```rust
+#[savvy]
+fn times_two_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
+
+    for (i, e) in x.iter().enumerate() {
+        if e.is_na() {
+            out.set_na(i)?;
+        } else {
+            out[i] = e * 2;
+        }
+    }
+
+    out.into()
+}
+```
+
+In this case, you can rewrite the code to the following so that you can test
+`times_two_int_impl()` with `cargo test`.
+
+```rust
+#[savvy]
+fn times_two_int(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
+    let result: Vec<i32> = times_two_int_impl(x.as_slice());
+    result.try_into()
+}
+
+fn times_two_int_impl(x: &[i32]) -> Vec<i32> {
+    x.iter()
+        .map(|x| if x.is_na() { *x } else { *x * 2 })
+        .collect::<Vec<i32>>()
+}
+```
+
+But, as you might notice, this implementation is a bit inefficient that it
+allocates a `Vec<i32>` just to store the temporary result. Like this, separating
+a function might be a bit tricky and it might not be really worth in some cases.
+(In this case, probably the function can return an iterator).
