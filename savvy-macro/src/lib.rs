@@ -2,17 +2,18 @@ use proc_macro::TokenStream;
 use quote::quote;
 
 use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
+use syn::parse_quote;
 
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let result = if let Ok(item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
-        savvy_fn(&item_fn)
-    } else if let Ok(item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
-        savvy_struct(&item_struct)
-    } else if let Ok(item_impl) = syn::parse::<syn::ItemImpl>(input.clone()) {
-        savvy_impl(&item_impl)
-    } else if let Ok(item_enum) = syn::parse::<syn::ItemEnum>(input.clone()) {
-        savvy_enum(&item_enum)
+    let result = if let Ok(mut item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
+        savvy_fn(&mut item_fn)
+    } else if let Ok(mut item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
+        savvy_struct(&mut item_struct)
+    } else if let Ok(mut item_impl) = syn::parse::<syn::ItemImpl>(input.clone()) {
+        savvy_impl(&mut item_impl)
+    } else if let Ok(mut item_enum) = syn::parse::<syn::ItemEnum>(input.clone()) {
+        savvy_enum(&mut item_enum)
     } else {
         let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
         return proc_macro::TokenStream::from(
@@ -30,11 +31,14 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
+fn savvy_fn(orig: &mut syn::ItemFn) -> syn::Result<TokenStream> {
     let savvy_fn = SavvyFn::from_fn(orig)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
     let item_fn_ffi = savvy_fn.generate_ffi_fn();
+
+    // Make public in order to make it easy to test
+    orig.vis = syn::Visibility::Public(parse_quote!(pub));
 
     Ok(quote! {
         #orig
@@ -45,11 +49,27 @@ fn savvy_fn(orig: &syn::ItemFn) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_impl(orig: &syn::ItemImpl) -> syn::Result<TokenStream> {
+fn savvy_impl(orig: &mut syn::ItemImpl) -> syn::Result<TokenStream> {
     let savvy_impl = SavvyImpl::new(orig)?;
 
     let list_fn_inner = savvy_impl.generate_inner_fns();
     let list_fn_ffi = savvy_impl.generate_ffi_fns();
+
+    // Make public in order to make it easy to test
+    for i in orig.items.iter_mut() {
+        match i {
+            syn::ImplItem::Const(c) => {
+                c.vis = syn::Visibility::Public(parse_quote!(pub));
+            }
+            syn::ImplItem::Fn(f) => {
+                f.vis = syn::Visibility::Public(parse_quote!(pub));
+            }
+            syn::ImplItem::Type(t) => {
+                t.vis = syn::Visibility::Public(parse_quote!(pub));
+            }
+            _ => {}
+        }
+    }
 
     Ok(quote! {
         #orig
@@ -60,9 +80,12 @@ fn savvy_impl(orig: &syn::ItemImpl) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_struct(orig: &syn::ItemStruct) -> syn::Result<TokenStream> {
+fn savvy_struct(orig: &mut syn::ItemStruct) -> syn::Result<TokenStream> {
     let savvy_struct = SavvyStruct::new(orig)?;
     let try_from_impls = savvy_struct.generate_try_from_impls();
+
+    // Make public in order to make it easy to test
+    orig.vis = syn::Visibility::Public(parse_quote!(pub));
 
     Ok(quote!(
         #orig
@@ -72,10 +95,13 @@ fn savvy_struct(orig: &syn::ItemStruct) -> syn::Result<TokenStream> {
     .into())
 }
 
-fn savvy_enum(orig: &syn::ItemEnum) -> syn::Result<TokenStream> {
+fn savvy_enum(orig: &mut syn::ItemEnum) -> syn::Result<TokenStream> {
     let savvy_enum = SavvyEnum::new(orig)?;
     let enum_with_discriminant = savvy_enum.generate_enum_with_discriminant();
     let try_from_impls = savvy_enum.generate_try_from_impls();
+
+    // Make public in order to make it easy to test
+    orig.vis = syn::Visibility::Public(parse_quote!(pub));
 
     Ok(quote!(
         #enum_with_discriminant

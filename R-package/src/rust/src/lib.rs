@@ -61,7 +61,7 @@ fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-pub fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
+fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -84,7 +84,7 @@ pub fn to_upper(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 /// @returns A character vector with upper case version of the input.
 /// @export
 #[savvy]
-pub fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedStringSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
