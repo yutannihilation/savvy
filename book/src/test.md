@@ -52,9 +52,9 @@ pub fn foo() -> savvy::Result<()> {
 
 ### Test module
 
-You can write tests under a module marked with `#[cfg(savvy_test)]`. A `#[test]`
-function needs to have the return value of `savvy::Result<()>`, which is the
-same convention as `#[savvy]`.
+You can write tests under a module marked with `#[cfg(savvy_test)]` instead of
+`#[cfg(test)]`. A `#[test]` function needs to have the return value of
+`savvy::Result<()>`, which is the same convention as `#[savvy]`.
 
 ```rust
 #[cfg(savvy_test)]

@@ -5,6 +5,10 @@
 
 ### Breaking changes
 
+* `savvy-cli test` now parses test modules marked with `#[cfg(savvy_test)]`
+  instead of `#[cfg(test)]`. The purpose of this change is to let `cargo test`
+  run for the tests unrelated to a real R sessions.
+
 * Savvy now generates different names of Rust functions and C functions;
   previously, the original function name is used for the FFI functions, but now
   it's `savvy_{original}_ffi`. This change shouldn't affect ordinary users.
