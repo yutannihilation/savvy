@@ -10,8 +10,9 @@
   it's `savvy_{original}_ffi`. This change shouldn't affect ordinary users.
   
   This change was necessary to let `#[savvy]` preserve the original function so
-  that we can write unit tests on the function easily. For more details, please
-  read the [Testing section](https://yutannihilation.github.io/savvy/guide/test.html) in the guide.
+  that we can write unit tests on the function easily. One modification is that
+  the function is made public. For more details, please read the [Testing section](https://yutannihilation.github.io/savvy/guide/test.html)
+  in the guide.
 
 * The generated R wrapper file is now named as `000-wrappers.R` instead of
   `wrappers.R`. This makes the file is loaded first so that you can override
