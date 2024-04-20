@@ -1,6 +1,8 @@
 
 #include <stdint.h>
 #include <Rinternals.h>
+#include <R_ext/Parse.h>
+
 #include "rust/api.h"
 
 static uintptr_t TAGGED_POINTER_MASK = (uintptr_t)1;
