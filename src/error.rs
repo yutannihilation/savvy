@@ -6,6 +6,7 @@ pub enum Error {
     NotScalar,
     Aborted(SEXP),
     InvalidPointer,
+    InvalidRCode(String),
     GeneralError(String),
 }
 
@@ -20,13 +21,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::UnexpectedType(type_name) => write!(f, "Unexpected type: {}", type_name),
+            Error::UnexpectedType(type_name) => write!(f, "Unexpected type: {type_name}"),
             Error::NotScalar => write!(f, "Must be length 1 of non-missing value"),
             Error::Aborted(_) => write!(f, "Aborted due to some error"),
             Error::InvalidPointer => {
                 write!(f, "This external pointer is already consumed or deleted")
             }
-            Error::GeneralError(msg) => write!(f, "{}", msg),
+            Error::InvalidRCode(code) => write!(f, "Failed to parse R code: {code}"),
+            Error::GeneralError(msg) => write!(f, "{msg}"),
         }
     }
 }

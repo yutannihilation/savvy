@@ -189,14 +189,32 @@ extern "C" {
     pub static mut R_GlobalEnv: SEXP;
 }
 
-// protection
+// Parse
+pub const ParseStatus_PARSE_NULL: ParseStatus = 0;
+pub const ParseStatus_PARSE_OK: ParseStatus = 1;
+pub const ParseStatus_PARSE_INCOMPLETE: ParseStatus = 2;
+pub const ParseStatus_PARSE_ERROR: ParseStatus = 3;
+pub const ParseStatus_PARSE_EOF: ParseStatus = 4;
+pub type ParseStatus = ::std::os::raw::c_int;
+extern "C" {
+    pub fn R_ParseVector(
+        arg1: SEXP,
+        arg2: ::std::os::raw::c_int,
+        arg3: *mut ParseStatus,
+        arg4: SEXP,
+    ) -> SEXP;
+
+    pub fn R_compute_identical(arg1: SEXP, arg2: SEXP, arg3: ::std::os::raw::c_int) -> Rboolean;
+}
+
+// Protection
 extern "C" {
     pub fn Rf_protect(arg1: SEXP) -> SEXP;
     pub fn Rf_unprotect(arg1: ::std::os::raw::c_int);
     pub fn R_PreserveObject(arg1: SEXP);
 }
 
-// type
+// Type
 extern "C" {
     // Note: For some reason, the return type of TYPEOF() is defined as int in
     // RInternals.h and memory.c. However, the actual implementation is
@@ -215,7 +233,7 @@ extern "C" {
     pub fn Rf_type2char(arg1: SEXPTYPE) -> *const ::std::os::raw::c_char;
 }
 
-// error
+// Error
 extern "C" {
     pub fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char, ...) -> !;
 }

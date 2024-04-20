@@ -142,6 +142,10 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_isEnvironment")
         .allowlist_function("Rf_eval")
         .allowlist_var("R_GlobalEnv")
+        // parse
+        .allowlist_item("ParseStatus")
+        .allowlist_function("R_ParseVector")
+        .allowlist_function("R_compute_identical")
         // protection
         .allowlist_function("Rf_protect")
         .allowlist_function("Rf_unprotect")

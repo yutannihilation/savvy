@@ -5,7 +5,7 @@ use savvy_ffi::{
     SETCDR, SET_TAG, SEXP,
 };
 
-use crate::{protect, unwind_protect, ListSexp};
+use crate::{protect, unwind_protect, EvalResult, ListSexp};
 
 use super::Sexp;
 
@@ -106,38 +106,6 @@ impl Drop for FunctionArgs {
     }
 }
 
-/// A result of a function call. Since the result does not yet belong to any
-/// environemnt or object, so it needs protection and unprotection. This struct
-/// is solely for handling the unprotection in `Drop`.
-pub struct FunctionCallResult {
-    inner: SEXP,
-    token: SEXP,
-}
-
-impl FunctionCallResult {
-    pub fn inner(&self) -> SEXP {
-        self.inner
-    }
-}
-
-impl Drop for FunctionCallResult {
-    fn drop(&mut self) {
-        protect::release_from_preserved_list(self.token);
-    }
-}
-
-impl From<FunctionCallResult> for Sexp {
-    fn from(value: FunctionCallResult) -> Self {
-        Self(value.inner())
-    }
-}
-
-impl From<FunctionCallResult> for crate::error::Result<Sexp> {
-    fn from(value: FunctionCallResult) -> Self {
-        Ok(<Sexp>::from(value))
-    }
-}
-
 impl FunctionSexp {
     #[inline]
     pub fn inner(&self) -> savvy_ffi::SEXP {
@@ -145,7 +113,7 @@ impl FunctionSexp {
     }
 
     /// Execute an R function
-    pub fn call(&self, args: FunctionArgs) -> crate::error::Result<FunctionCallResult> {
+    pub fn call(&self, args: FunctionArgs) -> crate::error::Result<EvalResult> {
         unsafe {
             let call = if args.is_empty() {
                 Rf_protect(Rf_lcons(self.inner(), R_NilValue))
@@ -161,7 +129,7 @@ impl FunctionSexp {
 
             Rf_unprotect(1);
 
-            Ok(FunctionCallResult { inner: res, token })
+            Ok(EvalResult { inner: res, token })
         }
     }
 }
