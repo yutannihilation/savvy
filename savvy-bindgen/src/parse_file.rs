@@ -396,6 +396,7 @@ fn transform_test_mod(
 
 pub fn generate_test_code(parsed_results: &Vec<ParsedResult>) -> String {
     let header: syn::File = parse_quote! {
+        #[allow(unused_imports)]
         use savvy::savvy;
 
         pub(crate) fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
