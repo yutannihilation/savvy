@@ -1,8 +1,40 @@
 use std::cell::Cell;
 
-use savvy_ffi::{R_NilValue, Rf_eval};
+use savvy_ffi::{R_NilValue, Rf_eval, SEXP};
 
-use crate::{sexp::utils::str_to_charsxp, unwind_protect};
+use crate::{protect, sexp::utils::str_to_charsxp, unwind_protect, Sexp};
+
+/// A result of a function call. Since the result does not yet belong to any
+/// environemnt or object, so it needs protection and unprotection. This struct
+/// is solely for handling the unprotection in `Drop`.
+pub struct EvalResult {
+    pub(crate) inner: SEXP,
+    pub(crate) token: SEXP,
+}
+
+impl EvalResult {
+    pub fn inner(&self) -> SEXP {
+        self.inner
+    }
+}
+
+impl Drop for EvalResult {
+    fn drop(&mut self) {
+        protect::release_from_preserved_list(self.token);
+    }
+}
+
+impl From<EvalResult> for Sexp {
+    fn from(value: EvalResult) -> Self {
+        Self(value.inner())
+    }
+}
+
+impl From<EvalResult> for crate::error::Result<Sexp> {
+    fn from(value: EvalResult) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
 
 #[macro_export]
 macro_rules! eval_parse_text {
@@ -58,8 +90,6 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<crate::Se
 
 #[cfg(test)]
 mod test {
-    use crate::IntegerSexp;
-
     use super::eval_parse_text;
 
     fn assert_invalid_r_code(code: &str) {

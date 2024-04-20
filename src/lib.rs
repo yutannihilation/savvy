@@ -54,7 +54,7 @@
 //! <https://yutannihilation.github.io/savvy/guide/>
 
 pub mod error;
-pub mod eval_parse_text;
+pub mod eval;
 pub mod ffi;
 pub mod io;
 pub mod panic_hook;
@@ -68,7 +68,7 @@ pub use error::{Error, Result};
 pub use sexp::external_pointer::{
     get_external_pointer_addr, take_external_pointer_value, ExternalPointerSexp, IntoExtPtrSexp,
 };
-pub use sexp::function::{FunctionArgs, FunctionCallResult, FunctionSexp};
+pub use sexp::function::{FunctionArgs, FunctionSexp};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
 pub use sexp::list::{ListSexp, OwnedListSexp};
 pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};
@@ -86,7 +86,7 @@ pub use savvy_ffi::Complex64;
 
 pub use unwind_protect::unwind_protect;
 
-pub use eval_parse_text::eval_parse_text;
+pub use eval::{eval_parse_text, EvalResult};
 
 // re-export
 pub use savvy_macro::savvy;
