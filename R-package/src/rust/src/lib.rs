@@ -437,8 +437,8 @@ mod tests {
     #[test]
     fn test_add_suffix() -> savvy::Result<()> {
         let x = savvy::OwnedStringSexp::try_from_slice(["foo", "bar"])?;
-        let result = super::add_suffix(x.as_read_only(), "Dr. ")?;
-        savvy::assert_eq_r_code(result, r#"c("Dr.foo", "Dr.bar")"#);
+        let result = super::add_suffix(x.as_read_only(), "suf")?;
+        savvy::assert_eq_r_code(result, r#"c("foo_suf", "bar_suf")"#);
         Ok(())
     }
 }
