@@ -282,7 +282,7 @@ doesn't work well, you can use `T`.
 
 Under the hood, the `Person` struct is stored in `EXTPTRSXP`. But, you don't
 need to care about how to deal with `EXTPTRSXP`. This is because it's stored in
-a closure environemnt on creation and never exposed to the user. As it's
+a closure environment on creation and never exposed to the user. As it's
 guaranteed on R's side that `self` is always a `EXTPTRSXP` of `Person`, Rust
 code just restore a `Person` instance from the `EXTPTRSXP` without any checks.
 

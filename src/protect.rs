@@ -37,6 +37,31 @@ use savvy_ffi::{
     SET_TAG, SEXP,
 };
 
+// Protection mechanism by `Rf_protect()`. This struct is needed for
+// auto-unprotect when returning from the scope.
+
+pub(crate) struct LocalProtection {}
+
+impl Drop for LocalProtection {
+    fn drop(&mut self) {
+        unsafe { Rf_unprotect(1) };
+    }
+}
+
+/// Provide a protection that lasts within the function scope, i.e.,
+/// automatically cleans up by `Rf_unprotect()`. This might not be very
+/// efficient as this can execute `Rf_unprotect(1)` multiple times where it
+/// could be `Rf_unprotect(n)` once. But, I found manual `Rf_unprotect()` is
+/// almost impossible for human considering there are many early return by `?`,
+/// so this should be better than failure.
+pub(crate) fn local_protect(obj: SEXP) -> LocalProtection {
+    unsafe { Rf_protect(obj) };
+    LocalProtection {}
+}
+
+// Protection mechanism by a doubly-linked pairlist.
+// cf. https://cpp11.r-lib.org/articles/internals.html#protection
+
 pub(crate) struct PreservedList(SEXP);
 
 // cf. https://doc.rust-lang.org/stable/nomicon/send-and-sync.html
@@ -57,10 +82,12 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         }
 
         // Protect the object until the operation finishes
-        Rf_protect(obj);
+        local_protect(obj);
 
         let preserved = PRESERVED_LIST.0;
-        let token = Rf_protect(Rf_cons(preserved, CDR(preserved)));
+        let token = Rf_cons(preserved, CDR(preserved));
+
+        local_protect(token);
 
         SET_TAG(token, obj);
         SETCDR(preserved, token);
@@ -68,8 +95,6 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         if CDR(token) != R_NilValue {
             SETCAR(CDR(token), token);
         }
-
-        Rf_unprotect(2);
 
         token
     }
