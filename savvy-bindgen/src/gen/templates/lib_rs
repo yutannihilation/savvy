@@ -90,7 +90,7 @@ mod test1 {
     #[test]
     fn test_person() {
         let mut p = super::Person::new();
-        p.set_name("foo");
+        p.set_name("foo").expect("set_name() must succeed");
         assert_eq!(&p.name, "foo");
     }
 }
