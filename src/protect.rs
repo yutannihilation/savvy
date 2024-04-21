@@ -37,8 +37,8 @@ use savvy_ffi::{
     SET_TAG, SEXP,
 };
 
-// Protection by `Rf_protect()`. This struct is needed for auto-unprotect when
-// returning from the scope.
+// Protection mechanism by `Rf_protect()`. This struct is needed for
+// auto-unprotect when returning from the scope.
 
 pub(crate) struct LocalProtection {}
 
@@ -58,6 +58,9 @@ pub(crate) fn local_protect(obj: SEXP) -> LocalProtection {
     unsafe { Rf_protect(obj) };
     LocalProtection {}
 }
+
+// Protection mechanism by a doubly-linked pairlist.
+// cf. https://cpp11.r-lib.org/articles/internals.html#protection
 
 pub(crate) struct PreservedList(SEXP);
 
