@@ -17,6 +17,11 @@ pub struct R_altrep_class_t {
     pub ptr: SEXP,
 }
 
+// I'm not fully confident, but R_altrep_class_t should be thread safe in the
+// sense that this can be set during the initialization.
+unsafe impl Send for R_altrep_class_t {}
+unsafe impl Sync for R_altrep_class_t {}
+
 extern "C" {
     // Note: this function is not limited to ALTREP, but this is placed here
     // because it's currently needed only for ALTREP.
