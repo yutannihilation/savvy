@@ -36,6 +36,68 @@ extern "C" {
     pub fn R_set_altrep_data2(x: SEXP, v: SEXP);
 }
 
+// general
+
+pub type R_altrep_UnserializeEX_method_t = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: SEXP,
+        arg2: SEXP,
+        arg3: SEXP,
+        arg4: ::std::os::raw::c_int,
+        arg5: ::std::os::raw::c_int,
+    ) -> SEXP,
+>;
+pub type R_altrep_Unserialize_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: SEXP) -> SEXP>;
+pub type R_altrep_Serialized_state_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> SEXP>;
+pub type R_altrep_DuplicateEX_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>;
+pub type R_altrep_Duplicate_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>;
+pub type R_altrep_Coerce_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: ::std::os::raw::c_int) -> SEXP>;
+pub type R_altrep_Inspect_method_t = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: SEXP,
+        arg2: ::std::os::raw::c_int,
+        arg3: ::std::os::raw::c_int,
+        arg4: ::std::os::raw::c_int,
+        arg5: ::std::option::Option<
+            unsafe extern "C" fn(
+                arg1: SEXP,
+                arg2: ::std::os::raw::c_int,
+                arg3: ::std::os::raw::c_int,
+                arg4: ::std::os::raw::c_int,
+            ),
+        >,
+    ) -> Rboolean,
+>;
+pub type R_altrep_Length_method_t =
+    ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> R_xlen_t>;
+extern "C" {
+    pub fn R_set_altrep_UnserializeEX_method(
+        cls: R_altrep_class_t,
+        fun: R_altrep_UnserializeEX_method_t,
+    );
+    pub fn R_set_altrep_Unserialize_method(
+        cls: R_altrep_class_t,
+        fun: R_altrep_Unserialize_method_t,
+    );
+    pub fn R_set_altrep_Serialized_state_method(
+        cls: R_altrep_class_t,
+        fun: R_altrep_Serialized_state_method_t,
+    );
+    pub fn R_set_altrep_DuplicateEX_method(
+        cls: R_altrep_class_t,
+        fun: R_altrep_DuplicateEX_method_t,
+    );
+    pub fn R_set_altrep_Duplicate_method(cls: R_altrep_class_t, fun: R_altrep_Duplicate_method_t);
+    pub fn R_set_altrep_Coerce_method(cls: R_altrep_class_t, fun: R_altrep_Coerce_method_t);
+    pub fn R_set_altrep_Inspect_method(cls: R_altrep_class_t, fun: R_altrep_Inspect_method_t);
+    pub fn R_set_altrep_Length_method(cls: R_altrep_class_t, fun: R_altrep_Length_method_t);
+}
+
 // integer
 
 pub type R_altinteger_Elt_method_t = ::std::option::Option<
