@@ -2,6 +2,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+// TODO: put under #[cfg(feature = "altrep")]
+pub mod altrep;
+
 // internal types
 
 pub type R_xlen_t = isize;

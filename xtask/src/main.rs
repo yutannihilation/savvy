@@ -159,6 +159,34 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rprintf")
         .allowlist_function("REprintf");
 
+    let builder = builder
+        // ALTREP
+        .allowlist_function("MARK_NOT_MUTABLE")
+        .allowlist_function("ALTREP")
+        .allowlist_function("ALTREP_CLASS")
+        .allowlist_function("R_new_altrep")
+        .allowlist_function("R_altrep_data1")
+        .allowlist_function("R_altrep_data2")
+        .allowlist_function("R_set_altrep_data1")
+        .allowlist_function("R_set_altrep_data2")
+        .allowlist_item("R_altrep_class_t")
+        // ALTINTEGER
+        .allowlist_item("R_altinteger_Elt_method_t")
+        .allowlist_item("R_altinteger_Max_method_t")
+        .allowlist_item("R_altinteger_Min_method_t")
+        .allowlist_item("R_altinteger_Sum_method_t")
+        .allowlist_item("R_altinteger_No_NA_method_t")
+        .allowlist_item("R_altinteger_Is_sorted_method_t")
+        .allowlist_item("R_altinteger_Get_region_method_t")
+        .allowlist_function("R_set_altinteger_Elt_method")
+        .allowlist_function("R_set_altinteger_Max_method")
+        .allowlist_function("R_set_altinteger_Min_method")
+        .allowlist_function("R_set_altinteger_Sum_method")
+        .allowlist_function("R_set_altinteger_No_NA_method")
+        .allowlist_function("R_set_altinteger_Is_sorted_method")
+        .allowlist_function("R_set_altinteger_Get_region_method")
+        .allowlist_function("R_make_altinteger_class");
+
     let bindings = builder.generate().expect("Unable to generate bindings");
 
     let stdout = Box::new(std::io::stdout());
