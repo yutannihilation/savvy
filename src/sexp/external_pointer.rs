@@ -1,9 +1,9 @@
 use savvy_ffi::{
     R_ClearExternalPtr, R_ExternalPtrAddr, R_MakeExternalPtr, R_NilValue, R_RegisterCFinalizerEx,
-    Rf_protect, Rf_unprotect, SEXP,
+    SEXP,
 };
 
-use crate::Sexp;
+use crate::{protect::local_protect, Sexp};
 
 // Some notes about the design.
 //
@@ -57,18 +57,15 @@ pub trait IntoExtPtrSexp: Sized {
         }
 
         unsafe {
-            let external_pointer = Rf_protect(R_MakeExternalPtr(
-                ptr as *mut std::os::raw::c_void,
-                R_NilValue,
-                R_NilValue,
-            ));
+            let external_pointer =
+                R_MakeExternalPtr(ptr as *mut std::os::raw::c_void, R_NilValue, R_NilValue);
+
+            local_protect(external_pointer);
 
             // Use R_RegisterCFinalizerEx(..., TRUE) instead of
             // R_RegisterCFinalizer() in order to make the cleanup happen during
             // a shutdown of the R session as well.
             R_RegisterCFinalizerEx(external_pointer, Some(finalizer::<Self>), 1);
-
-            Rf_unprotect(1);
 
             Sexp(external_pointer)
         }

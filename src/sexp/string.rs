@@ -5,7 +5,7 @@ use savvy_ffi::{R_NaString, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT
 use super::na::NotAvailableValue;
 use super::utils::{assert_len, str_to_charsxp};
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
-use crate::protect;
+use crate::protect::{self, local_protect};
 
 /// An external SEXP of a character vector.
 pub struct StringSexp(pub SEXP);
@@ -258,9 +258,8 @@ impl OwnedStringSexp {
             // Note: unlike `new()`, this allocates a STRSXP after creating a
             // CHARSXP. So, the `CHARSXP` needs to be protected.
             let charsxp = str_to_charsxp(value.as_ref())?;
-            savvy_ffi::Rf_protect(charsxp);
+            local_protect(charsxp);
             let out = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
-            savvy_ffi::Rf_unprotect(1);
             out
         };
         Self::new_from_raw_sexp(sexp, 1)

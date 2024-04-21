@@ -2,10 +2,14 @@ use std::cell::Cell;
 
 use savvy_ffi::{R_NilValue, R_compute_identical, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
 
-use crate::{protect, sexp::utils::str_to_charsxp, unwind_protect, Sexp};
+use crate::{
+    protect::{self, local_protect},
+    sexp::utils::str_to_charsxp,
+    unwind_protect, Sexp,
+};
 
 /// A result of a function call. Since the result does not yet belong to any
-/// environemnt or object, so it needs protection and unprotection. This struct
+/// environment or object, so it needs protection and unprotection. This struct
 /// is solely for handling the unprotection in `Drop`.
 pub struct EvalResult {
     pub(crate) inner: SEXP,
@@ -45,11 +49,8 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResul
 
     unsafe {
         let charsxp = str_to_charsxp(text.as_ref())?;
-        savvy_ffi::Rf_protect(charsxp);
-        let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp));
-        // need to unprotect first before extracting the result by ?
-        savvy_ffi::Rf_unprotect(1);
-        let text_sexp = text_sexp?;
+        local_protect(charsxp);
+        let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
 
         // According to WRE (https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Parsing-R-code-from-C),
         //
@@ -75,25 +76,22 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResul
         let parsed = unwind_protect(|| {
             savvy_ffi::R_ParseVector(text_sexp, -1, parse_status.as_ptr(), R_NilValue)
         })?;
-        savvy_ffi::Rf_protect(parsed);
+        local_protect(parsed);
 
         if parse_status.get() != savvy_ffi::ParseStatus_PARSE_OK {
-            savvy_ffi::Rf_unprotect(1);
             return Err(crate::error::Error::InvalidRCode(text.as_ref().to_string()));
         }
 
         // For simplicity, accept only a single line of R code.
         if Rf_xlength(parsed) != 1 {
-            savvy_ffi::Rf_unprotect(1);
             return Err(crate::error::Error::GeneralError(format!(
                 "eval_parse_text() accepts only a single expression, but got: {}",
                 text.as_ref(),
             )));
         }
 
-        let eval_result = unwind_protect(|| Rf_eval(VECTOR_ELT(parsed, 0), savvy_ffi::R_GlobalEnv));
-        savvy_ffi::Rf_unprotect(1);
-        let eval_result = eval_result?;
+        let eval_result =
+            unwind_protect(|| Rf_eval(VECTOR_ELT(parsed, 0), savvy_ffi::R_GlobalEnv))?;
 
         let token = protect::insert_to_preserved_list(eval_result);
         let out = EvalResult {

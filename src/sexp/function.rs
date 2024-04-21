@@ -1,11 +1,13 @@
 use std::ffi::CString;
 
 use savvy_ffi::{
-    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, Rf_protect, Rf_unprotect, CDR, SETCAR,
-    SETCDR, SET_TAG, SEXP,
+    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP,
 };
 
-use crate::{protect, unwind_protect, EvalResult, ListSexp};
+use crate::{
+    protect::{self, local_protect},
+    unwind_protect, EvalResult, ListSexp,
+};
 
 use super::Sexp;
 
@@ -116,18 +118,18 @@ impl FunctionSexp {
     pub fn call(&self, args: FunctionArgs) -> crate::error::Result<EvalResult> {
         unsafe {
             let call = if args.is_empty() {
-                Rf_protect(Rf_lcons(self.inner(), R_NilValue))
+                Rf_lcons(self.inner(), R_NilValue)
             } else {
-                Rf_protect(Rf_lcons(self.inner(), args.inner()))
+                Rf_lcons(self.inner(), args.inner())
             };
+
+            local_protect(call);
 
             // Note: here, probably the environment doesn't matter at all
             // because the first argument is the function, which preserves the
             // releated environments, itself.
             let res = unwind_protect(|| Rf_eval(call, savvy_ffi::R_GlobalEnv))?;
             let token = protect::insert_to_preserved_list(res);
-
-            Rf_unprotect(1);
 
             Ok(EvalResult { inner: res, token })
         }
