@@ -82,3 +82,36 @@ impl Person {
         Ok(out.into())
     }
 }
+
+// This test is run by `cargo test`. You can put tests that don't need a real
+// R session here.
+#[cfg(test)]
+mod test1 {
+    #[test]
+    fn test_person() {
+        let mut p = super::Person::new();
+        p.set_name("foo").expect("set_name() must succeed");
+        assert_eq!(&p.name, "foo");
+    }
+}
+
+// Tests marked under `#[cfg(savvy_test)]` are run by `savvy-cli test`, which
+// executes the Rust code on a real R session so that you can use R things for
+// testing.
+#[cfg(savvy_test)]
+mod test1 {
+    // The return type must be `savvy::Result<()>`
+    #[test]
+    fn test_to_upper() -> savvy::Result<()> {
+        // You can create a non-owned version of input by `.as_read_only()`
+        let x = savvy::OwnedStringSexp::try_from_slice(["foo", "bar"])?.as_read_only();
+
+        let result = super::to_upper(x)?;
+
+        // This function compares an SEXP with the result of R code specified in
+        // the second argument.
+        savvy::assert_eq_r_code(result, r#"c("FOO", "BAR")"#);
+
+        Ok(())
+    }
+}

@@ -43,3 +43,8 @@ jobs:
         with:
           args: 'c("--no-manual")'
           working-directory: ${{ runner.temp }}/sawy
+
+      - name: Run Rust tests
+        run: |
+          cargo test --manifest-path ${{ runner.temp }}/sawy/src/rust/Cargo.toml
+          cargo r-test ${{ runner.temp }}/sawy/src/rust
