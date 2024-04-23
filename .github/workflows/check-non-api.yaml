@@ -1,0 +1,39 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  
+name: Check so-called "non-API" APIs
+
+jobs:
+  check-non-api:
+    runs-on: ubuntu-latest
+
+    env:
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+  
+      - name: Check non-API
+        run: |
+          cat >tmp.R <<'EOF'
+          e <- new.env()
+          source("https://raw.githubusercontent.com/r-devel/r-svn/master/src/library/tools/R/sotools.R", local = e)
+          cat(e$nonAPI, sep = "|")
+          EOF
+
+          REGEX=$(Rscript tmp.R)
+          
+          NON_API=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
+
+          echo "Check result:"
+          echo
+          echo $NON_API
+          echo
+          
+          if [ -n "${NON_API}" ]; then
+            echo 'Found what they call "non-API"!'
+            exit 1
+          fi
