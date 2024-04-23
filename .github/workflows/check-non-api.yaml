@@ -18,7 +18,7 @@ jobs:
   
       - name: Check non-API
         run: |
-          cat >tmp.R <<EOF
+          cat >tmp.R <<'EOF'
           e <- new.env()
           source("https://raw.githubusercontent.com/r-devel/r-svn/master/src/library/tools/R/sotools.R", local = e)
           cat(e$nonAPI, sep = "|")
