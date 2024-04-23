@@ -27,7 +27,11 @@ jobs:
           REGEX=$(Rscript tmp.R)
           
           NON_API=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
+
+          echo "Check result:"
+          echo
           echo $NON_API
+          echo
           
           if [ -n "${NON_API}" ]; then
             echo 'Found what they call "non-API"!'
