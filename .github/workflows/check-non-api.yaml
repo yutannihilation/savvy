@@ -24,10 +24,7 @@ jobs:
           cat(e$nonAPI, sep = "|")
           EOF
 
-          cat tmp.R
-
           REGEX=$(Rscript tmp.R)
-          echo "${REGEX}"
           
           NON_API=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
           echo $NON_API
