@@ -29,10 +29,10 @@ jobs:
           REGEX=$(Rscript tmp.R)
           echo "${REGEX}"
           
-          NON_APIs=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
+          NON_API=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
+          echo $NON_API
           
           if [ -n "${NON_API}" ]; then
             echo 'Found what they call "non-API"!'
-            echo $NON_API
             exit 1
           fi
