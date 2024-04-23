@@ -26,7 +26,7 @@ jobs:
 
           REGEX=$(Rscript tmp.R)
           
-          NON_API=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
+          NON_API=$(grep -R -E "${REGEX}" ./savvy-ffi/src/)
 
           echo "Check result:"
           echo
