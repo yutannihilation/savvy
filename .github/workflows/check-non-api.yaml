@@ -7,7 +7,7 @@ on:
 name: Check so-called "non-API" APIs
 
 jobs:
-  build-wasm:
+  check-non-api:
     runs-on: ubuntu-latest
 
     env:
@@ -24,7 +24,11 @@ jobs:
           cat(e$nonAPI, sep = "|")
           EOF
 
+          cat tmp.R
+
           REGEX=$(Rscript tmp.R)
+          echo "${REGEX}"
+          
           NON_APIs=$(grep -E "${REGEX}" ./savvy-ffi/src/lib.rs)
           
           if [ -n "${NON_API}" ]; then
