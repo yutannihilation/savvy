@@ -302,7 +302,7 @@ impl OwnedRealSexp {
                 let new_len = last_index + 1;
                 if new_len != upper {
                     unsafe {
-                        savvy_ffi::SETLENGTH(out.inner, new_len as _);
+                        savvy_ffi::Rf_xlengthgets(out.inner, new_len as _);
                     }
                     out.len = new_len;
                 }
