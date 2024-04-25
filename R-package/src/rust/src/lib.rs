@@ -20,7 +20,6 @@ mod mod1;
 
 // This should not be parsed
 // mod mod2;
-// pub use mod2::*;
 
 use savvy::{r_print, savvy, OwnedListSexp};
 
