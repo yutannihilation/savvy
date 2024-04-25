@@ -1,45 +1,25 @@
 #![allow(unused_variables)]
 
 mod attributes;
-pub use attributes::*;
-
-mod convert_from_rust_types;
-pub use convert_from_rust_types::*;
-
-mod error_handling;
-pub use error_handling::*;
-
-mod init_vectors;
-pub use init_vectors::*;
-
-mod function;
-pub use function::*;
-
 mod complex;
-pub use complex::*;
-
 mod consuming_type;
-pub use consuming_type::*;
-
-mod try_from_iter;
-pub use try_from_iter::*;
-
+mod convert_from_rust_types;
 mod enum_support;
-pub use enum_support::*;
+mod error_handling;
+mod function;
+mod init_vectors;
+mod try_from_iter;
 
 // to test if the definition over multiple files is accepted.
 // cf. https://github.com/yutannihilation/savvy/issues/118
 mod separate_impl_definition;
-pub use separate_impl_definition::*;
 
 // to test modules are parsed properly
 // cf. https://github.com/yutannihilation/savvy/issues/147
 mod mod1;
-pub use mod1::*;
 
 // This should not be parsed
 // mod mod2;
-// pub use mod2::*;
 
 use savvy::{r_print, savvy, OwnedListSexp};
 

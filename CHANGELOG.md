@@ -168,17 +168,6 @@
   that it wouldn't compile when you specified `#[savvy]` on `impl` of a same
   struct multiple times. But now, you can split the `impl` not only within a
   same file but also over multiple files.
-  
-  Note that, in general, if you specify a `#[savvy]` function or struct in other
-  file than `lib.rs`, you need to export the objects by `*`. This is because
-  `#[savvy]` defines additional functions other than the original ones and these
-  also need to be exported. Since you don't know the names of such
-  auto-generated functions, `*` is the solution.
-
-  ```rust
-  mod foo;
-  pub use foo::*;
-  ```
 
 * `OwnedListSexp` and `ListSexp` gains `unchecked_*()` variants of the `set` and
   `get` methods for a fast but unsafe operation. Thanks @daniellga!
