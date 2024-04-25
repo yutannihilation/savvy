@@ -69,7 +69,7 @@ extern "C" {
 // Allocation and attributes
 extern "C" {
     pub fn Rf_xlength(arg1: SEXP) -> R_xlen_t;
-    pub fn Rf_xlengthgets(x: SEXP, v: R_xlen_t);
+    pub fn Rf_xlengthgets(arg1: SEXP, arg2: R_xlen_t);
     pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP;
     pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP;
     pub fn Rf_getAttrib(arg1: SEXP, arg2: SEXP) -> SEXP;
