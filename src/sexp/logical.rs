@@ -273,7 +273,7 @@ impl OwnedLogicalSexp {
                 let new_len = last_index + 1;
                 if new_len != upper {
                     unsafe {
-                        savvy_ffi::Rf_xlengthgets(out.inner, new_len as _);
+                        out.inner = savvy_ffi::Rf_xlengthgets(out.inner, new_len as _);
                     }
                     out.len = new_len;
                 }
