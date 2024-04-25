@@ -319,6 +319,51 @@ Person_name <- function(self) {
 }
 ```
 
+It's important to mention that savvy only wraps the `EXTPTRSXP` in a closure
+environment when the type is used directly as the returning type of the function.
+If the user wants to return `Person` inside a `List`, for example, the external
+pointer will be directly exposed to the user and it will be the user's responsibility
+to deal with it.
+
+```rust
+#[savvy]
+struct Person {}
+
+// This case savvy handles nicely.
+/// @export
+#[savvy]
+impl Person {
+    fn new() -> savvy::Result<Person> {
+        Ok(Person {})
+    }
+}
+
+// In this case, the user is handled an external pointer.
+/// @export
+#[savvy]
+fn create_list() -> savvy::Result<Sexp> {
+    let mut list = OwnedListSexp::new(1, false)?;
+    let person = Person {};
+    list.set_value(0, Sexp::try_from(person)?)?;
+    list.into()
+}
+```
+
+in R:
+
+```r
+> person = Person$new()
+> print(person)
+<environment: 0x0000027cf9d46a20>
+attr(,"class")
+[1] "Person"
+
+> l = create_list()
+> print(l)
+[[1]]
+<pointer: 0x0000000000000001>
+```
+
 ## Traps about protection
 
 This is a bit advanced topic. It's okay to have a struct to contain arbitrary
