@@ -36,4 +36,6 @@ jobs:
           if [ -n "${NON_API}" ]; then
             echo 'Found what they call "non-API"!'
             exit 1
+          else
+            echo "OK!"
           fi
