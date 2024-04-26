@@ -31,7 +31,7 @@
 // But, my implementation doesn't implement `Clone` trait, so I don't need to
 // worry that there still exists another instance on dropping it.
 
-use once_cell::sync::Lazy;
+use once_cell::sync::OnceCell;
 use savvy_ffi::{
     R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
     SET_TAG, SEXP,
@@ -68,11 +68,7 @@ pub(crate) struct PreservedList(SEXP);
 unsafe impl Send for PreservedList {}
 unsafe impl Sync for PreservedList {}
 
-pub(crate) static PRESERVED_LIST: Lazy<PreservedList> = Lazy::new(|| unsafe {
-    let r = Rf_cons(R_NilValue, R_NilValue);
-    R_PreserveObject(r);
-    PreservedList(r)
-});
+pub(crate) static PRESERVED_LIST: OnceCell<PreservedList> = OnceCell::new();
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
@@ -84,13 +80,17 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         // Protect the object until the operation finishes
         local_protect(obj);
 
-        let preserved = PRESERVED_LIST.0;
-        let token = Rf_cons(preserved, CDR(preserved));
+        let preserved = PRESERVED_LIST.get_or_init(|| {
+            let r = Rf_cons(R_NilValue, R_NilValue);
+            R_PreserveObject(r);
+            PreservedList(r)
+        });
+        let token = Rf_cons(preserved.0, CDR(preserved.0));
 
         local_protect(token);
 
         SET_TAG(token, obj);
-        SETCDR(preserved, token);
+        SETCDR(preserved.0, token);
 
         if CDR(token) != R_NilValue {
             SETCAR(CDR(token), token);
