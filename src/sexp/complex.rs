@@ -214,10 +214,14 @@ impl OwnedComplexSexp {
 
                 let new_len = last_index + 1;
                 if new_len == upper {
+                    // If the length is the same as expected, use it as it is.
                     Self::new_from_raw_sexp(inner, upper)
                 } else {
+                    // If the length is shorter than expected, re-allocate a new
+                    // SEXP and copy the values into it.
                     let mut out = unsafe { Self::new_without_init(new_len)? };
-                    let raw_slice = unsafe { std::slice::from_raw_parts(raw, new_len) }; // ignore the part over
+                    // `raw` is longer than new_len, but the elements over new_len are ignored
+                    let raw_slice = unsafe { std::slice::from_raw_parts(raw, new_len) };
                     out.as_mut_slice().copy_from_slice(raw_slice);
 
                     Ok(out)

@@ -303,11 +303,15 @@ impl OwnedRealSexp {
 
                 let new_len = last_index + 1;
                 if new_len == upper {
+                    // If the length is the same as expected, use it as it is.
                     Self::new_from_raw_sexp(inner, upper)
                 } else {
+                    // If the length is shorter than expected, re-allocate a new
+                    // SEXP and copy the values into it.
                     let out = unsafe { Self::new_without_init(new_len)? };
                     let dst = unsafe { std::slice::from_raw_parts_mut(out.raw, new_len) };
-                    let src = unsafe { std::slice::from_raw_parts(raw, new_len) }; // ignore the part over
+                    // `raw` is longer than new_len, but the elements over new_len are ignored
+                    let src = unsafe { std::slice::from_raw_parts(raw, new_len) };
                     dst.copy_from_slice(src);
 
                     Ok(out)

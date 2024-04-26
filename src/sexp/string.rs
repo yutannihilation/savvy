@@ -202,8 +202,11 @@ impl OwnedStringSexp {
 
                 let new_len = last_index + 1;
                 if new_len == upper {
+                    // If the length is the same as expected, use it as it is.
                     Self::new_from_raw_sexp(inner, upper)
                 } else {
+                    // If the length is shorter than expected, re-allocate a new
+                    // SEXP and copy the values into it.
                     let mut out = Self::new(new_len)?;
                     for i in 0..new_len {
                         unsafe { out.set_elt_unchecked(i, STRING_ELT(inner, i as _)) };
