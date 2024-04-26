@@ -4,7 +4,7 @@ use savvy_ffi::{REAL, REALSXP, SEXP};
 
 use super::utils::assert_len;
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
-use crate::protect;
+use crate::protect::{self, local_protect};
 use crate::NotAvailableValue; // for na()
 
 /// An external SEXP of a real vector.
@@ -287,27 +287,31 @@ impl OwnedRealSexp {
                 // (e.g. `(0..10).filter(|x| x % 2 == 0)`), so it needs to be
                 // truncated to the actual length at last.
 
-                let mut out = unsafe { Self::new_without_init(upper)? };
+                let inner = crate::alloc_vector(REALSXP, upper as _)?;
+                local_protect(inner);
+                let raw = unsafe { REAL(inner) };
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
                     // The upper bound of size_hint() is just for optimization
-                    // and what we should not trust. So, we should't use
-                    // `set_elt_unchecked()` here.
-                    out.set_elt(i, v)?;
+                    // and what we should not trust.
+                    assert_len(upper, i)?;
+                    unsafe { *(raw.add(i)) = v };
 
                     last_index = i;
                 }
 
                 let new_len = last_index + 1;
-                if new_len != upper {
-                    unsafe {
-                        out.inner = savvy_ffi::Rf_xlengthgets(out.inner, new_len as _);
-                    }
-                    out.len = new_len;
-                }
+                if new_len == upper {
+                    Self::new_from_raw_sexp(inner, upper)
+                } else {
+                    let out = unsafe { Self::new_without_init(new_len)? };
+                    let dst = unsafe { std::slice::from_raw_parts_mut(out.raw, new_len) };
+                    let src = unsafe { std::slice::from_raw_parts(raw, new_len) }; // ignore the part over
+                    dst.copy_from_slice(src);
 
-                Ok(out)
+                    Ok(out)
+                }
             }
             (_, None) => {
                 // When the length is not known at all, collect() it first.
