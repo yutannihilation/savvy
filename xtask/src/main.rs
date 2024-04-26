@@ -157,7 +157,9 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_errorcall")
         // I/O
         .allowlist_function("Rprintf")
-        .allowlist_function("REprintf");
+        .allowlist_function("REprintf")
+        // misc
+        .allowlist_type("DllInfo");
 
     let builder = builder
         // ALTREP
