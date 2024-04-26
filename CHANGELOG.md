@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+* Now savvy no longer uses `SETLENGTH`, which is a so-called "non-API" thing.
+
 ## [v0.6.0] (2024-04-20)
 
 ### Breaking changes

@@ -5,7 +5,7 @@ use savvy_ffi::CPLXSXP;
 use savvy_ffi::{COMPLEX, SEXP};
 
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
-use crate::protect;
+use crate::protect::{self, local_protect};
 use crate::NotAvailableValue; // for na()
 
 /// An external SEXP of a complex vector.
@@ -198,27 +198,34 @@ impl OwnedComplexSexp {
                 // (e.g. `(0..10).filter(|x| x % 2 == 0)`), so it needs to be
                 // truncated to the actual length at last.
 
-                let mut out = unsafe { Self::new_without_init(upper)? };
+                let inner = crate::alloc_vector(CPLXSXP, upper as _)?;
+                local_protect(inner);
+                let raw = unsafe { COMPLEX(inner) };
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
                     // The upper bound of size_hint() is just for optimization
-                    // and what we should not trust. So, we should't use
-                    // `set_elt_unchecked()` here.
-                    out.set_elt(i, v)?;
+                    // and what we should not trust.
+                    assert_len(upper, i)?;
+                    unsafe { *(raw.add(i)) = v };
 
                     last_index = i;
                 }
 
                 let new_len = last_index + 1;
-                if new_len != upper {
-                    unsafe {
-                        savvy_ffi::SETLENGTH(out.inner, new_len as _);
-                    }
-                    out.len = new_len;
-                }
+                if new_len == upper {
+                    // If the length is the same as expected, use it as it is.
+                    Self::new_from_raw_sexp(inner, upper)
+                } else {
+                    // If the length is shorter than expected, re-allocate a new
+                    // SEXP and copy the values into it.
+                    let mut out = unsafe { Self::new_without_init(new_len)? };
+                    // `raw` is longer than new_len, but the elements over new_len are ignored
+                    let raw_slice = unsafe { std::slice::from_raw_parts(raw, new_len) };
+                    out.as_mut_slice().copy_from_slice(raw_slice);
 
-                Ok(out)
+                    Ok(out)
+                }
             }
             (_, None) => {
                 // When the length is not known at all, collect() it first.

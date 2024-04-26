@@ -26,7 +26,7 @@ jobs:
 
           REGEX=$(Rscript tmp.R)
           
-          NON_API=$(grep -R -E "${REGEX}" ./savvy-ffi/src/)
+          NON_API=$(grep -R -E "${REGEX}" ./savvy-ffi/src/ || true)
 
           echo "Check result:"
           echo
@@ -36,4 +36,6 @@ jobs:
           if [ -n "${NON_API}" ]; then
             echo 'Found what they call "non-API"!'
             exit 1
+          else
+            echo "OK!"
           fi
