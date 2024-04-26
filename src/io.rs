@@ -1,9 +1,8 @@
 use savvy_ffi::{REprintf, Rprintf};
 
-use once_cell::sync::Lazy;
-use std::ffi::CString;
+use std::{ffi::CString, os::raw::c_char};
 
-pub(crate) static LINEBREAK: Lazy<CString> = Lazy::new(|| CString::new("\n").unwrap());
+pub(crate) const LINEBREAK: [c_char; 2] = [b'\n' as _, b'\0' as _];
 
 pub fn r_print(msg: &str, linebreak: bool) {
     unsafe {
