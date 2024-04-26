@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.1] (2024-04-26)
+
 ### Minor improvements
 
 * Now savvy no longer uses `SETLENGTH`, which is a so-called "non-API" thing.
@@ -511,7 +513,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.1...HEAD
+[v0.6.1]: https://github.com/yutannihilation/savvy/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/yutannihilation/savvy/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/yutannihilation/savvy/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/yutannihilation/savvy/compare/v0.5.1...v0.5.2
