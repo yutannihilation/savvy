@@ -1,4 +1,4 @@
-use crate::{MergedResult, SavvyFn, SavvyFnType};
+use crate::{MergedResult, SavvyFn, SavvyFnType, SavvyInitFn};
 
 impl SavvyFn {
     pub fn get_c_args(&self) -> Vec<(String, String)> {
@@ -100,7 +100,33 @@ pub fn generate_c_header_file(result: &MergedResult) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    format!("{bare_fns}\n{impls}")
+    let init_fns = result
+        .init_fns
+        .iter()
+        .map(|x| {
+            if x.use_dll_info {
+                format!("void {}(DllInfo *dll);", x.fn_name)
+            } else {
+                format!("void {}(void);", x.fn_name)
+            }
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!(
+        "// Bare functions
+
+{bare_fns}
+
+// Functions that wraps struct impl
+
+{impls}
+
+// Functions used for initialization
+
+{init_fns}
+"
+    )
 }
 
 fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
@@ -113,6 +139,19 @@ fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
 fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
     fns.iter()
         .map(|x| x.to_c_function_call_entry())
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn generate_c_initialization(fns: &[SavvyInitFn]) -> String {
+    fns.iter()
+        .map(|x| {
+            if x.use_dll_info {
+                format!("    {}(dll);", x.fn_name)
+            } else {
+                format!("    {}();", x.fn_name)
+            }
+        })
         .collect::<Vec<String>>()
         .join("\n")
 }
@@ -169,6 +208,8 @@ SEXP handle_result(SEXP res_) {
     let c_fns = c_fns.join("\n");
     let call_entries = call_entries.join("\n");
 
+    let initialization = generate_c_initialization(&result.init_fns);
+
     format!(
         "{common_part}
 {c_fns}
@@ -179,8 +220,11 @@ static const R_CallMethodDef CallEntries[] = {{
 }};
 
 void R_init_{pkg_name}(DllInfo *dll) {{
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+
+    // Functions for initialzation, if any.
+{initialization}
 }}
 "
     )

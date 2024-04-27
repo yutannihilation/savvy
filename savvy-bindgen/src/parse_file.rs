@@ -5,11 +5,18 @@ use quote::format_ident;
 use syn::parse_quote;
 
 use crate::{
-    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct,
+    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyInitFn,
+    SavvyStruct,
 };
 
-fn is_marked(attrs: &[syn::Attribute]) -> bool {
+fn is_savvified(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
+}
+
+fn is_init_function(attrs: &[syn::Attribute]) -> bool {
+    attrs
+        .iter()
+        .any(|attr| attr == &parse_quote!(#[savvy_init]))
 }
 
 pub fn read_file(path: &Path) -> String {
@@ -60,6 +67,7 @@ pub fn parse_file(path: &Path, mod_path: &[String]) -> ParsedResult {
         impls: Vec::new(),
         structs: Vec::new(),
         enums: Vec::new(),
+        init_fns: Vec::new(),
         mod_path: mod_path.to_vec(),
         child_mods: Vec::new(),
         tests,
@@ -86,9 +94,16 @@ impl ParsedResult {
     fn parse_item(&mut self, item: &syn::Item, location: &str) {
         match item {
             syn::Item::Fn(item_fn) => {
-                if is_marked(item_fn.attrs.as_slice()) {
+                if is_savvified(item_fn.attrs.as_slice()) {
                     self.bare_fns
                         .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
+                }
+
+                if is_init_function(item_fn.attrs.as_slice()) {
+                    self.init_fns.push(
+                        SavvyInitFn::new(item_fn)
+                            .expect("Failed to parse function for initialization"),
+                    );
                 }
 
                 let label = format!("fn {}", item_fn.sig.ident);
@@ -101,7 +116,7 @@ impl ParsedResult {
             }
 
             syn::Item::Impl(item_impl) => {
-                if is_marked(item_impl.attrs.as_slice()) {
+                if is_savvified(item_impl.attrs.as_slice()) {
                     self.impls
                         .push(SavvyImpl::new(item_impl).expect("Failed to parse impl"))
                 }
@@ -125,7 +140,7 @@ impl ParsedResult {
             }
 
             syn::Item::Struct(item_struct) => {
-                if is_marked(item_struct.attrs.as_slice()) {
+                if is_savvified(item_struct.attrs.as_slice()) {
                     self.structs
                         .push(SavvyStruct::new(item_struct).expect("Failed to parse struct"))
                 }
@@ -140,7 +155,7 @@ impl ParsedResult {
             }
 
             syn::Item::Enum(item_enum) => {
-                if is_marked(item_enum.attrs.as_slice()) {
+                if is_savvified(item_enum.attrs.as_slice()) {
                     self.enums
                         .push(SavvyEnum::new(item_enum).expect("Failed to parse enum"))
                 }
