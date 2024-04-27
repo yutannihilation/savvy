@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.1] (2024-04-26)
+
+### Minor improvements
+
+* Now savvy no longer uses `SETLENGTH`, which is a so-called "non-API" thing.
+
 ## [v0.6.0] (2024-04-20)
 
 ### Breaking changes
@@ -168,17 +174,6 @@
   that it wouldn't compile when you specified `#[savvy]` on `impl` of a same
   struct multiple times. But now, you can split the `impl` not only within a
   same file but also over multiple files.
-  
-  Note that, in general, if you specify a `#[savvy]` function or struct in other
-  file than `lib.rs`, you need to export the objects by `*`. This is because
-  `#[savvy]` defines additional functions other than the original ones and these
-  also need to be exported. Since you don't know the names of such
-  auto-generated functions, `*` is the solution.
-
-  ```rust
-  mod foo;
-  pub use foo::*;
-  ```
 
 * `OwnedListSexp` and `ListSexp` gains `unchecked_*()` variants of the `set` and
   `get` methods for a fast but unsafe operation. Thanks @daniellga!
@@ -518,7 +513,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.1...HEAD
+[v0.6.1]: https://github.com/yutannihilation/savvy/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/yutannihilation/savvy/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/yutannihilation/savvy/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/yutannihilation/savvy/compare/v0.5.1...v0.5.2

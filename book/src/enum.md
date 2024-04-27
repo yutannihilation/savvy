@@ -90,7 +90,7 @@ enum AnimalEnum {
 struct Animal(AnimalEnum);
 ```
 
-Also, savvy currently doesn't support discreminant. For example, this one won't
+Also, savvy currently doesn't support discriminants. For example, this one won't
 compile.
 
 ```rust

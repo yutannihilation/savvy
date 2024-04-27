@@ -159,6 +159,26 @@ SEXP savvy_set_attr_int__impl(SEXP attr, SEXP value) {
     return handle_result(res);
 }
 
+SEXP savvy_new_complex__impl(SEXP size) {
+    SEXP res = savvy_new_complex__ffi(size);
+    return handle_result(res);
+}
+
+SEXP savvy_first_complex__impl(SEXP x) {
+    SEXP res = savvy_first_complex__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_abs_complex__impl(SEXP x) {
+    SEXP res = savvy_abs_complex__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_new_value_pair__impl(SEXP a, SEXP b) {
+    SEXP res = savvy_new_value_pair__ffi(a, b);
+    return handle_result(res);
+}
+
 SEXP savvy_scalar_input_int__impl(SEXP x) {
     SEXP res = savvy_scalar_input_int__ffi(x);
     return handle_result(res);
@@ -284,6 +304,21 @@ SEXP savvy_rep_str_slice__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_print_foo_enum__impl(SEXP x) {
+    SEXP res = savvy_print_foo_enum__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_print_foo_enum_ref__impl(SEXP x) {
+    SEXP res = savvy_print_foo_enum_ref__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_foo_a__impl(void) {
+    SEXP res = savvy_foo_a__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_safe_stop__impl(void) {
     SEXP res = savvy_safe_stop__ffi();
     return handle_result(res);
@@ -296,21 +331,6 @@ SEXP savvy_raise_error__impl(void) {
 
 SEXP savvy_must_panic__impl(void) {
     SEXP res = savvy_must_panic__ffi();
-    return handle_result(res);
-}
-
-SEXP savvy_new_int__impl(SEXP size) {
-    SEXP res = savvy_new_int__ffi(size);
-    return handle_result(res);
-}
-
-SEXP savvy_new_real__impl(SEXP size) {
-    SEXP res = savvy_new_real__ffi(size);
-    return handle_result(res);
-}
-
-SEXP savvy_new_bool__impl(SEXP size) {
-    SEXP res = savvy_new_bool__ffi(size);
     return handle_result(res);
 }
 
@@ -329,23 +349,18 @@ SEXP savvy_get_args__impl(SEXP args) {
     return handle_result(res);
 }
 
-SEXP savvy_new_complex__impl(SEXP size) {
-    SEXP res = savvy_new_complex__ffi(size);
+SEXP savvy_new_int__impl(SEXP size) {
+    SEXP res = savvy_new_int__ffi(size);
     return handle_result(res);
 }
 
-SEXP savvy_first_complex__impl(SEXP x) {
-    SEXP res = savvy_first_complex__ffi(x);
+SEXP savvy_new_real__impl(SEXP size) {
+    SEXP res = savvy_new_real__ffi(size);
     return handle_result(res);
 }
 
-SEXP savvy_abs_complex__impl(SEXP x) {
-    SEXP res = savvy_abs_complex__ffi(x);
-    return handle_result(res);
-}
-
-SEXP savvy_new_value_pair__impl(SEXP a, SEXP b) {
-    SEXP res = savvy_new_value_pair__ffi(a, b);
+SEXP savvy_new_bool__impl(SEXP size) {
+    SEXP res = savvy_new_bool__ffi(size);
     return handle_result(res);
 }
 
@@ -371,21 +386,6 @@ SEXP savvy_filter_logical_duplicates__impl(SEXP x) {
 
 SEXP savvy_filter_string_ascii__impl(SEXP x) {
     SEXP res = savvy_filter_string_ascii__ffi(x);
-    return handle_result(res);
-}
-
-SEXP savvy_print_foo_enum__impl(SEXP x) {
-    SEXP res = savvy_print_foo_enum__ffi(x);
-    return handle_result(res);
-}
-
-SEXP savvy_print_foo_enum_ref__impl(SEXP x) {
-    SEXP res = savvy_print_foo_enum_ref__ffi(x);
-    return handle_result(res);
-}
-
-SEXP savvy_foo_a__impl(void) {
-    SEXP res = savvy_foo_a__ffi();
     return handle_result(res);
 }
 
@@ -511,6 +511,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_set_names_int__impl", (DL_FUNC) &savvy_set_names_int__impl, 0},
     {"savvy_set_dim_int__impl", (DL_FUNC) &savvy_set_dim_int__impl, 0},
     {"savvy_set_attr_int__impl", (DL_FUNC) &savvy_set_attr_int__impl, 2},
+    {"savvy_new_complex__impl", (DL_FUNC) &savvy_new_complex__impl, 1},
+    {"savvy_first_complex__impl", (DL_FUNC) &savvy_first_complex__impl, 1},
+    {"savvy_abs_complex__impl", (DL_FUNC) &savvy_abs_complex__impl, 1},
+    {"savvy_new_value_pair__impl", (DL_FUNC) &savvy_new_value_pair__impl, 2},
     {"savvy_scalar_input_int__impl", (DL_FUNC) &savvy_scalar_input_int__impl, 1},
     {"savvy_scalar_input_usize__impl", (DL_FUNC) &savvy_scalar_input_usize__impl, 1},
     {"savvy_scalar_input_real__impl", (DL_FUNC) &savvy_scalar_input_real__impl, 1},
@@ -536,27 +540,23 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rep_bool_slice__impl", (DL_FUNC) &savvy_rep_bool_slice__impl, 1},
     {"savvy_rep_str_vec__impl", (DL_FUNC) &savvy_rep_str_vec__impl, 1},
     {"savvy_rep_str_slice__impl", (DL_FUNC) &savvy_rep_str_slice__impl, 1},
+    {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
+    {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
+    {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
     {"savvy_safe_stop__impl", (DL_FUNC) &savvy_safe_stop__impl, 0},
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
-    {"savvy_new_int__impl", (DL_FUNC) &savvy_new_int__impl, 1},
-    {"savvy_new_real__impl", (DL_FUNC) &savvy_new_real__impl, 1},
-    {"savvy_new_bool__impl", (DL_FUNC) &savvy_new_bool__impl, 1},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
-    {"savvy_new_complex__impl", (DL_FUNC) &savvy_new_complex__impl, 1},
-    {"savvy_first_complex__impl", (DL_FUNC) &savvy_first_complex__impl, 1},
-    {"savvy_abs_complex__impl", (DL_FUNC) &savvy_abs_complex__impl, 1},
-    {"savvy_new_value_pair__impl", (DL_FUNC) &savvy_new_value_pair__impl, 2},
+    {"savvy_new_int__impl", (DL_FUNC) &savvy_new_int__impl, 1},
+    {"savvy_new_real__impl", (DL_FUNC) &savvy_new_real__impl, 1},
+    {"savvy_new_bool__impl", (DL_FUNC) &savvy_new_bool__impl, 1},
     {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
     {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},
     {"savvy_filter_logical_duplicates__impl", (DL_FUNC) &savvy_filter_logical_duplicates__impl, 1},
     {"savvy_filter_string_ascii__impl", (DL_FUNC) &savvy_filter_string_ascii__impl, 1},
-    {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
-    {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
-    {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
     {"savvy_FooEnum_print__impl", (DL_FUNC) &savvy_FooEnum_print__impl, 1},

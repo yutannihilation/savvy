@@ -42,12 +42,9 @@ impl NotAvailableValue for num_complex::Complex64 {
     }
 }
 
-use once_cell::sync::Lazy;
+use once_cell::sync::OnceCell;
 
-pub(crate) static NA_CHAR_PTR: Lazy<&str> = Lazy::new(|| unsafe {
-    let c_ptr = savvy_ffi::R_CHAR(savvy_ffi::R_NaString) as _;
-    std::str::from_utf8_unchecked(std::slice::from_raw_parts(c_ptr, 2))
-});
+pub(crate) static NA_CHAR_PTR: OnceCell<&str> = OnceCell::new();
 
 impl NotAvailableValue for &str {
     fn is_na(&self) -> bool {
@@ -60,6 +57,9 @@ impl NotAvailableValue for &str {
     //
     // cf., https://github.com/extendr/extendr/issues/483#issuecomment-1435499525
     fn na() -> Self {
-        NA_CHAR_PTR.as_ref()
+        NA_CHAR_PTR.get_or_init(|| unsafe {
+            let c_ptr = savvy_ffi::R_CHAR(savvy_ffi::R_NaString) as _;
+            std::str::from_utf8_unchecked(std::slice::from_raw_parts(c_ptr, 2))
+        })
     }
 }

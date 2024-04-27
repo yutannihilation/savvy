@@ -187,28 +187,32 @@ impl OwnedStringSexp {
                 // (e.g. `(0..10).filter(|x| x % 2 == 0)`), so it needs to be
                 // truncated to the actual length at last.
 
-                // string doesn't have new_without_init() method
-                let mut out = Self::new(upper)?;
+                let inner = crate::alloc_vector(STRSXP, upper as _)?;
+                local_protect(inner);
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
                     // The upper bound of size_hint() is just for optimization
-                    // and what we should not trust. So, we should't use
-                    // `set_elt_unchecked()` here.
-                    out.set_elt(i, v.as_ref())?;
+                    // and what we should not trust.
+                    assert_len(upper, i)?;
+                    unsafe { SET_STRING_ELT(inner, i as _, str_to_charsxp(v.as_ref())?) };
 
                     last_index = i;
                 }
 
                 let new_len = last_index + 1;
-                if new_len != upper {
-                    unsafe {
-                        savvy_ffi::SETLENGTH(out.inner, new_len as _);
+                if new_len == upper {
+                    // If the length is the same as expected, use it as it is.
+                    Self::new_from_raw_sexp(inner, upper)
+                } else {
+                    // If the length is shorter than expected, re-allocate a new
+                    // SEXP and copy the values into it.
+                    let mut out = Self::new(new_len)?;
+                    for i in 0..new_len {
+                        unsafe { out.set_elt_unchecked(i, STRING_ELT(inner, i as _)) };
                     }
-                    out.len = new_len;
+                    Ok(out)
                 }
-
-                Ok(out)
             }
             (_, None) => {
                 // When the length is not known at all, collect() it first.

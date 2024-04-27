@@ -156,7 +156,9 @@ fn write_file_inner(path: &Path, contents: &str, open_opts: std::fs::OpenOptions
     open_opts
         .open(path)
         .unwrap_or_else(|_| panic!("Failed to open {}", path_str))
-        .write_all(contents.as_bytes())
+        // Note: even if all the files are LF, it seems GitHub ACtions CI checks
+        // it out as CRLF, so replace CRLF to LF here just to make sure.
+        .write_all(contents.replace("\r\n", "\n").as_bytes())
         .unwrap_or_else(|_| panic!("Failed to write {}", path_str));
 }
 

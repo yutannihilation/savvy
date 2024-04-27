@@ -119,13 +119,22 @@ add_suffix <- function(x, y) {
 
 ## Using `#[savvy]` on other files than `lib.rs`
 
-You can use `#[savvy]` macro just the same as `lib.rs`. One thing you have to do
-is that you need to export the objects by `*`. This is because `#[savvy]`
-defines additional functions other than the original ones, and some of these
-also need to be exported. Since you don't know the names of such auto-generated
-functions, `*` is the solution.
+You can use `#[savvy]` macro just the same as `lib.rs`. Since `#[savvy]`
+automatically marks the functions necessary to be exposed as `pub`, you don't
+need to care about the visibility.
+
+For exampple, if you define a function in `src/foo.rs`,
+
+```rust
+#[savvy]
+fn do_nothing() -> savvy::Result<()> {
+    Ok(())
+}
+```
+
+just declaring `mod foo` in `src/lib.rs` is enough to make `do_nothing()`
+available to R.
 
 ```rust
 mod foo;
-pub use foo::*;
 ```

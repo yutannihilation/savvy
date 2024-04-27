@@ -187,6 +187,28 @@ set_attr_int <- function(attr, value) {
 }
 
 
+new_complex <- function(size) {
+  .Call(savvy_new_complex__impl, size)
+}
+
+
+first_complex <- function(x) {
+  .Call(savvy_first_complex__impl, x)
+}
+
+
+abs_complex <- function(x) {
+  .Call(savvy_abs_complex__impl, x)
+}
+
+
+new_value_pair <- function(a, b) {
+  a <- .savvy_extract_ptr(a, "Value")
+  b <- .savvy_extract_ptr(b, "Value")
+  .savvy_wrap_ValuePair(.Call(savvy_new_value_pair__impl, a, b))
+}
+
+
 scalar_input_int <- function(x) {
   invisible(.Call(savvy_scalar_input_int__impl, x))
 }
@@ -312,6 +334,23 @@ rep_str_slice <- function(x) {
 }
 
 
+print_foo_enum <- function(x) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  invisible(.Call(savvy_print_foo_enum__impl, x))
+}
+
+
+print_foo_enum_ref <- function(x) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  invisible(.Call(savvy_print_foo_enum_ref__impl, x))
+}
+
+
+foo_a <- function() {
+  .savvy_wrap_FooEnum(.Call(savvy_foo_a__impl))
+}
+
+
 safe_stop <- function() {
   invisible(.Call(savvy_safe_stop__impl))
 }
@@ -324,21 +363,6 @@ raise_error <- function() {
 
 must_panic <- function() {
   invisible(.Call(savvy_must_panic__impl))
-}
-
-
-new_int <- function(size) {
-  .Call(savvy_new_int__impl, size)
-}
-
-
-new_real <- function(size) {
-  .Call(savvy_new_real__impl, size)
-}
-
-
-new_bool <- function(size) {
-  .Call(savvy_new_bool__impl, size)
 }
 
 
@@ -357,25 +381,18 @@ get_args <- function(args) {
 }
 
 
-new_complex <- function(size) {
-  .Call(savvy_new_complex__impl, size)
+new_int <- function(size) {
+  .Call(savvy_new_int__impl, size)
 }
 
 
-first_complex <- function(x) {
-  .Call(savvy_first_complex__impl, x)
+new_real <- function(size) {
+  .Call(savvy_new_real__impl, size)
 }
 
 
-abs_complex <- function(x) {
-  .Call(savvy_abs_complex__impl, x)
-}
-
-
-new_value_pair <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(savvy_new_value_pair__impl, a, b))
+new_bool <- function(size) {
+  .Call(savvy_new_bool__impl, size)
 }
 
 
@@ -401,23 +418,6 @@ filter_logical_duplicates <- function(x) {
 
 filter_string_ascii <- function(x) {
   .Call(savvy_filter_string_ascii__impl, x)
-}
-
-
-print_foo_enum <- function(x) {
-  x <- .savvy_extract_ptr(x, "FooEnum")
-  invisible(.Call(savvy_print_foo_enum__impl, x))
-}
-
-
-print_foo_enum_ref <- function(x) {
-  x <- .savvy_extract_ptr(x, "FooEnum")
-  invisible(.Call(savvy_print_foo_enum_ref__impl, x))
-}
-
-
-foo_a <- function() {
-  .savvy_wrap_FooEnum(.Call(savvy_foo_a__impl))
 }
 
 

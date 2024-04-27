@@ -3,7 +3,7 @@
 ## What the hell is this?? Why do you need another framework when there's extendr?
 
 [extendr](https://extendr.github.io/) is great and ready to use, but it's not
-perfect in some points (e.g., [error handling][error]) and it's a kind of stuck;
+perfect in some points (e.g., [error handling][error]) and it's kind of stuck;
 extendr is too feature-rich and complex that no one can introduce a big breaking
 change easily. So, I needed to create a new, simple framework to experiment
 with. The main goal of savvy is to provide a simpler option other than extendr,
