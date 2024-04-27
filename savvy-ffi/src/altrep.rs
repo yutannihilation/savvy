@@ -8,13 +8,6 @@ use crate::{R_xlen_t, Rboolean, SEXP};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct _DllInfo {
-    _unused: [u8; 0],
-}
-pub type DllInfo = _DllInfo;
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct R_altrep_class_t {
     pub ptr: SEXP,
 }
@@ -99,7 +92,7 @@ extern "C" {
     pub fn R_make_altinteger_class(
         cname: *const ::std::os::raw::c_char,
         pname: *const ::std::os::raw::c_char,
-        info: *mut DllInfo,
+        info: *mut crate::DllInfo,
     ) -> R_altrep_class_t;
     pub fn R_set_altinteger_Elt_method(
         cls: R_altrep_class_t,
