@@ -1,3 +1,5 @@
+// Bare functions
+
 SEXP savvy_is_built_with_debug__ffi(void);
 SEXP savvy_to_upper__ffi(SEXP x);
 SEXP savvy_add_suffix__ffi(SEXP x, SEXP y);
@@ -72,6 +74,9 @@ SEXP savvy_filter_string_ascii__ffi(SEXP x);
 SEXP savvy_fun_mod1__ffi(void);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
 
+// Functions that wraps struct impl
+
+
 // methods and associated functions for FooEnum
 SEXP savvy_FooEnum_print__ffi(SEXP self__);
 
@@ -98,3 +103,7 @@ SEXP savvy_Value_get2__ffi(SEXP self__);
 SEXP savvy_ValuePair_new__ffi(SEXP a, SEXP b);
 SEXP savvy_ValuePair_new_copy__ffi(SEXP a, SEXP b);
 SEXP savvy_ValuePair_print__ffi(SEXP self__);
+
+// Functions used for initialization
+
+void init_foo(DllInfo *dll);
