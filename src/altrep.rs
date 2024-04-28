@@ -23,13 +23,18 @@ pub fn create_altrep_instance<T: 'static + AltInteger + IntoExtPtrSexp>(
     let sexp = x.into_external_pointer().0;
     local_protect(sexp);
 
-    let catalogue_mutex = ALTREP_CLASS_CATALOGUE
-        .get()
-        .expect("ALTREP_CLASS_CATALOGUE must be initialized before calling this function");
-    let catalogue = catalogue_mutex.lock().expect("Failed to get the lock");
-    let class = catalogue
-        .get(T::CLASS_NAME)
-        .expect("Failed to get the ALTREP class");
+    let catalogue_mutex = match ALTREP_CLASS_CATALOGUE.get() {
+        Some(catalogue_mutex) => catalogue_mutex,
+        None => return Err("ALTREP_CLASS_CATALOGUE is not initialized".into()),
+    };
+    let catalogue = match catalogue_mutex.lock() {
+        Ok(catalogue) => catalogue,
+        Err(e) => return Err(e.to_string().into()),
+    };
+    let class = match catalogue.get(T::CLASS_NAME) {
+        Some(class) => class,
+        None => return Err("Failed to get the ALTREP class".into()),
+    };
 
     let altrep = unsafe { R_new_altrep(*class, sexp, R_NilValue) };
     local_protect(altrep);
@@ -38,18 +43,32 @@ pub fn create_altrep_instance<T: 'static + AltInteger + IntoExtPtrSexp>(
     Ok(altrep)
 }
 
-fn register_altrep_class(class_name: &'static str, class_t: R_altrep_class_t) {
+fn register_altrep_class(
+    class_name: &'static str,
+    class_t: R_altrep_class_t,
+) -> crate::error::Result<()> {
     // There's no way to let global
     ALTREP_CLASS_CATALOGUE.get_or_init(|| Mutex::new(HashMap::new()));
 
-    let mut catalogue = ALTREP_CLASS_CATALOGUE.get().unwrap().lock().unwrap();
+    let catalogue_mutex = match ALTREP_CLASS_CATALOGUE.get() {
+        Some(catalogue_mutex) => catalogue_mutex,
+        None => return Err("ALTREP_CLASS_CATALOGUE is not initialized".into()),
+    };
 
-    if catalogue.insert(class_name, class_t).is_some() {
-        crate::io::r_eprint(
-            "[WARN] ALTREP class {class_name} is already defined. Something seems wrong.\n",
-            false,
+    let mut catalogue = match catalogue_mutex.lock() {
+        Ok(catalogue) => catalogue,
+        Err(e) => return Err(e.to_string().into()),
+    };
+
+    let existing_entry = catalogue.insert(class_name, class_t);
+
+    if existing_entry.is_some() {
+        return Err(
+            "[WARN] ALTREP class {class_name} is already defined. Something seems wrong.".into(),
         );
     }
+
+    Ok(())
 }
 
 pub trait AltInteger {
@@ -92,7 +111,9 @@ fn extract_self_from_altrep<T>(x: &SEXP) -> &mut T {
 }
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub fn register_altinteger_class<T: 'static + AltInteger>(dll_info: *mut crate::ffi::DllInfo) {
+pub fn register_altinteger_class<T: 'static + AltInteger>(
+    dll_info: *mut crate::ffi::DllInfo,
+) -> crate::error::Result<()> {
     let class_name = CString::new(T::CLASS_NAME).unwrap_or_default();
     let package_name = CString::new(T::PACKAGE_NAME).unwrap_or_default();
     let class_t =
@@ -196,13 +217,9 @@ pub fn register_altinteger_class<T: 'static + AltInteger>(dll_info: *mut crate::
         R_set_altrep_Coerce_method(class_t, Some(altrep_coerce::<T>));
         R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
-        // R_set_altinteger_No_NA_method(class_t, None);
-        // R_set_altinteger_Is_sorted_method(class_t, None);
-        // R_set_altinteger_Sum_method(class_t, None);
-        // R_set_altinteger_Min_method(class_t, None);
-        // R_set_altinteger_Max_method(class_t, None);
         R_set_altinteger_Elt_method(class_t, Some(altinteger_elt::<T>));
     }
 
-    register_altrep_class(T::CLASS_NAME, class_t);
+    register_altrep_class(T::CLASS_NAME, class_t)?;
+    Ok(())
 }
