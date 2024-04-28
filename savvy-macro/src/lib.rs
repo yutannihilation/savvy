@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyInitFn, SavvyStruct};
+use savvy_bindgen::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 use syn::parse_quote;
 
 #[proc_macro_attribute]
@@ -110,20 +110,6 @@ fn savvy_enum(orig: &mut syn::ItemEnum) -> syn::Result<TokenStream> {
         #(#try_from_impls)*
     )
     .into())
-}
-
-#[proc_macro_attribute]
-pub fn savvy_init(_args: TokenStream, input: TokenStream) -> TokenStream {
-    match &syn::parse::<syn::ItemFn>(input.clone()) {
-        // Just try to parse as SavvyInitfn, and return the original as it is.
-        Ok(item_fn) => match SavvyInitFn::new(item_fn) {
-            Ok(_) => input,
-            Err(e) => e.into_compile_error().into(),
-        },
-        Err(e) => proc_macro::TokenStream::from(
-            syn::Error::new(e.span(), "#[savvy_init] macro only accepts `fn`").into_compile_error(),
-        ),
-    }
 }
 
 #[cfg(test)]

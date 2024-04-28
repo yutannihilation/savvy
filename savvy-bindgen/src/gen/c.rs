@@ -1,4 +1,4 @@
-use crate::{MergedResult, SavvyFn, SavvyFnType, SavvyInitFn};
+use crate::{MergedResult, SavvyFn, SavvyFnType};
 
 impl SavvyFn {
     pub fn get_c_args(&self) -> Vec<(String, String)> {

@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyInitFn, SavvyStruct};
+use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 pub mod savvy_enum;
 pub mod savvy_fn;
 pub mod savvy_impl;
-pub mod savvy_init_fn;
 pub mod savvy_struct;
 
 pub struct ParsedTestCase {
@@ -22,7 +21,6 @@ pub struct ParsedResult {
     pub impls: Vec<SavvyImpl>,
     pub structs: Vec<SavvyStruct>,
     pub enums: Vec<SavvyEnum>,
-    pub init_fns: Vec<SavvyInitFn>,
     pub mod_path: Vec<String>,
     pub child_mods: Vec<String>,
     pub tests: Vec<ParsedTestCase>,
@@ -41,21 +39,16 @@ pub struct MergedResult {
     pub bare_fns: Vec<SavvyFn>,
     pub impls: Vec<(String, SavvyMergedImpl)>,
     pub enums: Vec<SavvyEnum>,
-    pub init_fns: Vec<SavvyInitFn>,
 }
 
 pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
     let mut bare_fns: Vec<SavvyFn> = Vec::new();
     let mut impl_map: HashMap<String, SavvyMergedImpl> = HashMap::new();
     let mut enums: Vec<SavvyEnum> = Vec::new();
-    let mut init_fns: Vec<SavvyInitFn> = Vec::new();
 
     for result in results {
         let mut fns = result.bare_fns;
         bare_fns.append(&mut fns);
-
-        let mut fns = result.init_fns;
-        init_fns.append(&mut fns);
 
         for i in result.impls {
             let key = i.ty.to_string();
@@ -127,6 +120,5 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
         bare_fns,
         impls,
         enums,
-        init_fns,
     }
 }

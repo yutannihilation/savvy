@@ -5,18 +5,11 @@ use quote::format_ident;
 use syn::parse_quote;
 
 use crate::{
-    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyInitFn,
-    SavvyStruct,
+    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct,
 };
 
 fn is_savvified(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
-}
-
-fn is_init_function(attrs: &[syn::Attribute]) -> bool {
-    attrs
-        .iter()
-        .any(|attr| attr == &parse_quote!(#[savvy_init]))
 }
 
 pub fn read_file(path: &Path) -> String {
@@ -67,7 +60,6 @@ pub fn parse_file(path: &Path, mod_path: &[String]) -> ParsedResult {
         impls: Vec::new(),
         structs: Vec::new(),
         enums: Vec::new(),
-        init_fns: Vec::new(),
         mod_path: mod_path.to_vec(),
         child_mods: Vec::new(),
         tests,
@@ -97,13 +89,6 @@ impl ParsedResult {
                 if is_savvified(item_fn.attrs.as_slice()) {
                     self.bare_fns
                         .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
-                }
-
-                if is_init_function(item_fn.attrs.as_slice()) {
-                    self.init_fns.push(
-                        SavvyInitFn::new(item_fn)
-                            .expect("Failed to parse function for initialization"),
-                    );
                 }
 
                 let label = format!("fn {}", item_fn.sig.ident);
