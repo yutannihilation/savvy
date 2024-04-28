@@ -100,28 +100,7 @@ pub fn generate_c_header_file(result: &MergedResult) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    let init_fns = result
-        .bare_fns
-        .iter()
-        .filter(|x| matches!(x.fn_type, SavvyFnType::InitFunction))
-        .map(|x| format!("void {}(DllInfo *dll);", x.fn_name))
-        .collect::<Vec<String>>()
-        .join("\n");
-
-    format!(
-        "// Bare functions
-
-{bare_fns}
-
-// Functions that wraps struct impl
-
-{impls}
-
-// Functions used for initialization
-
-{init_fns}
-"
-    )
+    format!("{bare_fns}\n{impls}")
 }
 
 fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
