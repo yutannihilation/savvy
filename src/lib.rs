@@ -62,6 +62,8 @@ pub mod protect;
 pub mod sexp;
 pub mod unwind_protect;
 
+pub mod altrep;
+
 use std::os::raw::c_char;
 
 pub use error::{Error, Result};
