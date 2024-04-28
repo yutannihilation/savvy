@@ -423,11 +423,8 @@ mod tests {
     }
 }
 
-use savvy::savvy_init;
-
-#[allow(clippy::missing_safety_doc)]
-#[no_mangle]
-#[savvy_init]
-pub unsafe extern "C" fn init_foo(_dll_info: *mut savvy::ffi::DllInfo) {
+#[savvy]
+fn init_foo(_dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     r_eprintln!("Initialized!");
+    Ok(())
 }
