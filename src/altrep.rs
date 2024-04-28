@@ -91,10 +91,8 @@ fn extract_self_from_altrep<T>(x: &SEXP) -> &mut T {
     self_.expect("Failed to convert the external pointer to the Rust object")
 }
 
-#[allow(clippy::missing_safety_doc)]
-pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
-    dll_info: *mut crate::ffi::DllInfo,
-) {
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub fn register_altinteger_class<T: 'static + AltInteger>(dll_info: *mut crate::ffi::DllInfo) {
     let class_name = CString::new(T::CLASS_NAME).unwrap_or_default();
     let package_name = CString::new(T::PACKAGE_NAME).unwrap_or_default();
     let class_t =

@@ -117,7 +117,7 @@ fn generate_r_impl_for_impl(
         match savvy_fn.fn_type {
             SavvyFnType::AssociatedFunction(_) => associated_fns.push(savvy_fn),
             SavvyFnType::Method { .. } => method_fns.push(savvy_fn),
-            SavvyFnType::BareFunction => panic!("Something is wrong"),
+            _ => panic!("Something is wrong"),
         }
     }
 
@@ -298,6 +298,8 @@ pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
     let r_fns = result
         .bare_fns
         .iter()
+        // initializaion functions don't need the R interface
+        .filter(|x| !matches!(x.fn_type, SavvyFnType::InitFunction))
         .map(|x| x.to_r_function())
         .collect::<Vec<String>>()
         .join("\n");

@@ -101,15 +101,10 @@ pub fn generate_c_header_file(result: &MergedResult) -> String {
         .join("\n");
 
     let init_fns = result
-        .init_fns
+        .bare_fns
         .iter()
-        .map(|x| {
-            if x.use_dll_info {
-                format!("void {}(DllInfo *dll);", x.fn_name)
-            } else {
-                format!("void {}(void);", x.fn_name)
-            }
-        })
+        .filter(|x| matches!(x.fn_type, SavvyFnType::InitFunction))
+        .map(|x| format!("void {}(DllInfo *dll);", x.fn_name))
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -138,20 +133,17 @@ fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
 
 fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
     fns.iter()
+        // initializaion functions don't need the R interface
+        .filter(|x| !matches!(x.fn_type, SavvyFnType::InitFunction))
         .map(|x| x.to_c_function_call_entry())
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-fn generate_c_initialization(fns: &[SavvyInitFn]) -> String {
+fn generate_c_initialization(fns: &[SavvyFn]) -> String {
     fns.iter()
-        .map(|x| {
-            if x.use_dll_info {
-                format!("    {}(dll);", x.fn_name)
-            } else {
-                format!("    {}();", x.fn_name)
-            }
-        })
+        .filter(|x| matches!(x.fn_type, SavvyFnType::InitFunction))
+        .map(|x| format!("    {}(dll);", x.fn_name_c_impl()))
         .collect::<Vec<String>>()
         .join("\n")
 }
@@ -208,7 +200,7 @@ SEXP handle_result(SEXP res_) {
     let c_fns = c_fns.join("\n");
     let call_entries = call_entries.join("\n");
 
-    let initialization = generate_c_initialization(&result.init_fns);
+    let initialization = generate_c_initialization(&result.bare_fns);
 
     format!(
         "{common_part}

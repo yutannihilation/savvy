@@ -1,7 +1,6 @@
 #![allow(unused_variables)]
 
 use savvy_macro::savvy;
-use savvy_macro::savvy_init;
 
 #[savvy]
 fn no_return_type(x: i32) {}
@@ -43,16 +42,19 @@ enum Foo {
     B = 100,
 }
 
-#[savvy_init]
-fn init_wrong_type(x: Foo) {}
+#[savvy]
+fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+    Ok(())
+}
 
-#[savvy_init]
-fn init_wrong_type2(x: DllInfo) {}
+#[savvy]
+fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+    Ok(())
+}
 
-#[savvy_init]
-fn init_wrong_type3(x: *const DllInfo) {}
-
-#[savvy_init]
-fn init_wrong_type3(x: *mut DllInfo) -> Foo {}
+#[savvy]
+fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+    Ok(())
+}
 
 fn main() {}
