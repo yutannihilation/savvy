@@ -83,6 +83,14 @@ pub trait AltInteger {
     fn elt(&mut self, i: usize) -> i32;
 }
 
+#[allow(clippy::mut_from_ref)]
+#[inline]
+fn extract_self_from_altrep<T>(x: &SEXP) -> &mut T {
+    let x = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x)).unwrap() as *mut T };
+    let self_ = unsafe { x.as_mut() };
+    self_.expect("Failed to convert the external pointer to the Rust object")
+}
+
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
     dll_info: *mut crate::ffi::DllInfo,
@@ -94,21 +102,13 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn helper_extract_self<T>(x: &SEXP) -> &mut T {
-        let x = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x)).unwrap() as *mut T };
-        let res = unsafe { x.as_mut() };
-        res.expect("Failed to convert the external pointer to the Rust object")
-    }
-
-    #[allow(clippy::mut_from_ref)]
-    #[inline]
-    fn helper_materialize<T: 'static + AltInteger>(x: &SEXP) -> SEXP {
+    fn materialize<T: 'static + AltInteger>(x: &SEXP) -> SEXP {
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
             return data;
         }
 
-        let self_: &mut T = helper_extract_self(x);
+        let self_: &mut T = extract_self_from_altrep(x);
 
         let len = self_.length();
         let new = crate::alloc_vector(INTSXP, len).unwrap();
@@ -136,7 +136,7 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         x: SEXP,
         _deep_copy: Rboolean,
     ) -> SEXP {
-        let materialized = helper_materialize::<T>(&x);
+        let materialized = materialize::<T>(&x);
 
         // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
         // unsafe { SET_ATTRIB(materialized, attrs) };
@@ -148,7 +148,7 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         x: SEXP,
         sexp_type: SEXPTYPE,
     ) -> SEXP {
-        let materialized = helper_materialize::<T>(&x);
+        let materialized = materialize::<T>(&x);
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
@@ -156,17 +156,17 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         x: SEXP,
         _writable: Rboolean,
     ) -> *mut c_void {
-        let materialized = helper_materialize::<T>(&x);
+        let materialized = materialize::<T>(&x);
         unsafe { INTEGER(materialized) as _ }
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: 'static + AltInteger>(x: SEXP) -> *const c_void {
-        let materialized = helper_materialize::<T>(&x);
+        let materialized = materialize::<T>(&x);
         unsafe { INTEGER(materialized) as _ }
     }
 
     unsafe extern "C" fn altrep_length<T: 'static + AltInteger>(x: SEXP) -> R_xlen_t {
-        let self_: &mut T = helper_extract_self(&x);
+        let self_: &mut T = extract_self_from_altrep(&x);
         self_.length() as _
     }
 
@@ -177,7 +177,7 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         _: i32,
         _: Option<unsafe extern "C" fn(SEXP, i32, i32, i32)>,
     ) -> Rboolean {
-        let self_: &mut T = helper_extract_self(&x);
+        let self_: &mut T = extract_self_from_altrep(&x);
         self_.inspect();
 
         Rboolean_TRUE
@@ -187,7 +187,7 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         x: SEXP,
         i: R_xlen_t,
     ) -> std::os::raw::c_int {
-        let self_: &mut T = helper_extract_self(&x);
+        let self_: &mut T = extract_self_from_altrep(&x);
         self_.elt(i as _) as _
     }
 
