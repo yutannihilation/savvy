@@ -91,7 +91,7 @@ pub use unwind_protect::unwind_protect;
 pub use eval::{assert_eq_r_code, eval_parse_text, EvalResult};
 
 // re-export
-pub use savvy_macro::{savvy, savvy_init};
+pub use savvy_macro::savvy;
 
 use ffi::SEXP;
 use savvy_ffi::{cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, SEXPTYPE};
