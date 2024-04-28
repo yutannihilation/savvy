@@ -248,3 +248,10 @@ extern "C" {
 
 // misc
 pub type DllInfo = *mut ::std::os::raw::c_void;
+extern "C" {
+    pub fn Rf_coerceVector(arg1: SEXP, arg2: SEXPTYPE) -> SEXP;
+    pub fn Rf_duplicate(arg1: SEXP) -> SEXP;
+    pub fn DATAPTR(x: SEXP) -> *mut ::std::os::raw::c_void;
+    pub fn DATAPTR_RO(x: SEXP) -> *const ::std::os::raw::c_void;
+
+}

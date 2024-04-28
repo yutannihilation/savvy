@@ -2,9 +2,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use std::os::raw::c_int;
+use std::os::raw::{c_int, c_void};
 
-use crate::{R_xlen_t, Rboolean, SEXP};
+use crate::{R_xlen_t, Rboolean, SEXP, SEXPTYPE};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -64,7 +64,7 @@ extern "C" {
     );
     pub fn R_set_altrep_Coerce_method(
         cls: R_altrep_class_t,
-        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: c_int) -> SEXP>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: SEXPTYPE) -> SEXP>,
     );
     pub fn R_set_altrep_Inspect_method(
         cls: R_altrep_class_t,
@@ -84,6 +84,20 @@ extern "C" {
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP) -> R_xlen_t>,
     );
+}
+
+// vector common
+
+extern "C" {
+    pub fn R_set_altvec_Dataptr_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> *mut c_void>,
+    );
+    pub fn R_set_altvec_Dataptr_or_null_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> *const c_void>,
+    );
+
 }
 
 // integer

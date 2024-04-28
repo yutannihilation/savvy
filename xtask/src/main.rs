@@ -158,7 +158,11 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rprintf")
         .allowlist_function("REprintf")
         // misc
-        .allowlist_type("DllInfo");
+        .allowlist_type("DllInfo")
+        .allowlist_function("Rf_duplicate")
+        .allowlist_function("Rf_coerceVector")
+        .allowlist_function("DATAPTR")
+        .allowlist_function("DATAPTR_RO");
 
     let builder = builder
         // ALTREP
@@ -179,6 +183,9 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altrep_Unserialize_method")
         .allowlist_function("R_set_altrep_UnserializeEX_method")
         .allowlist_function("R_set_altrep_Serialized_state_method")
+        // ALTVEC
+        .allowlist_function("R_set_altvec_Dataptr_method")
+        .allowlist_function("R_set_altvec_Dataptr_or_null_method")
         // ALTINTEGER
         .allowlist_item("R_altinteger_Elt_method_t")
         .allowlist_item("R_altinteger_Max_method_t")
