@@ -160,9 +160,7 @@ fn show() -> Result<(), DynError> {
         // misc
         .allowlist_type("DllInfo")
         .allowlist_function("Rf_duplicate")
-        .allowlist_function("Rf_coerceVector")
-        .allowlist_function("DATAPTR")
-        .allowlist_function("DATAPTR_RO");
+        .allowlist_function("Rf_coerceVector");
 
     let builder = builder
         // ALTREP

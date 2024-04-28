@@ -9,7 +9,7 @@ use savvy_ffi::{
         R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method, MARK_NOT_MUTABLE,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, DATAPTR, DATAPTR_RO, INTEGER, INTSXP, SEXP, SEXPTYPE,
+    Rf_unprotect, INTEGER, INTSXP, SEXP, SEXPTYPE,
 };
 
 use crate::{protect::local_protect, IntoExtPtrSexp};
@@ -56,6 +56,9 @@ pub trait AltInteger {
     /// Class name to identify the ALTREP class.
     const CLASS_NAME: &'static str;
 
+    /// Package name to identify the ALTREP class.
+    const PACKAGE_NAME: &'static str;
+
     /// Copies all the data into a new memory. This is used when the ALTREP
     /// needs to be materialized.
     ///
@@ -84,14 +87,10 @@ pub trait AltInteger {
 pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
     dll_info: *mut crate::ffi::DllInfo,
 ) {
-    let class_cstr = CString::new(T::CLASS_NAME).unwrap_or_default();
-    let class_t = unsafe {
-        R_make_altinteger_class(
-            class_cstr.as_ptr(),
-            c"savvy-altvec-test-package".as_ptr(),
-            dll_info,
-        )
-    };
+    let class_name = CString::new(T::CLASS_NAME).unwrap_or_default();
+    let package_name = CString::new(T::PACKAGE_NAME).unwrap_or_default();
+    let class_t =
+        unsafe { R_make_altinteger_class(class_name.as_ptr(), package_name.as_ptr(), dll_info) };
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
@@ -158,12 +157,12 @@ pub unsafe extern "C" fn register_altinteger_class<T: 'static + AltInteger>(
         _writable: Rboolean,
     ) -> *mut c_void {
         let materialized = helper_materialize::<T>(&x);
-        unsafe { DATAPTR(materialized) }
+        unsafe { INTEGER(materialized) as _ }
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: 'static + AltInteger>(x: SEXP) -> *const c_void {
         let materialized = helper_materialize::<T>(&x);
-        unsafe { DATAPTR_RO(materialized) }
+        unsafe { INTEGER(materialized) as _ }
     }
 
     unsafe extern "C" fn altrep_length<T: 'static + AltInteger>(x: SEXP) -> R_xlen_t {
