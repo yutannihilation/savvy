@@ -2,6 +2,8 @@ mod altinteger;
 pub use altinteger::*;
 mod altreal;
 pub use altreal::*;
+mod altlogical;
+pub use altlogical::*;
 
 use std::{collections::HashMap, sync::Mutex};
 

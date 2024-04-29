@@ -154,11 +154,11 @@ extern "C" {
     );
     pub fn R_set_altreal_Is_sorted_method(
         cls: R_altrep_class_t,
-        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> ::std::os::raw::c_int>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
     pub fn R_set_altreal_No_NA_method(
         cls: R_altrep_class_t,
-        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> ::std::os::raw::c_int>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
     pub fn R_set_altreal_Sum_method(
         cls: R_altrep_class_t,
@@ -171,5 +171,42 @@ extern "C" {
     pub fn R_set_altreal_Max_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+}
+
+// logical
+
+extern "C" {
+    pub fn R_make_altlogical_class(
+        cname: *const c_char,
+        pname: *const c_char,
+        info: *mut crate::DllInfo,
+    ) -> R_altrep_class_t;
+    pub fn R_set_altlogical_Elt_method(
+        cls: R_altrep_class_t,
+        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> c_int>,
+    );
+    pub fn R_set_altlogical_Get_region_method(
+        cls: R_altrep_class_t,
+        fun: ::std::option::Option<
+            unsafe extern "C" fn(
+                arg1: SEXP,
+                arg2: R_xlen_t,
+                arg3: R_xlen_t,
+                arg4: *mut c_int,
+            ) -> R_xlen_t,
+        >,
+    );
+    pub fn R_set_altlogical_Is_sorted_method(
+        cls: R_altrep_class_t,
+        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
+    );
+    pub fn R_set_altlogical_No_NA_method(
+        cls: R_altrep_class_t,
+        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
+    );
+    pub fn R_set_altlogical_Sum_method(
+        cls: R_altrep_class_t,
+        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
     );
 }

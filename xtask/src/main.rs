@@ -213,7 +213,14 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altreal_No_NA_method")
         .allowlist_function("R_set_altreal_Is_sorted_method")
         .allowlist_function("R_set_altreal_Get_region_method")
-        .allowlist_function("R_make_altreal_class");
+        .allowlist_function("R_make_altreal_class")
+        // altlogical
+        .allowlist_item("R_set_altlogical_Elt_method")
+        .allowlist_item("R_set_altlogical_Sum_method")
+        .allowlist_item("R_set_altlogical_No_NA_method")
+        .allowlist_item("R_set_altlogical_Is_sorted_method")
+        .allowlist_item("R_set_altlogical_Get_region_method")
+        .allowlist_item("R_make_altlogical_class");
 
     let bindings = builder.generate().expect("Unable to generate bindings");
 
