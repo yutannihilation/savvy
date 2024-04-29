@@ -32,7 +32,7 @@ jobs:
           crate-type = ["staticlib"]
 
           [dependencies]
-          savvy = { path = "../savvy", features = ["complex"] }
+          savvy = { path = "../savvy", features = ["complex", "altrep"] }
           savvy-ffi = { path = "../savvy/savvy-ffi" }
 
           [workspace.package]

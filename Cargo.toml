@@ -31,7 +31,7 @@ altrep = ["savvy-ffi/altrep"]
 cc = "1"
 
 [package.metadata.docs.rs]
-features = ["complex"]
+features = ["complex", "altrep"]
 
 [workspace.metadata.release]
 tag = false # do not create tags for individual crates (e.g. "savvy-cli-v0.2.5")
