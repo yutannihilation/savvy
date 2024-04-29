@@ -17,3 +17,14 @@ test_that("altreal works", {
   x[1] <- 2
   expect_equal(x, c(2, 2, 3))
 })
+
+
+test_that("altlogical works", {
+  x <- altlogical()
+  expect_equal(x[1], TRUE) # ELT method
+  expect_equal(length(x), 3L) # length method
+  expect_equal(as.character(x), c("TRUE", "FALSE", "TRUE")) # coerce method
+  # duplicate method? dataptr method? I'm not sure
+  x[1] <- FALSE
+  expect_equal(x, c(FALSE, FALSE, TRUE))
+})

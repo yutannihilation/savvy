@@ -17,6 +17,7 @@ SEXP savvy_get_name_external__ffi(SEXP x);
 SEXP savvy_set_name_external__ffi(SEXP x, SEXP name);
 SEXP savvy_altint__ffi(void);
 SEXP savvy_altreal__ffi(void);
+SEXP savvy_altlogical__ffi(void);
 SEXP savvy_init_altrep_class__ffi(DllInfo* dll_info);
 SEXP savvy_get_class_int__ffi(SEXP x);
 SEXP savvy_get_names_int__ffi(SEXP x);

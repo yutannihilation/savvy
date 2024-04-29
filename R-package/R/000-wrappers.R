@@ -157,6 +157,11 @@ altreal <- function() {
 }
 
 
+altlogical <- function() {
+  .Call(savvy_altlogical__impl)
+}
+
+
 get_class_int <- function(x) {
   .Call(savvy_get_class_int__impl, x)
 }
