@@ -152,6 +152,11 @@ altint <- function() {
 }
 
 
+altreal <- function() {
+  .Call(savvy_altreal__impl)
+}
+
+
 get_class_int <- function(x) {
   .Call(savvy_get_class_int__impl, x)
 }
