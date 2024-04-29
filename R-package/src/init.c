@@ -134,6 +134,11 @@ SEXP savvy_altlogical__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_altstring__impl(void) {
+    SEXP res = savvy_altstring__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_init_altrep_class__impl(DllInfo* dll_info) {
     SEXP res = savvy_init_altrep_class__ffi(dll_info);
     return handle_result(res);
@@ -526,6 +531,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_altint__impl", (DL_FUNC) &savvy_altint__impl, 0},
     {"savvy_altreal__impl", (DL_FUNC) &savvy_altreal__impl, 0},
     {"savvy_altlogical__impl", (DL_FUNC) &savvy_altlogical__impl, 0},
+    {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
     {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},
     {"savvy_get_names_int__impl", (DL_FUNC) &savvy_get_names_int__impl, 1},
     {"savvy_get_dim_int__impl", (DL_FUNC) &savvy_get_dim_int__impl, 1},

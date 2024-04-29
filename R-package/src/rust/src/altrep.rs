@@ -1,6 +1,6 @@
 use savvy::altrep::{
-    register_altinteger_class, register_altlogical_class, register_altreal_class, AltInteger,
-    AltLogical, AltReal,
+    register_altinteger_class, register_altlogical_class, register_altreal_class,
+    register_altstring_class, AltInteger, AltLogical, AltReal, AltString,
 };
 use savvy::savvy;
 
@@ -66,7 +66,7 @@ fn altreal() -> savvy::Result<savvy::Sexp> {
     Ok(savvy::Sexp(v_altrep))
 }
 
-// initialization
+// logical
 
 struct MyAltLogical(Vec<bool>);
 impl savvy::IntoExtPtrSexp for MyAltLogical {}
@@ -97,6 +97,37 @@ fn altlogical() -> savvy::Result<savvy::Sexp> {
     Ok(savvy::Sexp(v_altrep))
 }
 
+// string
+
+struct MyAltString(Vec<String>);
+impl savvy::IntoExtPtrSexp for MyAltString {}
+
+impl MyAltString {
+    fn new(x: Vec<String>) -> Self {
+        Self(x)
+    }
+}
+
+impl AltString for MyAltString {
+    const CLASS_NAME: &'static str = "MyAltString";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+
+    fn length(&mut self) -> usize {
+        self.0.len()
+    }
+
+    fn elt(&mut self, i: usize) -> &str {
+        self.0[i].as_str()
+    }
+}
+
+#[savvy]
+fn altstring() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltString::new(vec!["1".to_string(), "2".to_string(), "3".to_string()]);
+    let v_altrep = v.into_altrep()?;
+    Ok(savvy::Sexp(v_altrep))
+}
+
 // initialization
 
 #[savvy]
@@ -104,5 +135,6 @@ fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
     register_altreal_class::<MyAltReal>(dll_info)?;
     register_altlogical_class::<MyAltLogical>(dll_info)?;
+    register_altstring_class::<MyAltString>(dll_info)?;
     Ok(())
 }
