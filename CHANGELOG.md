@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* If `#[savvy]` is placed on a function whose argument is a `*mut DllInfo`, the
+  function is called when the package is loaded. See [the guide](https://yutannihilation.github.io/savvy/guide/initialization_routine.html) for more details.
+
 ## [v0.6.1] (2024-04-26)
 
 ### Minor improvements
