@@ -147,6 +147,26 @@ set_name_external <- function(x, name) {
 }
 
 
+altint <- function() {
+  .Call(savvy_altint__impl)
+}
+
+
+altreal <- function() {
+  .Call(savvy_altreal__impl)
+}
+
+
+altlogical <- function() {
+  .Call(savvy_altlogical__impl)
+}
+
+
+altstring <- function() {
+  .Call(savvy_altstring__impl)
+}
+
+
 get_class_int <- function(x) {
   .Call(savvy_get_class_int__impl, x)
 }

@@ -90,12 +90,14 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_setAttrib")
         // Integer
         .allowlist_function("INTEGER")
+        .allowlist_function("INTEGER_RO")
         .allowlist_function("INTEGER_ELT")
         .allowlist_function("SET_INTEGER_ELT")
         .allowlist_function("Rf_ScalarInteger")
         .allowlist_function("Rf_isInteger")
         // Real
         .allowlist_function("REAL")
+        .allowlist_function("REAL_RO")
         .allowlist_function("REAL_ELT")
         .allowlist_function("SET_COMPLEX_ELT")
         .allowlist_function("Rf_ScalarReal")
@@ -103,17 +105,21 @@ fn show() -> Result<(), DynError> {
         // Complex
         .allowlist_type("RComplex")
         .allowlist_function("COMPLEX")
+        .allowlist_function("COMPLEX_RO")
         .allowlist_function("COMPLEX_ELT")
         .allowlist_function("SET_COMPLEX_ELT")
         .allowlist_function("Rf_ScalarComplex")
         .allowlist_function("Rf_isComplex")
         // Logical
         .allowlist_function("LOGICAL")
+        .allowlist_function("LOGICAL_RO")
         .allowlist_function("LOGICAL_ELT")
         .allowlist_function("SET_LOGICAL_ELT")
         .allowlist_function("Rf_ScalarLogical")
         .allowlist_function("Rf_isLogical")
         // String and character
+        .allowlist_function("STRING_PTR")
+        .allowlist_function("STRING_PTR_RO")
         .allowlist_function("STRING_ELT")
         .allowlist_function("SET_STRING_ELT")
         .allowlist_function("Rf_ScalarString")
@@ -157,7 +163,62 @@ fn show() -> Result<(), DynError> {
         // I/O
         .allowlist_function("Rprintf")
         .allowlist_function("REprintf")
-        .allowlist_type("DllInfo");
+        // misc
+        .allowlist_type("DllInfo")
+        .allowlist_function("Rf_duplicate")
+        .allowlist_function("Rf_coerceVector");
+
+    let builder = builder
+        // ALTREP
+        .allowlist_function("MARK_NOT_MUTABLE")
+        .allowlist_function("ALTREP")
+        .allowlist_function("ALTREP_CLASS")
+        .allowlist_function("R_new_altrep")
+        .allowlist_function("R_altrep_data1")
+        .allowlist_function("R_altrep_data2")
+        .allowlist_function("R_set_altrep_data1")
+        .allowlist_function("R_set_altrep_data2")
+        .allowlist_item("R_altrep_class_t")
+        .allowlist_function("R_set_altrep_Coerce_method")
+        .allowlist_function("R_set_altrep_Length_method")
+        .allowlist_function("R_set_altrep_Inspect_method")
+        .allowlist_function("R_set_altrep_Duplicate_method")
+        .allowlist_function("R_set_altrep_Unserialize_method")
+        .allowlist_function("R_set_altrep_Serialized_state_method")
+        // ALTVEC
+        .allowlist_function("R_set_altvec_Dataptr_method")
+        .allowlist_function("R_set_altvec_Dataptr_or_null_method")
+        // ALTINTEGER
+        .allowlist_function("R_set_altinteger_Elt_method")
+        .allowlist_function("R_set_altinteger_Max_method")
+        .allowlist_function("R_set_altinteger_Min_method")
+        .allowlist_function("R_set_altinteger_Sum_method")
+        .allowlist_function("R_set_altinteger_No_NA_method")
+        .allowlist_function("R_set_altinteger_Is_sorted_method")
+        .allowlist_function("R_set_altinteger_Get_region_method")
+        .allowlist_function("R_make_altinteger_class")
+        // ALTREAL
+        .allowlist_function("R_set_altreal_Elt_method")
+        .allowlist_function("R_set_altreal_Max_method")
+        .allowlist_function("R_set_altreal_Min_method")
+        .allowlist_function("R_set_altreal_Sum_method")
+        .allowlist_function("R_set_altreal_No_NA_method")
+        .allowlist_function("R_set_altreal_Is_sorted_method")
+        .allowlist_function("R_set_altreal_Get_region_method")
+        .allowlist_function("R_make_altreal_class")
+        // altlogical
+        .allowlist_item("R_set_altlogical_Elt_method")
+        .allowlist_item("R_set_altlogical_Sum_method")
+        .allowlist_item("R_set_altlogical_No_NA_method")
+        .allowlist_item("R_set_altlogical_Is_sorted_method")
+        .allowlist_item("R_set_altlogical_Get_region_method")
+        .allowlist_item("R_make_altlogical_class")
+        // altstring
+        .allowlist_item("R_set_altstring_Elt_method")
+        .allowlist_item("R_set_altstring_No_NA_method")
+        .allowlist_item("R_set_altstring_Is_sorted_method")
+        .allowlist_item("R_set_altstring_Set_elt_method")
+        .allowlist_item("R_make_altstring_class");
 
     let bindings = builder.generate().expect("Unable to generate bindings");
 

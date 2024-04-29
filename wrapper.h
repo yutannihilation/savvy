@@ -10,3 +10,6 @@
 
 // For R_ParseVector()
 #include <R_ext/Parse.h>
+
+// For ALTREP
+#include <R_ext/Altrep.h>
