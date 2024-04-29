@@ -11,7 +11,7 @@ use savvy_ffi::{
         R_set_altvec_Dataptr_or_null_method,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, LGLSXP, LOGICAL, SEXP, SEXPTYPE,
+    Rf_unprotect, LGLSXP, LOGICAL, LOGICAL_RO, SEXP, SEXPTYPE,
 };
 
 use crate::IntoExtPtrSexp;
@@ -116,7 +116,7 @@ pub fn register_altlogical_class<T: AltLogical>(
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltLogical>(x: SEXP) -> *const c_void {
         let materialized = materialize::<T>(&x);
-        unsafe { LOGICAL(materialized) as _ }
+        unsafe { LOGICAL_RO(materialized) as _ }
     }
 
     unsafe extern "C" fn altrep_length<T: AltLogical>(x: SEXP) -> R_xlen_t {

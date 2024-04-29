@@ -81,6 +81,7 @@ extern "C" {
 // Integer
 extern "C" {
     pub fn INTEGER(x: SEXP) -> *mut ::std::os::raw::c_int;
+    pub fn INTEGER_RO(x: SEXP) -> *const ::std::os::raw::c_int;
     pub fn INTEGER_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
     pub fn SET_INTEGER_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int);
     pub fn Rf_ScalarInteger(arg1: ::std::os::raw::c_int) -> SEXP;
@@ -90,6 +91,7 @@ extern "C" {
 // Real
 extern "C" {
     pub fn REAL(x: SEXP) -> *mut f64;
+    pub fn REAL_RO(x: SEXP) -> *const f64;
     pub fn REAL_ELT(x: SEXP, i: R_xlen_t) -> f64;
     pub fn SET_REAL_ELT(x: SEXP, i: R_xlen_t, v: f64);
     pub fn Rf_ScalarReal(arg1: f64) -> SEXP;
@@ -115,6 +117,7 @@ extern "C" {
 #[cfg(feature = "complex")]
 extern "C" {
     pub fn COMPLEX(x: SEXP) -> *mut num_complex::Complex64;
+    pub fn COMPLEX_RO(x: SEXP) -> *mut num_complex::Complex64;
     pub fn COMPLEX_ELT(x: SEXP, i: R_xlen_t) -> num_complex::Complex64;
     pub fn SET_COMPLEX_ELT(x: SEXP, i: R_xlen_t, v: num_complex::Complex64);
     pub fn Rf_ScalarComplex(arg1: num_complex::Complex64) -> SEXP;
@@ -124,6 +127,7 @@ extern "C" {
 // Logical
 extern "C" {
     pub fn LOGICAL(x: SEXP) -> *mut ::std::os::raw::c_int;
+    pub fn LOGICAL_RO(x: SEXP) -> *const ::std::os::raw::c_int;
     pub fn LOGICAL_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
     pub fn SET_LOGICAL_ELT(x: SEXP, i: R_xlen_t, v: ::std::os::raw::c_int);
     pub fn Rf_ScalarLogical(arg1: ::std::os::raw::c_int) -> SEXP;
@@ -141,6 +145,8 @@ pub const cetype_t_CE_ANY: cetype_t = 99;
 pub type cetype_t = ::std::os::raw::c_int;
 
 extern "C" {
+    pub fn STRING_PTR(x: SEXP) -> *mut SEXP;
+    pub fn STRING_PTR_RO(x: SEXP) -> *const SEXP;
     pub fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP);
     pub fn Rf_ScalarString(arg1: SEXP) -> SEXP;

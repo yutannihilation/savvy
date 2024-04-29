@@ -11,7 +11,7 @@ use savvy_ffi::{
         R_set_altvec_Dataptr_or_null_method,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, INTEGER, INTSXP, SEXP, SEXPTYPE,
+    Rf_unprotect, INTEGER, INTEGER_RO, INTSXP, SEXP, SEXPTYPE,
 };
 
 use crate::IntoExtPtrSexp;
@@ -116,7 +116,7 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(x: SEXP) -> *const c_void {
         let materialized = materialize::<T>(&x);
-        unsafe { INTEGER(materialized) as _ }
+        unsafe { INTEGER_RO(materialized) as _ }
     }
 
     unsafe extern "C" fn altrep_length<T: AltInteger>(x: SEXP) -> R_xlen_t {

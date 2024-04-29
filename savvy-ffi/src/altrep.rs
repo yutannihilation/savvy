@@ -184,11 +184,11 @@ extern "C" {
     ) -> R_altrep_class_t;
     pub fn R_set_altlogical_Elt_method(
         cls: R_altrep_class_t,
-        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> c_int>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> c_int>,
     );
     pub fn R_set_altlogical_Get_region_method(
         cls: R_altrep_class_t,
-        fun: ::std::option::Option<
+        fun: Option<
             unsafe extern "C" fn(
                 arg1: SEXP,
                 arg2: R_xlen_t,
@@ -199,14 +199,40 @@ extern "C" {
     );
     pub fn R_set_altlogical_Is_sorted_method(
         cls: R_altrep_class_t,
-        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
     pub fn R_set_altlogical_No_NA_method(
         cls: R_altrep_class_t,
-        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
     pub fn R_set_altlogical_Sum_method(
         cls: R_altrep_class_t,
-        fun: ::std::option::Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+}
+
+// string
+
+extern "C" {
+    pub fn R_make_altstring_class(
+        cname: *const c_char,
+        pname: *const c_char,
+        info: *mut crate::DllInfo,
+    ) -> R_altrep_class_t;
+    pub fn R_set_altstring_Elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> SEXP>,
+    );
+    pub fn R_set_altstring_Set_elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t, arg3: SEXP)>,
+    );
+    pub fn R_set_altstring_Is_sorted_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
+    );
+    pub fn R_set_altstring_No_NA_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
 }
