@@ -112,7 +112,17 @@ fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
 
 fn generate_c_function_call_entry(fns: &[SavvyFn]) -> String {
     fns.iter()
+        // initializaion functions don't need the R interface
+        .filter(|x| !matches!(x.fn_type, SavvyFnType::InitFunction))
         .map(|x| x.to_c_function_call_entry())
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn generate_c_initialization(fns: &[SavvyFn]) -> String {
+    fns.iter()
+        .filter(|x| matches!(x.fn_type, SavvyFnType::InitFunction))
+        .map(|x| format!("    {}(dll);", x.fn_name_c_impl()))
         .collect::<Vec<String>>()
         .join("\n")
 }
@@ -169,6 +179,8 @@ SEXP handle_result(SEXP res_) {
     let c_fns = c_fns.join("\n");
     let call_entries = call_entries.join("\n");
 
+    let initialization = generate_c_initialization(&result.bare_fns);
+
     format!(
         "{common_part}
 {c_fns}
@@ -179,8 +191,11 @@ static const R_CallMethodDef CallEntries[] = {{
 }};
 
 void R_init_{pkg_name}(DllInfo *dll) {{
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+
+    // Functions for initialzation, if any.
+{initialization}
 }}
 "
     )

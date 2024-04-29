@@ -22,7 +22,7 @@ impl SavvyFn {
 
         let mut out: syn::ItemFn = match &self.fn_type {
             // A bare function
-            SavvyFnType::BareFunction => parse_quote!(
+            SavvyFnType::BareFunction | SavvyFnType::InitFunction => parse_quote!(
                 #(#attrs)*
                 unsafe fn #fn_name_inner( #(#args_pat: #args_ty),* ) #ret_ty {
                     #(#stmts_additional)*

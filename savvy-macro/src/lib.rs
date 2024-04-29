@@ -15,6 +15,7 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     } else if let Ok(mut item_enum) = syn::parse::<syn::ItemEnum>(input.clone()) {
         savvy_enum(&mut item_enum)
     } else {
+        // TODO: how can I convert TokenStream to Span?
         let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
         return proc_macro::TokenStream::from(
             syn::Error::new(

@@ -8,6 +8,7 @@ enum SavvyInputTypeCategory {
     PrimitiveType,
     UserDefinedTypeRef, // &T
     UserDefinedType,    // T
+    DllInfo,
 }
 
 struct SavvyInputType {
@@ -75,6 +76,11 @@ impl SavvyInputType {
                         ty_str,
                     }),
 
+                    "DllInfo" => Err(syn::Error::new_spanned(
+                        type_path,
+                        "DllInfo must be `*mut DllInfo`",
+                    )),
+
                     _ => Ok(Self {
                         category: SavvyInputTypeCategory::UserDefinedType,
                         ty_orig: ty.clone(),
@@ -82,6 +88,38 @@ impl SavvyInputType {
                     }),
                 }
             }
+
+            // Only *mut DllInfo falls here
+            syn::Type::Ptr(syn::TypePtr {
+                mutability, elem, ..
+            }) => {
+                let type_ident = if let syn::Type::Path(p) = elem.as_ref() {
+                    p.path.segments.last().unwrap().ident.to_string()
+                } else {
+                    "".to_string()
+                };
+
+                if &type_ident != "DllInfo" {
+                    return Err(syn::Error::new_spanned(
+                        ty.clone(),
+                        "Unexpected type specification: {:?}",
+                    ));
+                }
+
+                if mutability.is_none() {
+                    return Err(syn::Error::new_spanned(
+                        ty.clone(),
+                        "DllInfo must be `*mut DllInfo`",
+                    ));
+                }
+
+                Ok(Self {
+                    category: SavvyInputTypeCategory::DllInfo,
+                    ty_orig: ty.clone(),
+                    ty_str: type_ident.to_string(),
+                })
+            }
+
             _ => Err(syn::Error::new_spanned(
                 ty.clone(),
                 "Unexpected type specification: {:?}",
@@ -89,19 +127,27 @@ impl SavvyInputType {
         }
     }
 
-    /// Return the corresponding type for internal function.
+    /// Returns the corresponding type for internal function.
     fn to_rust_type_outer(&self) -> syn::Type {
         self.ty_orig.clone()
     }
 
-    /// Return the corresponding type for API function (at the moment, only `SEXP` is supported).
+    /// Returns the corresponding type for API function.
     fn to_rust_type_inner(&self) -> syn::Type {
-        parse_quote!(savvy::ffi::SEXP)
+        if matches!(self.category, SavvyInputTypeCategory::DllInfo) {
+            self.ty_orig.clone()
+        } else {
+            parse_quote!(savvy::ffi::SEXP)
+        }
     }
 
-    /// Return the corresponding type for C function (at the moment, only `SEXP` is supported).
+    /// Returns the corresponding type for C function.
     fn to_c_type(&self) -> String {
-        "SEXP".to_string()
+        if matches!(self.category, SavvyInputTypeCategory::DllInfo) {
+            "DllInfo*".to_string()
+        } else {
+            "SEXP".to_string()
+        }
     }
 }
 
@@ -191,6 +237,8 @@ pub enum SavvyFnType {
     /// A function that belongs to a struct, but  the first argument is not
     /// `self`. Contains the type name of the sturct.
     AssociatedFunction(syn::Type),
+    /// A function to be executed in the package's initialization routine.
+    InitFunction,
 }
 
 pub struct SavvyFn {
@@ -214,9 +262,9 @@ pub struct SavvyFn {
 impl SavvyFn {
     pub(crate) fn get_self_ty_ident(&self) -> Option<syn::Ident> {
         let self_ty = match &self.fn_type {
-            SavvyFnType::BareFunction => return None,
             SavvyFnType::Method { ty, .. } => ty,
             SavvyFnType::AssociatedFunction(ty) => ty,
+            _ => return None,
         };
         if let syn::Type::Path(type_path) = self_ty {
             let ty = type_path
@@ -307,9 +355,12 @@ impl SavvyFn {
                     };
                     let ty_ident = ty.to_rust_type_outer();
 
-                    stmts_additional.push(parse_quote! {
-                        let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
-                    });
+                    // DllInfo is passed as it is
+                    if !matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
+                        stmts_additional.push(parse_quote! {
+                            let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
+                        });
+                    }
 
                     Some(Ok(SavvyFnArg { pat, ty }))
                 }
@@ -317,6 +368,23 @@ impl SavvyFn {
                 syn::FnArg::Receiver(syn::Receiver { .. }) => None,
             })
             .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
+
+        // Check for init function
+        let is_init_fn = args_new
+            .iter()
+            .any(|x| matches!(x.ty.category, SavvyInputTypeCategory::DllInfo));
+        if is_init_fn && args_new.len() > 1 {
+            return Err(syn::Error::new_spanned(
+                sig,
+                "Initialization function can accept `*mut DllInfo` only",
+            ));
+        }
+
+        let fn_type = if is_init_fn {
+            SavvyFnType::InitFunction
+        } else {
+            fn_type
+        };
 
         Ok(Self {
             docs,

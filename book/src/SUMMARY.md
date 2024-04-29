@@ -26,4 +26,5 @@
 - [Calling R Function]()
 - [Testing](./test.md)
 - [Advanced Topics](./advanced_topics.md)
+    - [Initialization Routine](./initialization_routine.md)
 - [Comparison with extendr](./extendr.md)

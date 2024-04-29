@@ -42,4 +42,19 @@ enum Foo {
     B = 100,
 }
 
+#[savvy]
+fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+    Ok(())
+}
+
+#[savvy]
+fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+    Ok(())
+}
+
+#[savvy]
+fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+    Ok(())
+}
+
 fn main() {}
