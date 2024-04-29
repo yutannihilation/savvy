@@ -22,7 +22,7 @@ mod mod1;
 // This should not be parsed
 // mod mod2;
 
-use savvy::{r_eprintln, r_print, savvy, OwnedListSexp};
+use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{
     IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
