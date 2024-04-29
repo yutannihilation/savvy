@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use std::os::raw::{c_int, c_void};
+use std::os::raw::{c_char, c_int, c_void};
 
 use crate::{R_xlen_t, Rboolean, SEXP, SEXPTYPE};
 
@@ -104,8 +104,8 @@ extern "C" {
 
 extern "C" {
     pub fn R_make_altinteger_class(
-        cname: *const ::std::os::raw::c_char,
-        pname: *const ::std::os::raw::c_char,
+        cname: *const c_char,
+        pname: *const c_char,
         info: *mut crate::DllInfo,
     ) -> R_altrep_class_t;
     pub fn R_set_altinteger_Elt_method(
@@ -140,6 +140,51 @@ extern "C" {
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
     );
     pub fn R_set_altinteger_Max_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+}
+
+// Real
+
+extern "C" {
+    pub fn R_make_altreal_class(
+        cname: *const c_char,
+        pname: *const c_char,
+        info: *mut crate::DllInfo,
+    ) -> R_altrep_class_t;
+    pub fn R_set_altreal_Elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> f64>,
+    );
+    pub fn R_set_altreal_Get_region_method(
+        cls: R_altrep_class_t,
+        fun: Option<
+            unsafe extern "C" fn(
+                arg1: SEXP,
+                arg2: R_xlen_t,
+                arg3: R_xlen_t,
+                arg4: *mut f64,
+            ) -> R_xlen_t,
+        >,
+    );
+    pub fn R_set_altreal_Is_sorted_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> ::std::os::raw::c_int>,
+    );
+    pub fn R_set_altreal_No_NA_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP) -> ::std::os::raw::c_int>,
+    );
+    pub fn R_set_altreal_Sum_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+    pub fn R_set_altreal_Min_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+    pub fn R_set_altreal_Max_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
     );

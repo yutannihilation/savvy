@@ -199,7 +199,23 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altinteger_No_NA_method")
         .allowlist_function("R_set_altinteger_Is_sorted_method")
         .allowlist_function("R_set_altinteger_Get_region_method")
-        .allowlist_function("R_make_altinteger_class");
+        .allowlist_function("R_make_altinteger_class")
+        // ALTREAL
+        .allowlist_item("R_altreal_Elt_method_t")
+        .allowlist_item("R_altreal_Max_method_t")
+        .allowlist_item("R_altreal_Min_method_t")
+        .allowlist_item("R_altreal_Sum_method_t")
+        .allowlist_item("R_altreal_No_NA_method_t")
+        .allowlist_item("R_altreal_Is_sorted_method_t")
+        .allowlist_item("R_altreal_Get_region_method_t")
+        .allowlist_function("R_set_altreal_Elt_method")
+        .allowlist_function("R_set_altreal_Max_method")
+        .allowlist_function("R_set_altreal_Min_method")
+        .allowlist_function("R_set_altreal_Sum_method")
+        .allowlist_function("R_set_altreal_No_NA_method")
+        .allowlist_function("R_set_altreal_Is_sorted_method")
+        .allowlist_function("R_set_altreal_Get_region_method")
+        .allowlist_function("R_make_altreal_class");
 
     let bindings = builder.generate().expect("Unable to generate bindings");
 
