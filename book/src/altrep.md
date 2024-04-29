@@ -1,10 +1,20 @@
 # ALTREP
 
-You can implement an ALTREP class using savvy. Note that, this feature is very
-experimental, so it's possible that the interface will be significantly changed
-or even removed in future.
+You can implement an ALTREP class using savvy. 
 
-Savvy provides the following traits for ALTREP.
+## Disclaimer
+
+* This feature is very experimental, so it's possible that the interface will be
+  significantly changed or even removed in future.
+
+* The current API might be a bit oversimplified. For example, you cannot stop
+  the vector is materialized (i.e., allocated as a normal `SEXP` and put into
+  the `data2` slot of the ALTREP object).
+
+## Using ALTREP
+
+Savvy currently provides only the following traits for ALTREP. The other ALTREPs
+like `ALTLIST` are not supported.
 
 * `AltInteger`
 * `AltReap`
