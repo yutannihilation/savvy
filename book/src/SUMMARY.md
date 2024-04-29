@@ -27,4 +27,5 @@
 - [Testing](./test.md)
 - [Advanced Topics](./advanced_topics.md)
     - [Initialization Routine](./initialization_routine.md)
+    - [ALTREP](./altrep.md)
 - [Comparison with extendr](./extendr.md)

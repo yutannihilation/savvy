@@ -7,13 +7,14 @@ use savvy::savvy;
 // integer
 
 struct MyAltInt(Vec<i32>);
-impl savvy::IntoExtPtrSexp for MyAltInt {}
 
 impl MyAltInt {
     fn new(x: Vec<i32>) -> Self {
         Self(x)
     }
 }
+
+impl savvy::IntoExtPtrSexp for MyAltInt {}
 
 impl AltInteger for MyAltInt {
     const CLASS_NAME: &'static str = "MyAltInt";
@@ -38,13 +39,14 @@ fn altint() -> savvy::Result<savvy::Sexp> {
 // real
 
 struct MyAltReal(Vec<f64>);
-impl savvy::IntoExtPtrSexp for MyAltReal {}
 
 impl MyAltReal {
     fn new(x: Vec<f64>) -> Self {
         Self(x)
     }
 }
+
+impl savvy::IntoExtPtrSexp for MyAltReal {}
 
 impl AltReal for MyAltReal {
     const CLASS_NAME: &'static str = "MyAltReal";
@@ -69,13 +71,14 @@ fn altreal() -> savvy::Result<savvy::Sexp> {
 // logical
 
 struct MyAltLogical(Vec<bool>);
-impl savvy::IntoExtPtrSexp for MyAltLogical {}
 
 impl MyAltLogical {
     fn new(x: Vec<bool>) -> Self {
         Self(x)
     }
 }
+
+impl savvy::IntoExtPtrSexp for MyAltLogical {}
 
 impl AltLogical for MyAltLogical {
     const CLASS_NAME: &'static str = "MyAltLogical";
@@ -100,13 +103,14 @@ fn altlogical() -> savvy::Result<savvy::Sexp> {
 // string
 
 struct MyAltString(Vec<String>);
-impl savvy::IntoExtPtrSexp for MyAltString {}
 
 impl MyAltString {
     fn new(x: Vec<String>) -> Self {
         Self(x)
     }
 }
+
+impl savvy::IntoExtPtrSexp for MyAltString {}
 
 impl AltString for MyAltString {
     const CLASS_NAME: &'static str = "MyAltString";

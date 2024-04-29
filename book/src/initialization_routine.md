@@ -47,14 +47,11 @@ use std::sync::OnceLock;
 static GLOBAL_FOO: OnceLock<Foo> = OnceLock::new();
 
 #[savvy]
-fn init_global_foo(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
-    let foo = Foo::new();
-    GLOBAL_FOO.set(foo);
+fn init_global_foo(dll_info: *mut DllInfo) -> savvy::Result<()> {
+    GLOBAL_FOO.get_or_init(|| Foo::new());
 
     Ok(())
 }
 ```
 
-You can also register an ALTREP class using this mechanism.
-
-(TBD)
+You can also register an ALTREP class using this mechanism see [the next page](./altrep.html).
