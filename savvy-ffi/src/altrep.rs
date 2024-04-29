@@ -34,18 +34,6 @@ extern "C" {
 // general
 
 extern "C" {
-    pub fn R_set_altrep_UnserializeEX_method(
-        cls: R_altrep_class_t,
-        fun: Option<
-            unsafe extern "C" fn(
-                arg1: SEXP,
-                arg2: SEXP,
-                arg3: SEXP,
-                arg4: c_int,
-                arg5: c_int,
-            ) -> SEXP,
-        >,
-    );
     pub fn R_set_altrep_Unserialize_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: SEXP) -> SEXP>,
@@ -53,10 +41,6 @@ extern "C" {
     pub fn R_set_altrep_Serialized_state_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP) -> SEXP>,
-    );
-    pub fn R_set_altrep_DuplicateEX_method(
-        cls: R_altrep_class_t,
-        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
     );
     pub fn R_set_altrep_Duplicate_method(
         cls: R_altrep_class_t,

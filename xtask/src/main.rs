@@ -177,9 +177,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altrep_Length_method")
         .allowlist_function("R_set_altrep_Inspect_method")
         .allowlist_function("R_set_altrep_Duplicate_method")
-        .allowlist_function("R_set_altrep_DuplicateEX_method")
         .allowlist_function("R_set_altrep_Unserialize_method")
-        .allowlist_function("R_set_altrep_UnserializeEX_method")
         .allowlist_function("R_set_altrep_Serialized_state_method")
         // ALTVEC
         .allowlist_function("R_set_altvec_Dataptr_method")
