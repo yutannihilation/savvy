@@ -24,6 +24,9 @@ default = []
 # Support complex 
 complex = ["num-complex", "savvy-ffi/complex"]
 
+# Support ALTREP
+altrep = ["savvy-ffi/altrep"]
+
 [build-dependencies]
 cc = "1"
 

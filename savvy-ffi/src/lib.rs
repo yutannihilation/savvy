@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-// TODO: put under #[cfg(feature = "altrep")]
+#[cfg(feature = "altrep")]
 pub mod altrep;
 
 // internal types
