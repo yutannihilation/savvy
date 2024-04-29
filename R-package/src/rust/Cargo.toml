@@ -7,7 +7,8 @@ edition = "2021"
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
-savvy = { path = "../../../", features = ["complex"] }
+savvy = { path = "../../../", features = ["complex", "altrep"] }
+# for calling Rf_errorcall() to test error handling
 savvy-ffi = { path = "../../../savvy-ffi" }
 
 [profile.release]

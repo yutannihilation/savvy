@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
 
+mod altrep;
 mod attributes;
 mod complex;
 mod consuming_type;
@@ -421,10 +422,4 @@ mod tests {
         savvy::assert_eq_r_code(result, r#"c("foo_suf", "bar_suf")"#);
         Ok(())
     }
-}
-
-#[savvy]
-fn init_foo(_dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
-    r_eprintln!("Initialized!");
-    Ok(())
 }

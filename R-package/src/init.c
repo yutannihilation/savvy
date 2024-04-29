@@ -119,8 +119,13 @@ SEXP savvy_set_name_external__impl(SEXP x, SEXP name) {
     return handle_result(res);
 }
 
-SEXP savvy_init_foo__impl(DllInfo* _dll_info) {
-    SEXP res = savvy_init_foo__ffi(_dll_info);
+SEXP savvy_init_altrep_class__impl(DllInfo* dll_info) {
+    SEXP res = savvy_init_altrep_class__ffi(dll_info);
+    return handle_result(res);
+}
+
+SEXP savvy_altint__impl(void) {
+    SEXP res = savvy_altint__ffi();
     return handle_result(res);
 }
 
@@ -508,6 +513,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_external_person_new__impl", (DL_FUNC) &savvy_external_person_new__impl, 0},
     {"savvy_get_name_external__impl", (DL_FUNC) &savvy_get_name_external__impl, 1},
     {"savvy_set_name_external__impl", (DL_FUNC) &savvy_set_name_external__impl, 2},
+    {"savvy_altint__impl", (DL_FUNC) &savvy_altint__impl, 0},
     {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},
     {"savvy_get_names_int__impl", (DL_FUNC) &savvy_get_names_int__impl, 1},
     {"savvy_get_dim_int__impl", (DL_FUNC) &savvy_get_dim_int__impl, 1},
@@ -589,5 +595,5 @@ void R_init_savvyExamples(DllInfo *dll) {
     R_useDynamicSymbols(dll, FALSE);
 
     // Functions for initialzation, if any.
-    savvy_init_foo__impl(dll);
+    savvy_init_altrep_class__impl(dll);
 }
