@@ -21,7 +21,7 @@ mod mod1;
 // This should not be parsed
 // mod mod2;
 
-use savvy::{r_print, savvy, OwnedListSexp};
+use savvy::{r_eprintln, r_print, savvy, OwnedListSexp};
 
 use savvy::{
     IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
@@ -421,4 +421,10 @@ mod tests {
         savvy::assert_eq_r_code(result, r#"c("foo_suf", "bar_suf")"#);
         Ok(())
     }
+}
+
+#[savvy]
+fn init_foo(_dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
+    r_eprintln!("Initialized!");
+    Ok(())
 }

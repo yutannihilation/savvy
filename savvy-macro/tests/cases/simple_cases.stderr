@@ -47,3 +47,21 @@ error: savvy doesn't support an enum with discreminant
    |
 42 |     B = 100,
    |         ^^^
+
+error: DllInfo must be `*mut DllInfo`
+  --> tests/cases/simple_cases.rs:46:23
+   |
+46 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+   |                       ^^^^^^^
+
+error: DllInfo must be `*mut DllInfo`
+  --> tests/cases/simple_cases.rs:51:24
+   |
+51 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+   |                        ^^^^^^^^^^^^^^
+
+error: Initialization function can accept `*mut DllInfo` only
+  --> tests/cases/simple_cases.rs:56:1
+   |
+56 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

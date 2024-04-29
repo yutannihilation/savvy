@@ -119,6 +119,11 @@ SEXP savvy_set_name_external__impl(SEXP x, SEXP name) {
     return handle_result(res);
 }
 
+SEXP savvy_init_foo__impl(DllInfo* _dll_info) {
+    SEXP res = savvy_init_foo__ffi(_dll_info);
+    return handle_result(res);
+}
+
 SEXP savvy_get_class_int__impl(SEXP x) {
     SEXP res = savvy_get_class_int__ffi(x);
     return handle_result(res);
@@ -580,6 +585,9 @@ static const R_CallMethodDef CallEntries[] = {
 };
 
 void R_init_savvyExamples(DllInfo *dll) {
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+
+    // Functions for initialzation, if any.
+    savvy_init_foo__impl(dll);
 }

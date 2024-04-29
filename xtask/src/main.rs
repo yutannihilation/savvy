@@ -156,7 +156,8 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_errorcall")
         // I/O
         .allowlist_function("Rprintf")
-        .allowlist_function("REprintf");
+        .allowlist_function("REprintf")
+        .allowlist_type("DllInfo");
 
     let bindings = builder.generate().expect("Unable to generate bindings");
 

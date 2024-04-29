@@ -159,7 +159,7 @@ extern "C" {
 
 // External pointer
 
-pub type R_CFinalizer_t = ::std::option::Option<unsafe extern "C" fn(arg1: SEXP)>;
+pub type R_CFinalizer_t = Option<unsafe extern "C" fn(arg1: SEXP)>;
 extern "C" {
     pub fn R_MakeExternalPtr(p: *mut ::std::os::raw::c_void, tag: SEXP, prot: SEXP) -> SEXP;
     pub fn R_ExternalPtrAddr(s: SEXP) -> *mut ::std::os::raw::c_void;
@@ -242,3 +242,6 @@ extern "C" {
     pub fn Rprintf(arg1: *const ::std::os::raw::c_char, ...);
     pub fn REprintf(arg1: *const ::std::os::raw::c_char, ...);
 }
+
+// misc
+pub type DllInfo = *mut ::std::os::raw::c_void;

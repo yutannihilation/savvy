@@ -13,6 +13,7 @@ pub use ir::savvy_enum::SavvyEnum;
 pub use ir::savvy_fn::{SavvyFn, SavvyFnArg, SavvyFnType};
 pub use ir::savvy_impl::SavvyImpl;
 pub use ir::savvy_struct::SavvyStruct;
+
 pub use ir::{merge_parsed_results, MergedResult, ParsedResult};
 
 pub use utils::extract_docs;
