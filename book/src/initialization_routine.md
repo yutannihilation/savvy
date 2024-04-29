@@ -10,8 +10,10 @@ the package is loaded, which is what [Writing R Extension][wre] calls
 For example, if you write such a Rust function like this,
 
 ``` rust
+use savvy::ffi::DllInfo;
+
 #[savvy]
-fn init_foo(_dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
+fn init_foo(_dll_info: *mut DllInfo) -> savvy::Result<()> {
     r_eprintln!("Initialized!");
     Ok(())
 }
