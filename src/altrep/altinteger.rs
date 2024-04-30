@@ -23,20 +23,25 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
+    /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
         super::create_altrep_instance(self, Self::CLASS_NAME)
     }
 
+    /// Extracts the reference (`&T`) of the underlying data
     fn try_from_altrep_ref(x: &IntegerSexp) -> crate::Result<&Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_ref_from_altrep(&x.0)
     }
 
+    /// Extracts the mutable reference (`&mut T`) of the underlying data
     fn try_from_altrep_mut(x: &mut IntegerSexp) -> crate::Result<&mut Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_mut_from_altrep(&mut x.0)
     }
 
+    /// Takes the underlying data. After this operation, the external pointer is
+    /// replaced with a null pointer.
     fn try_from_altrep(x: IntegerSexp) -> crate::Result<Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_from_altrep(x.0)
