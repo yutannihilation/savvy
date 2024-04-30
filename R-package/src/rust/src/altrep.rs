@@ -20,6 +20,7 @@ impl savvy::IntoExtPtrSexp for MyAltInt {}
 impl AltInteger for MyAltInt {
     const CLASS_NAME: &'static str = "MyAltInt";
     const PACKAGE_NAME: &'static str = "TestPackage";
+    const CACHE_MATERIALIZED_SEXP: bool = false;
 
     fn length(&mut self) -> usize {
         self.0.len()
@@ -27,6 +28,10 @@ impl AltInteger for MyAltInt {
 
     fn elt(&mut self, i: usize) -> i32 {
         self.0[i]
+    }
+
+    fn dataptr(&mut self) -> Option<*mut i32> {
+        Some(self.0.as_mut_ptr())
     }
 }
 

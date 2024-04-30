@@ -24,9 +24,26 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
+    /// If `true` (default), cache the SEXP with all the values copied from the
+    /// underlying data. If `false`, R always access to the underlying data.
+    const CACHE_MATERIALIZED_SEXP: bool = true;
+
+    /// Return the length of the data.
+    fn length(&mut self) -> usize;
+
+    /// Returns the value of `i`-th element. Note that, it seems R handles the
+    /// out-of-bound check, so you don't need to implement it here.
+    fn elt(&mut self, i: usize) -> &str;
+
+    /// Returns the pointer to the underlying data. This must be implemented
+    /// when `AVOID_MATERIALIZATION` is `true``.
+    fn dataptr(&mut self) -> Option<*mut i32> {
+        None
+    }
+
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME)
+        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -52,13 +69,6 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     fn inspect(&mut self) {
         crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
     }
-
-    /// Return the length of the data.
-    fn length(&mut self) -> usize;
-
-    /// Returns the value of `i`-th element. Note that, it seems R handles the
-    /// out-of-bound check, so you don't need to implement it here.
-    fn elt(&mut self, i: usize) -> &str;
 }
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
