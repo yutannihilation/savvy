@@ -12,6 +12,12 @@ fn is_savvified(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| attr == &parse_quote!(#[savvy]))
 }
 
+fn is_savvified_init(attrs: &[syn::Attribute]) -> bool {
+    attrs
+        .iter()
+        .any(|attr| attr == &parse_quote!(#[savvy_init]))
+}
+
 pub fn read_file(path: &Path) -> String {
     if !path.exists() {
         eprintln!("{} does not exist", path.to_string_lossy());
@@ -88,7 +94,12 @@ impl ParsedResult {
             syn::Item::Fn(item_fn) => {
                 if is_savvified(item_fn.attrs.as_slice()) {
                     self.bare_fns
-                        .push(SavvyFn::from_fn(item_fn).expect("Failed to parse function"))
+                        .push(SavvyFn::from_fn(item_fn, false).expect("Failed to parse function"))
+                }
+
+                if is_savvified_init(item_fn.attrs.as_slice()) {
+                    self.bare_fns
+                        .push(SavvyFn::from_fn(item_fn, true).expect("Failed to parse function"))
                 }
 
                 let label = format!("fn {}", item_fn.sig.ident);

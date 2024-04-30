@@ -303,8 +303,13 @@ impl SavvyFn {
         }
     }
 
-    pub fn from_fn(orig: &syn::ItemFn) -> syn::Result<Self> {
-        Self::new(&orig.attrs, &orig.sig, SavvyFnType::BareFunction, None)
+    pub fn from_fn(orig: &syn::ItemFn, as_init_fn: bool) -> syn::Result<Self> {
+        let fn_type = if as_init_fn {
+            SavvyFnType::InitFunction
+        } else {
+            SavvyFnType::BareFunction
+        };
+        Self::new(&orig.attrs, &orig.sig, fn_type, None)
     }
 
     pub fn from_impl_fn(
@@ -324,8 +329,10 @@ impl SavvyFn {
         // TODO: check function signature and abort if any of it is unexpected one.
 
         let mut attrs = attrs.to_vec();
-        // Remove #[savvy]
-        attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
+        // Remove #[savvy] and #[savvy_init]
+        attrs.retain(|attr| {
+            !(attr == &parse_quote!(#[savvy]) || attr == &parse_quote!(#[savvy_init]))
+        });
 
         // Extract doc comments
         let docs = extract_docs(attrs.as_slice());
@@ -355,11 +362,27 @@ impl SavvyFn {
                     };
                     let ty_ident = ty.to_rust_type_outer();
 
-                    // DllInfo is passed as it is
-                    if !matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
-                        stmts_additional.push(parse_quote! {
-                            let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
-                        });
+                    match fn_type {
+                        // DllInfo is passed as it is
+                        SavvyFnType::InitFunction => {
+                            if !matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
+                                return Some(Err(syn::Error::new_spanned(
+                                    ty.ty_orig,
+                                    "#[savvy_init] can be used only on a function that takes `*mut DllInfo`",
+                                )));
+                            }
+                        }
+                        _ => {
+                            if matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
+                                return Some(Err(syn::Error::new_spanned(
+                                    ty.ty_orig,
+                                    "#[savvy] doesn't accept `*mut DllInfo`. Did you mean #[savvy_init]?",
+                                )));
+                            }
+                            stmts_additional.push(parse_quote! {
+                                let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
+                            });
+                        }
                     }
 
                     Some(Ok(SavvyFnArg { pat, ty }))

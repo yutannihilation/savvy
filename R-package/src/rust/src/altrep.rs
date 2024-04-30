@@ -2,7 +2,7 @@ use savvy::altrep::{
     register_altinteger_class, register_altlogical_class, register_altreal_class,
     register_altstring_class, AltInteger, AltLogical, AltReal, AltString,
 };
-use savvy::savvy;
+use savvy::{savvy, savvy_init};
 
 // integer
 
@@ -134,7 +134,7 @@ fn altstring() -> savvy::Result<savvy::Sexp> {
 
 // initialization
 
-#[savvy]
+#[savvy_init]
 fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
     register_altreal_class::<MyAltReal>(dll_info)?;

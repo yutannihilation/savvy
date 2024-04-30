@@ -5,8 +5,8 @@
 
 ### New features
 
-* If `#[savvy]` is placed on a function whose argument is a `*mut DllInfo`, the
-  function is called when the package is loaded. See [the guide](https://yutannihilation.github.io/savvy/guide/initialization_routine.html) for more details.
+* New macro `#[savvy_init]` makes the function executed when the DLL is loaded
+  by R. This is useful for initializaing resources. See [the guide](https://yutannihilation.github.io/savvy/guide/initialization_routine.html) for more details.
 
 * Savvy now experimentally supports ALTREP. See [the guide](https://yutannihilation.github.io/savvy/guide/altrep.html) for more details.
 

@@ -1,9 +1,9 @@
 # Initialization Routine
 
-A special convention of `#[savvy]` is that, if `#[savvy]` is placed on a
-function that takes `*mut DllInfo` as its argument, the function is called when
-the package is loaded, which is what [Writing R Extension][wre] calls
-"initialization routine".
+`#[savvy_init]` is a special version of `#[savvy]`. The function marked with
+this macro is called when the package is loaded, which is what [Writing R
+Extension][wre] calls "initialization routine". The function must take `*mut
+DllInfo` as its argument.
 
 [wre]: https://cran.r-project.org/doc/manuals/r-release/R-exts.html#dyn_002eload-and-dyn_002eunload
 
@@ -12,7 +12,7 @@ For example, if you write such a Rust function like this,
 ``` rust
 use savvy::ffi::DllInfo;
 
-#[savvy]
+#[savvy_init]
 fn init_foo(_dll_info: *mut DllInfo) -> savvy::Result<()> {
     r_eprintln!("Initialized!");
     Ok(())
@@ -46,7 +46,7 @@ use std::sync::OnceLock;
 
 static GLOBAL_FOO: OnceLock<Foo> = OnceLock::new();
 
-#[savvy]
+#[savvy_init]
 fn init_global_foo(dll_info: *mut DllInfo) -> savvy::Result<()> {
     GLOBAL_FOO.get_or_init(|| Foo::new());
 

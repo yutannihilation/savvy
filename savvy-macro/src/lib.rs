@@ -7,7 +7,7 @@ use syn::parse_quote;
 #[proc_macro_attribute]
 pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     let result = if let Ok(mut item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
-        savvy_fn(&mut item_fn)
+        savvy_fn(&mut item_fn, false)
     } else if let Ok(mut item_struct) = syn::parse::<syn::ItemStruct>(input.clone()) {
         savvy_struct(&mut item_struct)
     } else if let Ok(mut item_impl) = syn::parse::<syn::ItemImpl>(input.clone()) {
@@ -32,8 +32,30 @@ pub fn savvy(_args: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-fn savvy_fn(orig: &mut syn::ItemFn) -> syn::Result<TokenStream> {
-    let savvy_fn = SavvyFn::from_fn(orig)?;
+#[proc_macro_attribute]
+pub fn savvy_init(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let result = if let Ok(mut item_fn) = syn::parse::<syn::ItemFn>(input.clone()) {
+        savvy_fn(&mut item_fn, true)
+    } else {
+        // TODO: how can I convert TokenStream to Span?
+        let parse_result = syn::parse::<syn::ItemImpl>(input.clone());
+        return proc_macro::TokenStream::from(
+            syn::Error::new(
+                parse_result.unwrap_err().span(),
+                "#[savvy_init] macro only accepts `fn`",
+            )
+            .into_compile_error(),
+        );
+    };
+
+    match result {
+        Ok(token_stream) => token_stream,
+        Err(e) => e.into_compile_error().into(),
+    }
+}
+
+fn savvy_fn(orig: &mut syn::ItemFn, as_init_fn: bool) -> syn::Result<TokenStream> {
+    let savvy_fn = SavvyFn::from_fn(orig, as_init_fn)?;
 
     let item_fn_inner = savvy_fn.generate_inner_fn();
     let item_fn_ffi = savvy_fn.generate_ffi_fn();
@@ -119,7 +141,7 @@ mod tests {
     use syn::parse_quote;
 
     fn assert_snapshot_inner(orig: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig)
+        let result = SavvyFn::from_fn(&orig, false)
             .expect("Failed to parse a function")
             .generate_inner_fn();
         let formatted = unparse(&parse_quote!(#result));
@@ -164,7 +186,7 @@ mod tests {
     }
 
     fn assert_snapshot_ffi(orig: syn::ItemFn) {
-        let result = SavvyFn::from_fn(&orig)
+        let result = SavvyFn::from_fn(&orig, false)
             .expect("Failed to parse an impl")
             .generate_ffi_fn();
         let formatted = unparse(&parse_quote!(#result));

@@ -75,11 +75,11 @@ function generates an ALTREP class and registers it to an R session.
 
 The registration needs to happen when an R session loads the DLL of your crate.
 As explained in the section of [initialization routine](./initialization_routine.md),
-you can define a `#[savvy]` function that have a `*mut DllInfo` as its argument
-to make it happen in the initialization routine.
+you can define a `#[savvy_init]` function, which will be called in the 
+initialization routine.
 
 ``` rust
-#[savvy]
+#[savvy_init]
 fn init_altrep_class(dll_info: *mut DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
     Ok(())
