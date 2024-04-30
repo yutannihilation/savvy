@@ -1,67 +1,73 @@
 error: function must have return type
- --> tests/cases/simple_cases.rs:5:1
+ --> tests/cases/simple_cases.rs:6:1
   |
-5 | #[savvy]
+6 | #[savvy]
   | ^^^^^^^^
   |
   = note: this error originates in the attribute macro `savvy` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: the return type must be savvy::Result<T> or savvy::Result<()>
- --> tests/cases/simple_cases.rs:9:30
-  |
-9 | fn wrong_return_type(x: i32) -> i32 {}
-  |                              ^^^^^^
+  --> tests/cases/simple_cases.rs:10:30
+   |
+10 | fn wrong_return_type(x: i32) -> i32 {}
+   |                              ^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
-  --> tests/cases/simple_cases.rs:12:28
+  --> tests/cases/simple_cases.rs:13:28
    |
-12 | fn wrong_type_owned_int(x: OwnedIntegerSexp) -> savvy::Result<()> {
+13 | fn wrong_type_owned_int(x: OwnedIntegerSexp) -> savvy::Result<()> {
    |                            ^^^^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `RealSexp`?
-  --> tests/cases/simple_cases.rs:17:29
+  --> tests/cases/simple_cases.rs:18:29
    |
-17 | fn wrong_type_owned_real(x: OwnedRealSexp) -> savvy::Result<()> {
+18 | fn wrong_type_owned_real(x: OwnedRealSexp) -> savvy::Result<()> {
    |                             ^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `LogicalSexp`?
-  --> tests/cases/simple_cases.rs:22:32
+  --> tests/cases/simple_cases.rs:23:32
    |
-22 | fn wrong_type_owned_logical(x: OwnedLogicalSexp) -> savvy::Result<()> {
+23 | fn wrong_type_owned_logical(x: OwnedLogicalSexp) -> savvy::Result<()> {
    |                                ^^^^^^^^^^^^^^^^
 
 error: `Owned-` types are not allowed here. Did you mean `StringSexp`?
-  --> tests/cases/simple_cases.rs:27:31
+  --> tests/cases/simple_cases.rs:28:31
    |
-27 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
+28 | fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
    |                               ^^^^^^^^^^^^^^^
 
-error: savvy only supports a fieldless enum
-  --> tests/cases/simple_cases.rs:34:6
+error: #[savvy] doesn't accept `*mut DllInfo`. Did you mean #[savvy_init]?
+  --> tests/cases/simple_cases.rs:33:26
    |
-34 |     A(i32),
+33 | fn wrong_type_dllinfo(x: *mut DllInfo) -> savvy::Result<()> {
+   |                          ^^^^^^^^^^^^
+
+error: savvy only supports a fieldless enum
+  --> tests/cases/simple_cases.rs:40:6
+   |
+40 |     A(i32),
    |      ^^^^^
 
 error: savvy doesn't support an enum with discreminant
-  --> tests/cases/simple_cases.rs:42:9
+  --> tests/cases/simple_cases.rs:48:9
    |
-42 |     B = 100,
+48 |     B = 100,
    |         ^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:46:23
+  --> tests/cases/simple_cases.rs:52:23
    |
-46 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+52 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
    |                       ^^^^^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:51:24
+  --> tests/cases/simple_cases.rs:57:24
    |
-51 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+57 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
    |                        ^^^^^^^^^^^^^^
 
-error: Initialization function can accept `*mut DllInfo` only
-  --> tests/cases/simple_cases.rs:56:1
+error: #[savvy_init] can be used only on a function that takes `*mut DllInfo`
+  --> tests/cases/simple_cases.rs:62:41
    |
-56 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+62 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+   |                                         ^^^

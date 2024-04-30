@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
 use savvy_macro::savvy;
+use savvy_macro::savvy_init;
 
 #[savvy]
 fn no_return_type(x: i32) {}
@@ -28,6 +29,11 @@ fn wrong_type_owned_string(x: OwnedStringSexp) -> savvy::Result<()> {
     Ok(())
 }
 
+#[savvy]
+fn wrong_type_dllinfo(x: *mut DllInfo) -> savvy::Result<()> {
+    Ok(())
+}
+
 // only fieldless enums is supported
 #[savvy]
 enum Foo {
@@ -42,17 +48,17 @@ enum Foo {
     B = 100,
 }
 
-#[savvy]
+#[savvy_init]
 fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
     Ok(())
 }
 
-#[savvy]
+#[savvy_init]
 fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
     Ok(())
 }
 
-#[savvy]
+#[savvy_init]
 fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
     Ok(())
 }
