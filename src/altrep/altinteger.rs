@@ -8,15 +8,13 @@ use savvy_ffi::{
         R_altrep_data2, R_make_altinteger_class, R_set_altinteger_Elt_method,
         R_set_altrep_Coerce_method, R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method,
         R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method, ALTREP, ALTREP_CLASS,
+        R_set_altvec_Dataptr_or_null_method,
     },
-    R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, INTEGER, INTEGER_RO, INTSXP, SEXP, SEXPTYPE,
+    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
+    Rf_duplicate, Rf_protect, Rf_unprotect, INTEGER, INTEGER_RO, INTSXP, SEXP, SEXPTYPE,
 };
 
 use crate::{IntegerSexp, IntoExtPtrSexp};
-
-use super::ALTREP_CLASS_CATALOGUE;
 
 pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -29,30 +27,19 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
         super::create_altrep_instance(self, Self::CLASS_NAME)
     }
 
-    fn try_from_altrep(x: &IntegerSexp) -> crate::Result<&Self> {
-        if unsafe { ALTREP(x.0) != 1 } {
-            return Err("Not an ALTREP".into());
-        }
+    fn try_from_altrep_ref(x: &IntegerSexp) -> crate::Result<&Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_ref_from_altrep(&x.0)
+    }
 
-        let catalogue_mutex = match ALTREP_CLASS_CATALOGUE.get() {
-            Some(catalogue_mutex) => catalogue_mutex,
-            None => return Err("ALTREP_CLASS_CATALOGUE is not initialized".into()),
-        };
-        let catalogue = match catalogue_mutex.lock() {
-            Ok(catalogue) => catalogue,
-            Err(e) => return Err(e.to_string().into()),
-        };
-        let class = match catalogue.get(Self::CLASS_NAME) {
-            Some(class) => class,
-            None => return Err("Failed to get the ALTREP class".into()),
-        };
+    fn try_from_altrep_mut(x: &mut IntegerSexp) -> crate::Result<&mut Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_mut_from_altrep(&mut x.0)
+    }
 
-        if class.ptr != unsafe { ALTREP_CLASS(x.0) } {
-            return Err("Different ALTREP class".into());
-        }
-
-        let self_ = super::extract_self_from_altrep(&x.0);
-        Ok(self_)
+    fn try_from_altrep(x: IntegerSexp) -> crate::Result<Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_from_altrep(x.0)
     }
 
     /// Copies all the data into a new memory. This is used when the ALTREP
@@ -90,13 +77,16 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn materialize<T: AltInteger>(x: &SEXP) -> SEXP {
+    fn materialize<T: AltInteger>(x: &mut SEXP) -> SEXP {
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
             return data;
         }
 
-        let self_: &mut T = super::extract_self_from_altrep(x);
+        let self_: &mut T = match super::extract_mut_from_altrep(x) {
+            Ok(self_) => self_,
+            Err(_) => return unsafe { R_NilValue },
+        };
 
         let len = self_.length();
         let new = crate::alloc_vector(INTSXP, len).unwrap();
@@ -120,8 +110,11 @@ pub fn register_altinteger_class<T: AltInteger>(
         new
     }
 
-    unsafe extern "C" fn altrep_duplicate<T: AltInteger>(x: SEXP, _deep_copy: Rboolean) -> SEXP {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altrep_duplicate<T: AltInteger>(
+        mut x: SEXP,
+        _deep_copy: Rboolean,
+    ) -> SEXP {
+        let materialized = materialize::<T>(&mut x);
 
         // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
         // unsafe { SET_ATTRIB(materialized, attrs) };
@@ -129,44 +122,53 @@ pub fn register_altinteger_class<T: AltInteger>(
         unsafe { Rf_duplicate(materialized) }
     }
 
-    unsafe extern "C" fn altrep_coerce<T: AltInteger>(x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altrep_coerce<T: AltInteger>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        let materialized = materialize::<T>(&mut x);
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
     unsafe extern "C" fn altvec_dataptr<T: AltInteger>(
-        x: SEXP,
+        mut x: SEXP,
         _writable: Rboolean,
     ) -> *mut c_void {
-        let materialized = materialize::<T>(&x);
+        let materialized = materialize::<T>(&mut x);
         unsafe { INTEGER(materialized) as _ }
     }
 
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(x: SEXP) -> *const c_void {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(mut x: SEXP) -> *const c_void {
+        let materialized = materialize::<T>(&mut x);
         unsafe { INTEGER_RO(materialized) as _ }
     }
 
-    unsafe extern "C" fn altrep_length<T: AltInteger>(x: SEXP) -> R_xlen_t {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+    unsafe extern "C" fn altrep_length<T: AltInteger>(mut x: SEXP) -> R_xlen_t {
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return 0,
+        };
         self_.length() as _
     }
 
     unsafe extern "C" fn altrep_inspect<T: AltInteger>(
-        x: SEXP,
+        mut x: SEXP,
         _: c_int,
         _: c_int,
         _: c_int,
         _: Option<unsafe extern "C" fn(SEXP, c_int, c_int, c_int)>,
     ) -> Rboolean {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return Rboolean_FALSE,
+        };
         self_.inspect();
 
         Rboolean_TRUE
     }
 
-    unsafe extern "C" fn altinteger_elt<T: AltInteger>(x: SEXP, i: R_xlen_t) -> c_int {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+    unsafe extern "C" fn altinteger_elt<T: AltInteger>(mut x: SEXP, i: R_xlen_t) -> c_int {
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return unsafe { R_NaInt },
+        };
         self_.elt(i as _) as _
     }
 
