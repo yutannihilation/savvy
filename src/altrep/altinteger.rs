@@ -8,13 +8,15 @@ use savvy_ffi::{
         R_altrep_data2, R_make_altinteger_class, R_set_altinteger_Elt_method,
         R_set_altrep_Coerce_method, R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method,
         R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method,
+        R_set_altvec_Dataptr_or_null_method, ALTREP, ALTREP_CLASS,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
     Rf_unprotect, INTEGER, INTEGER_RO, INTSXP, SEXP, SEXPTYPE,
 };
 
-use crate::IntoExtPtrSexp;
+use crate::{IntegerSexp, IntoExtPtrSexp};
+
+use super::ALTREP_CLASS_CATALOGUE;
 
 pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -25,6 +27,32 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
 
     fn into_altrep(self) -> crate::Result<SEXP> {
         super::create_altrep_instance(self, Self::CLASS_NAME)
+    }
+
+    fn try_from_altrep(x: &IntegerSexp) -> crate::Result<&Self> {
+        if unsafe { ALTREP(x.0) != 1 } {
+            return Err("Not an ALTREP".into());
+        }
+
+        let catalogue_mutex = match ALTREP_CLASS_CATALOGUE.get() {
+            Some(catalogue_mutex) => catalogue_mutex,
+            None => return Err("ALTREP_CLASS_CATALOGUE is not initialized".into()),
+        };
+        let catalogue = match catalogue_mutex.lock() {
+            Ok(catalogue) => catalogue,
+            Err(e) => return Err(e.to_string().into()),
+        };
+        let class = match catalogue.get(Self::CLASS_NAME) {
+            Some(class) => class,
+            None => return Err("Failed to get the ALTREP class".into()),
+        };
+
+        if class.ptr != unsafe { ALTREP_CLASS(x.0) } {
+            return Err("Different ALTREP class".into());
+        }
+
+        let self_ = super::extract_self_from_altrep(&x.0);
+        Ok(self_)
     }
 
     /// Copies all the data into a new memory. This is used when the ALTREP

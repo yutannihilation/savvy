@@ -2,10 +2,11 @@ use savvy::altrep::{
     register_altinteger_class, register_altlogical_class, register_altreal_class,
     register_altstring_class, AltInteger, AltLogical, AltReal, AltString,
 };
-use savvy::{savvy, savvy_init};
+use savvy::{r_println, savvy, savvy_init, IntegerSexp};
 
 // integer
 
+#[derive(Debug)]
 struct MyAltInt(Vec<i32>);
 
 impl MyAltInt {
@@ -34,6 +35,13 @@ fn altint() -> savvy::Result<savvy::Sexp> {
     let v = MyAltInt::new(vec![1, 2, 3]);
     let v_altrep = v.into_altrep()?;
     Ok(savvy::Sexp(v_altrep))
+}
+
+#[savvy]
+fn restore_altint(x: IntegerSexp) -> savvy::Result<()> {
+    let x = MyAltInt::try_from_altrep(&x)?;
+    r_println!("{x:?}");
+    Ok(())
 }
 
 // real
