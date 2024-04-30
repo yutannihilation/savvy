@@ -9,8 +9,8 @@ use savvy_ffi::{
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
         R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, REAL, REALSXP, REAL_RO, SEXP, SEXPTYPE,
+    R_NaReal, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
+    Rf_duplicate, Rf_protect, Rf_unprotect, REAL, REALSXP, REAL_RO, SEXP, SEXPTYPE,
 };
 
 use crate::IntoExtPtrSexp;
@@ -61,13 +61,16 @@ pub fn register_altreal_class<T: AltReal>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn materialize<T: AltReal>(x: &SEXP) -> SEXP {
+    fn materialize<T: AltReal>(x: &mut SEXP) -> SEXP {
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
             return data;
         }
 
-        let self_: &mut T = super::extract_self_from_altrep(x);
+        let self_: &mut T = match super::extract_mut_from_altrep(x) {
+            Ok(self_) => self_,
+            Err(_) => return unsafe { R_NilValue },
+        };
 
         let len = self_.length();
         let new = crate::alloc_vector(REALSXP, len).unwrap();
@@ -91,8 +94,8 @@ pub fn register_altreal_class<T: AltReal>(
         new
     }
 
-    unsafe extern "C" fn altrep_duplicate<T: AltReal>(x: SEXP, _deep_copy: Rboolean) -> SEXP {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altrep_duplicate<T: AltReal>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
+        let materialized = materialize::<T>(&mut x);
 
         // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
         // unsafe { SET_ATTRIB(materialized, attrs) };
@@ -100,41 +103,53 @@ pub fn register_altreal_class<T: AltReal>(
         unsafe { Rf_duplicate(materialized) }
     }
 
-    unsafe extern "C" fn altrep_coerce<T: AltReal>(x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altrep_coerce<T: AltReal>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        let materialized = materialize::<T>(&mut x);
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    unsafe extern "C" fn altvec_dataptr<T: AltReal>(x: SEXP, _writable: Rboolean) -> *mut c_void {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altvec_dataptr<T: AltReal>(
+        mut x: SEXP,
+        _writable: Rboolean,
+    ) -> *mut c_void {
+        let materialized = materialize::<T>(&mut x);
         unsafe { REAL(materialized) as _ }
     }
 
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltReal>(x: SEXP) -> *const c_void {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltReal>(mut x: SEXP) -> *const c_void {
+        let materialized = materialize::<T>(&mut x);
         unsafe { REAL_RO(materialized) as _ }
     }
 
-    unsafe extern "C" fn altrep_length<T: AltReal>(x: SEXP) -> R_xlen_t {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+    unsafe extern "C" fn altrep_length<T: AltReal>(mut x: SEXP) -> R_xlen_t {
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return 0,
+        };
         self_.length() as _
     }
 
     unsafe extern "C" fn altrep_inspect<T: AltReal>(
-        x: SEXP,
+        mut x: SEXP,
         _: c_int,
         _: c_int,
         _: c_int,
         _: Option<unsafe extern "C" fn(SEXP, c_int, c_int, c_int)>,
     ) -> Rboolean {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return Rboolean_FALSE,
+        };
         self_.inspect();
 
         Rboolean_TRUE
     }
 
-    unsafe extern "C" fn altreal_elt<T: AltReal>(x: SEXP, i: R_xlen_t) -> f64 {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
+    unsafe extern "C" fn altreal_elt<T: AltReal>(mut x: SEXP, i: R_xlen_t) -> f64 {
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return unsafe { R_NaReal },
+        };
         self_.elt(i as _) as _
     }
 
