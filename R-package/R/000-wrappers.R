@@ -152,8 +152,13 @@ altint <- function() {
 }
 
 
-restore_altint <- function(x) {
-  invisible(.Call(savvy_restore_altint__impl, x))
+print_altint <- function(x) {
+  invisible(.Call(savvy_print_altint__impl, x))
+}
+
+
+double_altint <- function(x) {
+  invisible(.Call(savvy_double_altint__impl, x))
 }
 
 

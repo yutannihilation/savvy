@@ -38,9 +38,18 @@ fn altint() -> savvy::Result<savvy::Sexp> {
 }
 
 #[savvy]
-fn restore_altint(x: IntegerSexp) -> savvy::Result<()> {
-    let x = MyAltInt::try_from_altrep(&x)?;
+fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
+    let x = MyAltInt::try_from_altrep_ref(&x)?;
     r_println!("{x:?}");
+    Ok(())
+}
+
+#[savvy]
+fn double_altint(mut x: IntegerSexp) -> savvy::Result<()> {
+    let x = MyAltInt::try_from_altrep_mut(&mut x)?;
+    for i in x.0.iter_mut() {
+        *i *= 2;
+    }
     Ok(())
 }
 
