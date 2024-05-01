@@ -35,9 +35,30 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
     fn elt(&mut self, i: usize) -> bool;
 
     /// Returns the pointer to the underlying data. This must be implemented
-    /// when `AVOID_MATERIALIZATION` is `true``.
+    /// when `CACHE_MATERIALIZED_SEXP` is `true``.
     fn dataptr(&mut self) -> Option<*mut i32> {
         None
+    }
+
+    /// Copies the specified range of the data into a new memory. This is used
+    /// when the ALTREP needs to be materialized.
+    ///
+    /// For example, you can use `copy_from_slice()` for more efficient copying
+    /// of the values.
+    fn copy_to(&mut self, new: &mut [i32], offset: usize) {
+        // TODO: return error
+        if offset + new.len() > self.length() {
+            return;
+        }
+
+        for (i, v) in new.iter_mut().enumerate() {
+            *v = self.elt(i + offset) as _;
+        }
+    }
+
+    /// What gets printed when `.Internal(inspect(x))` is used.
+    fn inspect(&mut self) {
+        crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
     }
 
     /// Converts the struct into an ALTREP object
@@ -62,22 +83,6 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
     fn try_from_altrep(x: LogicalSexp) -> crate::Result<Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_from_altrep(x.0)
-    }
-
-    /// Copies all the data into a new memory. This is used when the ALTREP
-    /// needs to be materialized.
-    ///
-    /// For example, you can use `copy_from_slice()` for more efficient copying
-    /// of the values.
-    fn copy_data(&mut self, new: &mut [i32]) {
-        for (i, v) in new.iter_mut().enumerate() {
-            *v = self.elt(i) as _;
-        }
-    }
-
-    /// What gets printed when `.Internal(inspect(x))` is used.
-    fn inspect(&mut self) {
-        crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
     }
 }
 
@@ -110,7 +115,7 @@ pub fn register_altlogical_class<T: AltLogical>(
 
         let dst = unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) };
 
-        self_.copy_data(dst);
+        self_.copy_to(dst, 0);
 
         // Cache the materialized data in data2.
         //

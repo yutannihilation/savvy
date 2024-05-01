@@ -36,7 +36,7 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     fn elt(&mut self, i: usize) -> &str;
 
     /// Returns the pointer to the underlying data. This must be implemented
-    /// when `AVOID_MATERIALIZATION` is `true``.
+    /// when `CACHE_MATERIALIZED_SEXP` is `true``.
     fn dataptr(&mut self) -> Option<*mut i32> {
         None
     }
