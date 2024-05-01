@@ -24,10 +24,6 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// If `true` (default), cache the SEXP with all the values copied from the
-    /// underlying data. If `false`, R always access to the underlying data.
-    const CACHE_MATERIALIZED_SEXP: bool = true;
-
     /// Return the length of the data.
     fn length(&mut self) -> usize;
 
@@ -35,15 +31,9 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// out-of-bound check, so you don't need to implement it here.
     fn elt(&mut self, i: usize) -> &str;
 
-    /// Returns the pointer to the underlying data. This must be implemented
-    /// when `CACHE_MATERIALIZED_SEXP` is `true``.
-    fn dataptr(&mut self) -> Option<*mut i32> {
-        None
-    }
-
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
+        super::create_altrep_instance(self, Self::CLASS_NAME, true)
     }
 
     /// Extracts the reference (`&T`) of the underlying data

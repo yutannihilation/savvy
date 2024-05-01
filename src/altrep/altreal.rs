@@ -22,9 +22,9 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// If `true` (default), cache the SEXP with all the values copied from the
-    /// underlying data. If `false`, R always access to the underlying data.
-    const CACHE_MATERIALIZED_SEXP: bool = true;
+    /// If `true`, all R operations are done directly on the pointer to the
+    /// underlying data. In this case, the `dataptr` method must be implemented.
+    const EXPOSE_DATAPTR: bool = false;
 
     /// Return the length of the data.
     fn length(&mut self) -> usize;
@@ -33,8 +33,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
     /// out-of-bound check, so you don't need to implement it here.
     fn elt(&mut self, i: usize) -> f64;
 
-    /// Returns the pointer to the underlying data. This must be implemented
-    /// when `CACHE_MATERIALIZED_SEXP` is `true``.
+    /// Returns the pointer to the underlying data.
     fn dataptr(&mut self) -> Option<*mut i32> {
         None
     }
@@ -62,7 +61,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
 
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
+        super::create_altrep_instance(self, Self::CLASS_NAME, !Self::EXPOSE_DATAPTR)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -97,9 +96,13 @@ pub fn register_altreal_class<T: AltReal>(
     #[allow(clippy::mut_from_ref)]
     #[inline]
     fn materialize<T: AltReal>(x: &mut SEXP) -> SEXP {
-        let data = unsafe { R_altrep_data2(*x) };
-        if unsafe { data != R_NilValue } {
-            return data;
+        // If the strategy is to use cache the materialized SEXP, use it when
+        // available.
+        if !T::EXPOSE_DATAPTR {
+            let data = unsafe { R_altrep_data2(*x) };
+            if unsafe { data != R_NilValue } {
+                return data;
+            }
         }
 
         let self_: &mut T = match super::extract_mut_from_altrep(x) {
@@ -108,20 +111,16 @@ pub fn register_altreal_class<T: AltReal>(
         };
 
         let len = self_.length();
-        let new = crate::alloc_vector(REALSXP, len).unwrap();
 
+        let new = crate::alloc_vector(REALSXP, len).unwrap();
         unsafe { Rf_protect(new) };
 
-        let dst = unsafe { std::slice::from_raw_parts_mut(REAL(new), len) };
+        self_.copy_to(unsafe { std::slice::from_raw_parts_mut(REAL(new), len) }, 0);
 
-        self_.copy_to(dst, 0);
-
-        // Cache the materialized data in data2.
-        //
-        // Note that, for example arrow stores it in `CAR()` of data2, but this
-        // implementation naively uses data2. Probably that should be clever
-        // because data2 can be used for other purposes.
-        unsafe { R_set_altrep_data2(*x, new) };
+        if !T::EXPOSE_DATAPTR {
+            // Cache the materialized data in data2.
+            unsafe { R_set_altrep_data2(*x, new) };
+        }
 
         // new doesn't need protection because it's used as long as this ALTREP exists.
         unsafe { Rf_unprotect(1) };

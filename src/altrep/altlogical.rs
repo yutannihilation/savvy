@@ -23,22 +23,12 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// If `true` (default), cache the SEXP with all the values copied from the
-    /// underlying data. If `false`, R always access to the underlying data.
-    const CACHE_MATERIALIZED_SEXP: bool = true;
-
     /// Return the length of the data.
     fn length(&mut self) -> usize;
 
     /// Returns the value of `i`-th element. Note that, it seems R handles the
     /// out-of-bound check, so you don't need to implement it here.
     fn elt(&mut self, i: usize) -> bool;
-
-    /// Returns the pointer to the underlying data. This must be implemented
-    /// when `CACHE_MATERIALIZED_SEXP` is `true``.
-    fn dataptr(&mut self) -> Option<*mut i32> {
-        None
-    }
 
     /// Copies the specified range of the data into a new memory. This is used
     /// when the ALTREP needs to be materialized.
@@ -63,7 +53,7 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
 
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
+        super::create_altrep_instance(self, Self::CLASS_NAME, true)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -98,6 +88,7 @@ pub fn register_altlogical_class<T: AltLogical>(
     #[allow(clippy::mut_from_ref)]
     #[inline]
     fn materialize<T: AltLogical>(x: &mut SEXP) -> SEXP {
+        // Use the cached one if available
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
             return data;
@@ -109,19 +100,16 @@ pub fn register_altlogical_class<T: AltLogical>(
         };
 
         let len = self_.length();
-        let new = crate::alloc_vector(LGLSXP, len).unwrap();
 
+        let new = crate::alloc_vector(LGLSXP, len).unwrap();
         unsafe { Rf_protect(new) };
 
-        let dst = unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) };
-
-        self_.copy_to(dst, 0);
+        self_.copy_to(
+            unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) },
+            0,
+        );
 
         // Cache the materialized data in data2.
-        //
-        // Note that, for example arrow stores it in `CAR()` of data2, but this
-        // implementation naively uses data2. Probably that should be clever
-        // because data2 can be used for other purposes.
         unsafe { R_set_altrep_data2(*x, new) };
 
         // new doesn't need protection because it's used as long as this ALTREP exists.
