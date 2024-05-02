@@ -7,15 +7,15 @@ use savvy_ffi::{
     altrep::{
         R_altrep_data2, R_make_altstring_class, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
-        R_set_altrep_data2, R_set_altstring_Elt_method, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method,
+        R_set_altrep_data2, R_set_altstring_Elt_method, R_set_altstring_Set_elt_method,
+        R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
     R_NaString, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
     Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_STRING_ELT, SEXP, SEXPTYPE, STRING_ELT,
     STRING_PTR, STRSXP,
 };
 
-use crate::{IntoExtPtrSexp, StringSexp};
+use crate::{sexp::utils::charsxp_to_str, IntoExtPtrSexp, StringSexp};
 
 pub trait AltString: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -36,6 +36,10 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// Returns the value of `i`-th element. Note that, it seems R handles the
     /// out-of-bound check, so you don't need to implement it here.
     fn elt(&mut self, i: usize) -> &str;
+
+    /// Sets the value of `i`-the element to the specified value. `None`
+    /// represents NA.
+    fn set_elt(&mut self, i: usize, v: Option<&str>);
 
     /// What gets printed when `.Internal(inspect(x))` is used.
     fn inspect(&mut self) {
@@ -194,6 +198,27 @@ pub fn register_altstring_class<T: AltString>(
         unsafe { crate::sexp::utils::str_to_charsxp(self_.elt(i as _)).unwrap_or(R_NaString) }
     }
 
+    unsafe extern "C" fn altstring_set_elt<T: AltString>(mut x: SEXP, i: R_xlen_t, v: SEXP) {
+        // If the strategy is to use the cached SEXP, try to use it first
+        if T::CACHE_MATERIALIZED_SEXP {
+            if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+                return unsafe { SET_STRING_ELT(materialized, i, v) };
+            };
+        }
+
+        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+            Ok(self_) => self_,
+            Err(_) => return,
+        };
+        unsafe {
+            if v == savvy_ffi::R_NaString {
+                self_.set_elt(i as _, None);
+            } else {
+                self_.set_elt(i as _, Some(charsxp_to_str(v)));
+            }
+        }
+    }
+
     unsafe {
         R_set_altrep_Length_method(class_t, Some(altrep_length::<T>));
         R_set_altrep_Inspect_method(class_t, Some(altrep_inspect::<T>));
@@ -202,6 +227,7 @@ pub fn register_altstring_class<T: AltString>(
         R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
         R_set_altstring_Elt_method(class_t, Some(altstring_elt::<T>));
+        R_set_altstring_Set_elt_method(class_t, Some(altstring_set_elt::<T>));
     }
 
     super::register_altrep_class(T::CLASS_NAME, class_t)?;

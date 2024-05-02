@@ -347,6 +347,11 @@ impl AltString for MyAltString {
     fn elt(&mut self, i: usize) -> &str {
         self.0[i].as_str()
     }
+
+    fn set_elt(&mut self, i: usize, v: Option<&str>) {
+        r_println!("呼ばれた");
+        self.0[i] = v.unwrap_or_default().to_string();
+    }
 }
 
 #[savvy]
@@ -378,6 +383,11 @@ impl AltString for MyAltStringMutable {
 
     fn elt(&mut self, i: usize) -> &str {
         self.0[i].as_str()
+    }
+
+    fn set_elt(&mut self, i: usize, v: Option<&str>) {
+        r_println!("呼ばれた");
+        self.0[i] = v.unwrap_or_default().to_string();
     }
 }
 
