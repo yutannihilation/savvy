@@ -24,6 +24,12 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
+    /// If `true`, cache the materialized SEXP. This means any updates on the
+    /// underlying data are no longer reflected after the first materialization.
+    /// So, it is strongly recommended to set this to `true` only when the
+    /// underlying data doesn't change.
+    const CACHE_MATERIALIZED_SEXP: bool = true;
+
     /// Return the length of the data.
     fn length(&mut self) -> usize;
 
@@ -31,9 +37,14 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// out-of-bound check, so you don't need to implement it here.
     fn elt(&mut self, i: usize) -> &str;
 
+    /// What gets printed when `.Internal(inspect(x))` is used.
+    fn inspect(&mut self) {
+        crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
+    }
+
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, true)
+        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -54,11 +65,6 @@ pub trait AltString: Sized + IntoExtPtrSexp {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_from_altrep(x.0)
     }
-
-    /// What gets printed when `.Internal(inspect(x))` is used.
-    fn inspect(&mut self) {
-        crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
-    }
 }
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
@@ -73,9 +79,11 @@ pub fn register_altstring_class<T: AltString>(
     #[allow(clippy::mut_from_ref)]
     #[inline]
     fn materialize<T: AltString>(x: &mut SEXP) -> SEXP {
-        let data = unsafe { R_altrep_data2(*x) };
-        if unsafe { data != R_NilValue } {
-            return data;
+        if T::CACHE_MATERIALIZED_SEXP {
+            let data = unsafe { R_altrep_data2(*x) };
+            if unsafe { data != R_NilValue } {
+                return data;
+            }
         }
 
         let self_: &mut T = match super::extract_mut_from_altrep(x) {
@@ -98,12 +106,9 @@ pub fn register_altstring_class<T: AltString>(
             };
         }
 
-        // Cache the materialized data in data2.
-        //
-        // Note that, for example arrow stores it in `CAR()` of data2, but this
-        // implementation naively uses data2. Probably that should be clever
-        // because data2 can be used for other purposes.
-        unsafe { R_set_altrep_data2(*x, new) };
+        if T::CACHE_MATERIALIZED_SEXP {
+            unsafe { R_set_altrep_data2(*x, new) };
+        }
 
         // new doesn't need protection because it's used as long as this ALTREP exists.
         unsafe { Rf_unprotect(1) };

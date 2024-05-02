@@ -152,6 +152,11 @@ altint <- function() {
 }
 
 
+altint_mutable <- function() {
+  .Call(savvy_altint_mutable__impl)
+}
+
+
 print_altint <- function(x) {
   invisible(.Call(savvy_print_altint__impl, x))
 }

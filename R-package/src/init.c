@@ -124,6 +124,11 @@ SEXP savvy_altint__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_altint_mutable__impl(void) {
+    SEXP res = savvy_altint_mutable__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_print_altint__impl(SEXP x) {
     SEXP res = savvy_print_altint__ffi(x);
     return handle_result(res);
@@ -539,6 +544,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_get_name_external__impl", (DL_FUNC) &savvy_get_name_external__impl, 1},
     {"savvy_set_name_external__impl", (DL_FUNC) &savvy_set_name_external__impl, 2},
     {"savvy_altint__impl", (DL_FUNC) &savvy_altint__impl, 0},
+    {"savvy_altint_mutable__impl", (DL_FUNC) &savvy_altint_mutable__impl, 0},
     {"savvy_print_altint__impl", (DL_FUNC) &savvy_print_altint__impl, 1},
     {"savvy_double_altint__impl", (DL_FUNC) &savvy_double_altint__impl, 1},
     {"savvy_altreal__impl", (DL_FUNC) &savvy_altreal__impl, 0},

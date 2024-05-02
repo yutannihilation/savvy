@@ -11,7 +11,7 @@ use savvy_ffi::{
         R_set_altvec_Dataptr_or_null_method,
     },
     R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, INTEGER, INTEGER_RO, INTSXP, SEXP, SEXPTYPE,
+    Rf_duplicate, Rf_protect, Rf_unprotect, INTEGER, INTSXP, SEXP, SEXPTYPE,
 };
 
 use crate::{IntegerSexp, IntoExtPtrSexp};
@@ -23,10 +23,11 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// If `true`, all R operations are done directly on the pointer to the
-    /// underlying data. In this case, the `dataptr` method must be implemented.
-
-    const EXPOSE_DATAPTR: bool = true;
+    /// If `true`, cache the materialized SEXP. This means any updates on the
+    /// underlying data are no longer reflected after the first materialization.
+    /// So, it is strongly recommended to set this to `true` only when the
+    /// underlying data doesn't change.
+    const CACHE_MATERIALIZED_SEXP: bool = true;
 
     /// Return the length of the data.
     fn length(&mut self) -> usize;
@@ -63,7 +64,7 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
 
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, Self::EXPOSE_DATAPTR)
+        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -97,19 +98,24 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn materialize<T: AltInteger>(x: &mut SEXP) -> SEXP {
-        // If the strategy is to use cache the materialized SEXP, use it when
-        // available.
-        if T::EXPOSE_DATAPTR {
+    fn get_materialized_sexp<T: AltInteger>(x: &mut SEXP, allow_alocate: bool) -> Option<SEXP> {
+        // If the strategy is to use cache the materialized SEXP, check if
+        // there's already a cached one, and use it if it's available.
+        if T::CACHE_MATERIALIZED_SEXP {
             let data = unsafe { R_altrep_data2(*x) };
             if unsafe { data != R_NilValue } {
-                return data;
+                return Some(data);
             }
+        }
+
+        // If the allocation is unpreferable, give up here.
+        if !allow_alocate {
+            return None;
         }
 
         let self_: &mut T = match super::extract_mut_from_altrep(x) {
             Ok(self_) => self_,
-            Err(_) => return unsafe { R_NilValue },
+            Err(_) => return None,
         };
 
         let len = self_.length();
@@ -122,7 +128,7 @@ pub fn register_altinteger_class<T: AltInteger>(
             0,
         );
 
-        if T::EXPOSE_DATAPTR {
+        if T::CACHE_MATERIALIZED_SEXP {
             // Cache the materialized data in data2.
             unsafe { R_set_altrep_data2(*x, new) };
         }
@@ -130,57 +136,52 @@ pub fn register_altinteger_class<T: AltInteger>(
         // new doesn't need protection because it's used as long as this ALTREP exists.
         unsafe { Rf_unprotect(1) };
 
-        new
+        Some(new)
     }
 
     unsafe extern "C" fn altrep_duplicate<T: AltInteger>(
         mut x: SEXP,
         _deep_copy: Rboolean,
     ) -> SEXP {
-        let materialized = materialize::<T>(&mut x);
-
-        // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
-        // unsafe { SET_ATTRIB(materialized, attrs) };
-
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltInteger>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
-        let materialized = materialize::<T>(&mut x);
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    unsafe extern "C" fn altvec_dataptr<T: AltInteger>(
-        mut x: SEXP,
-        _writable: Rboolean,
-    ) -> *mut c_void {
+    fn altvec_dataptr_inner<T: AltInteger>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
         let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
             Ok(self_) => self_,
             Err(_) => return unsafe { R_NilValue },
         };
 
-        match self_.dataptr() {
-            Some(ptr) => ptr as _,
-            None => {
-                let materialized = materialize::<T>(&mut x);
-                unsafe { INTEGER(materialized) as _ }
+        if T::CACHE_MATERIALIZED_SEXP {
+            // If the strategy is to use the cached SEXP, do not call dataptr
+            match get_materialized_sexp::<T>(&mut x, allow_allocate) {
+                Some(materialized) => unsafe { INTEGER(materialized) as _ },
+                // Returning C NULL (not R NULL!) is the convention
+                None => std::ptr::null_mut(),
+            }
+        } else {
+            match self_.dataptr() {
+                Some(ptr) => ptr as _,
+                None => std::ptr::null_mut(),
             }
         }
     }
 
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(mut x: SEXP) -> *const c_void {
-        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
-            Ok(self_) => self_,
-            Err(_) => return unsafe { R_NilValue },
-        };
+    unsafe extern "C" fn altvec_dataptr<T: AltInteger>(
+        x: SEXP,
+        _writable: Rboolean,
+    ) -> *mut c_void {
+        altvec_dataptr_inner::<T>(x, true)
+    }
 
-        match self_.dataptr() {
-            Some(ptr) => ptr as _,
-            None => {
-                let materialized = materialize::<T>(&mut x);
-                unsafe { INTEGER_RO(materialized) as _ }
-            }
-        }
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(x: SEXP) -> *const c_void {
+        altvec_dataptr_inner::<T>(x, false)
     }
 
     unsafe extern "C" fn altrep_length<T: AltInteger>(mut x: SEXP) -> R_xlen_t {

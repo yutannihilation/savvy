@@ -20,6 +20,35 @@ impl savvy::IntoExtPtrSexp for MyAltInt {}
 impl AltInteger for MyAltInt {
     const CLASS_NAME: &'static str = "MyAltInt";
     const PACKAGE_NAME: &'static str = "TestPackage";
+    const CACHE_MATERIALIZED_SEXP: bool = true;
+
+    fn length(&mut self) -> usize {
+        self.0.len()
+    }
+
+    fn elt(&mut self, i: usize) -> i32 {
+        self.0[i]
+    }
+
+    fn dataptr(&mut self) -> Option<*mut i32> {
+        Some(self.0.as_mut_ptr())
+    }
+}
+
+#[derive(Debug)]
+struct MyAltIntMutable(Vec<i32>);
+
+impl MyAltIntMutable {
+    fn new(x: Vec<i32>) -> Self {
+        Self(x)
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltIntMutable {}
+
+impl AltInteger for MyAltIntMutable {
+    const CLASS_NAME: &'static str = "MyAltIntMutable";
+    const PACKAGE_NAME: &'static str = "TestPackage";
     const CACHE_MATERIALIZED_SEXP: bool = false;
 
     fn length(&mut self) -> usize {
@@ -43,19 +72,44 @@ fn altint() -> savvy::Result<savvy::Sexp> {
 }
 
 #[savvy]
+fn altint_mutable() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltIntMutable::new(vec![1, 2, 3]);
+    let v_altrep = v.into_altrep()?;
+    Ok(savvy::Sexp(v_altrep))
+}
+
+#[savvy]
 fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
-    let x = MyAltInt::try_from_altrep_ref(&x)?;
-    r_println!("{x:?}");
-    Ok(())
+    if let Ok(x) = MyAltInt::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    if let Ok(x) = MyAltIntMutable::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
 }
 
 #[savvy]
 fn double_altint(mut x: IntegerSexp) -> savvy::Result<()> {
-    let x = MyAltInt::try_from_altrep_mut(&mut x)?;
-    for i in x.0.iter_mut() {
-        *i *= 2;
-    }
-    Ok(())
+    if let Ok(x) = MyAltInt::try_from_altrep_mut(&mut x) {
+        for i in x.0.iter_mut() {
+            *i *= 2;
+        }
+        return Ok(());
+    };
+
+    if let Ok(x) = MyAltIntMutable::try_from_altrep_mut(&mut x) {
+        for i in x.0.iter_mut() {
+            *i *= 2;
+        }
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
 }
 
 // real
@@ -159,6 +213,7 @@ fn altstring() -> savvy::Result<savvy::Sexp> {
 #[savvy_init]
 fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
+    register_altinteger_class::<MyAltIntMutable>(dll_info)?;
     register_altreal_class::<MyAltReal>(dll_info)?;
     register_altlogical_class::<MyAltLogical>(dll_info)?;
     register_altstring_class::<MyAltString>(dll_info)?;

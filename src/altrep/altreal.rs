@@ -22,9 +22,11 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// If `true`, all R operations are done directly on the pointer to the
-    /// underlying data. In this case, the `dataptr` method must be implemented.
-    const EXPOSE_DATAPTR: bool = false;
+    /// If `true`, cache the materialized SEXP. This means any updates on the
+    /// underlying data are no longer reflected after the first materialization.
+    /// So, it is strongly recommended to set this to `true` only when the
+    /// underlying data doesn't change.
+    const CACHE_MATERIALIZED_SEXP: bool = true;
 
     /// Return the length of the data.
     fn length(&mut self) -> usize;
@@ -34,7 +36,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
     fn elt(&mut self, i: usize) -> f64;
 
     /// Returns the pointer to the underlying data.
-    fn dataptr(&mut self) -> Option<*mut i32> {
+    fn dataptr(&mut self) -> Option<*mut f64> {
         None
     }
 
@@ -61,7 +63,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
 
     /// Converts the struct into an ALTREP object
     fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME, !Self::EXPOSE_DATAPTR)
+        super::create_altrep_instance(self, Self::CLASS_NAME, Self::CACHE_MATERIALIZED_SEXP)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
@@ -96,9 +98,7 @@ pub fn register_altreal_class<T: AltReal>(
     #[allow(clippy::mut_from_ref)]
     #[inline]
     fn materialize<T: AltReal>(x: &mut SEXP) -> SEXP {
-        // If the strategy is to use cache the materialized SEXP, use it when
-        // available.
-        if !T::EXPOSE_DATAPTR {
+        if T::CACHE_MATERIALIZED_SEXP {
             let data = unsafe { R_altrep_data2(*x) };
             if unsafe { data != R_NilValue } {
                 return data;
@@ -117,8 +117,7 @@ pub fn register_altreal_class<T: AltReal>(
 
         self_.copy_to(unsafe { std::slice::from_raw_parts_mut(REAL(new), len) }, 0);
 
-        if !T::EXPOSE_DATAPTR {
-            // Cache the materialized data in data2.
+        if T::CACHE_MATERIALIZED_SEXP {
             unsafe { R_set_altrep_data2(*x, new) };
         }
 

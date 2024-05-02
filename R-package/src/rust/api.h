@@ -16,6 +16,7 @@ SEXP savvy_external_person_new__ffi(void);
 SEXP savvy_get_name_external__ffi(SEXP x);
 SEXP savvy_set_name_external__ffi(SEXP x, SEXP name);
 SEXP savvy_altint__ffi(void);
+SEXP savvy_altint_mutable__ffi(void);
 SEXP savvy_print_altint__ffi(SEXP x);
 SEXP savvy_double_altint__ffi(SEXP x);
 SEXP savvy_altreal__ffi(void);
