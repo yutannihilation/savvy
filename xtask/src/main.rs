@@ -179,6 +179,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altrep_data1")
         .allowlist_function("R_set_altrep_data2")
         .allowlist_item("R_altrep_class_t")
+        .allowlist_function("R_altrep_inherits")
         .allowlist_function("R_set_altrep_Coerce_method")
         .allowlist_function("R_set_altrep_Length_method")
         .allowlist_function("R_set_altrep_Inspect_method")
