@@ -48,8 +48,11 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     }
 
     /// Extracts the mutable reference (`&mut T`) of the underlying data
-    fn try_from_altrep_mut(x: &mut StringSexp) -> crate::Result<&mut Self> {
+    fn try_from_altrep_mut(x: &mut StringSexp, invalidate_cache: bool) -> crate::Result<&mut Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        if invalidate_cache {
+            unsafe { R_set_altrep_data2(x.0, R_NilValue) }
+        }
         super::extract_mut_from_altrep(&mut x.0)
     }
 

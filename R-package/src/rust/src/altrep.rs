@@ -48,7 +48,7 @@ fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
 
 #[savvy]
 fn tweak_altint(mut x: IntegerSexp) -> savvy::Result<()> {
-    if let Ok(x) = MyAltInt::try_from_altrep_mut(&mut x) {
+    if let Ok(x) = MyAltInt::try_from_altrep_mut(&mut x, true) {
         for i in x.0.iter_mut() {
             *i *= 2;
         }
@@ -103,7 +103,7 @@ fn print_altreal(x: RealSexp) -> savvy::Result<()> {
 
 #[savvy]
 fn tweak_altreal(mut x: RealSexp) -> savvy::Result<()> {
-    if let Ok(x) = MyAltReal::try_from_altrep_mut(&mut x) {
+    if let Ok(x) = MyAltReal::try_from_altrep_mut(&mut x, true) {
         for i in x.0.iter_mut() {
             *i *= 2.0;
         }
@@ -158,7 +158,7 @@ fn print_altlogical(x: LogicalSexp) -> savvy::Result<()> {
 
 #[savvy]
 fn tweak_altlogical(mut x: LogicalSexp) -> savvy::Result<()> {
-    if let Ok(x) = MyAltLogical::try_from_altrep_mut(&mut x) {
+    if let Ok(x) = MyAltLogical::try_from_altrep_mut(&mut x, true) {
         for i in x.0.iter_mut() {
             *i ^= true;
         }
@@ -213,7 +213,7 @@ fn print_altstring(x: StringSexp) -> savvy::Result<()> {
 
 #[savvy]
 fn tweak_altstring(mut x: StringSexp) -> savvy::Result<()> {
-    if let Ok(x) = MyAltString::try_from_altrep_mut(&mut x) {
+    if let Ok(x) = MyAltString::try_from_altrep_mut(&mut x, true) {
         for s in x.0.iter_mut() {
             s.push('0');
         }
