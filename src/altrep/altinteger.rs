@@ -11,7 +11,8 @@ use savvy_ffi::{
         R_set_altvec_Dataptr_or_null_method,
     },
     R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, INTEGER, INTSXP, SEXP, SEXPTYPE,
+    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, INTEGER, INTEGER_ELT, INTSXP, SEXP,
+    SEXPTYPE,
 };
 
 use crate::{IntegerSexp, IntoExtPtrSexp};
@@ -98,7 +99,7 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn get_materialized_sexp<T: AltInteger>(x: &mut SEXP, allow_alocate: bool) -> Option<SEXP> {
+    fn get_materialized_sexp<T: AltInteger>(x: &mut SEXP, allow_allocate: bool) -> Option<SEXP> {
         // If the strategy is to use cache the materialized SEXP, check if
         // there's already a cached one, and use it if it's available.
         if T::CACHE_MATERIALIZED_SEXP {
@@ -109,7 +110,7 @@ pub fn register_altinteger_class<T: AltInteger>(
         }
 
         // If the allocation is unpreferable, give up here.
-        if !allow_alocate {
+        if !allow_allocate {
             return None;
         }
 
@@ -153,11 +154,6 @@ pub fn register_altinteger_class<T: AltInteger>(
     }
 
     fn altvec_dataptr_inner<T: AltInteger>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
-        let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
-            Ok(self_) => self_,
-            Err(_) => return unsafe { R_NilValue },
-        };
-
         if T::CACHE_MATERIALIZED_SEXP {
             // If the strategy is to use the cached SEXP, do not call dataptr
             match get_materialized_sexp::<T>(&mut x, allow_allocate) {
@@ -166,6 +162,10 @@ pub fn register_altinteger_class<T: AltInteger>(
                 None => std::ptr::null_mut(),
             }
         } else {
+            let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+                Ok(self_) => self_,
+                Err(_) => return unsafe { R_NilValue },
+            };
             match self_.dataptr() {
                 Some(ptr) => ptr as _,
                 None => std::ptr::null_mut(),
@@ -185,6 +185,13 @@ pub fn register_altinteger_class<T: AltInteger>(
     }
 
     unsafe extern "C" fn altrep_length<T: AltInteger>(mut x: SEXP) -> R_xlen_t {
+        // If the strategy is to use the cached SEXP, try to use it first
+        if T::CACHE_MATERIALIZED_SEXP {
+            if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+                return unsafe { Rf_xlength(materialized) };
+            };
+        }
+
         let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
             Ok(self_) => self_,
             Err(_) => return 0,
@@ -209,6 +216,13 @@ pub fn register_altinteger_class<T: AltInteger>(
     }
 
     unsafe extern "C" fn altinteger_elt<T: AltInteger>(mut x: SEXP, i: R_xlen_t) -> c_int {
+        // If the strategy is to use the cached SEXP, try to use it first
+        if T::CACHE_MATERIALIZED_SEXP {
+            if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+                return unsafe { INTEGER_ELT(materialized, i) };
+            };
+        }
+
         let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
             Ok(self_) => self_,
             Err(_) => return unsafe { R_NaInt },
