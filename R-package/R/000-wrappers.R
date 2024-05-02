@@ -162,13 +162,28 @@ print_altint <- function(x) {
 }
 
 
-double_altint <- function(x) {
-  invisible(.Call(savvy_double_altint__impl, x))
+tweak_altint <- function(x) {
+  invisible(.Call(savvy_tweak_altint__impl, x))
 }
 
 
 altreal <- function() {
   .Call(savvy_altreal__impl)
+}
+
+
+altreal_mutable <- function() {
+  .Call(savvy_altreal_mutable__impl)
+}
+
+
+print_altreal <- function(x) {
+  invisible(.Call(savvy_print_altreal__impl, x))
+}
+
+
+tweak_altreal <- function(x) {
+  invisible(.Call(savvy_tweak_altreal__impl, x))
 }
 
 

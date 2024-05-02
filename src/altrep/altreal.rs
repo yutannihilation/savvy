@@ -10,7 +10,7 @@ use savvy_ffi::{
         R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
     R_NaReal, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, REAL, REALSXP, REAL_RO, SEXP, SEXPTYPE,
+    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, REAL, REALSXP, REAL_ELT, SEXP, SEXPTYPE,
 };
 
 use crate::{IntoExtPtrSexp, RealSexp};
@@ -97,17 +97,24 @@ pub fn register_altreal_class<T: AltReal>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn materialize<T: AltReal>(x: &mut SEXP) -> SEXP {
+    fn get_materialized_sexp<T: AltReal>(x: &mut SEXP, allow_allocate: bool) -> Option<SEXP> {
+        // If the strategy is to use cache the materialized SEXP, check if
+        // there's already a cached one, and use it if it's available.
         if T::CACHE_MATERIALIZED_SEXP {
             let data = unsafe { R_altrep_data2(*x) };
             if unsafe { data != R_NilValue } {
-                return data;
+                return Some(data);
             }
+        }
+
+        // If the allocation is unpreferable, give up here.
+        if !allow_allocate {
+            return None;
         }
 
         let self_: &mut T = match super::extract_mut_from_altrep(x) {
             Ok(self_) => self_,
-            Err(_) => return unsafe { R_NilValue },
+            Err(_) => return None,
         };
 
         let len = self_.length();
@@ -124,37 +131,55 @@ pub fn register_altreal_class<T: AltReal>(
         // new doesn't need protection because it's used as long as this ALTREP exists.
         unsafe { Rf_unprotect(1) };
 
-        new
+        Some(new)
     }
 
     unsafe extern "C" fn altrep_duplicate<T: AltReal>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
-        let materialized = materialize::<T>(&mut x);
-
-        // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
-        // unsafe { SET_ATTRIB(materialized, attrs) };
-
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltReal>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
-        let materialized = materialize::<T>(&mut x);
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    unsafe extern "C" fn altvec_dataptr<T: AltReal>(
-        mut x: SEXP,
-        _writable: Rboolean,
-    ) -> *mut c_void {
-        let materialized = materialize::<T>(&mut x);
-        unsafe { REAL(materialized) as _ }
+    fn altvec_dataptr_inner<T: AltReal>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
+        if T::CACHE_MATERIALIZED_SEXP {
+            // If the strategy is to use the cached SEXP, do not call dataptr
+            match get_materialized_sexp::<T>(&mut x, allow_allocate) {
+                Some(materialized) => unsafe { REAL(materialized) as _ },
+                // Returning C NULL (not R NULL!) is the convention
+                None => std::ptr::null_mut(),
+            }
+        } else {
+            let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
+                Ok(self_) => self_,
+                Err(_) => return unsafe { R_NilValue },
+            };
+            match self_.dataptr() {
+                Some(ptr) => ptr as _,
+                None => std::ptr::null_mut(),
+            }
+        }
     }
 
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltReal>(mut x: SEXP) -> *const c_void {
-        let materialized = materialize::<T>(&mut x);
-        unsafe { REAL_RO(materialized) as _ }
+    unsafe extern "C" fn altvec_dataptr<T: AltReal>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+        altvec_dataptr_inner::<T>(x, true)
+    }
+
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltReal>(x: SEXP) -> *const c_void {
+        altvec_dataptr_inner::<T>(x, false)
     }
 
     unsafe extern "C" fn altrep_length<T: AltReal>(mut x: SEXP) -> R_xlen_t {
+        // If the strategy is to use the cached SEXP, try to use it first
+        if T::CACHE_MATERIALIZED_SEXP {
+            if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+                return unsafe { Rf_xlength(materialized) };
+            };
+        }
+
         let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
             Ok(self_) => self_,
             Err(_) => return 0,
@@ -179,6 +204,13 @@ pub fn register_altreal_class<T: AltReal>(
     }
 
     unsafe extern "C" fn altreal_elt<T: AltReal>(mut x: SEXP, i: R_xlen_t) -> f64 {
+        // If the strategy is to use the cached SEXP, try to use it first
+        if T::CACHE_MATERIALIZED_SEXP {
+            if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+                return unsafe { REAL_ELT(materialized, i) };
+            };
+        }
+
         let self_: &mut T = match super::extract_mut_from_altrep(&mut x) {
             Ok(self_) => self_,
             Err(_) => return unsafe { R_NaReal },
