@@ -164,6 +164,21 @@ SEXP savvy_altlogical__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_altlogical_mutable__impl(void) {
+    SEXP res = savvy_altlogical_mutable__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_print_altlogical__impl(SEXP x) {
+    SEXP res = savvy_print_altlogical__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altlogical__impl(SEXP x) {
+    SEXP res = savvy_tweak_altlogical__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_altstring__impl(void) {
     SEXP res = savvy_altstring__ffi();
     return handle_result(res);
@@ -567,6 +582,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_print_altreal__impl", (DL_FUNC) &savvy_print_altreal__impl, 1},
     {"savvy_tweak_altreal__impl", (DL_FUNC) &savvy_tweak_altreal__impl, 1},
     {"savvy_altlogical__impl", (DL_FUNC) &savvy_altlogical__impl, 0},
+    {"savvy_altlogical_mutable__impl", (DL_FUNC) &savvy_altlogical_mutable__impl, 0},
+    {"savvy_print_altlogical__impl", (DL_FUNC) &savvy_print_altlogical__impl, 1},
+    {"savvy_tweak_altlogical__impl", (DL_FUNC) &savvy_tweak_altlogical__impl, 1},
     {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
     {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},
     {"savvy_get_names_int__impl", (DL_FUNC) &savvy_get_names_int__impl, 1},

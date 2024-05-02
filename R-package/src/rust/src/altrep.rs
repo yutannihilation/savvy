@@ -2,7 +2,7 @@ use savvy::altrep::{
     register_altinteger_class, register_altlogical_class, register_altreal_class,
     register_altstring_class, AltInteger, AltLogical, AltReal, AltString,
 };
-use savvy::{r_println, savvy, savvy_init, IntegerSexp, RealSexp};
+use savvy::{r_println, savvy, savvy_init, IntegerSexp, LogicalSexp, RealSexp};
 
 // integer
 
@@ -224,6 +224,7 @@ fn tweak_altreal(mut x: RealSexp) -> savvy::Result<()> {
 
 // logical
 
+#[derive(Debug)]
 struct MyAltLogical(Vec<bool>);
 
 impl MyAltLogical {
@@ -252,6 +253,74 @@ fn altlogical() -> savvy::Result<savvy::Sexp> {
     let v = MyAltLogical::new(vec![true, false, true]);
     let v_altrep = v.into_altrep()?;
     Ok(savvy::Sexp(v_altrep))
+}
+
+#[derive(Debug)]
+struct MyAltLogicalMutable(Vec<bool>);
+
+impl MyAltLogicalMutable {
+    fn new(x: Vec<bool>) -> Self {
+        Self(x)
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltLogicalMutable {}
+
+impl AltLogical for MyAltLogicalMutable {
+    const CLASS_NAME: &'static str = "MyAltLogicalMutable";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+    const CACHE_MATERIALIZED_SEXP: bool = false;
+
+    fn length(&mut self) -> usize {
+        self.0.len()
+    }
+
+    fn elt(&mut self, i: usize) -> bool {
+        self.0[i]
+    }
+}
+
+#[savvy]
+fn altlogical_mutable() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltLogicalMutable::new(vec![true, false, true]);
+    let v_altrep = v.into_altrep()?;
+    Ok(savvy::Sexp(v_altrep))
+}
+
+#[savvy]
+fn print_altlogical(x: LogicalSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltLogical::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    if let Ok(x) = MyAltLogicalMutable::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
+}
+
+#[savvy]
+fn tweak_altlogical(mut x: LogicalSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltLogical::try_from_altrep_mut(&mut x) {
+        for i in x.0.iter_mut() {
+            *i ^= true;
+        }
+        x.0.push(false);
+        return Ok(());
+    };
+
+    if let Ok(x) = MyAltLogicalMutable::try_from_altrep_mut(&mut x) {
+        for i in x.0.iter_mut() {
+            *i ^= true;
+        }
+        x.0.push(false);
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
 }
 
 // string
@@ -297,6 +366,7 @@ fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altreal_class::<MyAltRealMutable>(dll_info)?;
 
     register_altlogical_class::<MyAltLogical>(dll_info)?;
+    register_altlogical_class::<MyAltLogicalMutable>(dll_info)?;
 
     register_altstring_class::<MyAltString>(dll_info)?;
     Ok(())

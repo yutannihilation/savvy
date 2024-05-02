@@ -192,6 +192,21 @@ altlogical <- function() {
 }
 
 
+altlogical_mutable <- function() {
+  .Call(savvy_altlogical_mutable__impl)
+}
+
+
+print_altlogical <- function(x) {
+  invisible(.Call(savvy_print_altlogical__impl, x))
+}
+
+
+tweak_altlogical <- function(x) {
+  invisible(.Call(savvy_tweak_altlogical__impl, x))
+}
+
+
 altstring <- function() {
   .Call(savvy_altstring__impl)
 }
