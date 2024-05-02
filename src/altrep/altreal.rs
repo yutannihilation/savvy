@@ -46,8 +46,11 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
     }
 
     /// What gets printed when `.Internal(inspect(x))` is used.
-    fn inspect(&mut self) {
-        crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
+    fn inspect(&mut self, is_materialized: bool) {
+        crate::io::r_print(
+            &format!("{} (materialized: {is_materialized})", Self::CLASS_NAME),
+            false,
+        );
     }
 
     /// Converts the struct into an ALTREP object
@@ -165,9 +168,10 @@ pub fn register_altreal_class<T: AltReal>(
         _: c_int,
         _: Option<unsafe extern "C" fn(SEXP, c_int, c_int, c_int)>,
     ) -> Rboolean {
+        let is_materialized = unsafe { R_altrep_data2(x) == R_NilValue };
         match super::extract_mut_from_altrep::<T>(&mut x) {
             Ok(self_) => {
-                self_.inspect();
+                self_.inspect(is_materialized);
                 Rboolean_TRUE
             }
             Err(_) => Rboolean_FALSE,
