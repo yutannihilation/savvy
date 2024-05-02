@@ -182,7 +182,7 @@ pub fn register_altinteger_class<T: AltInteger>(
         _: c_int,
         _: Option<unsafe extern "C" fn(SEXP, c_int, c_int, c_int)>,
     ) -> Rboolean {
-        let is_materialized = unsafe { R_altrep_data2(x) == R_NilValue };
+        let is_materialized = unsafe { R_altrep_data2(x) != R_NilValue };
         match super::extract_mut_from_altrep::<T>(&mut x) {
             Ok(self_) => {
                 self_.inspect(is_materialized);
