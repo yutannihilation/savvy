@@ -10,11 +10,12 @@ use savvy_ffi::{
         R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
         R_set_altvec_Dataptr_or_null_method,
     },
-    R_NilValue, R_xlen_t, Rboolean, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect,
-    Rf_unprotect, LGLSXP, LOGICAL, LOGICAL_RO, SEXP, SEXPTYPE,
+    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
+    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, LGLSXP, LOGICAL, LOGICAL_ELT, SEXP,
+    SEXPTYPE,
 };
 
-use crate::IntoExtPtrSexp;
+use crate::{IntoExtPtrSexp, LogicalSexp};
 
 pub trait AltLogical: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -23,18 +24,26 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME)
-    }
+    /// Return the length of the data.
+    fn length(&mut self) -> usize;
 
-    /// Copies all the data into a new memory. This is used when the ALTREP
-    /// needs to be materialized.
+    /// Returns the value of `i`-th element. Note that, it seems R handles the
+    /// out-of-bound check, so you don't need to implement it here.
+    fn elt(&mut self, i: usize) -> bool;
+
+    /// Copies the specified range of the data into a new memory. This is used
+    /// when the ALTREP needs to be materialized.
     ///
     /// For example, you can use `copy_from_slice()` for more efficient copying
     /// of the values.
-    fn copy_data(&mut self, new: &mut [i32]) {
+    fn copy_to(&mut self, new: &mut [i32], offset: usize) {
+        // TODO: return error
+        if offset + new.len() > self.length() {
+            return;
+        }
+
         for (i, v) in new.iter_mut().enumerate() {
-            *v = self.elt(i) as _;
+            *v = self.elt(i + offset) as _;
         }
     }
 
@@ -43,12 +52,29 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
         crate::io::r_print(&format!("({})", Self::CLASS_NAME), false);
     }
 
-    /// Return the length of the data.
-    fn length(&mut self) -> usize;
+    /// Converts the struct into an ALTREP object
+    fn into_altrep(self) -> crate::Result<SEXP> {
+        super::create_altrep_instance(self, Self::CLASS_NAME)
+    }
 
-    /// Returns the value of `i`-th element. Note that, it seems R handles the
-    /// out-of-bound check, so you don't need to implement it here.
-    fn elt(&mut self, i: usize) -> bool;
+    /// Extracts the reference (`&T`) of the underlying data
+    fn try_from_altrep_ref(x: &LogicalSexp) -> crate::Result<&Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_ref_from_altrep(&x.0)
+    }
+
+    /// Extracts the mutable reference (`&mut T`) of the underlying data
+    fn try_from_altrep_mut(x: &mut LogicalSexp) -> crate::Result<&mut Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_mut_from_altrep(&mut x.0)
+    }
+
+    /// Takes the underlying data. After this operation, the external pointer is
+    /// replaced with a null pointer.
+    fn try_from_altrep(x: LogicalSexp) -> crate::Result<Self> {
+        super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
+        super::extract_from_altrep(x.0)
+    }
 }
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
@@ -62,84 +88,109 @@ pub fn register_altlogical_class<T: AltLogical>(
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn materialize<T: AltLogical>(x: &SEXP) -> SEXP {
+    fn get_materialized_sexp<T: AltLogical>(x: &mut SEXP, allow_allocate: bool) -> Option<SEXP> {
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
-            return data;
+            return Some(data);
         }
 
-        let self_: &mut T = super::extract_self_from_altrep(x);
+        // If the allocation is unpreferable, give up here.
+        if !allow_allocate {
+            return None;
+        }
+
+        let self_: &mut T = match super::extract_mut_from_altrep(x) {
+            Ok(self_) => self_,
+            Err(_) => return None,
+        };
 
         let len = self_.length();
-        let new = crate::alloc_vector(LGLSXP, len).unwrap();
 
+        let new = crate::alloc_vector(LGLSXP, len).unwrap();
         unsafe { Rf_protect(new) };
 
-        let dst = unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) };
-
-        self_.copy_data(dst);
+        self_.copy_to(
+            unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) },
+            0,
+        );
 
         // Cache the materialized data in data2.
-        //
-        // Note that, for example arrow stores it in `CAR()` of data2, but this
-        // implementation naively uses data2. Probably that should be clever
-        // because data2 can be used for other purposes.
         unsafe { R_set_altrep_data2(*x, new) };
 
         // new doesn't need protection because it's used as long as this ALTREP exists.
         unsafe { Rf_unprotect(1) };
 
-        new
+        Some(new)
     }
 
-    unsafe extern "C" fn altrep_duplicate<T: AltLogical>(x: SEXP, _deep_copy: Rboolean) -> SEXP {
-        let materialized = materialize::<T>(&x);
-
-        // let attrs = unsafe { Rf_protect(Rf_duplicate(ATTRIB(x))) };
-        // unsafe { SET_ATTRIB(materialized, attrs) };
-
+    unsafe extern "C" fn altrep_duplicate<T: AltLogical>(
+        mut x: SEXP,
+        _deep_copy: Rboolean,
+    ) -> SEXP {
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
-    unsafe extern "C" fn altrep_coerce<T: AltLogical>(x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
-        let materialized = materialize::<T>(&x);
+    unsafe extern "C" fn altrep_coerce<T: AltLogical>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
+    }
+
+    fn altvec_dataptr_inner<T: AltLogical>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
+        match get_materialized_sexp::<T>(&mut x, allow_allocate) {
+            Some(materialized) => unsafe { LOGICAL(materialized) as _ },
+            // Returning C NULL (not R NULL!) is the convention
+            None => std::ptr::null_mut(),
+        }
     }
 
     unsafe extern "C" fn altvec_dataptr<T: AltLogical>(
         x: SEXP,
         _writable: Rboolean,
     ) -> *mut c_void {
-        let materialized = materialize::<T>(&x);
-        unsafe { LOGICAL(materialized) as _ }
+        altvec_dataptr_inner::<T>(x, true)
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltLogical>(x: SEXP) -> *const c_void {
-        let materialized = materialize::<T>(&x);
-        unsafe { LOGICAL_RO(materialized) as _ }
+        altvec_dataptr_inner::<T>(x, false)
     }
 
-    unsafe extern "C" fn altrep_length<T: AltLogical>(x: SEXP) -> R_xlen_t {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
-        self_.length() as _
+    unsafe extern "C" fn altrep_length<T: AltLogical>(mut x: SEXP) -> R_xlen_t {
+        if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            unsafe { Rf_xlength(materialized) }
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => self_.length() as _,
+                Err(_) => 0,
+            }
+        }
     }
 
     unsafe extern "C" fn altrep_inspect<T: AltLogical>(
-        x: SEXP,
+        mut x: SEXP,
         _: c_int,
         _: c_int,
         _: c_int,
         _: Option<unsafe extern "C" fn(SEXP, c_int, c_int, c_int)>,
     ) -> Rboolean {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
-        self_.inspect();
-
-        Rboolean_TRUE
+        match super::extract_mut_from_altrep::<T>(&mut x) {
+            Ok(self_) => {
+                self_.inspect();
+                Rboolean_TRUE
+            }
+            Err(_) => Rboolean_FALSE,
+        }
     }
 
-    unsafe extern "C" fn altlogical_elt<T: AltLogical>(x: SEXP, i: R_xlen_t) -> c_int {
-        let self_: &mut T = super::extract_self_from_altrep(&x);
-        self_.elt(i as _) as _
+    unsafe extern "C" fn altlogical_elt<T: AltLogical>(mut x: SEXP, i: R_xlen_t) -> c_int {
+        if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            unsafe { LOGICAL_ELT(materialized, i) }
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => self_.elt(i as _) as _,
+                Err(_) => unsafe { R_NaInt },
+            }
+        }
     }
 
     unsafe {

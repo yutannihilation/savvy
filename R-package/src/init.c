@@ -124,8 +124,28 @@ SEXP savvy_altint__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_print_altint__impl(SEXP x) {
+    SEXP res = savvy_print_altint__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altint__impl(SEXP x) {
+    SEXP res = savvy_tweak_altint__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_altreal__impl(void) {
     SEXP res = savvy_altreal__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_print_altreal__impl(SEXP x) {
+    SEXP res = savvy_print_altreal__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altreal__impl(SEXP x) {
+    SEXP res = savvy_tweak_altreal__ffi(x);
     return handle_result(res);
 }
 
@@ -134,8 +154,28 @@ SEXP savvy_altlogical__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_print_altlogical__impl(SEXP x) {
+    SEXP res = savvy_print_altlogical__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altlogical__impl(SEXP x) {
+    SEXP res = savvy_tweak_altlogical__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_altstring__impl(void) {
     SEXP res = savvy_altstring__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_print_altstring__impl(SEXP x) {
+    SEXP res = savvy_print_altstring__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altstring__impl(SEXP x) {
+    SEXP res = savvy_tweak_altstring__ffi(x);
     return handle_result(res);
 }
 
@@ -529,9 +569,17 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_get_name_external__impl", (DL_FUNC) &savvy_get_name_external__impl, 1},
     {"savvy_set_name_external__impl", (DL_FUNC) &savvy_set_name_external__impl, 2},
     {"savvy_altint__impl", (DL_FUNC) &savvy_altint__impl, 0},
+    {"savvy_print_altint__impl", (DL_FUNC) &savvy_print_altint__impl, 1},
+    {"savvy_tweak_altint__impl", (DL_FUNC) &savvy_tweak_altint__impl, 1},
     {"savvy_altreal__impl", (DL_FUNC) &savvy_altreal__impl, 0},
+    {"savvy_print_altreal__impl", (DL_FUNC) &savvy_print_altreal__impl, 1},
+    {"savvy_tweak_altreal__impl", (DL_FUNC) &savvy_tweak_altreal__impl, 1},
     {"savvy_altlogical__impl", (DL_FUNC) &savvy_altlogical__impl, 0},
+    {"savvy_print_altlogical__impl", (DL_FUNC) &savvy_print_altlogical__impl, 1},
+    {"savvy_tweak_altlogical__impl", (DL_FUNC) &savvy_tweak_altlogical__impl, 1},
     {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
+    {"savvy_print_altstring__impl", (DL_FUNC) &savvy_print_altstring__impl, 1},
+    {"savvy_tweak_altstring__impl", (DL_FUNC) &savvy_tweak_altstring__impl, 1},
     {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},
     {"savvy_get_names_int__impl", (DL_FUNC) &savvy_get_names_int__impl, 1},
     {"savvy_get_dim_int__impl", (DL_FUNC) &savvy_get_dim_int__impl, 1},

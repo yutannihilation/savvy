@@ -1,6 +1,6 @@
-use std::os::raw::c_char;
+use std::{ffi::CStr, os::raw::c_char};
 
-use savvy_ffi::{cetype_t_CE_UTF8, Rf_mkCharLenCE, SEXP};
+use savvy_ffi::{cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SEXP};
 
 use crate::NotAvailableValue;
 
@@ -31,5 +31,20 @@ pub(crate) unsafe fn str_to_charsxp(v: &str) -> crate::error::Result<SEXP> {
                 )
             })
         }
+    }
+}
+
+// This doesn't handle NA.
+pub(crate) unsafe fn charsxp_to_str(v: SEXP) -> &'static str {
+    unsafe {
+        // I bravely assume all strings are valid UTF-8 and don't use
+        // `Rf_translateCharUTF8()`!
+        let ptr = R_CHAR(v) as *const u8;
+        let v_utf8 = std::slice::from_raw_parts(ptr, Rf_xlength(v) as usize + 1); // +1 for NUL
+
+        // Use CStr to check the UTF-8 validity.
+        CStr::from_bytes_with_nul_unchecked(v_utf8)
+            .to_str()
+            .unwrap_or_default()
     }
 }

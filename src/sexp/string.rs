@@ -1,9 +1,7 @@
-use std::ffi::CStr;
-
-use savvy_ffi::{R_NaString, Rf_xlength, R_CHAR, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP};
+use savvy_ffi::{R_NaString, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP};
 
 use super::na::NotAvailableValue;
-use super::utils::{assert_len, str_to_charsxp};
+use super::utils::{assert_len, charsxp_to_str, str_to_charsxp};
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect::{self, local_protect};
 
@@ -409,17 +407,7 @@ impl<'a> Iterator for StringSexpIter<'a> {
                 return Some(Self::Item::na());
             }
 
-            // I bravely assume all strings are valid UTF-8 and don't use
-            // `Rf_translateCharUTF8()`!
-            let ptr = R_CHAR(e) as *const u8;
-            let e_utf8 = std::slice::from_raw_parts(ptr, Rf_xlength(e) as usize + 1); // +1 for NUL
-
-            // Use CStr to check the UTF-8 validity.
-            Some(
-                CStr::from_bytes_with_nul_unchecked(e_utf8)
-                    .to_str()
-                    .unwrap_or_default(),
-            )
+            Some(charsxp_to_str(e))
         }
     }
 
