@@ -27,7 +27,6 @@ static ALTREP_CLASS_CATALOGUE: OnceCell<Mutex<HashMap<&'static str, R_altrep_cla
 pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
     x: T,
     class_name: &'static str,
-    mark_not_mutable: bool,
 ) -> crate::Result<SEXP> {
     let sexp = x.into_external_pointer().0;
     local_protect(sexp);
@@ -44,9 +43,8 @@ pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
 
     let altrep = unsafe { R_new_altrep(*class, sexp, R_NilValue) };
     local_protect(altrep);
-    if mark_not_mutable {
-        unsafe { MARK_NOT_MUTABLE(altrep) };
-    }
+
+    unsafe { MARK_NOT_MUTABLE(altrep) };
 
     Ok(altrep)
 }
