@@ -215,12 +215,12 @@ implementation adopt this caching strategy (more specifically, an ALTREP object
 has two slots, `data1` and `data2`, and `data2` is usually used for the cache).
 
 But, don't worry. `try_from_altrep_mut()` has a second argument,
-`invalidate_cache`. You can set this to `true` to invalidate the cache.
+`invalidate_cache`. You can set this to `true` to clear the cache.
 
 ```rust
 #[savvy]
 fn tweak_altint2(mut x: IntegerSexp) -> savvy::Result<()> {
-    if let Ok(x) = MyAltInt::try_from_altrep_mut(&mut x, false) {
+    if let Ok(x) = MyAltInt::try_from_altrep_mut(&mut x, true) {
       //                                                 ^^^^^
       //                                                   changed!
 ```
