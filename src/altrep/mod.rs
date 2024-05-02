@@ -12,10 +12,8 @@ use std::{collections::HashMap, sync::Mutex};
 
 use once_cell::sync::OnceCell;
 use savvy_ffi::{
-    altrep::{
-        R_altrep_class_t, R_altrep_data1, R_new_altrep, ALTREP, ALTREP_CLASS, MARK_NOT_MUTABLE,
-    },
-    R_NilValue, SEXP,
+    altrep::{R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, MARK_NOT_MUTABLE},
+    R_NilValue, Rboolean_TRUE, SEXP,
 };
 
 use crate::{protect::local_protect, IntoExtPtrSexp};
@@ -103,10 +101,6 @@ pub(crate) fn extract_from_altrep<T>(x: SEXP) -> crate::Result<T> {
 /// the class name.
 #[inline]
 pub(crate) fn assert_altrep_class(x: SEXP, class_name: &'static str) -> crate::error::Result<()> {
-    if unsafe { ALTREP(x) != 1 } {
-        return Err("Not an ALTREP".into());
-    }
-
     let catalogue_mutex = ALTREP_CLASS_CATALOGUE.get().ok_or(crate::Error::new(
         "ALTREP_CLASS_CATALOGUE is not initialized",
     ))?;
@@ -117,9 +111,13 @@ pub(crate) fn assert_altrep_class(x: SEXP, class_name: &'static str) -> crate::e
         .get(class_name)
         .ok_or(crate::Error::new("Failed to get the ALTREP class"))?;
 
-    if class.ptr == unsafe { ALTREP_CLASS(x) } {
+    if unsafe { R_altrep_inherits(x, *class) == Rboolean_TRUE } {
         Ok(())
     } else {
-        Err("Different ALTREP class".into())
+        Err(format!(
+            "Not an object of the specified ALTREP class ({})",
+            class_name
+        )
+        .into())
     }
 }
