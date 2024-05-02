@@ -152,11 +152,6 @@ altint <- function() {
 }
 
 
-altint_mutable <- function() {
-  .Call(savvy_altint_mutable__impl)
-}
-
-
 print_altint <- function(x) {
   invisible(.Call(savvy_print_altint__impl, x))
 }
@@ -169,11 +164,6 @@ tweak_altint <- function(x) {
 
 altreal <- function() {
   .Call(savvy_altreal__impl)
-}
-
-
-altreal_mutable <- function() {
-  .Call(savvy_altreal_mutable__impl)
 }
 
 
@@ -192,11 +182,6 @@ altlogical <- function() {
 }
 
 
-altlogical_mutable <- function() {
-  .Call(savvy_altlogical_mutable__impl)
-}
-
-
 print_altlogical <- function(x) {
   invisible(.Call(savvy_print_altlogical__impl, x))
 }
@@ -209,11 +194,6 @@ tweak_altlogical <- function(x) {
 
 altstring <- function() {
   .Call(savvy_altstring__impl)
-}
-
-
-altstring_mutable <- function() {
-  .Call(savvy_altstring_mutable__impl)
 }
 
 
