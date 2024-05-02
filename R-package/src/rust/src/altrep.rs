@@ -20,7 +20,6 @@ impl savvy::IntoExtPtrSexp for MyAltInt {}
 impl AltInteger for MyAltInt {
     const CLASS_NAME: &'static str = "MyAltInt";
     const PACKAGE_NAME: &'static str = "TestPackage";
-    const CACHE_MATERIALIZED_SEXP: bool = true;
 
     fn length(&mut self) -> usize {
         self.0.len()

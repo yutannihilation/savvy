@@ -1,11 +1,36 @@
 test_that("altinteger works", {
+
+  ### immutable
+
   x <- altint()
+
   expect_equal(x[1], 1L) # ELT method
   expect_equal(length(x), 3L) # length method
   expect_equal(as.character(x), c("1", "2", "3")) # coerce method
+
+  # after the first materialization, the values visible to R don't change
+  double_altint(x)
+  expect_equal(x, c(1L, 2L, 3L))
+
   # duplicate method? dataptr method? I'm not sure
   x[1] <- 2L
   expect_equal(x, c(2L, 2L, 3L))
+
+  ### mutable
+
+  x <- altint_mutable()
+
+  expect_equal(x[1], 1L) # ELT method
+  expect_equal(length(x), 3L) # length method
+  expect_equal(as.character(x), c("1", "2", "3")) # coerce method
+
+  # the change to values should be reflected
+  double_altint(x)
+  expect_equal(x, c(2L, 4L, 6L))
+
+  # duplicate method? dataptr method? I'm not sure
+  x[1] <- 10L
+  expect_equal(x, c(10L, 4L, 6L))
 })
 
 test_that("altreal works", {
