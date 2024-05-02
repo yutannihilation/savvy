@@ -212,6 +212,21 @@ altstring <- function() {
 }
 
 
+altstring_mutable <- function() {
+  .Call(savvy_altstring_mutable__impl)
+}
+
+
+print_altstring <- function(x) {
+  invisible(.Call(savvy_print_altstring__impl, x))
+}
+
+
+tweak_altstring <- function(x) {
+  invisible(.Call(savvy_tweak_altstring__impl, x))
+}
+
+
 get_class_int <- function(x) {
   .Call(savvy_get_class_int__impl, x)
 }
