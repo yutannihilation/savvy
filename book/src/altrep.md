@@ -65,8 +65,18 @@ impl AltInteger for MyAltInt {
 
     fn elt(&mut self, i: usize) -> i32 {
         self.0[i]
+    }
 }
 ```
+
+Optionally, you can implement these methods:
+
+* `copy_date(dst, offset)`: This copies the range of values starting from
+  `offset` into `dst`, a `&mut [T]`. The default implementation does just call
+  `elt()` repeatedly, but there might be more efficient implementation (e.g.
+  `copy_from_slice()`).
+* `inspect()`: This is called when `.Internal(inspect(x))`. You might want to
+  print some information useful for debugging.
 
 Next step is a bit advanced. You need to create a definition of ALTREP class
 from the above trait. This is done by the corresponding `register_alt*_class()`
@@ -96,8 +106,7 @@ to the R session.
 #[savvy]
 fn altint() -> savvy::Result<savvy::Sexp> {
     let v = MyAltInt::new(vec![1, 2, 3]);
-    let v_altrep = v.into_altrep()?;
-    Ok(savvy::Sexp(v_altrep))
+    v.into_altrep()
 }
 ```
 

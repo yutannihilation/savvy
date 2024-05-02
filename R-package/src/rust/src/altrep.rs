@@ -33,8 +33,7 @@ impl AltInteger for MyAltInt {
 #[savvy]
 fn altint() -> savvy::Result<savvy::Sexp> {
     let v = MyAltInt::new(vec![1, 2, 3]);
-    let v_altrep = v.into_altrep()?;
-    Ok(savvy::Sexp(v_altrep))
+    v.into_altrep()
 }
 
 #[savvy]
@@ -89,8 +88,7 @@ impl AltReal for MyAltReal {
 #[savvy]
 fn altreal() -> savvy::Result<savvy::Sexp> {
     let v = MyAltReal::new(vec![1.0, 2.0, 3.0]);
-    let v_altrep = v.into_altrep()?;
-    Ok(savvy::Sexp(v_altrep))
+    v.into_altrep()
 }
 
 #[savvy]
@@ -145,8 +143,7 @@ impl AltLogical for MyAltLogical {
 #[savvy]
 fn altlogical() -> savvy::Result<savvy::Sexp> {
     let v = MyAltLogical::new(vec![true, false, true]);
-    let v_altrep = v.into_altrep()?;
-    Ok(savvy::Sexp(v_altrep))
+    v.into_altrep()
 }
 
 #[savvy]
@@ -201,8 +198,7 @@ impl AltString for MyAltString {
 #[savvy]
 fn altstring() -> savvy::Result<savvy::Sexp> {
     let v = MyAltString::new(vec!["1".to_string(), "2".to_string(), "3".to_string()]);
-    let v_altrep = v.into_altrep()?;
-    Ok(savvy::Sexp(v_altrep))
+    v.into_altrep()
 }
 
 #[savvy]

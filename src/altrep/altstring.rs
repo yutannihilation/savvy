@@ -37,8 +37,8 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     }
 
     /// Converts the struct into an ALTREP object
-    fn into_altrep(self) -> crate::Result<SEXP> {
-        super::create_altrep_instance(self, Self::CLASS_NAME)
+    fn into_altrep(self) -> crate::Result<crate::Sexp> {
+        super::create_altrep_instance(self, Self::CLASS_NAME).map(crate::Sexp)
     }
 
     /// Extracts the reference (`&T`) of the underlying data
