@@ -86,3 +86,9 @@ test_that("altstring works", {
   x[1] <- "A"
   expect_equal(x, c("A", "20", "30", "-1"))
 })
+
+test_that("get_altrep_body_ref_unchecked() works", {
+  x <- altint()
+  # The same result of print_altint() is archieved by treating MyAltInt as the external class.
+  expect_output(print_altint_by_weird_way(x), "MyAltInt([1, 2, 3])", fixed = TRUE)
+})

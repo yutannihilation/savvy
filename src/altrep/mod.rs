@@ -12,11 +12,14 @@ use std::{collections::HashMap, sync::Mutex};
 
 use once_cell::sync::OnceCell;
 use savvy_ffi::{
-    altrep::{R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, MARK_NOT_MUTABLE},
-    R_NilValue, Rboolean_TRUE, SEXP,
+    altrep::{
+        R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, ALTREP, ALTREP_CLASS,
+        MARK_NOT_MUTABLE,
+    },
+    R_NilValue, Rboolean_TRUE, ATTRIB, CADR, CAR, PRINTNAME, SEXP,
 };
 
-use crate::{protect::local_protect, IntoExtPtrSexp};
+use crate::{protect::local_protect, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
 
 /// This stores the ALTREP class objects
 static ALTREP_CLASS_CATALOGUE: OnceCell<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
@@ -70,6 +73,64 @@ fn register_altrep_class(
     }
 
     Ok(())
+}
+
+/// Returns the class name of an ALTREP object.
+///
+/// # Safety
+/// This relies on undocumented implementation details of ALTREP, so something
+/// unexpected might happen.
+pub unsafe fn get_altrep_class_name(x: SEXP) -> crate::error::Result<&'static str> {
+    if unsafe { ALTREP(x) } != 1 {
+        return Err("Not an ALTREP".into());
+    }
+
+    let class_name_symbol = unsafe { CAR(ATTRIB(ALTREP_CLASS(x))) };
+    Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
+}
+
+/// Returns the package name of an ALTREP object.
+///
+/// # Safety
+/// This relies on undocumented implementation details of ALTREP, so something
+/// unexpected might happen.
+pub unsafe fn get_altrep_package_name(x: SEXP) -> crate::error::Result<&'static str> {
+    if unsafe { ALTREP(x) } != 1 {
+        return Err("Not an ALTREP".into());
+    }
+
+    let class_name_symbol = unsafe { CADR(ATTRIB(ALTREP_CLASS(x))) };
+    Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
+}
+
+/// Returns the `data1` of an ALTREP object as `&mut`.
+///
+/// # Safety
+/// Using this on a different type of pointer causes undefined behavior. It's
+/// user's responsibility to ensure the underlying pointer is `T`.
+pub unsafe fn get_altrep_body_mut_unchecked<T>(x: &mut SEXP) -> crate::error::Result<&mut T> {
+    if unsafe { ALTREP(*x) } != 1 {
+        return Err("Not an ALTREP".into());
+    }
+
+    let ptr = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x))? as *mut T };
+    let ref_mut = unsafe { ptr.as_mut() };
+    ref_mut.ok_or("Failed to convert the external pointer to the Rust object".into())
+}
+
+/// Returns the `data1` of an ALTREP object as `&`.
+///
+/// # Safety
+/// Using this on a different type of pointer causes undefined behavior. It's
+/// user's responsibility to ensure the underlying pointer is `T`.
+pub unsafe fn get_altrep_body_ref_unchecked<T>(x: &SEXP) -> crate::error::Result<&T> {
+    if unsafe { ALTREP(*x) } != 1 {
+        return Err("Not an ALTREP".into());
+    }
+
+    let ptr = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x))? as *const T };
+    let ref_mut = unsafe { ptr.as_ref() };
+    ref_mut.ok_or("Failed to convert the external pointer to the Rust object".into())
 }
 
 // Some helpers
