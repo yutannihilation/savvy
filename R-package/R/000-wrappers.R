@@ -207,6 +207,21 @@ tweak_altstring <- function(x) {
 }
 
 
+get_altrep_class_name <- function(x) {
+  invisible(.Call(savvy_get_altrep_class_name__impl, x))
+}
+
+
+get_altrep_package_name <- function(x) {
+  invisible(.Call(savvy_get_altrep_package_name__impl, x))
+}
+
+
+print_altint_by_weird_way <- function(x) {
+  invisible(.Call(savvy_print_altint_by_weird_way__impl, x))
+}
+
+
 get_class_int <- function(x) {
   .Call(savvy_get_class_int__impl, x)
 }

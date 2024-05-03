@@ -85,9 +85,11 @@ fn show() -> Result<(), DynError> {
         // Allocation and attributes
         .allowlist_function("Rf_xlength")
         .allowlist_function("Rf_allocVector")
-        .allowlist_function("Rf_install")
         .allowlist_function("Rf_getAttrib")
         .allowlist_function("Rf_setAttrib")
+        // Symbol
+        .allowlist_function("Rf_install")
+        .allowlist_function("PRINTNAME")
         // Integer
         .allowlist_function("INTEGER")
         .allowlist_function("INTEGER_RO")
@@ -139,9 +141,11 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_lcons")
         .allowlist_function("CAR")
         .allowlist_function("CDR")
+        .allowlist_function("CADR")
         .allowlist_function("SETCAR")
         .allowlist_function("SETCDR")
         .allowlist_function("SET_TAG")
+        .allowlist_function("ATTRIB")
         // Function and Environment
         .allowlist_function("Rf_isFunction")
         .allowlist_function("Rf_isEnvironment")

@@ -73,9 +73,14 @@ extern "C" {
 extern "C" {
     pub fn Rf_xlength(arg1: SEXP) -> R_xlen_t;
     pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP;
-    pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP;
     pub fn Rf_getAttrib(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn Rf_setAttrib(arg1: SEXP, arg2: SEXP, arg3: SEXP) -> SEXP;
+}
+
+// Symbol
+extern "C" {
+    pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP;
+    pub fn PRINTNAME(x: SEXP) -> SEXP;
 }
 
 // Integer
@@ -183,9 +188,11 @@ extern "C" {
     pub fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn CAR(e: SEXP) -> SEXP;
     pub fn CDR(e: SEXP) -> SEXP;
+    pub fn CADR(e: SEXP) -> SEXP;
     pub fn SETCAR(x: SEXP, y: SEXP) -> SEXP;
     pub fn SETCDR(x: SEXP, y: SEXP) -> SEXP;
     pub fn SET_TAG(x: SEXP, y: SEXP);
+    pub fn ATTRIB(x: SEXP) -> SEXP;
 }
 
 // Function and environment
