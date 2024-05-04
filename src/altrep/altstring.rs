@@ -34,7 +34,7 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// What gets printed when `.Internal(inspect(x))` is used.
     fn inspect(&mut self, is_materialized: bool) {
         crate::io::r_print(
-            &format!("{} (materialized: {is_materialized})", Self::CLASS_NAME),
+            &format!("{} (materialized: {is_materialized})\n", Self::CLASS_NAME),
             false,
         );
     }
@@ -128,7 +128,7 @@ pub fn register_altstring_class<T: AltString>(
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    // ALTSTRING probably doesn't have a data pointer to *mut CHARSXP, so always materialize
+    // ALTSTRING usually doesn't have it's own array of CHARSXPs, so always materialize.
     fn altvec_dataptr_inner<T: AltString>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
         match get_materialized_sexp::<T>(&mut x, allow_allocate) {
             Some(materialized) => unsafe { STRING_PTR(materialized) as _ },

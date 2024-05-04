@@ -237,3 +237,21 @@ extern "C" {
         fun: Option<unsafe extern "C" fn(arg1: SEXP) -> c_int>,
     );
 }
+
+// list
+
+extern "C" {
+    pub fn R_make_altlist_class(
+        cname: *const c_char,
+        pname: *const c_char,
+        info: *mut crate::DllInfo,
+    ) -> R_altrep_class_t;
+    pub fn R_set_altlist_Elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> SEXP>,
+    );
+    pub fn R_set_altlist_Set_elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t, arg3: SEXP)>,
+    );
+}

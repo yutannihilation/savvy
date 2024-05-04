@@ -129,6 +129,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_CHAR")
         .allowlist_function("Rf_mkCharLenCE")
         // List
+        .allowlist_function("DATAPTR")
         .allowlist_function("VECTOR_ELT")
         .allowlist_function("SET_VECTOR_ELT")
         // External pointer
@@ -223,7 +224,11 @@ fn show() -> Result<(), DynError> {
         .allowlist_item("R_set_altstring_No_NA_method")
         .allowlist_item("R_set_altstring_Is_sorted_method")
         .allowlist_item("R_set_altstring_Set_elt_method")
-        .allowlist_item("R_make_altstring_class");
+        .allowlist_item("R_make_altstring_class")
+        // altlist
+        .allowlist_item("R_set_altlist_Elt_method")
+        .allowlist_item("R_set_altlist_Set_elt_method")
+        .allowlist_item("R_make_altlist_class");
 
     let bindings = builder.generate().expect("Unable to generate bindings");
 

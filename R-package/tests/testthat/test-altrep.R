@@ -87,6 +87,28 @@ test_that("altstring works", {
   expect_equal(x, c("A", "20", "30", "-1"))
 })
 
+test_that("altlist works", {
+  x <- altlist()
+
+  expect_equal(x[[1]], c(1L, 2L, 3L)) # ELT method
+  expect_equal(x[[2]], c("a", "b", "c")) # ELT method
+  expect_equal(length(x), 2L) # length method
+  expect_equal(x, list(one = c(1L, 2L, 3L), two = c("a", "b", "c")))
+
+  # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
+  tweak_altlist(x)
+  expect_output(print_altlist(x), 'MyAltList { one: MyAltInt([2, 4, 6, 0]), two: MyAltString(["a0", "b0", "c0", "-1"]) }', fixed = TRUE)
+
+  expect_equal(x[[1]], c(2L, 4L, 6L, 0L)) # ELT method
+  expect_equal(x[[2]], c("a0", "b0", "c0", "-1")) # ELT method
+  expect_equal(length(x), 2L) # length method
+  expect_equal(x, list(one = c(2L, 4L, 6L, 0L), two = c("a0", "b0", "c0", "-1")))
+
+  # duplicate method? dataptr method? I'm not sure
+  x[[1]] <- "A"
+  expect_equal(x, list(one = "A", two =  c("a0", "b0", "c0", "-1")))
+})
+
 test_that("get_altrep_body_ref_unchecked() works", {
   x <- altint()
   # The same result of print_altint() is archieved by treating MyAltInt as the external class.

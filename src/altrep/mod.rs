@@ -1,9 +1,11 @@
 mod altinteger;
+mod altlist;
 mod altlogical;
 mod altreal;
 mod altstring;
 
 pub use altinteger::*;
+pub use altlist::*;
 pub use altlogical::*;
 pub use altreal::*;
 pub use altstring::*;
