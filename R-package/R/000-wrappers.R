@@ -506,6 +506,11 @@ times_two_numeric_i32_scalar <- function(x) {
 }
 
 
+print_numeric <- function(x) {
+  invisible(.Call(savvy_print_numeric__impl, x))
+}
+
+
 filter_integer_odd <- function(x) {
   .Call(savvy_filter_integer_odd__impl, x)
 }

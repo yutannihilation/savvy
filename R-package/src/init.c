@@ -479,6 +479,11 @@ SEXP savvy_times_two_numeric_i32_scalar__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_print_numeric__impl(SEXP x) {
+    SEXP res = savvy_print_numeric__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_filter_integer_odd__impl(SEXP x) {
     SEXP res = savvy_filter_integer_odd__ffi(x);
     return handle_result(res);
@@ -689,6 +694,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_times_two_numeric_i32__impl", (DL_FUNC) &savvy_times_two_numeric_i32__impl, 1},
     {"savvy_times_two_numeric_f64_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_f64_scalar__impl, 1},
     {"savvy_times_two_numeric_i32_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_i32_scalar__impl, 1},
+    {"savvy_print_numeric__impl", (DL_FUNC) &savvy_print_numeric__impl, 1},
     {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
     {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},

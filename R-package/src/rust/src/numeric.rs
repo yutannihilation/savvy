@@ -1,6 +1,6 @@
 use savvy::{
-    savvy,
-    sexp::numeric::{NumericScalar, NumericSexp},
+    r_println, savvy,
+    sexp::numeric::{NumericScalar, NumericSexp, NumericSexpVariant},
     NotAvailableValue, Sexp,
 };
 
@@ -40,4 +40,17 @@ fn times_two_numeric_i32_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
     } else {
         (v * 2).try_into()
     }
+}
+
+#[savvy]
+fn print_numeric(x: NumericSexp) -> savvy::Result<()> {
+    match x.into_typed() {
+        NumericSexpVariant::Integer(i) => {
+            r_println!("Integer {:?}", i.as_slice());
+        }
+        NumericSexpVariant::Real(r) => {
+            r_println!("Real {:?}", r.as_slice());
+        }
+    }
+    Ok(())
 }
