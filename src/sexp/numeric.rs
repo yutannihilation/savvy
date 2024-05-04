@@ -37,7 +37,7 @@ enum PrivateNumericSexp {
 }
 
 /// An enum to be used for `match`ing the content of `NumericSexp`.
-pub enum NumericSexpVariant {
+pub enum NumericTypedSexp {
     Integer(IntegerSexp),
     Real(RealSexp),
 }
@@ -46,21 +46,83 @@ pub enum NumericSexpVariant {
 pub struct NumericSexp(PrivateNumericSexp);
 
 impl NumericSexp {
+    #[inline]
+    fn inner(&self) -> savvy_ffi::SEXP {
+        match &self.0 {
+            PrivateNumericSexp::Integer { orig, .. } => orig.0,
+            PrivateNumericSexp::Real { orig, .. } => orig.0,
+        }
+    }
+
+    /// Returns the reference to the raw SEXP. This is convenient when
+    /// the lifetime is needed (e.g. returning a slice).
+    #[inline]
+    pub(crate) fn inner_ref(&self) -> &savvy_ffi::SEXP {
+        match &self.0 {
+            PrivateNumericSexp::Integer { orig, .. } => &orig.0,
+            PrivateNumericSexp::Real { orig, .. } => &orig.0,
+        }
+    }
+
+    /// Returns the length of the SEXP.
+    pub fn len(&self) -> usize {
+        unsafe { savvy_ffi::Rf_xlength(self.inner()) as _ }
+    }
+
+    /// Returns `true` if the SEXP is of zero-length.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns the specified attribute.
+    pub fn get_attrib(&self, attr: &str) -> crate::error::Result<Option<Sexp>> {
+        crate::Sexp(self.inner()).get_attrib(attr)
+    }
+
+    /// Returns the names.
+    pub fn get_names(&self) -> Option<Vec<&'static str>> {
+        crate::Sexp(self.inner()).get_names()
+    }
+
+    /// Returns the S3 class.
+    pub fn get_class(&self) -> Option<Vec<&'static str>> {
+        crate::Sexp(self.inner()).get_class()
+    }
+
+    /// Returns the dimension.
+    pub fn get_dim(&self) -> Option<&[i32]> {
+        // In order to maintain the lifetime, this cannot rely on the
+        // Sexp's method. Otherwise, you'll see the "cannot return
+        // reference to temporary value" error.
+        unsafe { crate::sexp::get_dim_from_sexp(self.inner_ref()) }
+    }
+
     /// Return the typed SEXP.
-    pub fn into_typed(self) -> NumericSexpVariant {
+    pub fn into_typed(self) -> NumericTypedSexp {
         match self.0 {
-            PrivateNumericSexp::Integer { orig, .. } => NumericSexpVariant::Integer(orig),
-            PrivateNumericSexp::Real { orig, .. } => NumericSexpVariant::Real(orig),
+            PrivateNumericSexp::Integer { orig, .. } => NumericTypedSexp::Integer(orig),
+            PrivateNumericSexp::Real { orig, .. } => NumericTypedSexp::Real(orig),
         }
     }
 
     /// Extracts a slice containing the underlying data of the SEXP.
     ///
-    /// If the data is real, allocates a new `Vec` and cache it. This fails when the value is
+    /// If the data is real, allocates a new `Vec` and cache it. This fails when
+    /// the value is
     ///
     /// - infinite
     /// - out of the range of `i32`
     /// - not integer-ish (e.g. `1.1`)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, 2.0, 3.0])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1, 2, 3)
+    /// assert_eq!(num_sexp.as_slice_i32().unwrap(), &[1, 2, 3]);
+    /// ```
     pub fn as_slice_i32(&self) -> crate::error::Result<&[i32]> {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => Ok(orig.as_slice()),
@@ -86,6 +148,15 @@ impl NumericSexp {
     /// Extracts a slice containing the underlying data of the SEXP.
     ///
     /// If the data is integer, allocates a new `Vec` and cache it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, 2, 3])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(num_sexp.as_slice_f64(), &[1.0, 2.0, 3.0]);
+    /// ```
     pub fn as_slice_f64(&self) -> &[f64] {
         match &self.0 {
             PrivateNumericSexp::Real { orig, .. } => orig.as_slice(),
@@ -110,7 +181,12 @@ impl NumericSexp {
 
     /// Returns an iterator over the underlying data of the SEXP.
     ///
-    /// If the data is integer, allocates a new `Vec` and cache it.
+    /// If the data is integer, allocates a new `Vec` and cache it. This fails
+    /// when the value is
+    ///
+    /// - infinite
+    /// - out of the range of `i32`
+    /// - not integer-ish (e.g. `1.1`)
     pub fn iter_i32(&self) -> crate::error::Result<std::slice::Iter<i32>> {
         self.as_slice_i32().map(|x| x.iter())
     }
@@ -121,6 +197,11 @@ impl NumericSexp {
     pub fn iter_f64(&self) -> std::slice::Iter<f64> {
         self.as_slice_f64().iter()
     }
+
+    // Note: If the conversion is needed, to_vec_*() would copy the values twice
+    // because it creates a `Vec` from to_slice(). This is inefficient, but I'm
+    // not sure which is worse to alwaays creates a `Vec` from scratch or use
+    // the cached one. So, I chose not to implement the method.
 }
 
 impl TryFrom<Sexp> for NumericSexp {
@@ -147,6 +228,28 @@ impl TryFrom<Sexp> for NumericSexp {
                 "Should not reach here!".to_string(),
             )),
         }
+    }
+}
+
+impl TryFrom<IntegerSexp> for NumericSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: IntegerSexp) -> Result<Self, Self::Error> {
+        Ok(Self(PrivateNumericSexp::Integer {
+            orig: value,
+            converted: OnceCell::new(),
+        }))
+    }
+}
+
+impl TryFrom<RealSexp> for NumericSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: RealSexp) -> Result<Self, Self::Error> {
+        Ok(Self(PrivateNumericSexp::Real {
+            orig: value,
+            converted: OnceCell::new(),
+        }))
     }
 }
 

@@ -77,7 +77,7 @@ pub use sexp::list::{ListSexp, OwnedListSexp};
 pub use sexp::logical::{LogicalSexp, OwnedLogicalSexp};
 pub use sexp::na::NotAvailableValue;
 pub use sexp::null::NullSexp;
-pub use sexp::numeric::{NumericScalar, NumericSexp, NumericSexpVariant};
+pub use sexp::numeric::{NumericScalar, NumericSexp, NumericTypedSexp};
 pub use sexp::real::{OwnedRealSexp, RealSexp};
 pub use sexp::string::{OwnedStringSexp, StringSexp};
 pub use sexp::{Sexp, TypedSexp};
