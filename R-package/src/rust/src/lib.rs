@@ -232,7 +232,7 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
             }
             TypedSexp::Real(x) => {
                 format!(
-                    "numeric [{}]",
+                    "double [{}]",
                     x.iter()
                         .map(|r| r.to_string())
                         .collect::<Vec<String>>()
