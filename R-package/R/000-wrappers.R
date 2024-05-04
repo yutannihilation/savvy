@@ -207,6 +207,21 @@ tweak_altstring <- function(x) {
 }
 
 
+altlist <- function() {
+  .Call(savvy_altlist__impl)
+}
+
+
+print_altlist <- function(x) {
+  invisible(.Call(savvy_print_altlist__impl, x))
+}
+
+
+tweak_altlist <- function(x) {
+  invisible(.Call(savvy_tweak_altlist__impl, x))
+}
+
+
 get_altrep_class_name <- function(x) {
   invisible(.Call(savvy_get_altrep_class_name__impl, x))
 }

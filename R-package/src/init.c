@@ -179,6 +179,21 @@ SEXP savvy_tweak_altstring__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_altlist__impl(void) {
+    SEXP res = savvy_altlist__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_print_altlist__impl(SEXP x) {
+    SEXP res = savvy_print_altlist__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altlist__impl(SEXP x) {
+    SEXP res = savvy_tweak_altlist__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_init_altrep_class__impl(DllInfo* dll_info) {
     SEXP res = savvy_init_altrep_class__ffi(dll_info);
     return handle_result(res);
@@ -595,6 +610,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
     {"savvy_print_altstring__impl", (DL_FUNC) &savvy_print_altstring__impl, 1},
     {"savvy_tweak_altstring__impl", (DL_FUNC) &savvy_tweak_altstring__impl, 1},
+    {"savvy_altlist__impl", (DL_FUNC) &savvy_altlist__impl, 0},
+    {"savvy_print_altlist__impl", (DL_FUNC) &savvy_print_altlist__impl, 1},
+    {"savvy_tweak_altlist__impl", (DL_FUNC) &savvy_tweak_altlist__impl, 1},
     {"savvy_get_altrep_class_name__impl", (DL_FUNC) &savvy_get_altrep_class_name__impl, 1},
     {"savvy_get_altrep_package_name__impl", (DL_FUNC) &savvy_get_altrep_package_name__impl, 1},
     {"savvy_print_altint_by_weird_way__impl", (DL_FUNC) &savvy_print_altint_by_weird_way__impl, 1},

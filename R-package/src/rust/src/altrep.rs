@@ -1,12 +1,16 @@
 use savvy::altrep::{
-    get_altrep_body_ref_unchecked, register_altinteger_class, register_altlogical_class,
-    register_altreal_class, register_altstring_class, AltInteger, AltLogical, AltReal, AltString,
+    get_altrep_body_ref_unchecked, register_altinteger_class, register_altlist_class,
+    register_altlogical_class, register_altreal_class, register_altstring_class, AltInteger,
+    AltList, AltLogical, AltReal, AltString,
 };
-use savvy::{r_println, savvy, savvy_init, IntegerSexp, LogicalSexp, RealSexp, StringSexp};
+use savvy::{
+    r_println, savvy, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RealSexp,
+    StringSexp,
+};
 
 // integer
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MyAltInt(Vec<i32>);
 
 impl MyAltInt {
@@ -61,7 +65,7 @@ fn tweak_altint(mut x: IntegerSexp) -> savvy::Result<()> {
 
 // real
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MyAltReal(Vec<f64>);
 
 impl MyAltReal {
@@ -116,7 +120,7 @@ fn tweak_altreal(mut x: RealSexp) -> savvy::Result<()> {
 
 // logical
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MyAltLogical(Vec<bool>);
 
 impl MyAltLogical {
@@ -171,7 +175,7 @@ fn tweak_altlogical(mut x: LogicalSexp) -> savvy::Result<()> {
 
 // string
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MyAltString(Vec<String>);
 
 impl MyAltString {
@@ -224,6 +228,80 @@ fn tweak_altstring(mut x: StringSexp) -> savvy::Result<()> {
     Err("Not a known ALTREP".into())
 }
 
+// list
+
+#[derive(Debug, Clone)]
+struct MyAltList {
+    one: MyAltInt,
+    two: MyAltString,
+}
+
+impl MyAltList {
+    fn new(one: Vec<i32>, two: Vec<String>) -> Self {
+        Self {
+            one: MyAltInt::new(one),
+            two: MyAltString::new(two),
+        }
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltList {}
+
+impl AltList for MyAltList {
+    const CLASS_NAME: &'static str = "MyAltList";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+
+    fn length(&mut self) -> usize {
+        2
+    }
+
+    fn elt(&mut self, i: usize) -> savvy::Sexp {
+        match i {
+            0 => self.one.clone().into_altrep().unwrap_or(NullSexp.into()),
+            1 => self.two.clone().into_altrep().unwrap_or(NullSexp.into()),
+            _ => NullSexp.into(),
+        }
+    }
+}
+
+#[savvy]
+fn altlist() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltList::new(
+        vec![1, 2, 3],
+        vec!["a".to_string(), "b".to_string(), "c".to_string()],
+    );
+    v.into_altrep(Some(["one", "two"]))
+}
+
+#[savvy]
+fn print_altlist(x: ListSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltList::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
+}
+
+#[savvy]
+fn tweak_altlist(mut x: ListSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltList::try_from_altrep_mut(&mut x, true) {
+        for i in x.one.0.iter_mut() {
+            *i *= 2;
+        }
+        x.one.0.push(0);
+
+        for s in x.two.0.iter_mut() {
+            s.push('0');
+        }
+        x.two.0.push("-1".to_string());
+
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
+}
+
 // initialization
 
 #[savvy_init]
@@ -232,6 +310,7 @@ fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altreal_class::<MyAltReal>(dll_info)?;
     register_altlogical_class::<MyAltLogical>(dll_info)?;
     register_altstring_class::<MyAltString>(dll_info)?;
+    register_altlist_class::<MyAltList>(dll_info)?;
     Ok(())
 }
 
