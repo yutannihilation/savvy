@@ -38,6 +38,17 @@
   }
   ```
 
+### Breaking changes
+
+* `AltList` now loses `names` argument in `into_altrep()` for consistency.
+  Please use `set_names()` on the resulted `Sexp` object.
+
+  ``` rust
+  let mut out = v.into_altrep()?;
+  out.set_names(["one", "two"])?;
+  Ok(out)
+  ```
+
 ## [v0.6.2] (2024-05-04)
 
 ### New features
