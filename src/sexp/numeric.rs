@@ -91,7 +91,7 @@ fn try_cast_f64_to_i32(f: &f64) -> crate::Result<i32> {
     if f.is_na() || f.is_nan() {
         Ok(i32::na())
     } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
-        Err("Out of i32 range".into())
+        Err(format!("{f:?} is out of range for integer").into())
     } else if (*f - f.round()).abs() > TOLERANCE {
         Err(format!("{f:?} is not integer-ish").into())
     } else {
