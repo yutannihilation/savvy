@@ -36,7 +36,7 @@ impl NumericSexp {
                 // If `converted` is not created, convert the values.
                 let v_new = orig
                     .iter()
-                    .map(|f| try_cast_f64_to_i32(f))
+                    .map(try_cast_f64_to_i32)
                     .collect::<crate::Result<Vec<i32>>>()?;
 
                 // Set v_new to converted. Otherwise, this is a temporary value and cannot be returned.
