@@ -7,8 +7,48 @@
 
 * New macro `#[savvy_init]` makes the function executed when the DLL is loaded
   by R. This is useful for initializaing resources. See [the guide](https://yutannihilation.github.io/savvy/guide/initialization_routine.html) for more details.
+  
+  Example:
+  ```rust
+  use std::sync::OnceLock;
+
+  static GLOBAL_FOO: OnceLock<Foo> = OnceLock::new();
+
+  #[savvy_init]
+  fn init_global_foo(dll_info: *mut DllInfo) -> savvy::Result<()> {
+      GLOBAL_FOO.get_or_init(|| Foo::new());
+
+      Ok(())
+  }
+  ```
 
 * Savvy now experimentally supports ALTREP. See [the guide](https://yutannihilation.github.io/savvy/guide/altrep.html) for more details.
+  
+  Example:
+  ```rust
+  struct MyAltInt(Vec<i32>);
+
+  impl MyAltInt {
+      fn new(x: Vec<i32>) -> Self {
+          Self(x)
+      }
+  }
+
+  impl savvy::IntoExtPtrSexp for MyAltInt {}
+
+  impl AltInteger for MyAltInt {
+      const CLASS_NAME: &'static str = "MyAltInt";
+      const PACKAGE_NAME: &'static str = "TestPackage";
+
+      fn length(&mut self) -> usize {
+          self.0.len()
+      }
+
+      fn elt(&mut self, i: usize) -> i32 {
+          self.0[i]
+      }
+  }
+  ```
 
 ## [v0.6.1] (2024-04-26)
 
