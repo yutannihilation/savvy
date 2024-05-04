@@ -67,8 +67,8 @@ times_any_int <- function(x, y) {
 #' @param x A numeric vector.
 #' @returns A numeric vector with values multiplied by 2.
 #' @export
-times_two_numeric <- function(x) {
-  .Call(savvy_times_two_numeric__impl, x)
+times_two_real <- function(x) {
+  .Call(savvy_times_two_real__impl, x)
 }
 
 #' Multiply Input By Another Input
@@ -77,8 +77,8 @@ times_two_numeric <- function(x) {
 #' @param y A real to multiply.
 #' @returns A real vector with values multiplied by `y`.
 #' @export
-times_any_numeric <- function(x, y) {
-  .Call(savvy_times_any_numeric__impl, x, y)
+times_any_real <- function(x, y) {
+  .Call(savvy_times_any_real__impl, x, y)
 }
 
 #' Flip Input
@@ -483,6 +483,16 @@ new_real <- function(size) {
 
 new_bool <- function(size) {
   .Call(savvy_new_bool__impl, size)
+}
+
+
+times_two_numeric_f64 <- function(x) {
+  .Call(savvy_times_two_numeric_f64__impl, x)
+}
+
+
+times_two_numeric_i32 <- function(x) {
+  .Call(savvy_times_two_numeric_i32__impl, x)
 }
 
 

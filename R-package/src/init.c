@@ -59,13 +59,13 @@ SEXP savvy_times_any_int__impl(SEXP x, SEXP y) {
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric__impl(SEXP x) {
-    SEXP res = savvy_times_two_numeric__ffi(x);
+SEXP savvy_times_two_real__impl(SEXP x) {
+    SEXP res = savvy_times_two_real__ffi(x);
     return handle_result(res);
 }
 
-SEXP savvy_times_any_numeric__impl(SEXP x, SEXP y) {
-    SEXP res = savvy_times_any_numeric__ffi(x, y);
+SEXP savvy_times_any_real__impl(SEXP x, SEXP y) {
+    SEXP res = savvy_times_any_real__ffi(x, y);
     return handle_result(res);
 }
 
@@ -459,6 +459,16 @@ SEXP savvy_new_bool__impl(SEXP size) {
     return handle_result(res);
 }
 
+SEXP savvy_times_two_numeric_f64__impl(SEXP x) {
+    SEXP res = savvy_times_two_numeric_f64__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_times_two_numeric_i32__impl(SEXP x) {
+    SEXP res = savvy_times_two_numeric_i32__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_filter_integer_odd__impl(SEXP x) {
     SEXP res = savvy_filter_integer_odd__ffi(x);
     return handle_result(res);
@@ -586,8 +596,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_add_suffix__impl", (DL_FUNC) &savvy_add_suffix__impl, 2},
     {"savvy_times_two_int__impl", (DL_FUNC) &savvy_times_two_int__impl, 1},
     {"savvy_times_any_int__impl", (DL_FUNC) &savvy_times_any_int__impl, 2},
-    {"savvy_times_two_numeric__impl", (DL_FUNC) &savvy_times_two_numeric__impl, 1},
-    {"savvy_times_any_numeric__impl", (DL_FUNC) &savvy_times_any_numeric__impl, 2},
+    {"savvy_times_two_real__impl", (DL_FUNC) &savvy_times_two_real__impl, 1},
+    {"savvy_times_any_real__impl", (DL_FUNC) &savvy_times_any_real__impl, 2},
     {"savvy_flip_logical__impl", (DL_FUNC) &savvy_flip_logical__impl, 1},
     {"savvy_flip_logical_expert_only__impl", (DL_FUNC) &savvy_flip_logical_expert_only__impl, 1},
     {"savvy_or_logical__impl", (DL_FUNC) &savvy_or_logical__impl, 2},
@@ -665,6 +675,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_new_int__impl", (DL_FUNC) &savvy_new_int__impl, 1},
     {"savvy_new_real__impl", (DL_FUNC) &savvy_new_real__impl, 1},
     {"savvy_new_bool__impl", (DL_FUNC) &savvy_new_bool__impl, 1},
+    {"savvy_times_two_numeric_f64__impl", (DL_FUNC) &savvy_times_two_numeric_f64__impl, 1},
+    {"savvy_times_two_numeric_i32__impl", (DL_FUNC) &savvy_times_two_numeric_i32__impl, 1},
     {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
     {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},
