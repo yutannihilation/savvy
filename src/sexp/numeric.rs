@@ -36,17 +36,7 @@ impl NumericSexp {
                 // If `converted` is not created, convert the values.
                 let v_new = orig
                     .iter()
-                    .map(|f| {
-                        if f.is_na() || f.is_nan() {
-                            Ok(i32::na())
-                        } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
-                            Err("Out of i32 range".into())
-                        } else if (*f - f.round()).abs() > TOLERANCE {
-                            Err(format!("{f:?} is not integer-ish").into())
-                        } else {
-                            Ok(*f as i32)
-                        }
-                    })
+                    .map(|f| try_cast_f64_to_i32(f))
                     .collect::<crate::Result<Vec<i32>>>()?;
 
                 // Set v_new to converted. Otherwise, this is a temporary value and cannot be returned.
@@ -97,6 +87,18 @@ impl NumericSexp {
     }
 }
 
+fn try_cast_f64_to_i32(f: &f64) -> crate::Result<i32> {
+    if f.is_na() || f.is_nan() {
+        Ok(i32::na())
+    } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
+        Err("Out of i32 range".into())
+    } else if (*f - f.round()).abs() > TOLERANCE {
+        Err(format!("{f:?} is not integer-ish").into())
+    } else {
+        Ok(*f as i32)
+    }
+}
+
 impl TryFrom<Sexp> for NumericSexp {
     type Error = crate::error::Error;
 
@@ -117,6 +119,83 @@ impl TryFrom<Sexp> for NumericSexp {
                 orig: r,
                 converted: OnceCell::new(),
             }),
+            _ => Err(crate::Error::GeneralError(
+                "Should not reach here!".to_string(),
+            )),
+        }
+    }
+}
+
+pub enum NumericScalar {
+    Integer(i32),
+    Real(f64),
+}
+
+impl NumericScalar {
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// If the data is real, allocates a new `Vec` and cache it. This fails when the value is
+    ///
+    /// - infinite
+    /// - out of the range of `i32`
+    /// - not integer-ish (e.g. `1.1`)
+    pub fn as_i32(&self) -> crate::error::Result<i32> {
+        match &self {
+            NumericScalar::Integer(i) => Ok(*i),
+            NumericScalar::Real(r) => try_cast_f64_to_i32(r),
+        }
+    }
+
+    /// Extracts a slice containing the underlying data of the SEXP.
+    ///
+    /// If the data is integer, allocates a new `Vec` and cache it.
+    pub fn as_f64(&self) -> f64 {
+        match &self {
+            NumericScalar::Integer(i) => *i as f64,
+            NumericScalar::Real(r) => *r,
+        }
+    }
+}
+
+impl TryFrom<Sexp> for NumericScalar {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Sexp) -> Result<Self, Self::Error> {
+        if !value.is_numeric() {
+            let expected = "numeric";
+            let actual = value.get_human_readable_type_name();
+            let msg = format!("expected: {expected}\n  actual: {actual}");
+            return Err(crate::Error::UnexpectedType(msg));
+        }
+
+        match value.into_typed() {
+            crate::TypedSexp::Integer(i) => {
+                if i.len() != 1 {
+                    return Err(crate::error::Error::NotScalar);
+                }
+
+                let i_scalar = *i.iter().next().unwrap();
+
+                if i_scalar.is_na() {
+                    return Err(crate::error::Error::NotScalar);
+                }
+
+                Ok(Self::Integer(i_scalar))
+            }
+            crate::TypedSexp::Real(r) => {
+                if r.len() != 1 {
+                    return Err(crate::error::Error::NotScalar);
+                }
+
+                let r_scalar = *r.iter().next().unwrap();
+
+                if r_scalar.is_na() {
+                    return Err(crate::error::Error::NotScalar);
+                }
+
+                Ok(Self::Real(r_scalar))
+            }
+
             _ => Err(crate::Error::GeneralError(
                 "Should not reach here!".to_string(),
             )),

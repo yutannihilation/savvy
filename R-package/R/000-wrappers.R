@@ -496,6 +496,16 @@ times_two_numeric_i32 <- function(x) {
 }
 
 
+times_two_numeric_f64_scalar <- function(x) {
+  .Call(savvy_times_two_numeric_f64_scalar__impl, x)
+}
+
+
+times_two_numeric_i32_scalar <- function(x) {
+  .Call(savvy_times_two_numeric_i32_scalar__impl, x)
+}
+
+
 filter_integer_odd <- function(x) {
   .Call(savvy_filter_integer_odd__impl, x)
 }

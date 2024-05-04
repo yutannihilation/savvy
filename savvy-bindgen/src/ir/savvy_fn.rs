@@ -70,7 +70,7 @@ impl SavvyInputType {
                     }),
 
                     // Primitive types
-                    "i32" | "usize" | "f64" | "bool" => Ok(Self {
+                    "i32" | "usize" | "f64" | "bool" | "NumericScalar" => Ok(Self {
                         category: SavvyInputTypeCategory::PrimitiveType,
                         ty_orig: ty.clone(),
                         ty_str,
