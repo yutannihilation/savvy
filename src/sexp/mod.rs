@@ -339,12 +339,16 @@ impl Sexp {
         Ok(())
     }
 
-    unsafe fn set_string_attrib_by_symbol<T: AsRef<str>>(
+    unsafe fn set_string_attrib_by_symbol<T, U>(
         &mut self,
         attr: SEXP,
-        values: &[T],
-    ) -> crate::error::Result<()> {
-        let values_sexp: OwnedStringSexp = values.try_into()?;
+        values: T,
+    ) -> crate::error::Result<()>
+    where
+        T: AsRef<[U]>,
+        U: AsRef<str>,
+    {
+        let values_sexp: OwnedStringSexp = values.as_ref().try_into()?;
         unsafe {
             crate::unwind_protect(|| savvy_ffi::Rf_setAttrib(self.0, attr, values_sexp.inner()))?
         };
@@ -353,18 +357,30 @@ impl Sexp {
     }
 
     /// Set the S3 class.
-    pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
+    pub fn set_class<T, U>(&mut self, classes: T) -> crate::error::Result<()>
+    where
+        T: AsRef<[U]>,
+        U: AsRef<str>,
+    {
         unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_ClassSymbol, classes) }
     }
 
     /// Set the names.
-    pub fn set_names<T: AsRef<str>>(&mut self, names: &[T]) -> crate::error::Result<()> {
+    pub fn set_names<T, U>(&mut self, names: T) -> crate::error::Result<()>
+    where
+        T: AsRef<[U]>,
+        U: AsRef<str>,
+    {
         unsafe { self.set_string_attrib_by_symbol(savvy_ffi::R_NamesSymbol, names) }
     }
 
     /// Set the dimension. `dim` can be `i32`, `usize`, or whatever
     /// numeric types that implements `TryInto<i32>`.
-    pub fn set_dim<T: TryInto<i32> + Copy>(&mut self, dim: &[T]) -> crate::error::Result<()> {
+    pub fn set_dim<T, U>(&mut self, dim: T) -> crate::error::Result<()>
+    where
+        T: AsRef<[U]>,
+        U: TryInto<i32> + Copy,
+    {
         unsafe { crate::sexp::set_dim_to_sexp(self.0, dim) }
     }
 }
@@ -381,10 +397,12 @@ pub(crate) unsafe fn get_dim_from_sexp(value: &SEXP) -> Option<&[i32]> {
     }
 }
 
-pub(crate) unsafe fn set_dim_to_sexp<T>(value: SEXP, dim: &[T]) -> crate::error::Result<()>
+pub(crate) unsafe fn set_dim_to_sexp<T, U>(value: SEXP, dim: T) -> crate::error::Result<()>
 where
-    T: TryInto<i32> + Copy,
+    T: AsRef<[U]>,
+    U: TryInto<i32> + Copy,
 {
+    let dim = dim.as_ref();
     let mut dim_sexp = unsafe { OwnedIntegerSexp::new_without_init(dim.len())? };
     dim.iter()
         .enumerate()
@@ -503,12 +521,20 @@ macro_rules! impl_common_sexp_ops_owned {
             }
 
             /// Set the S3 class.
-            pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
+            pub fn set_class<T, U>(&mut self, classes: T) -> crate::error::Result<()>
+            where
+                T: AsRef<[U]>,
+                U: AsRef<str>,
+            {
                 crate::Sexp(self.inner()).set_class(classes)
             }
 
             /// Set the names.
-            pub fn set_names<T: AsRef<str>>(&mut self, names: &[T]) -> crate::error::Result<()> {
+            pub fn set_names<T, U>(&mut self, names: T) -> crate::error::Result<()>
+            where
+                T: AsRef<[U]>,
+                U: AsRef<str>,
+            {
                 crate::Sexp(self.inner()).set_names(names)
             }
 
