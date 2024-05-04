@@ -1,6 +1,6 @@
 use savvy::{
     r_println, savvy,
-    sexp::numeric::{NumericScalar, NumericSexp, NumericSexpVariant},
+    sexp::{NumericScalar, NumericSexp, NumericSexpVariant},
     NotAvailableValue, Sexp,
 };
 
