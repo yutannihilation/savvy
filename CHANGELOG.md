@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.2] (2024-05-04)
+
 ### New features
 
 * New macro `#[savvy_init]` makes the function executed when the DLL is loaded
@@ -560,7 +562,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.2...HEAD
+[v0.6.2]: https://github.com/yutannihilation/savvy/compare/v0.6.1...v0.6.2
 [v0.6.1]: https://github.com/yutannihilation/savvy/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/yutannihilation/savvy/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/yutannihilation/savvy/compare/v0.5.2...v0.5.3
