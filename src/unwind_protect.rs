@@ -1,9 +1,11 @@
+use std::os::raw::c_void;
+
 use savvy_ffi::SEXP;
 
 extern "C" {
     fn unwind_protect_impl(
-        fun: ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void) -> SEXP>,
-        data: *mut ::std::os::raw::c_void,
+        fun: Option<unsafe extern "C" fn(data: *mut c_void) -> SEXP>,
+        data: *mut c_void,
     ) -> SEXP;
 }
 
@@ -16,7 +18,7 @@ where
     F: FnOnce() -> SEXP + Copy,
 {
     unsafe {
-        unsafe extern "C" fn do_call<F>(data: *mut std::os::raw::c_void) -> SEXP
+        unsafe extern "C" fn do_call<F>(data: *mut c_void) -> SEXP
         where
             F: FnOnce() -> SEXP + Copy,
         {
@@ -27,10 +29,11 @@ where
             }
         }
 
-        let fun_ptr = do_call::<F> as *const ();
-        let fun = std::mem::transmute(fun_ptr);
-        let data = std::mem::transmute(&f as *const F);
-        let res: SEXP = unwind_protect_impl(fun, data);
+        let do_call_ptr = std::mem::transmute::<_, Option<unsafe extern "C" fn(*mut c_void) -> SEXP>>(
+            do_call::<F> as *const (),
+        );
+        let actual_fn_ptr = std::mem::transmute::<_, *mut c_void>(&f as *const F);
+        let res: SEXP = unwind_protect_impl(do_call_ptr, actual_fn_ptr);
 
         if (res as usize & 1) == 1 {
             return Err(crate::error::Error::Aborted(res));

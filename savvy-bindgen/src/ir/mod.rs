@@ -94,7 +94,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
             let key = e.ty.to_string();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
-                    merged.docs = e.docs.clone();
+                    merged.docs.clone_from(&e.docs);
                 }
                 None => {
                     impl_map.insert(
