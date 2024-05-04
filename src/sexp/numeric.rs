@@ -2,7 +2,30 @@ use once_cell::sync::OnceCell;
 
 use crate::{IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 
-pub enum NumericSexp {
+// --- Utils -------------------------
+
+const I32MAX: f64 = i32::MAX as f64;
+const I32MIN: f64 = i32::MIN as f64;
+const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
+
+fn try_cast_f64_to_i32(f: &f64) -> crate::Result<i32> {
+    if f.is_na() || f.is_nan() {
+        Ok(i32::na())
+    } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
+        Err(format!("{f:?} is out of range for integer").into())
+    } else if (*f - f.round()).abs() > TOLERANCE {
+        Err(format!("{f:?} is not integer-ish").into())
+    } else {
+        Ok(*f as i32)
+    }
+}
+
+// --- Vector -------------------------
+
+/// A enum to hold both the original data and the converted version. Since it
+/// would be a bit confusing to expose the very implementational detail of
+/// `converted` field (this is needed to return a slice), this is private.
+enum PrivateNumericSexp {
     Integer {
         orig: IntegerSexp,
         converted: OnceCell<Vec<f64>>,
@@ -13,11 +36,24 @@ pub enum NumericSexp {
     },
 }
 
-const I32MAX: f64 = i32::MAX as f64;
-const I32MIN: f64 = i32::MIN as f64;
-const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
+/// An enum to be used for `match`ing the content of `NumericSexp`.
+pub enum NumericSexpVariant {
+    Integer(IntegerSexp),
+    Real(RealSexp),
+}
+
+/// A struct that holds either an integer or a real vector.
+pub struct NumericSexp(PrivateNumericSexp);
 
 impl NumericSexp {
+    /// Return the typed SEXP.
+    pub fn into_typed(self) -> NumericSexpVariant {
+        match self.0 {
+            PrivateNumericSexp::Integer { orig, .. } => NumericSexpVariant::Integer(orig),
+            PrivateNumericSexp::Real { orig, .. } => NumericSexpVariant::Real(orig),
+        }
+    }
+
     /// Extracts a slice containing the underlying data of the SEXP.
     ///
     /// If the data is real, allocates a new `Vec` and cache it. This fails when the value is
@@ -26,9 +62,9 @@ impl NumericSexp {
     /// - out of the range of `i32`
     /// - not integer-ish (e.g. `1.1`)
     pub fn as_slice_i32(&self) -> crate::error::Result<&[i32]> {
-        match &self {
-            NumericSexp::Integer { orig, .. } => Ok(orig.as_slice()),
-            NumericSexp::Real { orig, converted } => {
+        match &self.0 {
+            PrivateNumericSexp::Integer { orig, .. } => Ok(orig.as_slice()),
+            PrivateNumericSexp::Real { orig, converted } => {
                 if let Some(v) = converted.get() {
                     return Ok(v);
                 }
@@ -51,9 +87,9 @@ impl NumericSexp {
     ///
     /// If the data is integer, allocates a new `Vec` and cache it.
     pub fn as_slice_f64(&self) -> &[f64] {
-        match &self {
-            NumericSexp::Real { orig, .. } => orig.as_slice(),
-            NumericSexp::Integer { orig, converted } => {
+        match &self.0 {
+            PrivateNumericSexp::Real { orig, .. } => orig.as_slice(),
+            PrivateNumericSexp::Integer { orig, converted } => {
                 if let Some(v) = converted.get() {
                     return v;
                 }
@@ -87,18 +123,6 @@ impl NumericSexp {
     }
 }
 
-fn try_cast_f64_to_i32(f: &f64) -> crate::Result<i32> {
-    if f.is_na() || f.is_nan() {
-        Ok(i32::na())
-    } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
-        Err(format!("{f:?} is out of range for integer").into())
-    } else if (*f - f.round()).abs() > TOLERANCE {
-        Err(format!("{f:?} is not integer-ish").into())
-    } else {
-        Ok(*f as i32)
-    }
-}
-
 impl TryFrom<Sexp> for NumericSexp {
     type Error = crate::error::Error;
 
@@ -111,14 +135,14 @@ impl TryFrom<Sexp> for NumericSexp {
         }
 
         match value.into_typed() {
-            crate::TypedSexp::Integer(i) => Ok(Self::Integer {
+            crate::TypedSexp::Integer(i) => Ok(Self(PrivateNumericSexp::Integer {
                 orig: i,
                 converted: OnceCell::new(),
-            }),
-            crate::TypedSexp::Real(r) => Ok(Self::Real {
+            })),
+            crate::TypedSexp::Real(r) => Ok(Self(PrivateNumericSexp::Real {
                 orig: r,
                 converted: OnceCell::new(),
-            }),
+            })),
             _ => Err(crate::Error::GeneralError(
                 "Should not reach here!".to_string(),
             )),
@@ -126,6 +150,9 @@ impl TryFrom<Sexp> for NumericSexp {
     }
 }
 
+// --- Scalar -------------------------
+
+/// A struct that holds either an integer or a real scalar.
 pub enum NumericScalar {
     Integer(i32),
     Real(f64),
