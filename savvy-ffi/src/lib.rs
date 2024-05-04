@@ -103,6 +103,11 @@ extern "C" {
     pub fn Rf_isReal(s: SEXP) -> Rboolean;
 }
 
+// Numeric
+extern "C" {
+    pub fn Rf_isNumeric(arg1: SEXP) -> Rboolean;
+}
+
 // Complex
 //
 // Since the representation of Rcomplex matches num_complex's Compplex64, use it

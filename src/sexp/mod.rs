@@ -1,8 +1,8 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rf_getAttrib, Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isReal, Rf_isString,
-    Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
+    R_NilValue, Rf_getAttrib, Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isNumeric, Rf_isReal,
+    Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{
@@ -23,6 +23,9 @@ pub mod null;
 pub mod real;
 pub mod scalar;
 pub mod string;
+
+pub mod numeric;
+
 pub mod utils;
 
 #[cfg(feature = "complex")]
@@ -45,6 +48,11 @@ impl Sexp {
     /// Returns `true` if the SEXP is a real vector.
     pub fn is_real(&self) -> bool {
         unsafe { Rf_isReal(self.0) == 1 }
+    }
+
+    /// Returns `true` if the SEXP is a real or integer vector.
+    pub fn is_numeric(&self) -> bool {
+        unsafe { Rf_isNumeric(self.0) == 1 }
     }
 
     #[cfg(feature = "complex")]
@@ -122,7 +130,7 @@ macro_rules! impl_sexp_type_assert {
         } else {
             let expected = unsafe { get_human_readable_type_name(savvy_ffi::$sexptype) };
             let actual = $self.get_human_readable_type_name();
-            let msg = format!("Expected {expected}, got {actual}");
+            let msg = format!("expected: {expected}\n  actual: {actual}");
             Err(crate::error::Error::UnexpectedType(msg))
         }
     };
