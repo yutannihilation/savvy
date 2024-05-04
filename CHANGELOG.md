@@ -3,6 +3,41 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* New types `NumericSexp` and `NumericScalar` are added to handle both integer
+  and double. You can get a slice via `as_slice_*()` or an iterator via
+  `iter_*()`.  
+
+  ```rust
+  #[savvy]
+  fn times_two(x: NumericSexp) -> savvy::Result<Sexp> {
+      let mut out = OwnedIntegerSexp::new(x.len())?;
+
+      for (i, &v) in x.iter_i32()?.enumerate() {
+          if v.is_na() {
+              out[i] = i32::na();
+          } else {
+              out[i] = v * 2;
+          }
+      }
+
+      out.into()
+  }
+  ```
+
+  You can also use `.into_typed()` to handle integer and double differently.
+
+  ```rust
+  #[savvy]
+  fn times_two(x: NumericSexp) -> savvy::Result<savvy::Sexp> {
+      match x.into_typed() {
+          NumericTypedSexp::Integer(i) => times_two_int(i),
+          NumericTypedSexp::Real(r) => times_two_real(r),
+      }
+  }
+  ```
+
 ## [v0.6.2] (2024-05-04)
 
 ### New features
