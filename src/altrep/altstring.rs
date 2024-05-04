@@ -34,7 +34,7 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     /// What gets printed when `.Internal(inspect(x))` is used.
     fn inspect(&mut self, is_materialized: bool) {
         crate::io::r_print(
-            &format!("{} (materialized: {is_materialized})", Self::CLASS_NAME),
+            &format!("{} (materialized: {is_materialized})\n", Self::CLASS_NAME),
             false,
         );
     }
