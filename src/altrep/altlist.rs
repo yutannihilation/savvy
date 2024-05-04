@@ -5,19 +5,18 @@ use std::{
 
 use savvy_ffi::{
     altrep::{
-        R_altrep_data2, R_make_altstring_class, R_set_altrep_Coerce_method,
+        R_altrep_data2, R_make_altlist_class, R_set_altlist_Elt_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
-        R_set_altrep_data2, R_set_altstring_Elt_method, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method,
+        R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaString, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_STRING_ELT, SEXP, SEXPTYPE, STRING_ELT,
-    STRING_PTR, STRSXP,
+    R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate,
+    Rf_protect, Rf_unprotect, Rf_xlength, DATAPTR, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
+    VECTOR_ELT,
 };
 
-use crate::{IntoExtPtrSexp, StringSexp};
+use crate::{IntoExtPtrSexp, ListSexp};
 
-pub trait AltString: Sized + IntoExtPtrSexp {
+pub trait AltList: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
     const CLASS_NAME: &'static str;
 
@@ -29,7 +28,7 @@ pub trait AltString: Sized + IntoExtPtrSexp {
 
     /// Returns the value of `i`-th element. Note that, it seems R handles the
     /// out-of-bound check, so you don't need to implement it here.
-    fn elt(&mut self, i: usize) -> &str;
+    fn elt(&mut self, i: usize) -> crate::Sexp;
 
     /// What gets printed when `.Internal(inspect(x))` is used.
     fn inspect(&mut self, is_materialized: bool) {
@@ -40,18 +39,32 @@ pub trait AltString: Sized + IntoExtPtrSexp {
     }
 
     /// Converts the struct into an ALTREP object
-    fn into_altrep(self) -> crate::Result<crate::Sexp> {
-        super::create_altrep_instance(self, Self::CLASS_NAME).map(crate::Sexp)
+    fn into_altrep<S, U>(self, names: Option<S>) -> crate::Result<crate::Sexp>
+    where
+        S: AsRef<[U]>,
+        U: AsRef<str>,
+    {
+        match super::create_altrep_instance(self, Self::CLASS_NAME) {
+            Ok(x) => {
+                let mut res = crate::Sexp(x);
+                if let Some(names) = names {
+                    let names_slice = names.as_ref();
+                    res.set_names(names_slice)?;
+                }
+                Ok(res)
+            }
+            Err(e) => Err(e),
+        }
     }
 
     /// Extracts the reference (`&T`) of the underlying data
-    fn try_from_altrep_ref(x: &StringSexp) -> crate::Result<&Self> {
+    fn try_from_altrep_ref(x: &ListSexp) -> crate::Result<&Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_ref_from_altrep(&x.0)
     }
 
     /// Extracts the mutable reference (`&mut T`) of the underlying data
-    fn try_from_altrep_mut(x: &mut StringSexp, invalidate_cache: bool) -> crate::Result<&mut Self> {
+    fn try_from_altrep_mut(x: &mut ListSexp, invalidate_cache: bool) -> crate::Result<&mut Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         if invalidate_cache {
             unsafe { R_set_altrep_data2(x.0, R_NilValue) }
@@ -61,24 +74,24 @@ pub trait AltString: Sized + IntoExtPtrSexp {
 
     /// Takes the underlying data. After this operation, the external pointer is
     /// replaced with a null pointer.
-    fn try_from_altrep(x: StringSexp) -> crate::Result<Self> {
+    fn try_from_altrep(x: ListSexp) -> crate::Result<Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_from_altrep(x.0)
     }
 }
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub fn register_altstring_class<T: AltString>(
+pub fn register_altlist_class<T: AltList>(
     dll_info: *mut crate::ffi::DllInfo,
 ) -> crate::error::Result<()> {
     let class_name = CString::new(T::CLASS_NAME).unwrap_or_default();
     let package_name = CString::new(T::PACKAGE_NAME).unwrap_or_default();
     let class_t =
-        unsafe { R_make_altstring_class(class_name.as_ptr(), package_name.as_ptr(), dll_info) };
+        unsafe { R_make_altlist_class(class_name.as_ptr(), package_name.as_ptr(), dll_info) };
 
     #[allow(clippy::mut_from_ref)]
     #[inline]
-    fn get_materialized_sexp<T: AltString>(x: &mut SEXP, allow_allocate: bool) -> Option<SEXP> {
+    fn get_materialized_sexp<T: AltList>(x: &mut SEXP, allow_allocate: bool) -> Option<SEXP> {
         let data = unsafe { R_altrep_data2(*x) };
         if unsafe { data != R_NilValue } {
             return Some(data);
@@ -96,17 +109,11 @@ pub fn register_altstring_class<T: AltString>(
 
         let len = self_.length();
 
-        let new = crate::alloc_vector(STRSXP, len).unwrap();
+        let new = crate::alloc_vector(VECSXP, len).unwrap();
         unsafe { Rf_protect(new) };
 
         for i in 0..len {
-            unsafe {
-                SET_STRING_ELT(
-                    new,
-                    i as _,
-                    crate::sexp::utils::str_to_charsxp(self_.elt(i)).unwrap_or(R_NaString),
-                )
-            };
+            unsafe { SET_VECTOR_ELT(new, i as _, self_.elt(i).0) };
         }
 
         // Cache the materialized data in data2.
@@ -118,34 +125,34 @@ pub fn register_altstring_class<T: AltString>(
         Some(new)
     }
 
-    unsafe extern "C" fn altrep_duplicate<T: AltString>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
+    unsafe extern "C" fn altrep_duplicate<T: AltList>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
-    unsafe extern "C" fn altrep_coerce<T: AltString>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+    unsafe extern "C" fn altrep_coerce<T: AltList>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    // ALTSTRING usually doesn't have it's own array of CHARSXPs, so always materialize.
-    fn altvec_dataptr_inner<T: AltString>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
+    // ALTLIST usually doesn't have it's own array of SEXPs, so always materialize.
+    fn altvec_dataptr_inner<T: AltList>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
         match get_materialized_sexp::<T>(&mut x, allow_allocate) {
-            Some(materialized) => unsafe { STRING_PTR(materialized) as _ },
+            Some(materialized) => unsafe { DATAPTR(materialized) as _ },
             // Returning C NULL (not R NULL!) is the convention
             None => std::ptr::null_mut(),
         }
     }
 
-    unsafe extern "C" fn altvec_dataptr<T: AltString>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+    unsafe extern "C" fn altvec_dataptr<T: AltList>(x: SEXP, _writable: Rboolean) -> *mut c_void {
         altvec_dataptr_inner::<T>(x, true)
     }
 
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltString>(x: SEXP) -> *const c_void {
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltList>(x: SEXP) -> *const c_void {
         altvec_dataptr_inner::<T>(x, false)
     }
 
-    unsafe extern "C" fn altrep_length<T: AltString>(mut x: SEXP) -> R_xlen_t {
+    unsafe extern "C" fn altrep_length<T: AltList>(mut x: SEXP) -> R_xlen_t {
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             unsafe { Rf_xlength(materialized) }
         } else {
@@ -156,7 +163,7 @@ pub fn register_altstring_class<T: AltString>(
         }
     }
 
-    unsafe extern "C" fn altrep_inspect<T: AltString>(
+    unsafe extern "C" fn altrep_inspect<T: AltList>(
         mut x: SEXP,
         _: c_int,
         _: c_int,
@@ -173,15 +180,13 @@ pub fn register_altstring_class<T: AltString>(
         }
     }
 
-    unsafe extern "C" fn altstring_elt<T: AltString>(mut x: SEXP, i: R_xlen_t) -> SEXP {
+    unsafe extern "C" fn altlist_elt<T: AltList>(mut x: SEXP, i: R_xlen_t) -> SEXP {
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            unsafe { STRING_ELT(materialized, i) }
+            unsafe { VECTOR_ELT(materialized, i) }
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => unsafe {
-                    crate::sexp::utils::str_to_charsxp(self_.elt(i as _)).unwrap_or(R_NaString)
-                },
-                Err(_) => unsafe { R_NaString },
+                Ok(self_) => self_.elt(i as _).0,
+                Err(_) => unsafe { R_NilValue },
             }
         }
     }
@@ -193,11 +198,11 @@ pub fn register_altstring_class<T: AltString>(
         R_set_altrep_Coerce_method(class_t, Some(altrep_coerce::<T>));
         R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
-        R_set_altstring_Elt_method(class_t, Some(altstring_elt::<T>));
+        R_set_altlist_Elt_method(class_t, Some(altlist_elt::<T>));
 
         // Do not implement set_elt.
         //
-        // R_set_altstring_Set_elt_method(class_t, Some(altstring_set_elt::<T>));
+        // R_set_altlist_Set_elt_method(class_t, Some(altlist_set_elt::<T>));
     }
 
     super::register_altrep_class(T::CLASS_NAME, class_t)?;
