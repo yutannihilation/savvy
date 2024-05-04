@@ -14,12 +14,13 @@ You can implement an ALTREP class using savvy.
 ## Using ALTREP
 
 Savvy currently provides only the following traits for ALTREP. The other ALTREPs
-like `ALTLIST` are not supported.
+like `ALTCOMPLEX` are not yet supported.
 
-* `AltInteger`
-* `AltReap`
-* `AltLogical`
-* `AltString`
+* [`AltInteger`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltInteger.html)
+* [`AltReap`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltReap.html)
+* [`AltLogical`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltLogical.html)
+* [`AltString`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltString.html)
+* [`AltList`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltList.html)
 
 For example, consider the following struct that simply wraps a `Vec<i32>`.
 
