@@ -270,7 +270,9 @@ fn altlist() -> savvy::Result<savvy::Sexp> {
         vec![1, 2, 3],
         vec!["a".to_string(), "b".to_string(), "c".to_string()],
     );
-    v.into_altrep(Some(["one", "two"]))
+    let mut out = v.into_altrep()?;
+    out.set_names(["one", "two"])?;
+    Ok(out)
 }
 
 #[savvy]

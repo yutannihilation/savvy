@@ -39,20 +39,9 @@ pub trait AltList: Sized + IntoExtPtrSexp {
     }
 
     /// Converts the struct into an ALTREP object
-    fn into_altrep<S, U>(self, names: Option<S>) -> crate::Result<crate::Sexp>
-    where
-        S: AsRef<[U]>,
-        U: AsRef<str>,
-    {
+    fn into_altrep(self) -> crate::Result<crate::Sexp> {
         match super::create_altrep_instance(self, Self::CLASS_NAME) {
-            Ok(x) => {
-                let mut res = crate::Sexp(x);
-                if let Some(names) = names {
-                    let names_slice = names.as_ref();
-                    res.set_names(names_slice)?;
-                }
-                Ok(res)
-            }
+            Ok(x) => Ok(crate::Sexp(x)),
             Err(e) => Err(e),
         }
     }
