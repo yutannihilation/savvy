@@ -1,7 +1,5 @@
 use savvy::{
-    r_println, savvy,
-    sexp::{NumericScalar, NumericSexp, NumericSexpVariant},
-    NotAvailableValue, Sexp,
+    r_println, savvy, NotAvailableValue, NumericScalar, NumericSexp, NumericSexpVariant, Sexp,
 };
 
 #[savvy]
