@@ -18,7 +18,11 @@ for (i, e) in x.iter().enumerate() {
 }
 ```
 
-### 2. `as_slice()` (for integer and numeric)
+Similarly, `NumericSexp`, which handles both integer and double, provides
+`iter_i32()` and `iter_f64()`. But, this might allocate if the type conversion
+is needed.
+
+### 2. `as_slice()` (for integer and double)
 
 `IntegerSexp` and `RealSexp` can expose their underlying C array as a Rust slice
 by `as_slice()`.
@@ -32,6 +36,10 @@ fn foo(x: IntegerSexp) -> savvy::Result<()> {
 }
 ```
 
+Similarly, `NumericSexp`, which handles both integer and double, provides
+`as_slice_i32()` and `as_slice_f64()`. But, this might allocate if the type
+conversion is needed.
+
 ### 3. `to_vec()`
 
 As the name indicates, `to_vec()` copies the values to a new Rust vector.
@@ -43,7 +51,7 @@ let mut v = x.to_vec();
 some_function_takes_vec(v);
 ```
 
-If a function requires a slice and the type is not integer or numeric, you have
+If a function requires a slice and the type is not integer or double, you have
 no choice but `to_vec()` to create a new vector and then convert it to a slice.
 
 ```rust
