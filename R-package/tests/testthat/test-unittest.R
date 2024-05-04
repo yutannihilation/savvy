@@ -25,13 +25,13 @@ test_that("functions work", {
 
   # real vector
   expect_equal(
-    times_two_numeric(c(1.1, NA, 0.0, -1.1, Inf, -Inf)),
+    times_two_real(c(1.1, NA, 0.0, -1.1, Inf, -Inf)),
     c(2.2, NA, 0.0, -2.2, Inf, -Inf)
   )
 
   # real vector and scalar
   expect_equal(
-    times_any_numeric(c(1.1, NA, 0.0, -1.1, Inf, -Inf), 100.0),
+    times_any_real(c(1.1, NA, 0.0, -1.1, Inf, -Inf), 100.0),
     c(110.0, NA, 0.0, -110.0, Inf, -Inf)
   )
 

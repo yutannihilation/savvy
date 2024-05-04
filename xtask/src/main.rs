@@ -104,6 +104,8 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("SET_COMPLEX_ELT")
         .allowlist_function("Rf_ScalarReal")
         .allowlist_function("Rf_isReal")
+        // Numeric
+        .allowlist_function("Rf_isNumeric")
         // Complex
         .allowlist_type("RComplex")
         .allowlist_function("COMPLEX")

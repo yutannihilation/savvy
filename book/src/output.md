@@ -16,7 +16,7 @@ let mut out = OwnedStringSexp::new(x.len())?;
 ```
 
 Use `set_elt()` to put the values one by one. Note that you can also assign
-values like `out[i] = value` for integer and numeric. See [Type-specific
+values like `out[i] = value` for integer and double. See [Type-specific
 Topics](./07_type_specific.md) for more details.
 
 ```rust
@@ -80,7 +80,7 @@ R vector in `try_into()`. The copying cost can be innegligible when the vector
 is very huge.
 
 
-### `try_from_slice()`m
+### `try_from_slice()`
 
 The same conversions are also available in the form of
 `Owned{type}Sexp::try_from_slice()`. While this says "slice", this accepts
@@ -118,6 +118,6 @@ fn times_two3(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
 
 Note that, if you already have a slice or vec, you should use `try_from_slice()`
 instead of calling `iter()` on the slice or vec and using `try_from_iter()`. In
-such cases, `try_from_slice()` is more performant for integer, numeric, and
+such cases, `try_from_slice()` is more performant for integer, double, and
 complex because it just copies the underlying memory into SEXP rather than
 handling the elements one by one.

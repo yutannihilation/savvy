@@ -40,7 +40,11 @@ fn times_two(x: IntegerSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
 
     for (i, &v) in x.iter().enumerate() {
-        out[i] = v * 2;
+        if v.is_na() {
+            out[i] = i32::na();
+        } else {
+            out[i] = v * 2;
+        }
     }
 
     out.into()
@@ -57,6 +61,62 @@ are copied one by one).
 
 [copy_from_slice]: https://doc.rust-lang.org/std/primitive.slice.html#method.copy_from_slice
 
+
+### `NumericSexp`
+
+It's ideal to ensure the function takes the expected type on R's side (e.g., you
+can use `vctrs::vec_cast()`, or define S3 methods for integer and double
+separately). But, it's not always possible.
+
+You can use `NumericSexp` to accept both real and integer. `NumericSexp`
+provides a method to get either `i32` or `f64` values:
+
+* `as_slice_i32()` returns `&[i32]`. This is fallible.
+* `as_slice_f64()` returns `&[f64]`.
+* `iter_i32()` returns an iterator of `i32`. This is fallible.
+* `iter_f64()` returns an iterator of `f64`.
+
+These functions return the underlying data directly if the type is the same as
+wanted, otherwise converts the values. If the conversion is from `f64` to `i32`,
+it fails when any of the values is
+
+- `Inf` or `-Inf`
+- out of range for `i32`
+- not integer-ish (e.g. `1.1`)
+
+For example, you can rewrite the above function like this:
+
+```rust
+#[savvy]
+fn times_two(x: NumericSexp) -> savvy::Result<Sexp> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
+
+    for (i, &v) in x.iter_i32()?.enumerate() {
+        if v.is_na() {
+            out[i] = i32::na();
+        } else {
+            out[i] = v * 2;
+        }
+    }
+
+    out.into()
+}
+```
+
+Another way is to use `.into_typed()` and `match` the result to apply an
+appropriate function depneding on the type. In this case, you need to define two
+different functions, but this might be useful when the logic is very different
+for integer values and real values.
+
+```rust
+#[savvy]
+fn times_two(x: NumericSexp) -> savvy::Result<savvy::Sexp> {
+    match x.into_typed() {
+        NumericTypedSexp::Integer(i) => times_two_int(i),
+        NumericTypedSexp::Real(r) => times_two_real(r),
+    }
+}
+```
 
 ## Logical
 

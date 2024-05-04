@@ -17,10 +17,37 @@ fn scalar_input_int(x: i32) -> savvy::Result<()> {
 | R type     | Rust scalar type   |
 |:-----------|:-------------------|
 | integer    | `i32`              |
-| numeric    | `f64`              |
+| double     | `f64`              |
 | logical    | `bool`             |
 | character  | `&str`             |
 | complex    | `num_complex::Complex64` |
+| integer or double   | `savvy::NumericScalar` |
+
+### `NumericScalar`
+
+`NumericScalar` is a special type that can handle both integeer and double. You
+can get the value from it by `as_i32()` for `i32`, or `as_f64()` for `f64`.
+These method converts the value if the input type is different from the target
+type.
+
+```rust
+#[savvy]
+fn times_two_numeric_i32_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
+    let v = x.as_i32()?;
+    if v.is_na() {
+        (i32::na()).try_into()
+    } else {
+        (v * 2).try_into()
+    }
+}
+```
+
+Note that, while `as_f64()` is infallible,  `as_i32()` can fail when the
+conversion is from `f64` to `i32` and
+
+- the value is `Inf` or `-Inf`
+- the value is out of range for `i32`
+- the value is not integer-ish (e.g. `1.1`)
 
 ## Output
 

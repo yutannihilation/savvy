@@ -5,7 +5,8 @@ You can use these types as an argument of a `#[savvy]` function.
 | R type            | vector          | scalar      |
 |:------------------|:----------------|:------------|
 | integer           | `IntegerSexp`   | `i32`       |
-| numeric           | `RealSexp`      | `f64`       |
+| double            | `RealSexp`      | `f64`       |
+| integer or double | `NumericSexp`   | `NumericScalar` |
 | logical           | `LogicalSexp`   | `bool`      |
 | character         | `StringSexp`    | `&str`      |
 | complex[^1]       | `ComplexSexp`   | `Complex64` |
@@ -14,26 +15,11 @@ You can use these types as an argument of a `#[savvy]` function.
 
 [^1]: Complex is optionally supported under feature flag `complex`
 
-As described in [Key ideas](./key_ideas.md), there's no conversion method
-between the types. However, you can cast an `Sexp` into a specific type by
-`.into_typed()` and write `match` branches to deal with each type. So, for
-example, you can use `Sexp` as an input argument instead of a specific type like
-`IntegerSexp` or `RealSexp` like this:
-
-```rust
-#[savvy]
-fn identity_num(x: Sexp) -> savvy::Result<savvy::Sexp> {
-    match x.into_typed() {
-        TypedSexp::Integer(i) => identity_int(i),
-        TypedSexp::Real(r) => identity_real(r),
-        _ => Err("Expected integer or numeric".into()),
-    }
-}
-```
-
-This is important when the interface returns `Sexp`. For example, `ListSexp`
-returns `Sexp` because the list element can be any type. For more details about
-`List`, please read [List](./list.md) section.
+If you want to handle multiple types, you can cast an `Sexp` into a specific
+type by `.into_typed()` and write `match` branches to deal with each type. This
+is important when the interface returns `Sexp`. For example, `ListSexp` returns
+`Sexp` because the list element can be any type. For more details about `List`,
+please read [List](./list.md) section.
 
 ```rust
 #[savvy]
@@ -48,7 +34,7 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
             }
             TypedSexp::Real(x) => {
                 format!(
-                    "numeric [{}]",
+                    "double [{}]",
                     x.iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ")
                 )
             }
@@ -77,3 +63,19 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
     Ok(())
 }
 ```
+
+Likewise, `NumericSxep` also provides `into_typed()`. You can match it with
+either `IntegerSexp` or `RealSexp` and apply an appropriate function.
+Alternatively, you can rely on the type conversion that `NumericSexp` provides.
+See more details in [the next section](./atomic_types.md).
+
+```rust
+#[savvy]
+fn identity_num(x: NumericSexp) -> savvy::Result<savvy::Sexp> {
+    match x.into_typed() {
+        NumericTypedSexp::Integer(i) => identity_int(i),
+        NumericTypedSexp::Real(r) => identity_real(r),
+    }
+}
+```
+

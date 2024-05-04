@@ -9,6 +9,7 @@ mod enum_support;
 mod error_handling;
 mod function;
 mod init_vectors;
+mod numeric;
 mod try_from_iter;
 
 // to test if the definition over multiple files is accepted.
@@ -127,7 +128,7 @@ fn times_any_int(x: IntegerSexp, y: i32) -> savvy::Result<savvy::Sexp> {
 /// @returns A numeric vector with values multiplied by 2.
 /// @export
 #[savvy]
-fn times_two_numeric(x: RealSexp) -> savvy::Result<savvy::Sexp> {
+fn times_two_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedRealSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -148,7 +149,7 @@ fn times_two_numeric(x: RealSexp) -> savvy::Result<savvy::Sexp> {
 /// @returns A real vector with values multiplied by `y`.
 /// @export
 #[savvy]
-fn times_any_numeric(x: RealSexp, y: f64) -> savvy::Result<savvy::Sexp> {
+fn times_any_real(x: RealSexp, y: f64) -> savvy::Result<savvy::Sexp> {
     let mut out = OwnedRealSexp::new(x.len())?;
 
     for (i, e) in x.iter().enumerate() {
@@ -231,7 +232,7 @@ fn print_list(x: ListSexp) -> savvy::Result<()> {
             }
             TypedSexp::Real(x) => {
                 format!(
-                    "numeric [{}]",
+                    "double [{}]",
                     x.iter()
                         .map(|r| r.to_string())
                         .collect::<Vec<String>>()

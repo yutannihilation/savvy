@@ -10,7 +10,7 @@ and the latter, owned SEXP, is writable. Here's the list:
 | R type                          | Read-only version       | Writable version     |
 |:--------------------------------|:------------------------|:---------------------|
 | `INTSXP` (integer)              | `IntegerSexp`           | `OwnedIntegerSexp`   |
-| `REALSXP` (numeric)             | `RealSexp`              | `OwnedRealSexp`      |
+| `REALSXP` (double)              | `RealSexp`              | `OwnedRealSexp`      |
 | `LGLSXP` (logical)              | `LogicalSexp`           | `OwnedLogicalSexp`   |
 | `STRSXP` (character)            | `StringSexp`            | `OwnedStringSexp`    |
 | `VECSXP` (list)                 | `ListSexp`              | `OwnedListSexp`      |
@@ -38,8 +38,9 @@ savvy is non-ALTREP-aware for int, real, and logical (See [#18][issue18]).
 
 ## No implicit conversions
 
-Savvy doesn't provide conversion between types. For example, you cannot supply a
-numeric vector to a function with a `IntegerSexp` argument.
+Savvy doesn't provide conversion between types unless you do explicitly. For
+example, you cannot supply a double vector to a function with a `IntegerSexp`
+argument.
 
 ```rust
 #[savvy]
@@ -59,6 +60,9 @@ identity_int(c(1, 2))
 #> Error in identity_int(c(1, 2)) : 
 #>   Unexpected type: Cannot convert double to integer
 ```
+
+Instead, you can use `NumericSexp` to accept both integer and a
+
 
 While you probably feel this is inconvenient, this is also a design decision.
 My concerns on supporting these conversion are
