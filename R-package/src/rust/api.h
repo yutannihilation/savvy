@@ -94,6 +94,7 @@ SEXP savvy_filter_complex_without_im__ffi(SEXP x);
 SEXP savvy_filter_logical_duplicates__ffi(SEXP x);
 SEXP savvy_filter_string_ascii__ffi(SEXP x);
 SEXP savvy_fun_mod1__ffi(void);
+SEXP savvy_init_logger__ffi(DllInfo* dll_info);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
 
 // methods and associated functions for FooEnum

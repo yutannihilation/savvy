@@ -514,6 +514,11 @@ SEXP savvy_fun_mod1__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_init_logger__impl(DllInfo* dll_info) {
+    SEXP res = savvy_init_logger__ffi(dll_info);
+    return handle_result(res);
+}
+
 SEXP savvy_fun_mod1_1_foo__impl(void) {
     SEXP res = savvy_fun_mod1_1_foo__ffi();
     return handle_result(res);
@@ -728,4 +733,5 @@ void R_init_savvyExamples(DllInfo *dll) {
 
     // Functions for initialzation, if any.
     savvy_init_altrep_class__impl(dll);
+    savvy_init_logger__impl(dll);
 }
