@@ -12,8 +12,8 @@ pub(crate) use debug;
 
 #[cfg(feature = "logger")]
 pub fn env_logger() -> env_logger::Builder {
-    let r_stdout = Box::new(crate::io::r_stdout());
-    let target = env_logger::Target::Pipe(r_stdout);
+    let r_stderr = Box::new(crate::io::r_stderr());
+    let target = env_logger::Target::Pipe(r_stderr);
     let mut builder = env_logger::builder();
     builder.target(target);
     builder
