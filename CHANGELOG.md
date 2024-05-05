@@ -38,6 +38,21 @@
   }
   ```
 
+* Savvy now provides `r_stdout()` and `r_stderr()` to be used with interfaces
+  that require `std::io::Write`. Also, you can use `savvy::log::env_logger()` to
+  output logs to R's stderr. Here's an example usage:
+
+  ```rust
+  use savvy::savvy_init;
+  use savvy_ffi::DllInfo;
+
+  #[savvy_init]
+  fn init_logger(dll_info: *mut DllInfo) -> savvy::Result<()> {
+      savvy::log::env_logger().init();
+      Ok(())
+  }
+  ```
+
 ### Breaking changes
 
 * `AltList` now loses `names` argument in `into_altrep()` for consistency.
