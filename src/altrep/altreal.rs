@@ -115,6 +115,8 @@ pub fn register_altreal_class<T: AltReal>(
 
         self_.copy_to(unsafe { std::slice::from_raw_parts_mut(REAL(new), len) }, 0);
 
+        crate::log::debug!("A {} object is materialized", T::CLASS_NAME);
+
         // Cache the materialized data in data2.
         unsafe { R_set_altrep_data2(*x, new) };
 

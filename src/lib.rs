@@ -65,6 +65,8 @@ pub mod unwind_protect;
 #[cfg(feature = "altrep")]
 pub mod altrep;
 
+pub mod log;
+
 use std::os::raw::c_char;
 
 pub use error::{Error, Result};

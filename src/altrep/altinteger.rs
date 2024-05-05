@@ -123,6 +123,8 @@ pub fn register_altinteger_class<T: AltInteger>(
             0,
         );
 
+        crate::log::debug!("A {} object is materialized", T::CLASS_NAME);
+
         // Cache the materialized data in data2.
         unsafe { R_set_altrep_data2(*x, new) };
 
