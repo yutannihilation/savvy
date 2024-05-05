@@ -257,6 +257,7 @@ extern "C" {
 // Error
 extern "C" {
     pub fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char, ...) -> !;
+    pub fn Rf_warningcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char, ...);
 }
 
 // I/O

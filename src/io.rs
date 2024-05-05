@@ -1,4 +1,4 @@
-use savvy_ffi::{REprintf, Rprintf};
+use savvy_ffi::{REprintf, R_NilValue, Rprintf};
 
 use std::{ffi::CString, io::Write, os::raw::c_char};
 
@@ -27,6 +27,22 @@ pub fn r_eprint(msg: &str, linebreak: bool) {
         if linebreak {
             REprintf(LINEBREAK.as_ptr());
         }
+    }
+}
+
+/// Show a warning.
+///
+/// Note that, a warning can raise error when `options(warn = 2)`, so you should
+/// not ignore the error from `r_warn()`. The error should be propagated to the
+/// R session.
+pub fn r_warn(msg: &str) -> crate::error::Result<()> {
+    unsafe {
+        let msg = CString::new(msg).unwrap_or_default();
+        crate::unwind_protect(|| {
+            savvy_ffi::Rf_warningcall(R_NilValue, msg.as_ptr());
+            R_NilValue
+        })?;
+        Ok(())
     }
 }
 

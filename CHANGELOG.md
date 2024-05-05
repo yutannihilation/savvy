@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* New function `r_warn()` safely show a warning. Note that, a warning can raise
+  error when `options(warn = 2)`, so you should not ignore the error from
+  `r_warn()`. The error should be propagated to the R session.
+
 ## [v0.6.3] (2024-05-05)
 
 ### New features

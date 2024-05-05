@@ -441,6 +441,11 @@ foo_a <- function() {
 }
 
 
+get_foo_value <- function() {
+  .Call(savvy_get_foo_value__impl)
+}
+
+
 safe_stop <- function() {
   invisible(.Call(savvy_safe_stop__impl))
 }
@@ -453,6 +458,11 @@ raise_error <- function() {
 
 must_panic <- function() {
   invisible(.Call(savvy_must_panic__impl))
+}
+
+
+safe_warn <- function() {
+  invisible(.Call(savvy_safe_warn__impl))
 }
 
 
