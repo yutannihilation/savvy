@@ -7,7 +7,7 @@ use savvy::{
 fn times_two_numeric_f64(x: NumericSexp) -> savvy::Result<Sexp> {
     let mut out = OwnedRealSexp::new(x.len())?;
 
-    for (i, &v) in x.iter_f64().enumerate() {
+    for (i, v) in x.iter_f64().enumerate() {
         if v.is_na() {
             out[i] = f64::na();
         } else {
@@ -22,7 +22,8 @@ fn times_two_numeric_f64(x: NumericSexp) -> savvy::Result<Sexp> {
 fn times_two_numeric_i32(x: NumericSexp) -> savvy::Result<Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
 
-    for (i, &v) in x.iter_i32()?.enumerate() {
+    for (i, v) in x.iter_i32().enumerate() {
+        let v = v?;
         if v.is_na() {
             out[i] = i32::na();
         } else {

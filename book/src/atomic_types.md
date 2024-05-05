@@ -73,7 +73,7 @@ provides a method to get either `i32` or `f64` values:
 
 * `as_slice_i32()` returns `&[i32]`. This is fallible.
 * `as_slice_f64()` returns `&[f64]`.
-* `iter_i32()` returns an iterator of `i32`. This is fallible.
+* `iter_i32()` returns an iterator of `Result<i32>`.
 * `iter_f64()` returns an iterator of `f64`.
 
 These functions return the underlying data directly if the type is the same as
@@ -91,7 +91,8 @@ For example, you can rewrite the above function like this:
 fn times_two(x: NumericSexp) -> savvy::Result<Sexp> {
     let mut out = OwnedIntegerSexp::new(x.len())?;
 
-    for (i, &v) in x.iter_i32()?.enumerate() {
+    for (i, v) in x.iter_i32().enumerate() {
+        let v = v?;
         if v.is_na() {
             out[i] = i32::na();
         } else {

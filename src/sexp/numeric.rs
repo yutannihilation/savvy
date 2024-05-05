@@ -8,15 +8,23 @@ const I32MAX: f64 = i32::MAX as f64;
 const I32MIN: f64 = i32::MIN as f64;
 const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
 
-fn try_cast_f64_to_i32(f: &f64) -> crate::Result<i32> {
+fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
     if f.is_na() || f.is_nan() {
         Ok(i32::na())
-    } else if f.is_infinite() || *f > I32MAX || *f < I32MIN {
+    } else if f.is_infinite() || !(I32MIN..=I32MAX).contains(&f) {
         Err(format!("{f:?} is out of range for integer").into())
-    } else if (*f - f.round()).abs() > TOLERANCE {
+    } else if (f - f.round()).abs() > TOLERANCE {
         Err(format!("{f:?} is not integer-ish").into())
     } else {
-        Ok(*f as i32)
+        Ok(f as i32)
+    }
+}
+
+fn cast_i32_to_f64(i: i32) -> f64 {
+    if i.is_na() {
+        f64::na()
+    } else {
+        i as f64
     }
 }
 
@@ -134,7 +142,7 @@ impl NumericSexp {
                 // If `converted` is not created, convert the values.
                 let v_new = orig
                     .iter()
-                    .map(try_cast_f64_to_i32)
+                    .map(|x| try_cast_f64_to_i32(*x))
                     .collect::<crate::Result<Vec<i32>>>()?;
 
                 // Set v_new to converted. Otherwise, this is a temporary value and cannot be returned.
@@ -166,10 +174,7 @@ impl NumericSexp {
                 }
 
                 // If `converted` is not created, convert the values.
-                let v_new = orig
-                    .iter()
-                    .map(|i| if i.is_na() { f64::na() } else { *i as f64 })
-                    .collect();
+                let v_new = orig.iter().map(|i| cast_i32_to_f64(*i)).collect();
 
                 // Set v_new to converted. Otherwise, this is a temporary value and cannot be returned.
                 let v = converted.get_or_init(|| v_new);
@@ -181,21 +186,98 @@ impl NumericSexp {
 
     /// Returns an iterator over the underlying data of the SEXP.
     ///
-    /// If the data is integer, allocates a new `Vec` and cache it. This fails
-    /// when the value is
+    /// If the data is integer, allocates a new `Vec` and cache it. While this
+    /// method itself doesn't fail, the iterator might fail to return value in
+    /// case the conversion failed, i.e. when the value is
     ///
     /// - infinite
     /// - out of the range of `i32`
     /// - not integer-ish (e.g. `1.1`)
-    pub fn iter_i32(&self) -> crate::error::Result<std::slice::Iter<i32>> {
-        self.as_slice_i32().map(|x| x.iter())
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::NotAvailableValue;
+    ///
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, i32::na()])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1, NA)
+    /// let mut iter = num_sexp.iter_f64();
+    ///
+    /// assert_eq!(iter.next(), Some(1.0));
+    ///
+    /// // NA is propagated
+    /// let e1 = iter.next();
+    /// assert!(e1.is_some());
+    /// assert!(e1.unwrap().is_na());
+    /// ```
+    pub fn iter_i32(&self) -> NumericIteratorI32 {
+        match &self.0 {
+            PrivateNumericSexp::Integer { orig, .. } => NumericIteratorI32 {
+                sexp: self,
+                raw: Some(orig.as_slice()),
+                i: 0,
+                len: self.len(),
+            },
+            PrivateNumericSexp::Real { converted, .. } => {
+                let raw = converted.get().map(|x| x.as_slice());
+                NumericIteratorI32 {
+                    sexp: self,
+                    raw,
+                    i: 0,
+                    len: self.len(),
+                }
+            }
+        }
     }
 
     /// Returns an iterator over the underlying data of the SEXP.
     ///
     /// If the data is integer, allocates a new `Vec` and cache it.
-    pub fn iter_f64(&self) -> std::slice::Iter<f64> {
-        self.as_slice_f64().iter()
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::NotAvailableValue;
+    ///
+    /// # let int_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, f64::na(), 1.1])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1.0, NA, 1.1)
+    /// let mut iter = num_sexp.iter_i32();
+    ///
+    /// let e0 = iter.next();
+    /// assert!(e0.is_some());
+    /// assert_eq!(e0.unwrap()?, 1);
+    ///
+    /// // NA is propagated
+    /// let e1 = iter.next();
+    /// assert!(e1.is_some());
+    /// assert!(e1.unwrap()?.is_na());
+    ///
+    /// // 1.1 is not integer-ish, so the conversion fails.
+    /// let e2 = iter.next();
+    /// assert!(e2.is_some());
+    /// assert!(e2.unwrap().is_err());
+    /// ```
+    pub fn iter_f64(&self) -> NumericIteratorF64 {
+        match &self.0 {
+            PrivateNumericSexp::Real { orig, .. } => NumericIteratorF64 {
+                sexp: self,
+                raw: Some(orig.as_slice()),
+                i: 0,
+                len: self.len(),
+            },
+            PrivateNumericSexp::Integer { converted, .. } => {
+                let raw = converted.get().map(|x| x.as_slice());
+                NumericIteratorF64 {
+                    sexp: self,
+                    raw,
+                    i: 0,
+                    len: self.len(),
+                }
+            }
+        }
     }
 
     // Note: If the conversion is needed, to_vec_*() would copy the values twice
@@ -253,6 +335,82 @@ impl TryFrom<RealSexp> for NumericSexp {
     }
 }
 
+// --- Iterator -----------------------
+
+/// An iterator that retuns `i32` wrapped with `Result`.
+///
+/// - If the underlying data is integer, use the value as it is.
+/// - If the underlying data is real, but there's already the `i32` values
+///   converted from the real, use the values.
+/// - Otherwise, convert a real value to `i32` on the fly. This is fallible.
+pub struct NumericIteratorI32<'a> {
+    sexp: &'a NumericSexp,
+    raw: Option<&'a [i32]>,
+    i: usize,
+    len: usize,
+}
+
+impl<'a> Iterator for NumericIteratorI32<'a> {
+    type Item = crate::error::Result<i32>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = self.i;
+        self.i += 1;
+
+        if i >= self.len {
+            return None;
+        }
+
+        match &self.raw {
+            Some(x) => Some(Ok(x[i])),
+            None => {
+                if let PrivateNumericSexp::Real { orig, .. } = &self.sexp.0 {
+                    Some(try_cast_f64_to_i32(orig.as_slice()[i]))
+                } else {
+                    unreachable!("Integer must have the raw slice.");
+                }
+            }
+        }
+    }
+}
+
+/// An iterator that retuns `f64`.
+///
+/// - If the underlying data is real, use the value as it is.
+/// - If the underlying data is integer, but there's already the `f64` values
+///   converted from the integer, use the values.
+/// - Otherwise, convert an integer value to `f64` on the fly.
+pub struct NumericIteratorF64<'a> {
+    sexp: &'a NumericSexp,
+    raw: Option<&'a [f64]>,
+    i: usize,
+    len: usize,
+}
+
+impl<'a> Iterator for NumericIteratorF64<'a> {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = self.i;
+        self.i += 1;
+
+        if i >= self.len {
+            return None;
+        }
+
+        match &self.raw {
+            Some(x) => Some(x[i]),
+            None => {
+                if let PrivateNumericSexp::Integer { orig, .. } = &self.sexp.0 {
+                    Some(cast_i32_to_f64(orig.as_slice()[i]))
+                } else {
+                    unreachable!("Real must have the raw slice.");
+                }
+            }
+        }
+    }
+}
+
 // --- Scalar -------------------------
 
 /// A struct that holds either an integer or a real scalar.
@@ -272,7 +430,7 @@ impl NumericScalar {
     pub fn as_i32(&self) -> crate::error::Result<i32> {
         match &self {
             NumericScalar::Integer(i) => Ok(*i),
-            NumericScalar::Real(r) => try_cast_f64_to_i32(r),
+            NumericScalar::Real(r) => try_cast_f64_to_i32(*r),
         }
     }
 

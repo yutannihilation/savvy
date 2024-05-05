@@ -14,7 +14,8 @@
   fn times_two(x: NumericSexp) -> savvy::Result<Sexp> {
       let mut out = OwnedIntegerSexp::new(x.len())?;
 
-      for (i, &v) in x.iter_i32()?.enumerate() {
+      for (i, v) in x.iter_i32().enumerate() {
+          let v = v?; // The item of iter_i32() is Result because the conversion can fail.
           if v.is_na() {
               out[i] = i32::na();
           } else {
