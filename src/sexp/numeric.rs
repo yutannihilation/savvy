@@ -193,6 +193,24 @@ impl NumericSexp {
     /// - infinite
     /// - out of the range of `i32`
     /// - not integer-ish (e.g. `1.1`)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::NotAvailableValue;
+    ///
+    /// # let int_sexp = savvy::OwnedIntegerSexp::try_from_slice([1, i32::na()])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1, NA)
+    /// let mut iter = num_sexp.iter_f64();
+    ///
+    /// assert_eq!(iter.next(), Some(1.0));
+    ///
+    /// // NA is propagated
+    /// let e1 = iter.next();
+    /// assert!(e1.is_some());
+    /// assert!(e1.unwrap().is_na());
+    /// ```
     pub fn iter_i32(&self) -> NumericIteratorI32 {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => NumericIteratorI32 {
@@ -216,6 +234,32 @@ impl NumericSexp {
     /// Returns an iterator over the underlying data of the SEXP.
     ///
     /// If the data is integer, allocates a new `Vec` and cache it.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use savvy::NotAvailableValue;
+    ///
+    /// # let int_sexp = savvy::OwnedRealSexp::try_from_slice([1.0, f64::na(), 1.1])?.as_read_only();
+    /// # let num_sexp: savvy::NumericSexp = int_sexp.try_into()?;
+    /// // `num_sexp` is c(1.0, NA, 1.1)
+    /// let mut iter = num_sexp.iter_i32();
+    ///
+    /// let e0 = iter.next();
+    /// assert!(e0.is_some());
+    /// assert_eq!(e0.unwrap()?, 1);
+    ///
+    /// // NA is propagated
+    /// let e1 = iter.next();
+    /// assert!(e1.is_some());
+    /// assert!(e1.unwrap()?.is_na());
+    ///
+    /// // 1.1 is not integer-ish, so the conversion fails.
+    /// let e2 = iter.next();
+    /// assert!(e2.is_some());
+    /// assert!(e2.unwrap().is_err());
+    /// ```
     pub fn iter_f64(&self) -> NumericIteratorF64 {
         match &self.0 {
             PrivateNumericSexp::Real { orig, .. } => NumericIteratorF64 {
@@ -358,7 +402,7 @@ impl<'a> Iterator for NumericIteratorF64<'a> {
             Some(x) => Some(x[i]),
             None => {
                 if let PrivateNumericSexp::Integer { orig, .. } = &self.sexp.0 {
-                    Some(orig.as_slice()[i] as _)
+                    Some(cast_i32_to_f64(orig.as_slice()[i]))
                 } else {
                     unreachable!("Real must have the raw slice.");
                 }
