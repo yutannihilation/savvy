@@ -8,7 +8,17 @@ macro_rules! debug {
     ($($arg:tt)+) => {};
 }
 
-pub(crate) use debug;
+#[cfg(feature = "logger")]
+macro_rules! trace {
+    ($($arg:tt)+) => (log::trace!($($arg)+))
+}
+
+#[cfg(not(feature = "logger"))]
+macro_rules! trace {
+    ($($arg:tt)+) => {};
+}
+
+pub(crate) use {debug, trace};
 
 #[cfg(feature = "logger")]
 pub fn env_logger() -> env_logger::Builder {

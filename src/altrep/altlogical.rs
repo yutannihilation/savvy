@@ -138,11 +138,15 @@ pub fn register_altlogical_class<T: AltLogical>(
         mut x: SEXP,
         _deep_copy: Rboolean,
     ) -> SEXP {
+        crate::log::trace!("A {} object is duplicated", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltLogical>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        crate::log::trace!("A {} object is coerced", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
@@ -159,10 +163,14 @@ pub fn register_altlogical_class<T: AltLogical>(
         x: SEXP,
         _writable: Rboolean,
     ) -> *mut c_void {
+        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, true)
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltLogical>(x: SEXP) -> *const c_void {
+        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, false)
     }
 
@@ -195,6 +203,8 @@ pub fn register_altlogical_class<T: AltLogical>(
     }
 
     unsafe extern "C" fn altlogical_elt<T: AltLogical>(mut x: SEXP, i: R_xlen_t) -> c_int {
+        crate::log::trace!("LOGICAL_ELT({}, {i}) is called", T::CLASS_NAME);
+
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             unsafe { LOGICAL_ELT(materialized, i) }
         } else {

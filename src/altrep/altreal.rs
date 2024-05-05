@@ -127,11 +127,15 @@ pub fn register_altreal_class<T: AltReal>(
     }
 
     unsafe extern "C" fn altrep_duplicate<T: AltReal>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
+        crate::log::trace!("A {} object is duplicated", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltReal>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        crate::log::trace!("A {} object is coerced", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
@@ -145,10 +149,14 @@ pub fn register_altreal_class<T: AltReal>(
     }
 
     unsafe extern "C" fn altvec_dataptr<T: AltReal>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, true)
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltReal>(x: SEXP) -> *const c_void {
+        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, false)
     }
 
@@ -181,6 +189,8 @@ pub fn register_altreal_class<T: AltReal>(
     }
 
     unsafe extern "C" fn altreal_elt<T: AltReal>(mut x: SEXP, i: R_xlen_t) -> f64 {
+        crate::log::trace!("REAL_ELT({}, {i}) is called", T::CLASS_NAME);
+
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             unsafe { REAL_ELT(materialized, i) }
         } else {
