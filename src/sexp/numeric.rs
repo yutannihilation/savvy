@@ -20,6 +20,14 @@ fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
     }
 }
 
+fn cast_i32_to_f64(i: i32) -> f64 {
+    if i.is_na() {
+        f64::na()
+    } else {
+        i as f64
+    }
+}
+
 // --- Vector -------------------------
 
 /// A enum to hold both the original data and the converted version. Since it
@@ -166,10 +174,7 @@ impl NumericSexp {
                 }
 
                 // If `converted` is not created, convert the values.
-                let v_new = orig
-                    .iter()
-                    .map(|i| if i.is_na() { f64::na() } else { *i as f64 })
-                    .collect();
+                let v_new = orig.iter().map(|i| cast_i32_to_f64(*i)).collect();
 
                 // Set v_new to converted. Otherwise, this is a temporary value and cannot be returned.
                 let v = converted.get_or_init(|| v_new);
@@ -188,9 +193,9 @@ impl NumericSexp {
     /// - infinite
     /// - out of the range of `i32`
     /// - not integer-ish (e.g. `1.1`)
-    pub fn iter_i32(&self) -> NumericIteratorInteger {
+    pub fn iter_i32(&self) -> NumericIteratorI32 {
         match &self.0 {
-            PrivateNumericSexp::Integer { orig, .. } => NumericIteratorInteger {
+            PrivateNumericSexp::Integer { orig, .. } => NumericIteratorI32 {
                 sexp: self,
                 raw: Some(orig.as_slice()),
                 i: 0,
@@ -198,7 +203,7 @@ impl NumericSexp {
             },
             PrivateNumericSexp::Real { converted, .. } => {
                 let raw = converted.get().map(|x| x.as_slice());
-                NumericIteratorInteger {
+                NumericIteratorI32 {
                     sexp: self,
                     raw,
                     i: 0,
@@ -211,9 +216,9 @@ impl NumericSexp {
     /// Returns an iterator over the underlying data of the SEXP.
     ///
     /// If the data is integer, allocates a new `Vec` and cache it.
-    pub fn iter_f64(&self) -> NumericIteratorReal {
+    pub fn iter_f64(&self) -> NumericIteratorF64 {
         match &self.0 {
-            PrivateNumericSexp::Real { orig, .. } => NumericIteratorReal {
+            PrivateNumericSexp::Real { orig, .. } => NumericIteratorF64 {
                 sexp: self,
                 raw: Some(orig.as_slice()),
                 i: 0,
@@ -221,7 +226,7 @@ impl NumericSexp {
             },
             PrivateNumericSexp::Integer { converted, .. } => {
                 let raw = converted.get().map(|x| x.as_slice());
-                NumericIteratorReal {
+                NumericIteratorF64 {
                     sexp: self,
                     raw,
                     i: 0,
@@ -294,14 +299,14 @@ impl TryFrom<RealSexp> for NumericSexp {
 /// - If the underlying data is real, but there's already the `i32` values
 ///   converted from the real, use the values.
 /// - Otherwise, convert a real value to `i32` on the fly. This is fallible.
-pub struct NumericIteratorInteger<'a> {
+pub struct NumericIteratorI32<'a> {
     sexp: &'a NumericSexp,
     raw: Option<&'a [i32]>,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for NumericIteratorInteger<'a> {
+impl<'a> Iterator for NumericIteratorI32<'a> {
     type Item = crate::error::Result<i32>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -331,14 +336,14 @@ impl<'a> Iterator for NumericIteratorInteger<'a> {
 /// - If the underlying data is integer, but there's already the `f64` values
 ///   converted from the integer, use the values.
 /// - Otherwise, convert an integer value to `f64` on the fly.
-pub struct NumericIteratorReal<'a> {
+pub struct NumericIteratorF64<'a> {
     sexp: &'a NumericSexp,
     raw: Option<&'a [f64]>,
     i: usize,
     len: usize,
 }
 
-impl<'a> Iterator for NumericIteratorReal<'a> {
+impl<'a> Iterator for NumericIteratorF64<'a> {
     type Item = f64;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -352,10 +357,10 @@ impl<'a> Iterator for NumericIteratorReal<'a> {
         match &self.raw {
             Some(x) => Some(x[i]),
             None => {
-                if let PrivateNumericSexp::Real { orig, .. } = &self.sexp.0 {
-                    Some(orig.as_slice()[i])
+                if let PrivateNumericSexp::Integer { orig, .. } = &self.sexp.0 {
+                    Some(orig.as_slice()[i] as _)
                 } else {
-                    unreachable!("Integer must have the raw slice.");
+                    unreachable!("Real must have the raw slice.");
                 }
             }
         }

@@ -1,3 +1,6 @@
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+
 #[cfg(feature = "logger")]
 macro_rules! debug {
     ($($arg:tt)+) => (log::debug!($($arg)+))
