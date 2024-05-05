@@ -32,9 +32,9 @@ pub fn r_eprint(msg: &str, linebreak: bool) {
 
 /// Show a warning.
 ///
-/// Note that, warning might raise error depending on the value of `option(wran
-/// = )`. So, if this returns an error, you should propagate it to the R
-/// session.
+/// Note that, a warning can raise error when `options(warn = 2)`, so you should
+/// not ignore the error from `r_warn()`. The error should be propagated to the
+/// R session.
 pub fn r_warn(msg: &str) -> crate::error::Result<()> {
     unsafe {
         let msg = CString::new(msg).unwrap_or_default();

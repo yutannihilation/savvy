@@ -19,9 +19,21 @@ raise_error()
 For the implementation details of the internals, please refer to [my blog
 post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/#implementation).
 
-# Dealing with `panic!`
+## Show a warning
 
-## First of all, don't use `panic!`
+To show a warning, you can use `r_warn()`.
+
+```rust
+savvy::io::r_warn("foo")?;
+```
+
+Note that, a warning can raise error when `options(warn = 2)`, so you should not
+ignore the error from `r_warn()`. The error should be propagated to the R
+session.
+
+## Dealing with `panic!`
+
+### First of all, don't use `panic!`
 
 If you are familiar with extendr, you might get used to use `panic!` casually.
 But, in the savvy framework, `panic!` crashes your R session. So, please don't
@@ -38,7 +50,7 @@ entire session. Savvy just respects what is supposed to happen.
 But, if the session terminates immediately, it's hard to investigate the cause.
 What can I do?
 
-## Use debug build
+### Use debug build
 
 If `DEBUG` envvar is set to `true` on building (i.e., `devtools::load_all()`),
 savvy catches `panic!` and shows the backtrace instead of crashing the R
@@ -85,7 +97,7 @@ must_panic()
 #> Error: panic happened
 ```
 
-## Set `panic="unwind"`
+### Set `panic="unwind"`
 
 As described above, `panic!` is an unrecoverable error. It should not be
 recovered on the release build in principle.
