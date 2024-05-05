@@ -193,7 +193,11 @@ impl OwnedListSexp {
         crate::Sexp(self.inner()).set_attrib(attr, value)
     }
 
-    pub fn set_class<T: AsRef<str>>(&mut self, classes: &[T]) -> crate::error::Result<()> {
+    pub fn set_class<T, U>(&mut self, classes: T) -> crate::error::Result<()>
+    where
+        T: AsRef<[U]>,
+        U: AsRef<str>,
+    {
         crate::Sexp(self.inner()).set_class(classes)
     }
 
