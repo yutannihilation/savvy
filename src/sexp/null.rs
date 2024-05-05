@@ -12,6 +12,12 @@ impl From<NullSexp> for Sexp {
     }
 }
 
+impl From<NullSexp> for crate::error::Result<Sexp> {
+    fn from(value: NullSexp) -> Self {
+        Ok(<Sexp>::from(value))
+    }
+}
+
 // Conversion into SEXP is infallible as it's just extract the inner one.
 impl From<NullSexp> for SEXP {
     fn from(value: NullSexp) -> Self {
