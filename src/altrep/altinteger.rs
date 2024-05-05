@@ -123,6 +123,8 @@ pub fn register_altinteger_class<T: AltInteger>(
             0,
         );
 
+        crate::log::debug!("A {} object is materialized", T::CLASS_NAME);
+
         // Cache the materialized data in data2.
         unsafe { R_set_altrep_data2(*x, new) };
 
@@ -136,11 +138,15 @@ pub fn register_altinteger_class<T: AltInteger>(
         mut x: SEXP,
         _deep_copy: Rboolean,
     ) -> SEXP {
+        crate::log::trace!("A {} object is duplicated", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltInteger>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        crate::log::trace!("A {} object is coerced", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
@@ -157,10 +163,14 @@ pub fn register_altinteger_class<T: AltInteger>(
         x: SEXP,
         _writable: Rboolean,
     ) -> *mut c_void {
+        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, true)
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltInteger>(x: SEXP) -> *const c_void {
+        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, false)
     }
 
@@ -193,6 +203,8 @@ pub fn register_altinteger_class<T: AltInteger>(
     }
 
     unsafe extern "C" fn altinteger_elt<T: AltInteger>(mut x: SEXP, i: R_xlen_t) -> c_int {
+        crate::log::trace!("INTEGER_ELT({}, {i}) is called", T::CLASS_NAME);
+
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             unsafe { INTEGER_ELT(materialized, i) }
         } else {

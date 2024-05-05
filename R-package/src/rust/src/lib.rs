@@ -23,6 +23,8 @@ mod mod1;
 // This should not be parsed
 // mod mod2;
 
+mod log;
+
 use savvy::{r_print, savvy, OwnedListSexp};
 
 use savvy::{

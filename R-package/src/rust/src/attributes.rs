@@ -39,7 +39,7 @@ fn get_attr_int(x: savvy::IntegerSexp, attr: &str) -> savvy::Result<savvy::Sexp>
 fn set_class_int() -> savvy::Result<savvy::Sexp> {
     let mut x = OwnedIntegerSexp::new(1)?;
 
-    x.set_class(&["foo", "bar"])?;
+    x.set_class(["foo", "bar"])?;
 
     x.into()
 }
@@ -49,7 +49,7 @@ fn set_names_int() -> savvy::Result<savvy::Sexp> {
     let x_vec = vec![1, 2];
     let mut x: OwnedIntegerSexp = x_vec.try_into()?;
 
-    x.set_names(&["foo", "bar"])?;
+    x.set_names(["foo", "bar"])?;
 
     x.into()
 }

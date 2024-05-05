@@ -105,6 +105,8 @@ pub fn register_altlist_class<T: AltList>(
             unsafe { SET_VECTOR_ELT(new, i as _, self_.elt(i).0) };
         }
 
+        crate::log::debug!("A {} object is materialized", T::CLASS_NAME);
+
         // Cache the materialized data in data2.
         unsafe { R_set_altrep_data2(*x, new) };
 
@@ -115,11 +117,15 @@ pub fn register_altlist_class<T: AltList>(
     }
 
     unsafe extern "C" fn altrep_duplicate<T: AltList>(mut x: SEXP, _deep_copy: Rboolean) -> SEXP {
+        crate::log::trace!("A {} object is duplicated", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_duplicate(materialized) }
     }
 
     unsafe extern "C" fn altrep_coerce<T: AltList>(mut x: SEXP, sexp_type: SEXPTYPE) -> SEXP {
+        crate::log::trace!("A {} object is coerced", T::CLASS_NAME);
+
         let materialized = get_materialized_sexp::<T>(&mut x, true).expect("Must have result");
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
@@ -134,10 +140,14 @@ pub fn register_altlist_class<T: AltList>(
     }
 
     unsafe extern "C" fn altvec_dataptr<T: AltList>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, true)
     }
 
     unsafe extern "C" fn altvec_dataptr_or_null<T: AltList>(x: SEXP) -> *const c_void {
+        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
+
         altvec_dataptr_inner::<T>(x, false)
     }
 
@@ -170,6 +180,8 @@ pub fn register_altlist_class<T: AltList>(
     }
 
     unsafe extern "C" fn altlist_elt<T: AltList>(mut x: SEXP, i: R_xlen_t) -> SEXP {
+        crate::log::trace!("VECTOR_ELT({}, {i}) is called", T::CLASS_NAME);
+
         if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             unsafe { VECTOR_ELT(materialized, i) }
         } else {
