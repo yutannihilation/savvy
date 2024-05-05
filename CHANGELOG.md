@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.3] (2024-05-05)
+
 ### New features
 
 * New types `NumericSexp` and `NumericScalar` are added to handle both integer
@@ -624,7 +626,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.3...HEAD
+[v0.6.3]: https://github.com/yutannihilation/savvy/compare/v0.6.2...v0.6.3
 [v0.6.2]: https://github.com/yutannihilation/savvy/compare/v0.6.1...v0.6.2
 [v0.6.1]: https://github.com/yutannihilation/savvy/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/yutannihilation/savvy/compare/v0.5.3...v0.6.0
