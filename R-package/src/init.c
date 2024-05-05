@@ -414,6 +414,16 @@ SEXP savvy_foo_a__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_init_foo_value__impl(DllInfo* dll) {
+    SEXP res = savvy_init_foo_value__ffi(dll);
+    return handle_result(res);
+}
+
+SEXP savvy_get_foo_value__impl(void) {
+    SEXP res = savvy_get_foo_value__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_safe_stop__impl(void) {
     SEXP res = savvy_safe_stop__ffi();
     return handle_result(res);
@@ -426,6 +436,11 @@ SEXP savvy_raise_error__impl(void) {
 
 SEXP savvy_must_panic__impl(void) {
     SEXP res = savvy_must_panic__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_safe_warn__impl(void) {
+    SEXP res = savvy_safe_warn__ffi();
     return handle_result(res);
 }
 
@@ -686,9 +701,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
     {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
     {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
+    {"savvy_get_foo_value__impl", (DL_FUNC) &savvy_get_foo_value__impl, 0},
     {"savvy_safe_stop__impl", (DL_FUNC) &savvy_safe_stop__impl, 0},
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
+    {"savvy_safe_warn__impl", (DL_FUNC) &savvy_safe_warn__impl, 0},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
@@ -733,5 +750,6 @@ void R_init_savvyExamples(DllInfo *dll) {
 
     // Functions for initialzation, if any.
     savvy_init_altrep_class__impl(dll);
+    savvy_init_foo_value__impl(dll);
     savvy_init_logger__impl(dll);
 }
