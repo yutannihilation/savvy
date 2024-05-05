@@ -165,8 +165,9 @@ fn show() -> Result<(), DynError> {
         // type
         .allowlist_function("Rf_type2char")
         .allowlist_function("TYPEOF")
-        // error
+        // error & warning
         .allowlist_function("Rf_errorcall")
+        .allowlist_function("Rf_warningcall")
         // I/O
         .allowlist_function("Rprintf")
         .allowlist_function("REprintf")
