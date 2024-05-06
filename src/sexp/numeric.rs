@@ -106,7 +106,7 @@ impl NumericSexp {
         unsafe { crate::sexp::get_dim_from_sexp(self.inner_ref()) }
     }
 
-    /// Return the typed SEXP.
+    /// Returns the typed SEXP.
     pub fn into_typed(self) -> NumericTypedSexp {
         match self.0 {
             PrivateNumericSexp::Integer { orig, .. } => NumericTypedSexp::Integer(orig),

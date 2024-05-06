@@ -24,7 +24,7 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
     /// Package name to identify the ALTREP class.
     const PACKAGE_NAME: &'static str;
 
-    /// Return the length of the data.
+    /// Returns the length of the data.
     fn length(&mut self) -> usize;
 
     /// Returns the value of `i`-th element. Note that, it seems R handles the
@@ -55,18 +55,18 @@ pub trait AltLogical: Sized + IntoExtPtrSexp {
         );
     }
 
-    /// Converts the struct into an ALTREP object
+    /// Converts the struct into an ALTREP object.
     fn into_altrep(self) -> crate::Result<crate::Sexp> {
         super::create_altrep_instance(self, Self::CLASS_NAME).map(crate::Sexp)
     }
 
-    /// Extracts the reference (`&T`) of the underlying data
+    /// Extracts the reference (`&T`) of the underlying data.
     fn try_from_altrep_ref(x: &LogicalSexp) -> crate::Result<&Self> {
         super::assert_altrep_class(x.0, Self::CLASS_NAME)?;
         super::extract_ref_from_altrep(&x.0)
     }
 
-    /// Extracts the mutable reference (`&mut T`) of the underlying data
+    /// Extracts the mutable reference (`&mut T`) of the underlying data.
     fn try_from_altrep_mut(
         x: &mut LogicalSexp,
         invalidate_cache: bool,
