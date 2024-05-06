@@ -8,7 +8,7 @@ static FOO_VALUE: OnceLock<Mutex<i32>> = OnceLock::new();
 
 #[savvy_init]
 fn init_foo_value(dll: *mut DllInfo) -> savvy::Result<()> {
-    match FOO_VALUE.set(Mutex::new(0)) {
+    match FOO_VALUE.set(Mutex::new(-1)) {
         Ok(_) => Ok(()),
         Err(_) => Err("Failed to set values".into()),
     }
