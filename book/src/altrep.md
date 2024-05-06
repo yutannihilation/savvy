@@ -17,7 +17,7 @@ Savvy currently provides only the following traits for ALTREP. The other ALTREPs
 like `ALTCOMPLEX` are not yet supported.
 
 * [`AltInteger`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltInteger.html)
-* [`AltReap`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltReap.html)
+* [`AltReal`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltReal.html)
 * [`AltLogical`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltLogical.html)
 * [`AltString`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltString.html)
 * [`AltList`](https://yutannihilation.github.io/savvy/reference/savvy/altrep/trait.AltList.html)
