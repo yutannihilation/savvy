@@ -71,6 +71,8 @@ SEXP savvy_rep_bool_vec__ffi(SEXP x);
 SEXP savvy_rep_bool_slice__ffi(SEXP x);
 SEXP savvy_rep_str_vec__ffi(SEXP x);
 SEXP savvy_rep_str_slice__ffi(SEXP x);
+SEXP savvy_default_value_scalar__ffi(SEXP x);
+SEXP savvy_default_value_vec__ffi(SEXP x);
 SEXP savvy_print_foo_enum__ffi(SEXP x);
 SEXP savvy_print_foo_enum_ref__ffi(SEXP x);
 SEXP savvy_foo_a__ffi(void);
@@ -102,6 +104,11 @@ SEXP savvy_fun_mod1_1_foo__ffi(void);
 
 // methods and associated functions for FooEnum
 SEXP savvy_FooEnum_print__ffi(SEXP self__);
+
+// methods and associated functions for FooWithDefault
+SEXP savvy_FooWithDefault_new__ffi(SEXP default_value);
+SEXP savvy_FooWithDefault_default_value_method__ffi(SEXP self__, SEXP x);
+SEXP savvy_FooWithDefault_default_value_associated_fn__ffi(SEXP x);
 
 // methods and associated functions for Person
 SEXP savvy_Person_new__ffi(void);

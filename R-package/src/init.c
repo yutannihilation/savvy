@@ -399,6 +399,16 @@ SEXP savvy_rep_str_slice__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_default_value_scalar__impl(SEXP x) {
+    SEXP res = savvy_default_value_scalar__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_default_value_vec__impl(SEXP x) {
+    SEXP res = savvy_default_value_vec__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_print_foo_enum__impl(SEXP x) {
     SEXP res = savvy_print_foo_enum__ffi(x);
     return handle_result(res);
@@ -541,6 +551,21 @@ SEXP savvy_fun_mod1_1_foo__impl(void) {
 
 SEXP savvy_FooEnum_print__impl(SEXP self__) {
     SEXP res = savvy_FooEnum_print__ffi(self__);
+    return handle_result(res);
+}
+
+SEXP savvy_FooWithDefault_new__impl(SEXP default_value) {
+    SEXP res = savvy_FooWithDefault_new__ffi(default_value);
+    return handle_result(res);
+}
+
+SEXP savvy_FooWithDefault_default_value_method__impl(SEXP self__, SEXP x) {
+    SEXP res = savvy_FooWithDefault_default_value_method__ffi(self__, x);
+    return handle_result(res);
+}
+
+SEXP savvy_FooWithDefault_default_value_associated_fn__impl(SEXP x) {
+    SEXP res = savvy_FooWithDefault_default_value_associated_fn__ffi(x);
     return handle_result(res);
 }
 
@@ -698,6 +723,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rep_bool_slice__impl", (DL_FUNC) &savvy_rep_bool_slice__impl, 1},
     {"savvy_rep_str_vec__impl", (DL_FUNC) &savvy_rep_str_vec__impl, 1},
     {"savvy_rep_str_slice__impl", (DL_FUNC) &savvy_rep_str_slice__impl, 1},
+    {"savvy_default_value_scalar__impl", (DL_FUNC) &savvy_default_value_scalar__impl, 1},
+    {"savvy_default_value_vec__impl", (DL_FUNC) &savvy_default_value_vec__impl, 1},
     {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
     {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
     {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
@@ -725,6 +752,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
     {"savvy_FooEnum_print__impl", (DL_FUNC) &savvy_FooEnum_print__impl, 1},
+    {"savvy_FooWithDefault_new__impl", (DL_FUNC) &savvy_FooWithDefault_new__impl, 1},
+    {"savvy_FooWithDefault_default_value_method__impl", (DL_FUNC) &savvy_FooWithDefault_default_value_method__impl, 2},
+    {"savvy_FooWithDefault_default_value_associated_fn__impl", (DL_FUNC) &savvy_FooWithDefault_default_value_associated_fn__impl, 1},
     {"savvy_Person_new__impl", (DL_FUNC) &savvy_Person_new__impl, 0},
     {"savvy_Person_new2__impl", (DL_FUNC) &savvy_Person_new2__impl, 0},
     {"savvy_Person_new_fallible__impl", (DL_FUNC) &savvy_Person_new_fallible__impl, 0},
