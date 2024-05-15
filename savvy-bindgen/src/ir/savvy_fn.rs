@@ -15,11 +15,12 @@ struct SavvyInputType {
     category: SavvyInputTypeCategory,
     ty_orig: syn::Type,
     ty_str: String,
+    optional: bool,
 }
 
 #[allow(dead_code)]
 impl SavvyInputType {
-    fn from_type(ty: &syn::Type) -> syn::Result<Self> {
+    fn from_type(ty: &syn::Type, optional: bool) -> syn::Result<Self> {
         match &ty {
             // User-defined structs are accepted in the form of either `&` or
             // `&mut`. Note that `&str` also falls here.
@@ -31,12 +32,14 @@ impl SavvyInputType {
                             category: SavvyInputTypeCategory::PrimitiveType,
                             ty_orig: ty.clone(),
                             ty_str: "&str".to_string(),
+                            optional,
                         })
                     } else {
                         Ok(Self {
                             category: SavvyInputTypeCategory::UserDefinedTypeRef,
                             ty_orig: ty.clone(),
                             ty_str,
+                            optional,
                         })
                     }
                 } else {
@@ -48,9 +51,26 @@ impl SavvyInputType {
             }
 
             syn::Type::Path(type_path) => {
-                let type_ident = &type_path.path.segments.last().unwrap().ident;
+                let type_path_last = type_path.path.segments.last().unwrap();
+                let type_ident = &type_path_last.ident;
                 let ty_str = type_ident.to_string();
                 match ty_str.as_str() {
+                    "Option" => match &type_path_last.arguments {
+                        syn::PathArguments::AngleBracketed(
+                            syn::AngleBracketedGenericArguments { args, .. },
+                        ) if args.len() == 1 => match &args.first().unwrap() {
+                            syn::GenericArgument::Type(ty) => Self::from_type(ty, true),
+                            _ => Err(syn::Error::new_spanned(
+                                type_path,
+                                "Option<T> can accept only a type",
+                            )),
+                        },
+                        _ => Err(syn::Error::new_spanned(
+                            type_path,
+                            "Option<T> can accept only a type",
+                        )),
+                    },
+
                     // Owned-types are not allowed for the input
                     "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedComplexSexp"
                     | "OwnedLogicalSexp" | "OwnedStringSexp" | "OwnedListSexp" => {
@@ -67,6 +87,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
                         ty_str,
+                        optional,
                     }),
 
                     // Primitive types
@@ -74,6 +95,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::PrimitiveType,
                         ty_orig: ty.clone(),
                         ty_str,
+                        optional,
                     }),
 
                     "DllInfo" => Err(syn::Error::new_spanned(
@@ -85,6 +107,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::UserDefinedType,
                         ty_orig: ty.clone(),
                         ty_str,
+                        optional,
                     }),
                 }
             }
@@ -117,6 +140,7 @@ impl SavvyInputType {
                     category: SavvyInputTypeCategory::DllInfo,
                     ty_orig: ty.clone(),
                     ty_str: type_ident.to_string(),
+                    optional,
                 })
             }
 
@@ -174,6 +198,10 @@ impl SavvyFnArg {
 
     pub fn ty_string(&self) -> String {
         self.ty.ty_str.clone()
+    }
+
+    pub fn is_optional(&self) -> bool {
+        self.ty.optional
     }
 
     pub fn to_c_type_string(&self) -> String {
@@ -356,7 +384,7 @@ impl SavvyFn {
                         }
                     };
 
-                    let ty = match SavvyInputType::from_type(ty.as_ref()) {
+                    let ty = match SavvyInputType::from_type(ty.as_ref(), false) {
                         Ok(ty) => ty,
                         Err(e) => return Some(Err(e)),
                     };
@@ -379,9 +407,13 @@ impl SavvyFn {
                                     "#[savvy] doesn't accept `*mut DllInfo`. Did you mean #[savvy_init]?",
                                 )));
                             }
-                            stmts_additional.push(parse_quote! {
-                                let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?;
-                            });
+
+                            if ty.optional {
+                                stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
+                                stmts_additional.push(parse_quote! { let #pat = if #pat.is_null() { None } else { Some(<#ty_ident>::try_from(#pat)?) }; })
+                            } else {
+                                stmts_additional.push(parse_quote! { let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?; });
+                            }
                         }
                     }
 
