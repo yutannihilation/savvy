@@ -30,15 +30,49 @@ impl SavvyFn {
         }
     }
 
-    fn get_r_args(&self) -> Vec<String> {
-        let mut out: Vec<_> = self.args.iter().map(|arg| arg.pat_string()).collect();
+    // The return value is (pat, default value)
+    fn get_r_args(&self) -> Vec<(String, Option<String>)> {
+        let mut out: Vec<_> = self
+            .args
+            .iter()
+            .map(|arg| {
+                let pat = arg.pat_string();
+                let default_value = if arg.is_optional() {
+                    Some("NULL".to_string())
+                } else {
+                    None
+                };
+
+                (pat, default_value)
+            })
+            .collect();
 
         // if it's a method, add `self__` arg
         if matches!(&self.fn_type, SavvyFnType::Method { .. }) {
-            out.insert(0, "self".to_string())
+            out.insert(0, ("self".to_string(), None))
         }
 
         out
+    }
+
+    fn get_r_args_for_signature(&self) -> Vec<String> {
+        self.get_r_args()
+            .iter()
+            .map(|(pat, default_value)| {
+                if let Some(value) = default_value {
+                    format!(r#"{pat} = {value}"#)
+                } else {
+                    pat.to_string()
+                }
+            })
+            .collect::<Vec<_>>()
+    }
+
+    fn get_r_args_for_call(&self) -> Vec<String> {
+        self.get_r_args()
+            .iter()
+            .map(|(pat, _)| pat.to_string())
+            .collect::<Vec<_>>()
     }
 
     fn to_r_function(&self) -> String {
@@ -47,16 +81,10 @@ impl SavvyFn {
 
         let doc_comments = get_r_doc_comment(self.docs.as_slice());
 
-        let args = self
-            .get_c_args()
-            .iter()
-            .map(|(pat, _)| pat.clone())
-            .collect::<Vec<String>>();
+        let args_sig = self.get_r_args_for_signature().join(", ");
 
-        let mut args_call = args.clone();
+        let mut args_call = self.get_r_args_for_call();
         args_call.insert(0, format!("{fn_name_c}"));
-
-        let args = args.join(", ");
         let args_call = args_call.join(", ");
 
         let mut body_lines = self.get_extractions();
@@ -79,7 +107,7 @@ impl SavvyFn {
 
         format!(
             "{doc_comments}
-{fn_name} <- function({args}) {{
+{fn_name} <- function({args_sig}) {{
 {body}
 }}
 "
@@ -127,17 +155,17 @@ fn generate_r_impl_for_impl(
             let fn_name = x.fn_name_r();
             let fn_name_c = x.fn_name_c_impl();
 
-            let mut args = x.get_r_args();
             // Remove self from arguments for R
-            let args_r = args
-                .clone()
+            let args_sig = x
+                .get_r_args_for_signature()
                 .into_iter()
                 .filter(|e| *e != "self")
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            args.insert(0, format!("{fn_name_c}"));
-            let args_call = args.join(", ");
+            let mut args_call = x.get_r_args_for_call();
+            args_call.insert(0, format!("{fn_name_c}"));
+            let args_call = args_call.join(", ");
 
             let mut body_lines = x.get_extractions();
 
@@ -160,7 +188,7 @@ fn generate_r_impl_for_impl(
 
             format!(
                 "{fn_name} <- function(self) {{
-  function({args_r}) {{
+  function({args_sig}) {{
   {body}
   }}
 }}
@@ -196,12 +224,11 @@ fn generate_r_impl_for_impl(
             let fn_name = x.fn_name.clone();
             let fn_name_c = x.fn_name_c_impl();
 
-            let mut args = x.get_r_args();
+            let args_sig = x.get_r_args_for_signature().join(", ");
 
-            let args_r = args.join(", ");
-
-            args.insert(0, format!("{fn_name_c}"));
-            let args_call = args.join(", ");
+            let mut args_call = x.get_r_args_for_call();
+            args_call.insert(0, format!("{fn_name_c}"));
+            let args_call = args_call.join(", ");
 
             let mut body_lines = x.get_extractions();
 
@@ -224,7 +251,7 @@ fn generate_r_impl_for_impl(
             let body = body_lines.join("\n");
 
             format!(
-                r#"{class_r}${fn_name} <- function({args_r}) {{
+                r#"{class_r}${fn_name} <- function({args_sig}) {{
 {body}
 }}
 "#

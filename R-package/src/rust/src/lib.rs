@@ -10,6 +10,7 @@ mod error_handling;
 mod function;
 mod init_vectors;
 mod numeric;
+mod optional_arg;
 mod try_from_iter;
 
 // to test if the definition over multiple files is accepted.

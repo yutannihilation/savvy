@@ -424,6 +424,16 @@ rep_str_slice <- function(x) {
 }
 
 
+default_value_scalar <- function(x = NULL) {
+  .Call(savvy_default_value_scalar__impl, x)
+}
+
+
+default_value_vec <- function(x = NULL) {
+  .Call(savvy_default_value_vec__impl, x)
+}
+
+
 print_foo_enum <- function(x) {
   x <- .savvy_extract_ptr(x, "FooEnum")
   invisible(.Call(savvy_print_foo_enum__impl, x))
@@ -593,6 +603,38 @@ print.FooEnum <- function(x, ...) {
 
 ### associated functions for FooEnum
 
+
+
+### wrapper functions for FooWithDefault
+
+FooWithDefault_default_value_method <- function(self) {
+  function(x = NULL) {
+  .Call(savvy_FooWithDefault_default_value_method__impl, self, x)
+  }
+}
+
+.savvy_wrap_FooWithDefault <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+    e$default_value_method <- FooWithDefault_default_value_method(ptr)
+  
+  class(e) <- "FooWithDefault"
+  e
+}
+
+
+
+FooWithDefault <- new.env(parent = emptyenv())
+
+### associated functions for FooWithDefault
+
+FooWithDefault$new <- function(default_value) {
+  .savvy_wrap_FooWithDefault(.Call(savvy_FooWithDefault_new__impl, default_value))
+}
+
+FooWithDefault$default_value_associated_fn <- function(x = NULL) {
+.Call(savvy_FooWithDefault_default_value_associated_fn__impl, x)
+}
 
 
 ### wrapper functions for Person

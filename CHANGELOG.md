@@ -9,6 +9,28 @@
   error when `options(warn = 2)`, so you should not ignore the error from
   `r_warn()`. The error should be propagated to the R session.
 
+* Savvy now translates `Option<T>` as an optional argument, i.e., an argument
+  with the default value of `NULL`.
+
+  Example:
+  ``` rust
+  #[savvy]
+  fn default_value_vec(x: Option<IntegerSexp>) -> savvy::Result<Sexp> {
+      if let Some(x) = x {
+          x.iter().sum::<i32>().try_into()
+      } else {
+          (-1).try_into()
+      }
+  }
+  ```
+  ``` r
+  default_value_vec(1:10)
+  #> [1] 55
+
+  default_value_vec()
+  #> [1] -1
+  ```
+
 ## [v0.6.3] (2024-05-05)
 
 ### New features
