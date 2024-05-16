@@ -399,16 +399,6 @@ SEXP savvy_rep_str_slice__impl(SEXP x) {
     return handle_result(res);
 }
 
-SEXP savvy_default_value_scalar__impl(SEXP x) {
-    SEXP res = savvy_default_value_scalar__ffi(x);
-    return handle_result(res);
-}
-
-SEXP savvy_default_value_vec__impl(SEXP x) {
-    SEXP res = savvy_default_value_vec__ffi(x);
-    return handle_result(res);
-}
-
 SEXP savvy_print_foo_enum__impl(SEXP x) {
     SEXP res = savvy_print_foo_enum__ffi(x);
     return handle_result(res);
@@ -506,6 +496,16 @@ SEXP savvy_times_two_numeric_i32_scalar__impl(SEXP x) {
 
 SEXP savvy_print_numeric__impl(SEXP x) {
     SEXP res = savvy_print_numeric__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_default_value_scalar__impl(SEXP x) {
+    SEXP res = savvy_default_value_scalar__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_default_value_vec__impl(SEXP x) {
+    SEXP res = savvy_default_value_vec__ffi(x);
     return handle_result(res);
 }
 
@@ -723,8 +723,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rep_bool_slice__impl", (DL_FUNC) &savvy_rep_bool_slice__impl, 1},
     {"savvy_rep_str_vec__impl", (DL_FUNC) &savvy_rep_str_vec__impl, 1},
     {"savvy_rep_str_slice__impl", (DL_FUNC) &savvy_rep_str_slice__impl, 1},
-    {"savvy_default_value_scalar__impl", (DL_FUNC) &savvy_default_value_scalar__impl, 1},
-    {"savvy_default_value_vec__impl", (DL_FUNC) &savvy_default_value_vec__impl, 1},
     {"savvy_print_foo_enum__impl", (DL_FUNC) &savvy_print_foo_enum__impl, 1},
     {"savvy_print_foo_enum_ref__impl", (DL_FUNC) &savvy_print_foo_enum_ref__impl, 1},
     {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
@@ -744,6 +742,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_times_two_numeric_f64_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_f64_scalar__impl, 1},
     {"savvy_times_two_numeric_i32_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_i32_scalar__impl, 1},
     {"savvy_print_numeric__impl", (DL_FUNC) &savvy_print_numeric__impl, 1},
+    {"savvy_default_value_scalar__impl", (DL_FUNC) &savvy_default_value_scalar__impl, 1},
+    {"savvy_default_value_vec__impl", (DL_FUNC) &savvy_default_value_vec__impl, 1},
     {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
     {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},

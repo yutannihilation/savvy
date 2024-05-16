@@ -34,6 +34,21 @@ fn wrong_type_dllinfo(x: *mut DllInfo) -> savvy::Result<()> {
     Ok(())
 }
 
+#[savvy]
+fn wrong_type_nested_option(x: Option<Option<i32>>) -> savvy::Result<()> {
+    Ok(())
+}
+
+#[savvy]
+fn wrong_type_option_position(x: Option<i32>, y: i32) -> savvy::Result<()> {
+    Ok(())
+}
+
+#[savvy]
+fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()> {
+    Ok(())
+}
+
 // only fieldless enums is supported
 #[savvy]
 enum Foo {

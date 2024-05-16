@@ -20,7 +20,7 @@ struct SavvyInputType {
 
 #[allow(dead_code)]
 impl SavvyInputType {
-    fn from_type(ty: &syn::Type, optional: bool) -> syn::Result<Self> {
+    fn from_type(ty: &syn::Type, in_option: bool) -> syn::Result<Self> {
         match &ty {
             // User-defined structs are accepted in the form of either `&` or
             // `&mut`. Note that `&str` also falls here.
@@ -32,14 +32,14 @@ impl SavvyInputType {
                             category: SavvyInputTypeCategory::PrimitiveType,
                             ty_orig: ty.clone(),
                             ty_str: "&str".to_string(),
-                            optional,
+                            optional: in_option,
                         })
                     } else {
                         Ok(Self {
                             category: SavvyInputTypeCategory::UserDefinedTypeRef,
                             ty_orig: ty.clone(),
                             ty_str,
-                            optional,
+                            optional: in_option,
                         })
                     }
                 } else {
@@ -55,21 +55,30 @@ impl SavvyInputType {
                 let type_ident = &type_path_last.ident;
                 let ty_str = type_ident.to_string();
                 match ty_str.as_str() {
-                    "Option" => match &type_path_last.arguments {
-                        syn::PathArguments::AngleBracketed(
-                            syn::AngleBracketedGenericArguments { args, .. },
-                        ) if args.len() == 1 => match &args.first().unwrap() {
-                            syn::GenericArgument::Type(ty) => Self::from_type(ty, true),
-                            _ => Err(syn::Error::new_spanned(
+                    "Option" => {
+                        if in_option {
+                            return Err(syn::Error::new_spanned(
                                 type_path,
-                                "Option<T> can accept only a type",
-                            )),
-                        },
-                        _ => Err(syn::Error::new_spanned(
+                                "`Option` cannot be nested",
+                            ));
+                        }
+
+                        if let syn::PathArguments::AngleBracketed(
+                            syn::AngleBracketedGenericArguments { args, .. },
+                        ) = &type_path_last.arguments
+                        {
+                            if args.len() == 1 {
+                                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
+                                    return Self::from_type(ty, true);
+                                }
+                            }
+                        }
+
+                        Err(syn::Error::new_spanned(
                             type_path,
                             "Option<T> can accept only a type",
-                        )),
-                    },
+                        ))
+                    }
 
                     // Owned-types are not allowed for the input
                     "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedComplexSexp"
@@ -87,7 +96,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
                         ty_str,
-                        optional,
+                        optional: in_option,
                     }),
 
                     // Primitive types
@@ -95,7 +104,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::PrimitiveType,
                         ty_orig: ty.clone(),
                         ty_str,
-                        optional,
+                        optional: in_option,
                     }),
 
                     "DllInfo" => Err(syn::Error::new_spanned(
@@ -107,7 +116,7 @@ impl SavvyInputType {
                         category: SavvyInputTypeCategory::UserDefinedType,
                         ty_orig: ty.clone(),
                         ty_str,
-                        optional,
+                        optional: in_option,
                     }),
                 }
             }
@@ -140,7 +149,7 @@ impl SavvyInputType {
                     category: SavvyInputTypeCategory::DllInfo,
                     ty_orig: ty.clone(),
                     ty_str: type_ident.to_string(),
-                    optional,
+                    optional: in_option,
                 })
             }
 
@@ -424,6 +433,15 @@ impl SavvyFn {
             })
             .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
 
+        // reject signature like fn (x: Option<i32>, y: i32)
+        let mut args_after_optional = args_new.iter().skip_while(|x| !x.is_optional());
+        if args_after_optional.any(|x| !x.is_optional()) {
+            return Err(syn::Error::new_spanned(
+                sig.inputs.clone(),
+                "optional args can be placed only after mandatory args",
+            ));
+        }
+
         // Check for init function
         let is_init_fn = args_new
             .iter()
@@ -476,6 +494,7 @@ fn get_savvy_return_type(
             return_type.clone(),
             "function must have return type",
         )),
+
         syn::ReturnType::Type(_, ty) => {
             let e = Err(syn::Error::new_spanned(
                 return_type.clone(),
@@ -522,63 +541,61 @@ fn get_savvy_return_type(
             };
 
             // Check `T`` in savvy::Result<T>
-            match path_args {
-                syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
-                    args,
-                    ..
-                }) => {
-                    if args.len() != 1 {
-                        return e;
-                    }
-                    match &args.first().unwrap() {
-                        syn::GenericArgument::Type(ty) => match ty {
-                            syn::Type::Tuple(type_tuple) => {
-                                if type_tuple.elems.is_empty() {
-                                    Ok(SavvyFnReturnType::Unit(return_type.clone()))
-                                } else {
-                                    e
-                                }
-                            }
-                            syn::Type::Path(type_path) => {
-                                let ty_str =
-                                    type_path.path.segments.last().unwrap().ident.to_string();
-                                match ty_str.as_str() {
-                                    "Sexp" => Ok(SavvyFnReturnType::Sexp(return_type.clone())),
 
-                                    // if it's `savvy::Result<Self>`, replace `Self` with the actual type
-                                    "Self" => {
-                                        let ty_str =
-                                            if let Some(ty_str) = self_ty_to_string(self_ty) {
-                                                ty_str
-                                            } else {
-                                                return e;
-                                            };
-                                        Ok(SavvyFnReturnType::UserDefinedStruct(
+            if let syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+                args,
+                ..
+            }) = path_args
+            {
+                if args.len() != 1 {
+                    return e;
+                }
+
+                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
+                    match ty {
+                        syn::Type::Tuple(type_tuple) => {
+                            if type_tuple.elems.is_empty() {
+                                return Ok(SavvyFnReturnType::Unit(return_type.clone()));
+                            }
+                        }
+
+                        syn::Type::Path(type_path) => {
+                            let ty_str = type_path.path.segments.last().unwrap().ident.to_string();
+                            match ty_str.as_str() {
+                                "Sexp" => return Ok(SavvyFnReturnType::Sexp(return_type.clone())),
+
+                                // if it's `savvy::Result<Self>`, replace `Self` with the actual type
+                                "Self" => {
+                                    if let Some(ty_str) = self_ty_to_string(self_ty) {
+                                        return Ok(SavvyFnReturnType::UserDefinedStruct(
                                             UserDefinedStructReturnType {
                                                 ty_str,
                                                 return_type: parse_quote!(-> savvy::Result<#self_ty>),
                                                 wrapped_with_result: true,
                                             },
-                                        ))
+                                        ));
                                     }
+                                }
 
-                                    // if it's the actual type, us as it is.
-                                    _ => Ok(SavvyFnReturnType::UserDefinedStruct(
+                                // if it's the actual type, use it as it is.
+                                _ => {
+                                    return Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
                                             ty_str,
                                             return_type: return_type.clone(),
                                             wrapped_with_result: true,
                                         },
-                                    )),
+                                    ))
                                 }
                             }
-                            _ => e,
-                        },
-                        _ => e,
+                        }
+
+                        _ => {}
                     }
                 }
-                _ => e,
             }
+
+            e
         }
     }
 }
