@@ -54,32 +54,38 @@ error: optional args can be placed only after mandatory args
 43 | fn wrong_type_option_position(x: Option<i32>, y: i32) -> savvy::Result<()> {
    |                               ^^^^^^^^^^^^^^^^^^^^^^
 
-error: savvy only supports a fieldless enum
-  --> tests/cases/simple_cases.rs:50:6
+error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
+  --> tests/cases/simple_cases.rs:48:42
    |
-50 |     A(i32),
+48 | fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()> {
+   |                                          ^^^^^^^^^^^^^^^^
+
+error: savvy only supports a fieldless enum
+  --> tests/cases/simple_cases.rs:55:6
+   |
+55 |     A(i32),
    |      ^^^^^
 
 error: savvy doesn't support an enum with discreminant
-  --> tests/cases/simple_cases.rs:58:9
+  --> tests/cases/simple_cases.rs:63:9
    |
-58 |     B = 100,
+63 |     B = 100,
    |         ^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:62:23
+  --> tests/cases/simple_cases.rs:67:23
    |
-62 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+67 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
    |                       ^^^^^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:67:24
+  --> tests/cases/simple_cases.rs:72:24
    |
-67 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+72 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
    |                        ^^^^^^^^^^^^^^
 
 error: #[savvy_init] can be used only on a function that takes `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:72:41
+  --> tests/cases/simple_cases.rs:77:41
    |
-72 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+77 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
    |                                         ^^^
