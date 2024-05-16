@@ -424,16 +424,6 @@ rep_str_slice <- function(x) {
 }
 
 
-default_value_scalar <- function(x = NULL) {
-  .Call(savvy_default_value_scalar__impl, x)
-}
-
-
-default_value_vec <- function(x = NULL) {
-  .Call(savvy_default_value_vec__impl, x)
-}
-
-
 print_foo_enum <- function(x) {
   x <- .savvy_extract_ptr(x, "FooEnum")
   invisible(.Call(savvy_print_foo_enum__impl, x))
@@ -528,6 +518,16 @@ times_two_numeric_i32_scalar <- function(x) {
 
 print_numeric <- function(x) {
   invisible(.Call(savvy_print_numeric__impl, x))
+}
+
+
+default_value_scalar <- function(x = NULL) {
+  .Call(savvy_default_value_scalar__impl, x)
+}
+
+
+default_value_vec <- function(x = NULL) {
+  .Call(savvy_default_value_vec__impl, x)
 }
 
 
