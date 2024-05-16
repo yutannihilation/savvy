@@ -1,4 +1,4 @@
-# Handling Salars
+# Handling Scalar
 
 ## Input
 
