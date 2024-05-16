@@ -59,7 +59,7 @@ impl SavvyInputType {
                         if in_option {
                             return Err(syn::Error::new_spanned(
                                 type_path,
-                                "Option<Option<T>> is not allowed",
+                                "`Option` cannot be nested",
                             ));
                         }
 
@@ -432,6 +432,15 @@ impl SavvyFn {
                 syn::FnArg::Receiver(syn::Receiver { .. }) => None,
             })
             .collect::<syn::Result<Vec<SavvyFnArg>>>()?;
+
+        // reject signature like fn (x: Option<i32>, y: i32)
+        let mut args_after_optional = args_new.iter().skip_while(|x| !x.is_optional());
+        if args_after_optional.any(|x| !x.is_optional()) {
+            return Err(syn::Error::new_spanned(
+                sig.inputs.clone(),
+                "optional args can be placed only after mandatory args",
+            ));
+        }
 
         // Check for init function
         let is_init_fn = args_new
