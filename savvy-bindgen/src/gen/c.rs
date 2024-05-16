@@ -1,6 +1,7 @@
 use crate::{MergedResult, SavvyFn, SavvyFnType};
 
 impl SavvyFn {
+    // The return value is (pat, ty)
     pub fn get_c_args(&self) -> Vec<(String, String)> {
         let mut out: Vec<_> = self
             .args
