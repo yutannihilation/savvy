@@ -577,7 +577,7 @@ fn get_savvy_return_type(
                                     }
                                 }
 
-                                // if it's the actual type, us as it is.
+                                // if it's the actual type, use it as it is.
                                 _ => {
                                     return Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
