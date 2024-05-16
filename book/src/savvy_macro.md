@@ -42,6 +42,7 @@ function must satisfy the following conditions:
     * a corresponding Rust type for scalar (e.g., `i32` and `f64`)
     * a user-defined struct marked with `#[savvy]` (`&T`, `&mut T`, or `T`)
     * a user-defined enum marked with `#[savvy]` (`&T`, or `T`)
+    * any of above wrapped with `Option` (this is translated as an optional arg)
 * The function's return value must be either
     * `savvy::Result<()>` for the case of no actual return value
     * `savvy::Result<savvy::Sexp>` for the case of some return value of R object
