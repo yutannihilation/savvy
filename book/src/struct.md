@@ -371,7 +371,7 @@ things, however, if you want to pass an `SEXP` from an R session, **it's your
 responsibility to take care of the protection on it**.
 
 The `SEXP` passed from outside doesn't need an additional protection at the time
-of the function call because it belongs to some enviroment on R session, which
+of the function call because it belongs to some environment on R session, which
 means it's not GC-ed accidentally. However, after the function call, it's
 possible the `SEXP` loses its link to any other R objects. To prevent the
 tragedy (i.e., R session crash), you should create a owned version and copy the
