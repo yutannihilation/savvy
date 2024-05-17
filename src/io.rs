@@ -7,7 +7,7 @@ pub(crate) const LINEBREAK: [c_char; 2] = [b'\n' as _, b'\0' as _];
 pub fn r_print(msg: &str, linebreak: bool) {
     if !msg.is_empty() {
         // ignore error
-        let _ = r_stdout().write_all(msg.as_bytes());
+        let _ = r_stdout().write_all(msg.replace('%', "%%").as_bytes());
     }
 
     unsafe {
@@ -20,7 +20,7 @@ pub fn r_print(msg: &str, linebreak: bool) {
 pub fn r_eprint(msg: &str, linebreak: bool) {
     if !msg.is_empty() {
         // ignore error
-        let _ = r_stderr().write_all(msg.as_bytes());
+        let _ = r_stderr().write_all(msg.replace('%', "%%").as_bytes());
     }
 
     unsafe {
