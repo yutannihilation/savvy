@@ -31,6 +31,10 @@
   #> [1] -1
   ```
 
+### Bug fixes
+
+* `r_print!()` and `r_eprint!()` now can print strings containing `%`.
+
 ## [v0.6.3] (2024-05-05)
 
 ### New features
