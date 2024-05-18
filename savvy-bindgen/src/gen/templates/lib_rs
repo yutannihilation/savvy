@@ -95,10 +95,10 @@ mod test1 {
     }
 }
 
-// Tests marked under `#[cfg(savvy_test)]` are run by `savvy-cli test`, which
+// Tests marked under `#[cfg(feature = "savvy-test")]` are run by `savvy-cli test`, which
 // executes the Rust code on a real R session so that you can use R things for
 // testing.
-#[cfg(savvy_test)]
+#[cfg(feature = "savvy-test")]
 mod test1 {
     // The return type must be `savvy::Result<()>`
     #[test]

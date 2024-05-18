@@ -35,6 +35,12 @@
 
 * `r_print!()` and `r_eprint!()` now can print strings containing `%`.
 
+### Breaking Change
+
+* The notation for `savvy-cli test` is now changed to `#[cfg(feature =
+  "savvy-test")]` from `#[cfg(savvy_test)]`. This is to avoid the upcoming
+  change in Cargo ([ref](https://blog.rust-lang.org/2024/05/06/check-cfg.html)).
+
 ## [v0.6.3] (2024-05-05)
 
 ### New features

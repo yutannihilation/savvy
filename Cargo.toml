@@ -33,6 +33,8 @@ altrep = ["savvy-ffi/altrep"]
 # Support logger
 logger = ["log", "env_logger"]
 
+savvy-test = []
+
 [build-dependencies]
 cc = "1"
 

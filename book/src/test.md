@@ -52,13 +52,13 @@ pub fn foo() -> savvy::Result<()> {
 
 ### Test module
 
-You can write tests under a module marked with `#[cfg(savvy_test)]` instead of
+You can write tests under a module marked with `#[cfg(feature = "savvy-test")]` instead of
 `#[cfg(test)]`. A `#[test]` function needs to have the return value of
 `savvy::Result<()>`, which is the same convention as `#[savvy]`.
 To check if an SEXP contains the expected data, `assert_eq_r_code` is convenient.
 
 ```rust
-#[cfg(savvy_test)]
+#[cfg(feature = "savvy-test")]
 mod test {
     use savvy::{OwnedIntegerSexp, assert_eq_r_code};
 
@@ -73,6 +73,15 @@ mod test {
 }
 ```
 
+Note that `savvy-test` is just a marker for `savvy-cli`, not a real feature. So,
+in theory, you don't really need this. However, in reality, you probably want to
+add it to the `[features]` section of `Cargo.toml` because otherwise Cargo warns.
+
+```toml
+[features]
+savvy-test = []
+```
+
 To test a function that takes user-supplied SEXPs like `IntegerSexp`, you can
 use `.as_read_only()` to convert from the corresponding `Owned-` type. For
 example, if you have a function `your_fn()` that accepts `IntegerSexp`, you can
@@ -85,7 +94,7 @@ pub fn your_fn(x: IntegerSexp) -> savvy::Result<()> {
     // ...snip...
 }
 
-#[cfg(savvy_test)]
+#[cfg(feature = "savvy-test")]
 mod test {
     use savvy::OwnedIntegerSexp;
 
