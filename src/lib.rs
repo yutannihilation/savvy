@@ -70,6 +70,7 @@ pub mod log;
 use std::os::raw::c_char;
 
 pub use error::{Error, Result};
+pub use sexp::environment::EnvironmentSexp;
 pub use sexp::external_pointer::{
     get_external_pointer_addr, take_external_pointer_value, ExternalPointerSexp, IntoExtPtrSexp,
 };

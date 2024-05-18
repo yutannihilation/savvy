@@ -154,6 +154,9 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_isEnvironment")
         .allowlist_function("Rf_eval")
         .allowlist_var("R_GlobalEnv")
+        .allowlist_function("Rf_findVarInFrame3")
+        .allowlist_function("Rf_defineVar")
+        .allowlist_var("R_UnboundValue")
         // parse
         .allowlist_item("ParseStatus")
         .allowlist_function("R_ParseVector")
