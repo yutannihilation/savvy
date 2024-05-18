@@ -128,7 +128,7 @@ pub fn assert_eq_r_code<T1: Into<Sexp>, T2: AsRef<str>>(actual: T1, expected: T2
     assert!(is_r_identical(actual, parsed));
 }
 
-#[cfg(savvy_test)]
+#[cfg(feature = "savvy-test")]
 mod test {
     use crate::{IntegerSexp, RealSexp};
 

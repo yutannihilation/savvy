@@ -409,7 +409,7 @@ fn set_name_external(x: &mut Person, name: &str) -> savvy::Result<()> {
     x.set_name(name)
 }
 
-#[cfg(savvy_test)]
+#[cfg(feature = "savvy-test")]
 mod tests {
     #[test]
     fn test_to_upper() -> savvy::Result<()> {

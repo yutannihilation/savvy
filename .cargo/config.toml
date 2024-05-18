@@ -7,3 +7,6 @@ r-test = "run --manifest-path ./savvy-cli/Cargo.toml -- test"
 # makes the linker ignore these problems.
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "link-arg=/FORCE:UNRESOLVED"]
+
+[toolchain]
+channel = "nightly"
