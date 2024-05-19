@@ -10,11 +10,25 @@ use super::utils::str_to_symsxp;
 pub struct EnvironmentSexp(pub SEXP);
 
 impl EnvironmentSexp {
+    /// Returns the raw SEXP.
     #[inline]
     pub fn inner(&self) -> savvy_ffi::SEXP {
         self.0
     }
 
+    /// Returns the SEXP bound to a variable of the specified name in the
+    /// specified environment.
+    ///
+    /// # Protection
+    ///
+    /// The result Sexp is unprotected. In most of the cases, you don't need to
+    /// worry about this because existing in an environment means it won't be
+    /// GC-ed as long as the environment exists (it's possible the correspondig
+    /// variable gets explicitly removed, but it should be rare). However, if
+    /// the environment is a temporary one (e.g. an exectuion environment of a
+    /// function call), it's your responsibility to protect the object. In other
+    /// words, you should never use this if you don't understand how R's
+    /// protection mechanism works.
     pub fn get<T: AsRef<str>>(&self, name: T) -> crate::error::Result<Option<crate::Sexp>> {
         let sym = str_to_symsxp(name)?.ok_or("name must not be empty")?;
 
@@ -31,6 +45,8 @@ impl EnvironmentSexp {
         }
     }
 
+    /// Returns `true` the specified environment contains the specified
+    /// variable.
     pub fn contains<T: AsRef<str>>(&self, name: T) -> crate::error::Result<bool> {
         let sym = str_to_symsxp(name)?.ok_or("name must not be empty")?;
 
@@ -42,6 +58,7 @@ impl EnvironmentSexp {
         Ok(res)
     }
 
+    /// Bind the SEXP to the specified environment as the specified name.
     pub fn set<T: AsRef<str>>(&self, name: T, value: Sexp) -> crate::error::Result<()> {
         let name_cstr = match CString::new(name.as_ref()) {
             Ok(cstr) => cstr,

@@ -14,4 +14,7 @@ test_that("environment", {
 
   set_var_in_env(e1, "c", 100L)
   expect_equal(e1$c, 100L)
+  # overwrite
+  set_var_in_env(e1, "c", 300L)
+  expect_equal(e1$c, 300L)
 })

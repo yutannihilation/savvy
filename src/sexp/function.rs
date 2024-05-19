@@ -19,10 +19,13 @@ pub struct FunctionArgs {
 }
 
 impl FunctionArgs {
+    /// Returns the raw SEXP.
+    #[inline]
     pub fn inner(&self) -> SEXP {
         self.head
     }
 
+    /// Returns the length of the SEXP.
     pub fn len(&self) -> usize {
         self.len
     }
@@ -100,12 +103,20 @@ impl Drop for FunctionArgs {
 }
 
 impl FunctionSexp {
+    /// Returns the raw SEXP.
     #[inline]
     pub fn inner(&self) -> savvy_ffi::SEXP {
         self.0
     }
 
-    /// Execute an R function
+    /// Execute an R function and get the result.
+    ///
+    /// # Protection
+    ///
+    /// The result is protected as long as it's wrapped in `EvalResult`. If you
+    /// extract the raw result from it, it's your responsibility to protect it
+    /// properly. In other words, you should never do it if you don't understand
+    /// how R's protection mechanism works.
     pub fn call(&self, args: FunctionArgs) -> crate::error::Result<EvalResult> {
         unsafe {
             let call = if args.is_empty() {
