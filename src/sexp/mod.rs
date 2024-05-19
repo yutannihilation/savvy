@@ -1,18 +1,21 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rf_getAttrib, Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isNumeric, Rf_isReal,
-    Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
+    R_NilValue, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical,
+    Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP,
+    SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{
-    ExternalPointerSexp, IntegerSexp, ListSexp, LogicalSexp, NullSexp, OwnedIntegerSexp,
-    OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp, StringSexp,
+    EnvironmentSexp, ExternalPointerSexp, FunctionSexp, IntegerSexp, ListSexp, LogicalSexp,
+    NullSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp,
+    StringSexp,
 };
 
 #[cfg(feature = "complex")]
 use crate::{ComplexSexp, OwnedComplexSexp};
 
+pub mod environment;
 pub mod external_pointer;
 pub mod function;
 pub mod integer;
@@ -91,6 +94,10 @@ impl Sexp {
         unsafe { Rf_isFunction(self.0) == 1 }
     }
 
+    pub fn is_environment(&self) -> bool {
+        unsafe { Rf_isEnvironment(self.0) == 1 }
+    }
+
     fn is_sexp_type(&self, sexptype: SEXPTYPE) -> bool {
         match sexptype {
             savvy_ffi::INTSXP => self.is_integer(),
@@ -103,6 +110,7 @@ impl Sexp {
             savvy_ffi::EXTPTRSXP => self.is_external_pointer(),
             // cf. https://github.com/wch/r-source/blob/95ac44a87065d5b42579b621d278adc44641dcf0/src/include/Rinlinedfuns.h#L810-L815
             savvy_ffi::CLOSXP | savvy_ffi::BUILTINSXP | savvy_ffi::SPECIALSXP => self.is_function(),
+            savvy_ffi::ENVSXP => self.is_environment(),
             savvy_ffi::NILSXP => self.is_null(),
             _ => false,
         }
@@ -182,6 +190,11 @@ impl Sexp {
     pub fn assert_function(&self) -> crate::error::Result<()> {
         impl_sexp_type_assert!(self, CLOSXP)
     }
+
+    /// Returns error when the SEXP is not a function.
+    pub fn assert_environment(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, ENVSXP)
+    }
 }
 
 #[non_exhaustive]
@@ -197,6 +210,7 @@ pub enum TypedSexp {
     Null(NullSexp),
     ExternalPointer(ExternalPointerSexp),
     Function(FunctionSexp),
+    Environment(EnvironmentSexp),
     Other(SEXP),
 }
 
@@ -219,6 +233,7 @@ into_typed_sxp!(StringSexp, String);
 into_typed_sxp!(ListSexp, List);
 into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
 into_typed_sxp!(FunctionSexp, Function);
+into_typed_sxp!(EnvironmentSexp, Environment);
 into_typed_sxp!(NullSexp, Null);
 
 macro_rules! into_typed_sxp_owned {
@@ -251,6 +266,7 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::List(sxp) => sxp.inner(),
             TypedSexp::ExternalPointer(sxp) => sxp.inner(),
             TypedSexp::Function(sxp) => sxp.inner(),
+            TypedSexp::Environment(sxp) => sxp.inner(),
             TypedSexp::Other(sxp) => sxp,
         }
     }
@@ -273,6 +289,7 @@ impl Sexp {
             savvy_ffi::CLOSXP | savvy_ffi::BUILTINSXP | savvy_ffi::SPECIALSXP => {
                 TypedSexp::Function(FunctionSexp(self.0))
             }
+            savvy_ffi::ENVSXP => TypedSexp::Environment(EnvironmentSexp(self.0)),
             savvy_ffi::NILSXP => TypedSexp::Null(NullSexp),
             _ => TypedSexp::Other(self.0),
         }
@@ -555,5 +572,3 @@ macro_rules! impl_common_sexp_ops_owned {
 
 pub(crate) use impl_common_sexp_ops;
 pub(crate) use impl_common_sexp_ops_owned;
-
-use self::function::FunctionSexp;

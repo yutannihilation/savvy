@@ -441,6 +441,21 @@ foo_a <- function() {
 }
 
 
+get_var_in_env <- function(name, env = NULL) {
+  .Call(savvy_get_var_in_env__impl, name, env)
+}
+
+
+var_exists_in_env <- function(name, env = NULL) {
+  .Call(savvy_var_exists_in_env__impl, name, env)
+}
+
+
+set_var_in_env <- function(name, value, env = NULL) {
+  invisible(.Call(savvy_set_var_in_env__impl, name, value, env))
+}
+
+
 get_foo_value <- function() {
   .Call(savvy_get_foo_value__impl)
 }

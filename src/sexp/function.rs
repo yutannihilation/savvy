@@ -1,15 +1,11 @@
-use std::ffi::CString;
-
-use savvy_ffi::{
-    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP,
-};
+use savvy_ffi::{R_NilValue, Rf_cons, Rf_eval, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP};
 
 use crate::{
     protect::{self, local_protect},
     unwind_protect, EvalResult, ListSexp,
 };
 
-use super::Sexp;
+use super::{utils::str_to_symsxp, Sexp};
 
 /// An external SEXP of a function.
 pub struct FunctionSexp(pub SEXP);
@@ -23,10 +19,13 @@ pub struct FunctionArgs {
 }
 
 impl FunctionArgs {
+    /// Returns the raw SEXP.
+    #[inline]
     pub fn inner(&self) -> SEXP {
         self.head
     }
 
+    /// Returns the length of the SEXP.
     pub fn len(&self) -> usize {
         self.len
     }
@@ -76,14 +75,9 @@ impl FunctionArgs {
         }
 
         // Set the arg name
-        let arg_name = arg_name.as_ref();
-        if !arg_name.is_empty() {
-            let arg_name_cstr = match CString::new(arg_name) {
-                Ok(cstr) => cstr,
-                Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-            };
+        if let Some(sym) = str_to_symsxp(arg_name)? {
             unsafe {
-                SET_TAG(self.tail, Rf_install(arg_name_cstr.as_ptr()));
+                SET_TAG(self.tail, sym);
             }
         }
 
@@ -109,12 +103,20 @@ impl Drop for FunctionArgs {
 }
 
 impl FunctionSexp {
+    /// Returns the raw SEXP.
     #[inline]
     pub fn inner(&self) -> savvy_ffi::SEXP {
         self.0
     }
 
-    /// Execute an R function
+    /// Execute an R function and get the result.
+    ///
+    /// # Protection
+    ///
+    /// The result is protected as long as it's wrapped in `EvalResult`. If you
+    /// extract the raw result from it, it's your responsibility to protect it
+    /// properly. In other words, you should never do it if you don't understand
+    /// how R's protection mechanism works.
     pub fn call(&self, args: FunctionArgs) -> crate::error::Result<EvalResult> {
         unsafe {
             let call = if args.is_empty() {
