@@ -6,6 +6,7 @@ mod complex;
 mod consuming_type;
 mod convert_from_rust_types;
 mod enum_support;
+mod environment;
 mod error_handling;
 mod function;
 mod init_vectors;
