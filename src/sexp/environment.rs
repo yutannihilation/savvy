@@ -36,7 +36,7 @@ impl EnvironmentSexp {
 
         let res = unsafe {
             crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame3(self.0, sym, Rboolean_FALSE))?
-                == R_UnboundValue
+                != R_UnboundValue
         };
 
         Ok(res)
