@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use savvy_ffi::{R_NilValue, R_UnboundValue, Rboolean_FALSE, Rboolean_TRUE, SEXP};
+use savvy_ffi::{R_GlobalEnv, R_NilValue, R_UnboundValue, Rboolean_FALSE, Rboolean_TRUE, SEXP};
 
 use crate::Sexp;
 
@@ -73,6 +73,11 @@ impl EnvironmentSexp {
         };
 
         Ok(())
+    }
+
+    /// Return the global env.
+    pub fn global_env() -> crate::error::Error<Self> {
+        Self(unsafe { R_GlobalEnv })
     }
 }
 
