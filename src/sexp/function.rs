@@ -1,15 +1,11 @@
-use std::ffi::CString;
-
-use savvy_ffi::{
-    R_NilValue, Rf_cons, Rf_eval, Rf_install, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP,
-};
+use savvy_ffi::{R_NilValue, Rf_cons, Rf_eval, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP};
 
 use crate::{
     protect::{self, local_protect},
     unwind_protect, EvalResult, ListSexp,
 };
 
-use super::Sexp;
+use super::{environment::str_to_symsexp, Sexp};
 
 /// An external SEXP of a function.
 pub struct FunctionSexp(pub SEXP);
@@ -76,14 +72,9 @@ impl FunctionArgs {
         }
 
         // Set the arg name
-        let arg_name = arg_name.as_ref();
-        if !arg_name.is_empty() {
-            let arg_name_cstr = match CString::new(arg_name) {
-                Ok(cstr) => cstr,
-                Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-            };
+        if let Some(sym) = str_to_symsexp(arg_name)? {
             unsafe {
-                SET_TAG(self.tail, Rf_install(arg_name_cstr.as_ptr()));
+                SET_TAG(self.tail, sym);
             }
         }
 

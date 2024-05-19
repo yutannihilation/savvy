@@ -14,21 +14,12 @@ impl EnvironmentSexp {
     }
 
     pub fn get<T: AsRef<str>>(&self, name: T) -> crate::error::Result<Option<crate::Sexp>> {
-        let name_cstr = match CString::new(name.as_ref()) {
-            Ok(cstr) => cstr,
-            Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-        };
+        let sym = str_to_symsexp(name)?.ok_or("name must not be empty")?;
 
         // Note: since this SEXP already belongs to an environment, this doesn't
         // need protection.
         let sexp = unsafe {
-            crate::unwind_protect(|| {
-                savvy_ffi::Rf_findVarInFrame3(
-                    self.0,
-                    savvy_ffi::Rf_install(name_cstr.as_ptr()),
-                    Rboolean_TRUE,
-                )
-            })?
+            crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame3(self.0, sym, Rboolean_TRUE))?
         };
 
         if sexp == unsafe { R_UnboundValue } {
@@ -39,19 +30,11 @@ impl EnvironmentSexp {
     }
 
     pub fn contains<T: AsRef<str>>(&self, name: T) -> crate::error::Result<bool> {
-        let name_cstr = match CString::new(name.as_ref()) {
-            Ok(cstr) => cstr,
-            Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-        };
+        let sym = str_to_symsexp(name)?.ok_or("name must not be empty")?;
 
         let res = unsafe {
-            crate::unwind_protect(|| {
-                savvy_ffi::Rf_findVarInFrame3(
-                    self.0,
-                    savvy_ffi::Rf_install(name_cstr.as_ptr()),
-                    Rboolean_FALSE,
-                )
-            })? == R_UnboundValue
+            crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame3(self.0, sym, Rboolean_FALSE))?
+                == R_UnboundValue
         };
 
         Ok(res)
@@ -72,6 +55,22 @@ impl EnvironmentSexp {
 
         Ok(())
     }
+}
+
+// Note: the result is not protected (although symbol is probably not GC-ed?)
+pub(crate) fn str_to_symsexp<T: AsRef<str>>(name: T) -> crate::error::Result<Option<SEXP>> {
+    let name = name.as_ref();
+    if name.is_empty() {
+        return Ok(None);
+    }
+
+    let name_cstr = match CString::new(name) {
+        Ok(cstr) => cstr,
+        Err(e) => return Err(crate::error::Error::new(&e.to_string())),
+    };
+    let sym = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_install(name_cstr.as_ptr())) }?;
+
+    Ok(Some(sym))
 }
 
 // conversions from/to EnvironmentSexp ***************
