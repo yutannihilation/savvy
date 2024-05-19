@@ -76,7 +76,7 @@ impl EnvironmentSexp {
     }
 
     /// Return the global env.
-    pub fn global_env() -> crate::error::Error<Self> {
+    pub fn global_env() -> Self {
         Self(unsafe { R_GlobalEnv })
     }
 }
