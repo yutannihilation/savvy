@@ -441,18 +441,18 @@ foo_a <- function() {
 }
 
 
-get_var_in_env <- function(env, name) {
-  .Call(savvy_get_var_in_env__impl, env, name)
+get_var_in_env <- function(name, env = NULL) {
+  .Call(savvy_get_var_in_env__impl, name, env)
 }
 
 
-var_exists_in_env <- function(env, name) {
-  .Call(savvy_var_exists_in_env__impl, env, name)
+var_exists_in_env <- function(name, env = NULL) {
+  .Call(savvy_var_exists_in_env__impl, name, env)
 }
 
 
-set_var_in_env <- function(env, name, value) {
-  invisible(.Call(savvy_set_var_in_env__impl, env, name, value))
+set_var_in_env <- function(name, value, env = NULL) {
+  invisible(.Call(savvy_set_var_in_env__impl, name, value, env))
 }
 
 

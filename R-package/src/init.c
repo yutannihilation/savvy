@@ -414,18 +414,18 @@ SEXP savvy_foo_a__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_get_var_in_env__impl(SEXP env, SEXP name) {
-    SEXP res = savvy_get_var_in_env__ffi(env, name);
+SEXP savvy_get_var_in_env__impl(SEXP name, SEXP env) {
+    SEXP res = savvy_get_var_in_env__ffi(name, env);
     return handle_result(res);
 }
 
-SEXP savvy_var_exists_in_env__impl(SEXP env, SEXP name) {
-    SEXP res = savvy_var_exists_in_env__ffi(env, name);
+SEXP savvy_var_exists_in_env__impl(SEXP name, SEXP env) {
+    SEXP res = savvy_var_exists_in_env__ffi(name, env);
     return handle_result(res);
 }
 
-SEXP savvy_set_var_in_env__impl(SEXP env, SEXP name, SEXP value) {
-    SEXP res = savvy_set_var_in_env__ffi(env, name, value);
+SEXP savvy_set_var_in_env__impl(SEXP name, SEXP value, SEXP env) {
+    SEXP res = savvy_set_var_in_env__ffi(name, value, env);
     return handle_result(res);
 }
 
