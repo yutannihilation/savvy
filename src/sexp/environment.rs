@@ -19,10 +19,13 @@ impl EnvironmentSexp {
     /// Returns the SEXP bound to a variable of the specified name in the
     /// specified environment.
     ///
+    /// The absense of an object with the specified name is represented as
+    /// `None`. `Some(NilSexp)` means there's a variable whose value is `NULL`.
+    ///
     /// # Protection
     ///
-    /// The result Sexp is unprotected. In most of the cases, you don't need to
-    /// worry about this because existing in an environment means it won't be
+    /// The result `Sexp` is unprotected. In most of the cases, you don't need
+    /// to worry about this because existing in an environment means it won't be
     /// GC-ed as long as the environment exists (it's possible the correspondig
     /// variable gets explicitly removed, but it should be rare). However, if
     /// the environment is a temporary one (e.g. an exectuion environment of a
