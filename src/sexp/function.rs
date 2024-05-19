@@ -5,7 +5,7 @@ use crate::{
     unwind_protect, EvalResult, ListSexp,
 };
 
-use super::{environment::str_to_symsexp, Sexp};
+use super::{utils::str_to_symsxp, Sexp};
 
 /// An external SEXP of a function.
 pub struct FunctionSexp(pub SEXP);
@@ -72,7 +72,7 @@ impl FunctionArgs {
         }
 
         // Set the arg name
-        if let Some(sym) = str_to_symsexp(arg_name)? {
+        if let Some(sym) = str_to_symsxp(arg_name)? {
             unsafe {
                 SET_TAG(self.tail, sym);
             }
