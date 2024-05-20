@@ -96,6 +96,7 @@ SEXP savvy_times_two_numeric_i32_scalar__ffi(SEXP x);
 SEXP savvy_print_numeric__ffi(SEXP x);
 SEXP savvy_default_value_scalar__ffi(SEXP x);
 SEXP savvy_default_value_vec__ffi(SEXP x);
+SEXP savvy_default_value_struct__ffi(SEXP x);
 SEXP savvy_filter_integer_odd__ffi(SEXP x);
 SEXP savvy_filter_real_negative__ffi(SEXP x);
 SEXP savvy_filter_complex_without_im__ffi(SEXP x);

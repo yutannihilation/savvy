@@ -10,4 +10,7 @@ test_that("optional arg works", {
   x <- FooWithDefault$new(-100L)
   expect_equal(x$default_value_method(10L), 10L)
   expect_equal(x$default_value_method(), -100L)
+
+  expect_equal(default_value_struct(x), -100L)
+  expect_equal(default_value_struct(), -1L)
 })

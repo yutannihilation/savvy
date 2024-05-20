@@ -11,6 +11,10 @@ NULL
 
 # Check class and extract the external pointer embedded in the environment
 .savvy_extract_ptr <- function(e, class) {
+  if(is.null(e)) {
+    return(NULL)
+  }
+
   if(inherits(e, class)) {
     e$.ptr
   } else {
@@ -543,6 +547,12 @@ default_value_scalar <- function(x = NULL) {
 
 default_value_vec <- function(x = NULL) {
   .Call(savvy_default_value_vec__impl, x)
+}
+
+
+default_value_struct <- function(x = NULL) {
+  x <- .savvy_extract_ptr(x, "FooWithDefault")
+  .Call(savvy_default_value_struct__impl, x)
 }
 
 
