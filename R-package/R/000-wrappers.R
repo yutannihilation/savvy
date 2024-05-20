@@ -11,6 +11,10 @@ NULL
 
 # Check class and extract the external pointer embedded in the environment
 .savvy_extract_ptr <- function(e, class) {
+  if(is.null(e)) {
+    return(NULL)
+  }
+
   if(inherits(e, class)) {
     e$.ptr
   } else {
