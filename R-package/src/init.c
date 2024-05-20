@@ -524,6 +524,11 @@ SEXP savvy_default_value_vec__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_default_value_struct__impl(SEXP x) {
+    SEXP res = savvy_default_value_struct__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_filter_integer_odd__impl(SEXP x) {
     SEXP res = savvy_filter_integer_odd__ffi(x);
     return handle_result(res);
@@ -762,6 +767,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_print_numeric__impl", (DL_FUNC) &savvy_print_numeric__impl, 1},
     {"savvy_default_value_scalar__impl", (DL_FUNC) &savvy_default_value_scalar__impl, 1},
     {"savvy_default_value_vec__impl", (DL_FUNC) &savvy_default_value_vec__impl, 1},
+    {"savvy_default_value_struct__impl", (DL_FUNC) &savvy_default_value_struct__impl, 1},
     {"savvy_filter_integer_odd__impl", (DL_FUNC) &savvy_filter_integer_odd__impl, 1},
     {"savvy_filter_real_negative__impl", (DL_FUNC) &savvy_filter_real_negative__impl, 1},
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},

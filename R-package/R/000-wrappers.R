@@ -546,6 +546,12 @@ default_value_vec <- function(x = NULL) {
 }
 
 
+default_value_struct <- function(x = NULL) {
+  x <- .savvy_extract_ptr(x, "FooWithDefault")
+  .Call(savvy_default_value_struct__impl, x)
+}
+
+
 filter_integer_odd <- function(x) {
   .Call(savvy_filter_integer_odd__impl, x)
 }

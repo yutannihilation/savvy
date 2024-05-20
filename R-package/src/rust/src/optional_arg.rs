@@ -33,3 +33,12 @@ impl FooWithDefault {
         x.unwrap_or(-1).try_into()
     }
 }
+
+#[savvy]
+fn default_value_struct(x: Option<&FooWithDefault>) -> savvy::Result<Sexp> {
+    if let Some(x) = x {
+        x.default_value.try_into()
+    } else {
+        (-1).try_into()
+    }
+}
