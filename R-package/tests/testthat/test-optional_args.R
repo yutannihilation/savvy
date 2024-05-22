@@ -13,4 +13,7 @@ test_that("optional arg works", {
 
   expect_equal(default_value_struct(x), -100L)
   expect_equal(default_value_struct(), -1L)
+
+  expect_equal(default_value_enum(FooEnum$A), 1L)
+  expect_equal(default_value_enum(), -1L)
 })

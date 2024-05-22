@@ -556,6 +556,12 @@ default_value_struct <- function(x = NULL) {
 }
 
 
+default_value_enum <- function(x = NULL) {
+  x <- .savvy_extract_ptr(x, "FooEnum")
+  .Call(savvy_default_value_enum__impl, x)
+}
+
+
 filter_integer_odd <- function(x) {
   .Call(savvy_filter_integer_odd__impl, x)
 }
