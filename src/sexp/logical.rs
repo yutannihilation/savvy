@@ -1,4 +1,4 @@
-use savvy_ffi::{R_NaInt, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
+use savvy_ffi::{R_NaInt, Rboolean_TRUE, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
 
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
 use crate::protect::{self, local_protect};
@@ -429,7 +429,7 @@ impl<'a> Iterator for LogicalSexpIter<'a> {
     type Item = bool;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter_raw.next().map(|x| *x == 1)
+        self.iter_raw.next().map(|x| *x == Rboolean_TRUE)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {

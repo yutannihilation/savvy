@@ -1,9 +1,9 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger, Rf_isLogical,
-    Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP, INTEGER, SEXP,
-    SEXPTYPE, TYPEOF, VECSXP,
+    R_NilValue, Rboolean_TRUE, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger,
+    Rf_isLogical, Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP,
+    INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{
@@ -45,28 +45,28 @@ impl Sexp {
 
     /// Returns `true` if the SEXP is an integer vector.
     pub fn is_integer(&self) -> bool {
-        unsafe { Rf_isInteger(self.0) == 1 }
+        unsafe { Rf_isInteger(self.0) == Rboolean_TRUE }
     }
 
     /// Returns `true` if the SEXP is a real vector.
     pub fn is_real(&self) -> bool {
-        unsafe { Rf_isReal(self.0) == 1 }
+        unsafe { Rf_isReal(self.0) == Rboolean_TRUE }
     }
 
     /// Returns `true` if the SEXP is a real or integer vector.
     pub fn is_numeric(&self) -> bool {
-        unsafe { Rf_isNumeric(self.0) == 1 }
+        unsafe { Rf_isNumeric(self.0) == Rboolean_TRUE }
     }
 
     #[cfg(feature = "complex")]
     /// Returns `true` if the SEXP is a complex.
     pub fn is_complex(&self) -> bool {
-        unsafe { savvy_ffi::Rf_isComplex(self.0) == 1 }
+        unsafe { savvy_ffi::Rf_isComplex(self.0) == Rboolean_TRUE }
     }
 
     /// Returns `true` if the SEXP is a logical vector.
     pub fn is_logical(&self) -> bool {
-        unsafe { Rf_isLogical(self.0) == 1 }
+        unsafe { Rf_isLogical(self.0) == Rboolean_TRUE }
     }
 
     /// Returns `true` if the SEXP is a character vector.
@@ -75,7 +75,7 @@ impl Sexp {
         //
         // macro version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/include/Defn.h#L759
         // function version: https://github.com/wch/r-source/blob/9065779ee510b7bd8ca93d08f4dd4b6e2bd31923/src/main/memory.c#L4460
-        unsafe { Rf_isString(self.0) == 1 }
+        unsafe { Rf_isString(self.0) == Rboolean_TRUE }
     }
 
     /// Returns `true` if the SEXP is a list.
@@ -91,11 +91,11 @@ impl Sexp {
 
     /// Returns `true` if the SEXP is a function.
     pub fn is_function(&self) -> bool {
-        unsafe { Rf_isFunction(self.0) == 1 }
+        unsafe { Rf_isFunction(self.0) == Rboolean_TRUE }
     }
 
     pub fn is_environment(&self) -> bool {
-        unsafe { Rf_isEnvironment(self.0) == 1 }
+        unsafe { Rf_isEnvironment(self.0) == Rboolean_TRUE }
     }
 
     fn is_sexp_type(&self, sexptype: SEXPTYPE) -> bool {

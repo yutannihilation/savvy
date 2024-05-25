@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use savvy_ffi::{R_NilValue, R_compute_identical, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
+use savvy_ffi::{R_NilValue, R_compute_identical, Rboolean_TRUE, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
 
 use crate::{
     protect::{self, local_protect},
@@ -109,7 +109,7 @@ pub fn is_r_identical<T1: Into<Sexp>, T2: Into<Sexp>>(x: T1, y: T2) -> bool {
     let x_sexp: Sexp = x.into();
     let y_sexp: Sexp = y.into();
     // They say 16 is the same as identical()'s default
-    unsafe { R_compute_identical(x_sexp.0, y_sexp.0, 16) == 1 }
+    unsafe { R_compute_identical(x_sexp.0, y_sexp.0, 16) == Rboolean_TRUE }
 }
 
 /// Assert that the SEXPs have the same data inside. The second argument is a
