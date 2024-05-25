@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.4] (2024-05-25)
+
 ### New features
 
 * New function `r_warn()` safely show a warning. Note that, a warning can raise
@@ -664,7 +666,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.4...HEAD
+[v0.6.4]: https://github.com/yutannihilation/savvy/compare/v0.6.3...v0.6.4
 [v0.6.3]: https://github.com/yutannihilation/savvy/compare/v0.6.2...v0.6.3
 [v0.6.2]: https://github.com/yutannihilation/savvy/compare/v0.6.1...v0.6.2
 [v0.6.1]: https://github.com/yutannihilation/savvy/compare/v0.6.0...v0.6.1
