@@ -210,8 +210,8 @@ fn generate_r_impl_for_impl(
         r#"{wrap_fn_name} <- function(ptr) {{
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  {methods}
-  
+{methods}
+
   class(e) <- "{class_r}"
   e
 }}
