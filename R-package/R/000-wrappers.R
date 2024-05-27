@@ -600,7 +600,7 @@ fun_mod1_1_foo <- function() {
 
 FooEnum_print <- function(self) {
   function() {
-  invisible(.Call(savvy_FooEnum_print__impl, self))
+    invisible(.Call(savvy_FooEnum_print__impl, self))
   }
 }
 
@@ -640,7 +640,7 @@ print.FooEnum <- function(x, ...) {
 
 FooWithDefault_default_value_method <- function(self) {
   function(x = NULL) {
-  .Call(savvy_FooWithDefault_default_value_method__impl, self, x)
+    .Call(savvy_FooWithDefault_default_value_method__impl, self, x)
   }
 }
 
@@ -664,7 +664,7 @@ FooWithDefault$new <- function(default_value) {
 }
 
 FooWithDefault$default_value_associated_fn <- function(x = NULL) {
-.Call(savvy_FooWithDefault_default_value_associated_fn__impl, x)
+  .Call(savvy_FooWithDefault_default_value_associated_fn__impl, x)
 }
 
 
@@ -678,13 +678,13 @@ Person_another_person <- function(self) {
 
 Person_set_name <- function(self) {
   function(name) {
-  invisible(.Call(savvy_Person_set_name__impl, self, name))
+    invisible(.Call(savvy_Person_set_name__impl, self, name))
   }
 }
 
 Person_name <- function(self) {
   function() {
-  .Call(savvy_Person_name__impl, self)
+    .Call(savvy_Person_name__impl, self)
   }
 }
 
@@ -724,7 +724,7 @@ Person$new_with_name <- function(name) {
 }
 
 Person$associated_function <- function() {
-.Call(savvy_Person_associated_function__impl)
+  .Call(savvy_Person_associated_function__impl)
 }
 
 
@@ -732,7 +732,7 @@ Person$associated_function <- function() {
 
 Person2_name <- function(self) {
   function() {
-  .Call(savvy_Person2_name__impl, self)
+    .Call(savvy_Person2_name__impl, self)
   }
 }
 
@@ -758,19 +758,19 @@ Person2 <- new.env(parent = emptyenv())
 Value_pair <- function(self) {
   function(b) {
     b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(savvy_Value_pair__impl, self, b))
+    .savvy_wrap_ValuePair(.Call(savvy_Value_pair__impl, self, b))
   }
 }
 
 Value_get <- function(self) {
   function() {
-  .Call(savvy_Value_get__impl, self)
+    .Call(savvy_Value_get__impl, self)
   }
 }
 
 Value_get2 <- function(self) {
   function() {
-  .Call(savvy_Value_get2__impl, self)
+    .Call(savvy_Value_get2__impl, self)
   }
 }
 
@@ -800,7 +800,7 @@ Value$new <- function(x) {
 
 ValuePair_print <- function(self) {
   function() {
-  invisible(.Call(savvy_ValuePair_print__impl, self))
+    invisible(.Call(savvy_ValuePair_print__impl, self))
   }
 }
 
