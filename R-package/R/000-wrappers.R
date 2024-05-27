@@ -607,8 +607,8 @@ FooEnum_print <- function(self) {
 .savvy_wrap_FooEnum <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$print <- FooEnum_print(ptr)
-  
+  e$print <- FooEnum_print(ptr)
+
   class(e) <- "FooEnum"
   e
 }
@@ -647,8 +647,8 @@ FooWithDefault_default_value_method <- function(self) {
 .savvy_wrap_FooWithDefault <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$default_value_method <- FooWithDefault_default_value_method(ptr)
-  
+  e$default_value_method <- FooWithDefault_default_value_method(ptr)
+
   class(e) <- "FooWithDefault"
   e
 }
@@ -691,10 +691,10 @@ Person_name <- function(self) {
 .savvy_wrap_Person <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$another_person <- Person_another_person(ptr)
+  e$another_person <- Person_another_person(ptr)
   e$set_name <- Person_set_name(ptr)
   e$name <- Person_name(ptr)
-  
+
   class(e) <- "Person"
   e
 }
@@ -739,8 +739,8 @@ Person2_name <- function(self) {
 .savvy_wrap_Person2 <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$name <- Person2_name(ptr)
-  
+  e$name <- Person2_name(ptr)
+
   class(e) <- "Person2"
   e
 }
@@ -777,10 +777,10 @@ Value_get2 <- function(self) {
 .savvy_wrap_Value <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$pair <- Value_pair(ptr)
+  e$pair <- Value_pair(ptr)
   e$get <- Value_get(ptr)
   e$get2 <- Value_get2(ptr)
-  
+
   class(e) <- "Value"
   e
 }
@@ -807,8 +807,8 @@ ValuePair_print <- function(self) {
 .savvy_wrap_ValuePair <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-    e$print <- ValuePair_print(ptr)
-  
+  e$print <- ValuePair_print(ptr)
+
   class(e) <- "ValuePair"
   e
 }
