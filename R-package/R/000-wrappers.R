@@ -24,7 +24,7 @@ NULL
 }
 
 
-is_built_with_debug <- function() {
+`is_built_with_debug` <- function() {
   .Call(savvy_is_built_with_debug__impl)
 }
 
@@ -33,8 +33,8 @@ is_built_with_debug <- function() {
 #' @param x A character vector.
 #' @returns A character vector with upper case version of the input.
 #' @export
-to_upper <- function(x) {
-  .Call(savvy_to_upper__impl, x)
+`to_upper` <- function(`x`) {
+  .Call(savvy_to_upper__impl, `x`)
 }
 
 #' Add suffix
@@ -43,8 +43,8 @@ to_upper <- function(x) {
 #' @param y A suffix.
 #' @returns A character vector with upper case version of the input.
 #' @export
-add_suffix <- function(x, y) {
-  .Call(savvy_add_suffix__impl, x, y)
+`add_suffix` <- function(`x`, `y`) {
+  .Call(savvy_add_suffix__impl, `x`, `y`)
 }
 
 #' Multiply Input By Two
@@ -52,8 +52,8 @@ add_suffix <- function(x, y) {
 #' @param x An integer vector.
 #' @returns An integer vector with values multiplied by 2.
 #' @export
-times_two_int <- function(x) {
-  .Call(savvy_times_two_int__impl, x)
+`times_two_int` <- function(`x`) {
+  .Call(savvy_times_two_int__impl, `x`)
 }
 
 #' Multiply Input By Another Input
@@ -62,8 +62,8 @@ times_two_int <- function(x) {
 #' @param y An integer to multiply.
 #' @returns An integer vector with values multiplied by `y`.
 #' @export
-times_any_int <- function(x, y) {
-  .Call(savvy_times_any_int__impl, x, y)
+`times_any_int` <- function(`x`, `y`) {
+  .Call(savvy_times_any_int__impl, `x`, `y`)
 }
 
 #' Multiply Input By Two
@@ -71,8 +71,8 @@ times_any_int <- function(x, y) {
 #' @param x A numeric vector.
 #' @returns A numeric vector with values multiplied by 2.
 #' @export
-times_two_real <- function(x) {
-  .Call(savvy_times_two_real__impl, x)
+`times_two_real` <- function(`x`) {
+  .Call(savvy_times_two_real__impl, `x`)
 }
 
 #' Multiply Input By Another Input
@@ -81,8 +81,8 @@ times_two_real <- function(x) {
 #' @param y A real to multiply.
 #' @returns A real vector with values multiplied by `y`.
 #' @export
-times_any_real <- function(x, y) {
-  .Call(savvy_times_any_real__impl, x, y)
+`times_any_real` <- function(`x`, `y`) {
+  .Call(savvy_times_any_real__impl, `x`, `y`)
 }
 
 #' Flip Input
@@ -90,13 +90,13 @@ times_any_real <- function(x, y) {
 #' @param x A logical vector.
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
-flip_logical <- function(x) {
-  .Call(savvy_flip_logical__impl, x)
+`flip_logical` <- function(`x`) {
+  .Call(savvy_flip_logical__impl, `x`)
 }
 
 
-flip_logical_expert_only <- function(x) {
-  .Call(savvy_flip_logical_expert_only__impl, x)
+`flip_logical_expert_only` <- function(`x`) {
+  .Call(savvy_flip_logical_expert_only__impl, `x`)
 }
 
 #' Or operation
@@ -105,8 +105,8 @@ flip_logical_expert_only <- function(x) {
 #' @param y A logical value.
 #' @returns A logical vector with filled values (`NA` is converted to `TRUE`).
 #' @export
-or_logical <- function(x, y) {
-  .Call(savvy_or_logical__impl, x, y)
+`or_logical` <- function(`x`, `y`) {
+  .Call(savvy_or_logical__impl, `x`, `y`)
 }
 
 #' Print the content of list
@@ -114,500 +114,500 @@ or_logical <- function(x, y) {
 #' @param x A list vector.
 #' @returns `NULL`
 #' @export
-print_list <- function(x) {
-  invisible(.Call(savvy_print_list__impl, x))
+`print_list` <- function(`x`) {
+  invisible(.Call(savvy_print_list__impl, `x`))
 }
 
 
-list_with_no_values <- function() {
+`list_with_no_values` <- function() {
   .Call(savvy_list_with_no_values__impl)
 }
 
 
-list_with_no_names <- function() {
+`list_with_no_names` <- function() {
   .Call(savvy_list_with_no_names__impl)
 }
 
 
-list_with_names_and_values <- function() {
+`list_with_names_and_values` <- function() {
   .Call(savvy_list_with_names_and_values__impl)
 }
 
 
-external_person_new <- function() {
+`external_person_new` <- function() {
   .savvy_wrap_Person(.Call(savvy_external_person_new__impl))
 }
 
 
-get_name_external <- function(x) {
-  x <- .savvy_extract_ptr(x, "Person")
-  .Call(savvy_get_name_external__impl, x)
+`get_name_external` <- function(`x`) {
+  `x` <- .savvy_extract_ptr(`x`, "Person")
+  .Call(savvy_get_name_external__impl, `x`)
 }
 
 
-set_name_external <- function(x, name) {
-  x <- .savvy_extract_ptr(x, "Person")
-  invisible(.Call(savvy_set_name_external__impl, x, name))
+`set_name_external` <- function(`x`, `name`) {
+  `x` <- .savvy_extract_ptr(`x`, "Person")
+  invisible(.Call(savvy_set_name_external__impl, `x`, `name`))
 }
 
 
-altint <- function() {
+`altint` <- function() {
   .Call(savvy_altint__impl)
 }
 
 
-print_altint <- function(x) {
-  invisible(.Call(savvy_print_altint__impl, x))
+`print_altint` <- function(`x`) {
+  invisible(.Call(savvy_print_altint__impl, `x`))
 }
 
 
-tweak_altint <- function(x) {
-  invisible(.Call(savvy_tweak_altint__impl, x))
+`tweak_altint` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altint__impl, `x`))
 }
 
 
-altreal <- function() {
+`altreal` <- function() {
   .Call(savvy_altreal__impl)
 }
 
 
-print_altreal <- function(x) {
-  invisible(.Call(savvy_print_altreal__impl, x))
+`print_altreal` <- function(`x`) {
+  invisible(.Call(savvy_print_altreal__impl, `x`))
 }
 
 
-tweak_altreal <- function(x) {
-  invisible(.Call(savvy_tweak_altreal__impl, x))
+`tweak_altreal` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altreal__impl, `x`))
 }
 
 
-altlogical <- function() {
+`altlogical` <- function() {
   .Call(savvy_altlogical__impl)
 }
 
 
-print_altlogical <- function(x) {
-  invisible(.Call(savvy_print_altlogical__impl, x))
+`print_altlogical` <- function(`x`) {
+  invisible(.Call(savvy_print_altlogical__impl, `x`))
 }
 
 
-tweak_altlogical <- function(x) {
-  invisible(.Call(savvy_tweak_altlogical__impl, x))
+`tweak_altlogical` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altlogical__impl, `x`))
 }
 
 
-altstring <- function() {
+`altstring` <- function() {
   .Call(savvy_altstring__impl)
 }
 
 
-print_altstring <- function(x) {
-  invisible(.Call(savvy_print_altstring__impl, x))
+`print_altstring` <- function(`x`) {
+  invisible(.Call(savvy_print_altstring__impl, `x`))
 }
 
 
-tweak_altstring <- function(x) {
-  invisible(.Call(savvy_tweak_altstring__impl, x))
+`tweak_altstring` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altstring__impl, `x`))
 }
 
 
-altlist <- function() {
+`altlist` <- function() {
   .Call(savvy_altlist__impl)
 }
 
 
-print_altlist <- function(x) {
-  invisible(.Call(savvy_print_altlist__impl, x))
+`print_altlist` <- function(`x`) {
+  invisible(.Call(savvy_print_altlist__impl, `x`))
 }
 
 
-tweak_altlist <- function(x) {
-  invisible(.Call(savvy_tweak_altlist__impl, x))
+`tweak_altlist` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altlist__impl, `x`))
 }
 
 
-get_altrep_class_name <- function(x) {
-  invisible(.Call(savvy_get_altrep_class_name__impl, x))
+`get_altrep_class_name` <- function(`x`) {
+  invisible(.Call(savvy_get_altrep_class_name__impl, `x`))
 }
 
 
-get_altrep_package_name <- function(x) {
-  invisible(.Call(savvy_get_altrep_package_name__impl, x))
+`get_altrep_package_name` <- function(`x`) {
+  invisible(.Call(savvy_get_altrep_package_name__impl, `x`))
 }
 
 
-print_altint_by_weird_way <- function(x) {
-  invisible(.Call(savvy_print_altint_by_weird_way__impl, x))
+`print_altint_by_weird_way` <- function(`x`) {
+  invisible(.Call(savvy_print_altint_by_weird_way__impl, `x`))
 }
 
 
-get_class_int <- function(x) {
-  .Call(savvy_get_class_int__impl, x)
+`get_class_int` <- function(`x`) {
+  .Call(savvy_get_class_int__impl, `x`)
 }
 
 
-get_names_int <- function(x) {
-  .Call(savvy_get_names_int__impl, x)
+`get_names_int` <- function(`x`) {
+  .Call(savvy_get_names_int__impl, `x`)
 }
 
 
-get_dim_int <- function(x) {
-  .Call(savvy_get_dim_int__impl, x)
+`get_dim_int` <- function(`x`) {
+  .Call(savvy_get_dim_int__impl, `x`)
 }
 
 
-get_attr_int <- function(x, attr) {
-  .Call(savvy_get_attr_int__impl, x, attr)
+`get_attr_int` <- function(`x`, `attr`) {
+  .Call(savvy_get_attr_int__impl, `x`, `attr`)
 }
 
 
-set_class_int <- function() {
+`set_class_int` <- function() {
   .Call(savvy_set_class_int__impl)
 }
 
 
-set_names_int <- function() {
+`set_names_int` <- function() {
   .Call(savvy_set_names_int__impl)
 }
 
 
-set_dim_int <- function() {
+`set_dim_int` <- function() {
   .Call(savvy_set_dim_int__impl)
 }
 
 
-set_attr_int <- function(attr, value) {
-  .Call(savvy_set_attr_int__impl, attr, value)
+`set_attr_int` <- function(`attr`, `value`) {
+  .Call(savvy_set_attr_int__impl, `attr`, `value`)
 }
 
 
-new_complex <- function(size) {
-  .Call(savvy_new_complex__impl, size)
+`new_complex` <- function(`size`) {
+  .Call(savvy_new_complex__impl, `size`)
 }
 
 
-first_complex <- function(x) {
-  .Call(savvy_first_complex__impl, x)
+`first_complex` <- function(`x`) {
+  .Call(savvy_first_complex__impl, `x`)
 }
 
 
-abs_complex <- function(x) {
-  .Call(savvy_abs_complex__impl, x)
+`abs_complex` <- function(`x`) {
+  .Call(savvy_abs_complex__impl, `x`)
 }
 
 
-new_value_pair <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(savvy_new_value_pair__impl, a, b))
+`new_value_pair` <- function(`a`, `b`) {
+  `a` <- .savvy_extract_ptr(`a`, "Value")
+  `b` <- .savvy_extract_ptr(`b`, "Value")
+  .savvy_wrap_ValuePair(.Call(savvy_new_value_pair__impl, `a`, `b`))
 }
 
 
-scalar_input_int <- function(x) {
-  invisible(.Call(savvy_scalar_input_int__impl, x))
+`scalar_input_int` <- function(`x`) {
+  invisible(.Call(savvy_scalar_input_int__impl, `x`))
 }
 
 
-scalar_input_usize <- function(x) {
-  invisible(.Call(savvy_scalar_input_usize__impl, x))
+`scalar_input_usize` <- function(`x`) {
+  invisible(.Call(savvy_scalar_input_usize__impl, `x`))
 }
 
 
-scalar_input_real <- function(x) {
-  invisible(.Call(savvy_scalar_input_real__impl, x))
+`scalar_input_real` <- function(`x`) {
+  invisible(.Call(savvy_scalar_input_real__impl, `x`))
 }
 
 
-scalar_input_logical <- function(x) {
-  invisible(.Call(savvy_scalar_input_logical__impl, x))
+`scalar_input_logical` <- function(`x`) {
+  invisible(.Call(savvy_scalar_input_logical__impl, `x`))
 }
 
 
-scalar_input_string <- function(x) {
-  invisible(.Call(savvy_scalar_input_string__impl, x))
+`scalar_input_string` <- function(`x`) {
+  invisible(.Call(savvy_scalar_input_string__impl, `x`))
 }
 
 
-scalar_output_int <- function() {
+`scalar_output_int` <- function() {
   .Call(savvy_scalar_output_int__impl)
 }
 
 
-scalar_output_int2 <- function() {
+`scalar_output_int2` <- function() {
   .Call(savvy_scalar_output_int2__impl)
 }
 
 
-scalar_output_real <- function() {
+`scalar_output_real` <- function() {
   .Call(savvy_scalar_output_real__impl)
 }
 
 
-scalar_output_real2 <- function() {
+`scalar_output_real2` <- function() {
   .Call(savvy_scalar_output_real2__impl)
 }
 
 
-scalar_output_logical <- function() {
+`scalar_output_logical` <- function() {
   .Call(savvy_scalar_output_logical__impl)
 }
 
 
-scalar_output_logical2 <- function() {
+`scalar_output_logical2` <- function() {
   .Call(savvy_scalar_output_logical2__impl)
 }
 
 
-scalar_output_string <- function() {
+`scalar_output_string` <- function() {
   .Call(savvy_scalar_output_string__impl)
 }
 
 
-scalar_output_string2 <- function() {
+`scalar_output_string2` <- function() {
   .Call(savvy_scalar_output_string2__impl)
 }
 
 
-scalar_output_complex <- function() {
+`scalar_output_complex` <- function() {
   .Call(savvy_scalar_output_complex__impl)
 }
 
 
-scalar_output_complex2 <- function() {
+`scalar_output_complex2` <- function() {
   .Call(savvy_scalar_output_complex2__impl)
 }
 
 
-sum_int <- function(x) {
-  .Call(savvy_sum_int__impl, x)
+`sum_int` <- function(`x`) {
+  .Call(savvy_sum_int__impl, `x`)
 }
 
 
-sum_real <- function(x) {
-  .Call(savvy_sum_real__impl, x)
+`sum_real` <- function(`x`) {
+  .Call(savvy_sum_real__impl, `x`)
 }
 
 
-rep_int_vec <- function(x) {
-  .Call(savvy_rep_int_vec__impl, x)
+`rep_int_vec` <- function(`x`) {
+  .Call(savvy_rep_int_vec__impl, `x`)
 }
 
 
-rep_int_slice <- function(x) {
-  .Call(savvy_rep_int_slice__impl, x)
+`rep_int_slice` <- function(`x`) {
+  .Call(savvy_rep_int_slice__impl, `x`)
 }
 
 
-rep_real_vec <- function(x) {
-  .Call(savvy_rep_real_vec__impl, x)
+`rep_real_vec` <- function(`x`) {
+  .Call(savvy_rep_real_vec__impl, `x`)
 }
 
 
-rep_real_slice <- function(x) {
-  .Call(savvy_rep_real_slice__impl, x)
+`rep_real_slice` <- function(`x`) {
+  .Call(savvy_rep_real_slice__impl, `x`)
 }
 
 
-rep_bool_vec <- function(x) {
-  .Call(savvy_rep_bool_vec__impl, x)
+`rep_bool_vec` <- function(`x`) {
+  .Call(savvy_rep_bool_vec__impl, `x`)
 }
 
 
-rep_bool_slice <- function(x) {
-  .Call(savvy_rep_bool_slice__impl, x)
+`rep_bool_slice` <- function(`x`) {
+  .Call(savvy_rep_bool_slice__impl, `x`)
 }
 
 
-rep_str_vec <- function(x) {
-  .Call(savvy_rep_str_vec__impl, x)
+`rep_str_vec` <- function(`x`) {
+  .Call(savvy_rep_str_vec__impl, `x`)
 }
 
 
-rep_str_slice <- function(x) {
-  .Call(savvy_rep_str_slice__impl, x)
+`rep_str_slice` <- function(`x`) {
+  .Call(savvy_rep_str_slice__impl, `x`)
 }
 
 
-print_foo_enum <- function(x) {
-  x <- .savvy_extract_ptr(x, "FooEnum")
-  invisible(.Call(savvy_print_foo_enum__impl, x))
+`print_foo_enum` <- function(`x`) {
+  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  invisible(.Call(savvy_print_foo_enum__impl, `x`))
 }
 
 
-print_foo_enum_ref <- function(x) {
-  x <- .savvy_extract_ptr(x, "FooEnum")
-  invisible(.Call(savvy_print_foo_enum_ref__impl, x))
+`print_foo_enum_ref` <- function(`x`) {
+  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  invisible(.Call(savvy_print_foo_enum_ref__impl, `x`))
 }
 
 
-foo_a <- function() {
+`foo_a` <- function() {
   .savvy_wrap_FooEnum(.Call(savvy_foo_a__impl))
 }
 
 
-get_var_in_env <- function(name, env = NULL) {
-  .Call(savvy_get_var_in_env__impl, name, env)
+`get_var_in_env` <- function(`name`, `env` = NULL) {
+  .Call(savvy_get_var_in_env__impl, `name`, `env`)
 }
 
 
-var_exists_in_env <- function(name, env = NULL) {
-  .Call(savvy_var_exists_in_env__impl, name, env)
+`var_exists_in_env` <- function(`name`, `env` = NULL) {
+  .Call(savvy_var_exists_in_env__impl, `name`, `env`)
 }
 
 
-set_var_in_env <- function(name, value, env = NULL) {
-  invisible(.Call(savvy_set_var_in_env__impl, name, value, env))
+`set_var_in_env` <- function(`name`, `value`, `env` = NULL) {
+  invisible(.Call(savvy_set_var_in_env__impl, `name`, `value`, `env`))
 }
 
 
-get_foo_value <- function() {
+`get_foo_value` <- function() {
   .Call(savvy_get_foo_value__impl)
 }
 
 
-safe_stop <- function() {
+`safe_stop` <- function() {
   invisible(.Call(savvy_safe_stop__impl))
 }
 
 
-raise_error <- function() {
+`raise_error` <- function() {
   .Call(savvy_raise_error__impl)
 }
 
 
-must_panic <- function() {
+`must_panic` <- function() {
   invisible(.Call(savvy_must_panic__impl))
 }
 
 
-safe_warn <- function() {
+`safe_warn` <- function() {
   invisible(.Call(savvy_safe_warn__impl))
 }
 
 
-do_call <- function(fun, args) {
-  .Call(savvy_do_call__impl, fun, args)
+`do_call` <- function(`fun`, `args`) {
+  .Call(savvy_do_call__impl, `fun`, `args`)
 }
 
 
-call_with_args <- function(fun) {
-  .Call(savvy_call_with_args__impl, fun)
+`call_with_args` <- function(`fun`) {
+  .Call(savvy_call_with_args__impl, `fun`)
 }
 
 
-get_args <- function(args) {
-  .Call(savvy_get_args__impl, args)
+`get_args` <- function(`args`) {
+  .Call(savvy_get_args__impl, `args`)
 }
 
 
-new_int <- function(size) {
-  .Call(savvy_new_int__impl, size)
+`new_int` <- function(`size`) {
+  .Call(savvy_new_int__impl, `size`)
 }
 
 
-new_real <- function(size) {
-  .Call(savvy_new_real__impl, size)
+`new_real` <- function(`size`) {
+  .Call(savvy_new_real__impl, `size`)
 }
 
 
-new_bool <- function(size) {
-  .Call(savvy_new_bool__impl, size)
+`new_bool` <- function(`size`) {
+  .Call(savvy_new_bool__impl, `size`)
 }
 
 
-times_two_numeric_f64 <- function(x) {
-  .Call(savvy_times_two_numeric_f64__impl, x)
+`times_two_numeric_f64` <- function(`x`) {
+  .Call(savvy_times_two_numeric_f64__impl, `x`)
 }
 
 
-times_two_numeric_i32 <- function(x) {
-  .Call(savvy_times_two_numeric_i32__impl, x)
+`times_two_numeric_i32` <- function(`x`) {
+  .Call(savvy_times_two_numeric_i32__impl, `x`)
 }
 
 
-times_two_numeric_f64_scalar <- function(x) {
-  .Call(savvy_times_two_numeric_f64_scalar__impl, x)
+`times_two_numeric_f64_scalar` <- function(`x`) {
+  .Call(savvy_times_two_numeric_f64_scalar__impl, `x`)
 }
 
 
-times_two_numeric_i32_scalar <- function(x) {
-  .Call(savvy_times_two_numeric_i32_scalar__impl, x)
+`times_two_numeric_i32_scalar` <- function(`x`) {
+  .Call(savvy_times_two_numeric_i32_scalar__impl, `x`)
 }
 
 
-print_numeric <- function(x) {
-  invisible(.Call(savvy_print_numeric__impl, x))
+`print_numeric` <- function(`x`) {
+  invisible(.Call(savvy_print_numeric__impl, `x`))
 }
 
 
-default_value_scalar <- function(x = NULL) {
-  .Call(savvy_default_value_scalar__impl, x)
+`default_value_scalar` <- function(`x` = NULL) {
+  .Call(savvy_default_value_scalar__impl, `x`)
 }
 
 
-default_value_vec <- function(x = NULL) {
-  .Call(savvy_default_value_vec__impl, x)
+`default_value_vec` <- function(`x` = NULL) {
+  .Call(savvy_default_value_vec__impl, `x`)
 }
 
 
-default_value_struct <- function(x = NULL) {
-  x <- .savvy_extract_ptr(x, "FooWithDefault")
-  .Call(savvy_default_value_struct__impl, x)
+`default_value_struct` <- function(`x` = NULL) {
+  `x` <- .savvy_extract_ptr(`x`, "FooWithDefault")
+  .Call(savvy_default_value_struct__impl, `x`)
 }
 
 
-default_value_enum <- function(x = NULL) {
-  x <- .savvy_extract_ptr(x, "FooEnum")
-  .Call(savvy_default_value_enum__impl, x)
+`default_value_enum` <- function(`x` = NULL) {
+  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  .Call(savvy_default_value_enum__impl, `x`)
 }
 
 
-filter_integer_odd <- function(x) {
-  .Call(savvy_filter_integer_odd__impl, x)
+`filter_integer_odd` <- function(`x`) {
+  .Call(savvy_filter_integer_odd__impl, `x`)
 }
 
 
-filter_real_negative <- function(x) {
-  .Call(savvy_filter_real_negative__impl, x)
+`filter_real_negative` <- function(`x`) {
+  .Call(savvy_filter_real_negative__impl, `x`)
 }
 
 
-filter_complex_without_im <- function(x) {
-  .Call(savvy_filter_complex_without_im__impl, x)
+`filter_complex_without_im` <- function(`x`) {
+  .Call(savvy_filter_complex_without_im__impl, `x`)
 }
 
 
-filter_logical_duplicates <- function(x) {
-  .Call(savvy_filter_logical_duplicates__impl, x)
+`filter_logical_duplicates` <- function(`x`) {
+  .Call(savvy_filter_logical_duplicates__impl, `x`)
 }
 
 
-filter_string_ascii <- function(x) {
-  .Call(savvy_filter_string_ascii__impl, x)
+`filter_string_ascii` <- function(`x`) {
+  .Call(savvy_filter_string_ascii__impl, `x`)
 }
 
 
-fun_mod1 <- function() {
+`fun_mod1` <- function() {
   invisible(.Call(savvy_fun_mod1__impl))
 }
 
 
-fun_mod1_1_foo <- function() {
+`fun_mod1_1_foo` <- function() {
   invisible(.Call(savvy_fun_mod1_1_foo__impl))
 }
 
 ### wrapper functions for FooEnum
 
-FooEnum_print <- function(self) {
+`FooEnum_print` <- function(self) {
   function() {
-    invisible(.Call(savvy_FooEnum_print__impl, self))
+    invisible(.Call(savvy_FooEnum_print__impl, `self`))
   }
 }
 
-.savvy_wrap_FooEnum <- function(ptr) {
+`.savvy_wrap_FooEnum` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$print <- FooEnum_print(ptr)
+  e$`print` <- `FooEnum_print`(ptr)
 
   class(e) <- "FooEnum"
   e
@@ -618,11 +618,11 @@ FooEnum_print <- function(self) {
 #'
 #' @export
 FooEnum <- new.env(parent = emptyenv())
-FooEnum$A <- .savvy_wrap_FooEnum(0L)
-FooEnum$B <- .savvy_wrap_FooEnum(1L)
+`FooEnum`$`A` <- .savvy_wrap_FooEnum(0L)
+`FooEnum`$`B` <- .savvy_wrap_FooEnum(1L)
 
 #' @export
-print.FooEnum <- function(x, ...) {
+`print.FooEnum` <- function(x, ...) {
   idx <- x$.ptr + 1L
   label <- c("A", "B")[idx]
   if (is.na(label)) {
@@ -638,16 +638,16 @@ print.FooEnum <- function(x, ...) {
 
 ### wrapper functions for FooWithDefault
 
-FooWithDefault_default_value_method <- function(self) {
-  function(x = NULL) {
-    .Call(savvy_FooWithDefault_default_value_method__impl, self, x)
+`FooWithDefault_default_value_method` <- function(self) {
+  function(`x` = NULL) {
+    .Call(savvy_FooWithDefault_default_value_method__impl, `self`, `x`)
   }
 }
 
-.savvy_wrap_FooWithDefault <- function(ptr) {
+`.savvy_wrap_FooWithDefault` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$default_value_method <- FooWithDefault_default_value_method(ptr)
+  e$`default_value_method` <- `FooWithDefault_default_value_method`(ptr)
 
   class(e) <- "FooWithDefault"
   e
@@ -655,45 +655,45 @@ FooWithDefault_default_value_method <- function(self) {
 
 
 
-FooWithDefault <- new.env(parent = emptyenv())
+`FooWithDefault` <- new.env(parent = emptyenv())
 
 ### associated functions for FooWithDefault
 
-FooWithDefault$new <- function(default_value) {
-  .savvy_wrap_FooWithDefault(.Call(savvy_FooWithDefault_new__impl, default_value))
+`FooWithDefault`$`new` <- function(`default_value`) {
+  .savvy_wrap_FooWithDefault(.Call(savvy_FooWithDefault_new__impl, `default_value`))
 }
 
-FooWithDefault$default_value_associated_fn <- function(x = NULL) {
-  .Call(savvy_FooWithDefault_default_value_associated_fn__impl, x)
+`FooWithDefault`$`default_value_associated_fn` <- function(`x` = NULL) {
+  .Call(savvy_FooWithDefault_default_value_associated_fn__impl, `x`)
 }
 
 
 ### wrapper functions for Person
 
-Person_another_person <- function(self) {
+`Person_another_person` <- function(self) {
   function() {
-    .savvy_wrap_Person2(.Call(savvy_Person_another_person__impl, self))
+    .savvy_wrap_Person2(.Call(savvy_Person_another_person__impl, `self`))
   }
 }
 
-Person_set_name <- function(self) {
-  function(name) {
-    invisible(.Call(savvy_Person_set_name__impl, self, name))
+`Person_set_name` <- function(self) {
+  function(`name`) {
+    invisible(.Call(savvy_Person_set_name__impl, `self`, `name`))
   }
 }
 
-Person_name <- function(self) {
+`Person_name` <- function(self) {
   function() {
-    .Call(savvy_Person_name__impl, self)
+    .Call(savvy_Person_name__impl, `self`)
   }
 }
 
-.savvy_wrap_Person <- function(ptr) {
+`.savvy_wrap_Person` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$another_person <- Person_another_person(ptr)
-  e$set_name <- Person_set_name(ptr)
-  e$name <- Person_name(ptr)
+  e$`another_person` <- `Person_another_person`(ptr)
+  e$`set_name` <- `Person_set_name`(ptr)
+  e$`name` <- `Person_name`(ptr)
 
   class(e) <- "Person"
   e
@@ -703,43 +703,43 @@ Person_name <- function(self) {
 #' A person with a name
 #'
 #' @export
-Person <- new.env(parent = emptyenv())
+`Person` <- new.env(parent = emptyenv())
 
 ### associated functions for Person
 
-Person$new <- function() {
+`Person`$`new` <- function() {
   .savvy_wrap_Person(.Call(savvy_Person_new__impl))
 }
 
-Person$new2 <- function() {
+`Person`$`new2` <- function() {
   .savvy_wrap_Person(.Call(savvy_Person_new2__impl))
 }
 
-Person$new_fallible <- function() {
+`Person`$`new_fallible` <- function() {
   .savvy_wrap_Person(.Call(savvy_Person_new_fallible__impl))
 }
 
-Person$new_with_name <- function(name) {
-  .savvy_wrap_Person(.Call(savvy_Person_new_with_name__impl, name))
+`Person`$`new_with_name` <- function(`name`) {
+  .savvy_wrap_Person(.Call(savvy_Person_new_with_name__impl, `name`))
 }
 
-Person$associated_function <- function() {
+`Person`$`associated_function` <- function() {
   .Call(savvy_Person_associated_function__impl)
 }
 
 
 ### wrapper functions for Person2
 
-Person2_name <- function(self) {
+`Person2_name` <- function(self) {
   function() {
-    .Call(savvy_Person2_name__impl, self)
+    .Call(savvy_Person2_name__impl, `self`)
   }
 }
 
-.savvy_wrap_Person2 <- function(ptr) {
+`.savvy_wrap_Person2` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$name <- Person2_name(ptr)
+  e$`name` <- `Person2_name`(ptr)
 
   class(e) <- "Person2"
   e
@@ -747,7 +747,7 @@ Person2_name <- function(self) {
 
 
 
-Person2 <- new.env(parent = emptyenv())
+`Person2` <- new.env(parent = emptyenv())
 
 ### associated functions for Person2
 
@@ -755,31 +755,31 @@ Person2 <- new.env(parent = emptyenv())
 
 ### wrapper functions for Value
 
-Value_pair <- function(self) {
-  function(b) {
-    b <- .savvy_extract_ptr(b, "Value")
-    .savvy_wrap_ValuePair(.Call(savvy_Value_pair__impl, self, b))
+`Value_pair` <- function(self) {
+  function(`b`) {
+    `b` <- .savvy_extract_ptr(`b`, "Value")
+    .savvy_wrap_ValuePair(.Call(savvy_Value_pair__impl, `self`, `b`))
   }
 }
 
-Value_get <- function(self) {
+`Value_get` <- function(self) {
   function() {
-    .Call(savvy_Value_get__impl, self)
+    .Call(savvy_Value_get__impl, `self`)
   }
 }
 
-Value_get2 <- function(self) {
+`Value_get2` <- function(self) {
   function() {
-    .Call(savvy_Value_get2__impl, self)
+    .Call(savvy_Value_get2__impl, `self`)
   }
 }
 
-.savvy_wrap_Value <- function(ptr) {
+`.savvy_wrap_Value` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$pair <- Value_pair(ptr)
-  e$get <- Value_get(ptr)
-  e$get2 <- Value_get2(ptr)
+  e$`pair` <- `Value_pair`(ptr)
+  e$`get` <- `Value_get`(ptr)
+  e$`get2` <- `Value_get2`(ptr)
 
   class(e) <- "Value"
   e
@@ -787,27 +787,27 @@ Value_get2 <- function(self) {
 
 
 
-Value <- new.env(parent = emptyenv())
+`Value` <- new.env(parent = emptyenv())
 
 ### associated functions for Value
 
-Value$new <- function(x) {
-  .savvy_wrap_Value(.Call(savvy_Value_new__impl, x))
+`Value`$`new` <- function(`x`) {
+  .savvy_wrap_Value(.Call(savvy_Value_new__impl, `x`))
 }
 
 
 ### wrapper functions for ValuePair
 
-ValuePair_print <- function(self) {
+`ValuePair_print` <- function(self) {
   function() {
-    invisible(.Call(savvy_ValuePair_print__impl, self))
+    invisible(.Call(savvy_ValuePair_print__impl, `self`))
   }
 }
 
-.savvy_wrap_ValuePair <- function(ptr) {
+`.savvy_wrap_ValuePair` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$print <- ValuePair_print(ptr)
+  e$`print` <- `ValuePair_print`(ptr)
 
   class(e) <- "ValuePair"
   e
@@ -815,20 +815,20 @@ ValuePair_print <- function(self) {
 
 
 
-ValuePair <- new.env(parent = emptyenv())
+`ValuePair` <- new.env(parent = emptyenv())
 
 ### associated functions for ValuePair
 
-ValuePair$new <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new__impl, a, b))
+`ValuePair`$`new` <- function(`a`, `b`) {
+  `a` <- .savvy_extract_ptr(`a`, "Value")
+  `b` <- .savvy_extract_ptr(`b`, "Value")
+  .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new__impl, `a`, `b`))
 }
 
-ValuePair$new_copy <- function(a, b) {
-  a <- .savvy_extract_ptr(a, "Value")
-  b <- .savvy_extract_ptr(b, "Value")
-  .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new_copy__impl, a, b))
+`ValuePair`$`new_copy` <- function(`a`, `b`) {
+  `a` <- .savvy_extract_ptr(`a`, "Value")
+  `b` <- .savvy_extract_ptr(`b`, "Value")
+  .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new_copy__impl, `a`, `b`))
 }
 
 

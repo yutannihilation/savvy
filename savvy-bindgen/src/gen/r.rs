@@ -61,9 +61,9 @@ impl SavvyFn {
             .iter()
             .map(|(pat, default_value)| {
                 if let Some(value) = default_value {
-                    format!(r#"{pat} = {value}"#)
+                    format!("`{pat}` = {value}")
                 } else {
-                    pat.to_string()
+                    format!("`{pat}`")
                 }
             })
             .collect::<Vec<_>>()
@@ -72,7 +72,7 @@ impl SavvyFn {
     fn get_r_args_for_call(&self) -> Vec<String> {
         self.get_r_args()
             .iter()
-            .map(|(pat, _)| pat.to_string())
+            .map(|(pat, _)| format!("`{pat}`"))
             .collect::<Vec<_>>()
     }
 
@@ -108,7 +108,7 @@ impl SavvyFn {
 
         format!(
             "{doc_comments}
-{fn_name} <- function({args_sig}) {{
+`{fn_name}` <- function({args_sig}) {{
 {body}
 }}
 "
@@ -126,7 +126,7 @@ impl SavvyFn {
                 let r_var = arg.pat_string();
                 let r_class = arg.ty_string();
                 Some(format!(
-                    r#"{r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
+                    r#"`{r_var}` <- .savvy_extract_ptr(`{r_var}`, "{r_class}")"#
                 ))
             })
             .collect::<Vec<String>>()
@@ -160,7 +160,7 @@ fn generate_r_impl_for_impl(
             let args_sig = x
                 .get_r_args_for_signature()
                 .into_iter()
-                .filter(|e| *e != "self")
+                .filter(|e| *e != "`self`")
                 .collect::<Vec<String>>()
                 .join(", ");
 
@@ -188,7 +188,7 @@ fn generate_r_impl_for_impl(
             let body = add_indent(&body_lines.join("\n"), 4);
 
             format!(
-                "{fn_name} <- function(self) {{
+                "`{fn_name}` <- function(self) {{
   function({args_sig}) {{
 {body}
   }}
@@ -201,14 +201,14 @@ fn generate_r_impl_for_impl(
 
     let methods = method_fns
         .iter()
-        .map(|o| format!("  e${} <- {}(ptr)", o.fn_name, o.fn_name_r()))
+        .map(|o| format!("  e$`{}` <- `{}`(ptr)", o.fn_name, o.fn_name_r()))
         .collect::<Vec<String>>()
         .join("\n");
 
     let wrap_fn_name = format!(".savvy_wrap_{}", class_r);
 
     let wrap_fn = format!(
-        r#"{wrap_fn_name} <- function(ptr) {{
+        r#"`{wrap_fn_name}` <- function(ptr) {{
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
 {methods}
@@ -252,7 +252,7 @@ fn generate_r_impl_for_impl(
             let body = add_indent(&body_lines.join("\n"), 2);
 
             format!(
-                r#"{class_r}${fn_name} <- function({args_sig}) {{
+                r#"`{class_r}`$`{fn_name}` <- function({args_sig}) {{
 {body}
 }}
 "#
@@ -263,7 +263,7 @@ fn generate_r_impl_for_impl(
 
     let init = match enum_types.get(ty) {
         Some(e) => generate_r_impl_for_enum(e),
-        None => format!("{class_r} <- new.env(parent = emptyenv())"),
+        None => format!("`{class_r}` <- new.env(parent = emptyenv())"),
     };
 
     let doc_comments = get_r_doc_comment(i.docs.as_slice());
@@ -291,7 +291,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
         .variants
         .iter()
         .enumerate()
-        .map(|(i, v)| format!(r#"{class_r}${v} <- .savvy_wrap_{class_r}({i}L)"#))
+        .map(|(i, v)| format!(r#"`{class_r}`$`{v}` <- .savvy_wrap_{class_r}({i}L)"#))
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -307,7 +307,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
 {variants}
 
 #' @export
-print.{class_r} <- function(x, ...) {{
+`print.{class_r}` <- function(x, ...) {{
   idx <- x$.ptr + 1L
   label <- c({variant_labels})[idx]
   if (is.na(label)) {{
