@@ -24,3 +24,10 @@ pub fn extract_docs(attrs: &[syn::Attribute]) -> Vec<String> {
         })
         .collect()
 }
+
+pub(crate) fn add_indent(x: &str, indent: usize) -> String {
+    x.lines()
+        .map(|x| format!("{:indent$}{x}", "", indent = indent))
+        .collect::<Vec<String>>()
+        .join("\n")
+}

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use quote::format_ident;
 
 use crate::ir::SavvyMergedImpl;
+use crate::utils::add_indent;
 use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnType};
 
 use crate::ir::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
@@ -92,18 +93,18 @@ impl SavvyFn {
         // If the result is NULL, wrap it with invisible
         let fn_call = match &self.return_type {
             SavvyFnReturnType::Unit(_) => {
-                format!("  invisible(.Call({args_call}))")
+                format!("invisible(.Call({args_call}))")
             }
-            SavvyFnReturnType::Sexp(_) => format!("  .Call({args_call})"),
+            SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
             SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
                 ty_str, ..
             }) => {
-                format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+                format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
             }
         };
         body_lines.push(fn_call);
 
-        let body = body_lines.join("\n");
+        let body = add_indent(&body_lines.join("\n"), 2);
 
         format!(
             "{doc_comments}
@@ -125,7 +126,7 @@ impl SavvyFn {
                 let r_var = arg.pat_string();
                 let r_class = arg.ty_string();
                 Some(format!(
-                    r#"  {r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
+                    r#"{r_var} <- .savvy_extract_ptr({r_var}, "{r_class}")"#
                 ))
             })
             .collect::<Vec<String>>()
@@ -179,17 +180,17 @@ fn generate_r_impl_for_impl(
                     ty_str,
                     ..
                 }) => {
-                    format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+                    format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
                 }
             };
             body_lines.push(fn_call);
 
-            let body = body_lines.join("\n");
+            let body = add_indent(&body_lines.join("\n"), 4);
 
             format!(
                 "{fn_name} <- function(self) {{
   function({args_sig}) {{
-  {body}
+{body}
   }}
 }}
 "
@@ -242,13 +243,13 @@ fn generate_r_impl_for_impl(
                     ty_str,
                     ..
                 }) => {
-                    format!("  .savvy_wrap_{ty_str}(.Call({args_call}))")
+                    format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
                 }
             };
 
             body_lines.push(fn_call);
 
-            let body = body_lines.join("\n");
+            let body = add_indent(&body_lines.join("\n"), 2);
 
             format!(
                 r#"{class_r}${fn_name} <- function({args_sig}) {{

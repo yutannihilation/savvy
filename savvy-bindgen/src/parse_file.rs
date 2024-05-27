@@ -5,7 +5,8 @@ use quote::format_ident;
 use syn::parse_quote;
 
 use crate::{
-    extract_docs, ir::ParsedTestCase, ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct,
+    extract_docs, ir::ParsedTestCase, utils::add_indent, ParsedResult, SavvyEnum, SavvyFn,
+    SavvyImpl, SavvyStruct,
 };
 
 fn is_savvified(attrs: &[syn::Attribute]) -> bool {
@@ -455,13 +456,6 @@ Error:
     }
 
     out
-}
-
-fn add_indent(x: &str, indent: usize) -> String {
-    x.lines()
-        .map(|x| format!("{:indent$}{x}", "", indent = indent))
-        .collect::<Vec<String>>()
-        .join("\n")
 }
 
 fn wrap_with_test_function(
