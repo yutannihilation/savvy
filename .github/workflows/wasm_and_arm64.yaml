@@ -15,10 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-  
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          targets: wasm32-unknown-emscripten
 
       - name: Tweak
         run: |
