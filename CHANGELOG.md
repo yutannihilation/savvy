@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor Improvements
+
+* Wrapper environment of a Rust struct or enum now cannot be modified by users.
+
 ## [v0.6.4] (2024-05-25)
 
 ### New features

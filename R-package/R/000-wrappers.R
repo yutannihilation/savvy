@@ -613,13 +613,41 @@ NULL
   e
 }
 
+#' @export
+`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
+
 
 #' A Or B.
 #'
 #' @export
-FooEnum <- new.env(parent = emptyenv())
+`FooEnum` <- new.env(parent = emptyenv())
 `FooEnum`$`A` <- .savvy_wrap_FooEnum(0L)
 `FooEnum`$`B` <- .savvy_wrap_FooEnum(1L)
+
+#' @export
+`$.FooEnum__bundle` <- function(x, name) {
+  if (!name %in% c("A", "B")) {
+    stop(paste0("Unknown variant: ", name), call. = FALSE)
+  }
+
+  NextMethod()
+}
+
+#' @export
+`[[.FooEnum__bundle` <- function(x, i) {
+  if (is.numeric(i)) {
+    stop("FooEnum cannot be subset by index", call. = FALSE)
+  }
+
+  if (!i %in% c("A", "B")) {
+    stop(paste0("Unknown variant: ", i), call. = FALSE)
+  }
+
+  NextMethod()
+}
 
 #' @export
 `print.FooEnum` <- function(x, ...) {
@@ -632,9 +660,28 @@ FooEnum <- new.env(parent = emptyenv())
 }
 
 
+#' @export
+`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
+
 ### associated functions for FooEnum
 
 
+
+class(`FooEnum`) <- "FooEnum__bundle"
+
+#' @export
+`print.FooEnum__bundle` <- function(x, ...) {
+  cat('FooEnum')
+}
+
+#' @export
+`$<-.FooEnum__bundle` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooEnum__bundle` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 ### wrapper functions for FooWithDefault
 
@@ -653,9 +700,21 @@ FooEnum <- new.env(parent = emptyenv())
   e
 }
 
+#' @export
+`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
+
 
 
 `FooWithDefault` <- new.env(parent = emptyenv())
+
+#' @export
+`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### associated functions for FooWithDefault
 
@@ -667,6 +726,19 @@ FooEnum <- new.env(parent = emptyenv())
   .Call(savvy_FooWithDefault_default_value_associated_fn__impl, `x`)
 }
 
+
+class(`FooWithDefault`) <- "FooWithDefault__bundle"
+
+#' @export
+`print.FooWithDefault__bundle` <- function(x, ...) {
+  cat('FooWithDefault')
+}
+
+#' @export
+`$<-.FooWithDefault__bundle` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.FooWithDefault__bundle` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### wrapper functions for Person
 
@@ -699,11 +771,23 @@ FooEnum <- new.env(parent = emptyenv())
   e
 }
 
+#' @export
+`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
+
 
 #' A person with a name
 #'
 #' @export
 `Person` <- new.env(parent = emptyenv())
+
+#' @export
+`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 ### associated functions for Person
 
@@ -728,6 +812,19 @@ FooEnum <- new.env(parent = emptyenv())
 }
 
 
+class(`Person`) <- "Person__bundle"
+
+#' @export
+`print.Person__bundle` <- function(x, ...) {
+  cat('Person')
+}
+
+#' @export
+`$<-.Person__bundle` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person__bundle` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
+
 ### wrapper functions for Person2
 
 `Person2_name` <- function(self) {
@@ -745,13 +842,38 @@ FooEnum <- new.env(parent = emptyenv())
   e
 }
 
+#' @export
+`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
+
 
 
 `Person2` <- new.env(parent = emptyenv())
 
+#' @export
+`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
+
 ### associated functions for Person2
 
 
+
+class(`Person2`) <- "Person2__bundle"
+
+#' @export
+`print.Person2__bundle` <- function(x, ...) {
+  cat('Person2')
+}
+
+#' @export
+`$<-.Person2__bundle` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Person2__bundle` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 ### wrapper functions for Value
 
@@ -785,9 +907,21 @@ FooEnum <- new.env(parent = emptyenv())
   e
 }
 
+#' @export
+`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
+
 
 
 `Value` <- new.env(parent = emptyenv())
+
+#' @export
+`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### associated functions for Value
 
@@ -795,6 +929,19 @@ FooEnum <- new.env(parent = emptyenv())
   .savvy_wrap_Value(.Call(savvy_Value_new__impl, `x`))
 }
 
+
+class(`Value`) <- "Value__bundle"
+
+#' @export
+`print.Value__bundle` <- function(x, ...) {
+  cat('Value')
+}
+
+#' @export
+`$<-.Value__bundle` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Value__bundle` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### wrapper functions for ValuePair
 
@@ -813,9 +960,21 @@ FooEnum <- new.env(parent = emptyenv())
   e
 }
 
+#' @export
+`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
+
 
 
 `ValuePair` <- new.env(parent = emptyenv())
+
+#' @export
+`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 ### associated functions for ValuePair
 
@@ -831,4 +990,17 @@ FooEnum <- new.env(parent = emptyenv())
   .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new_copy__impl, `a`, `b`))
 }
 
+
+class(`ValuePair`) <- "ValuePair__bundle"
+
+#' @export
+`print.ValuePair__bundle` <- function(x, ...) {
+  cat('ValuePair')
+}
+
+#' @export
+`$<-.ValuePair__bundle` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.ValuePair__bundle` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 

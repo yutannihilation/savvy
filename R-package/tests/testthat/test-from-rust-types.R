@@ -55,4 +55,8 @@ test_that("user-defined structs", {
   x <- Person$new()
   class(x) <- "foo"
   expect_error(get_name_external(x))
+
+  # cannot be modified
+  expect_error(Person$"aaa" <- "aaa")
+  expect_error(Person[["aaa"]] <- "aaa")
 })
