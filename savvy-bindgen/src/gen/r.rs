@@ -141,6 +141,7 @@ fn generate_r_impl_for_impl(
     let mut associated_fns: Vec<&SavvyFn> = Vec::new();
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
     let class_r = ty;
+    let class_r_for_bundle = format!("{class_r}__bundle");
 
     for savvy_fn in &i.fns {
         match savvy_fn.fn_type {
@@ -216,6 +217,12 @@ fn generate_r_impl_for_impl(
   class(e) <- "{class_r}"
   e
 }}
+
+#' @export
+`$<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
 "#
     );
 
@@ -269,7 +276,7 @@ fn generate_r_impl_for_impl(
     let doc_comments = get_r_doc_comment(i.docs.as_slice());
 
     format!(
-        "### wrapper functions for {class_r}
+        r#"### wrapper functions for {class_r}
 
 {closures}
 {wrap_fn}
@@ -277,15 +284,35 @@ fn generate_r_impl_for_impl(
 {doc_comments}
 {init}
 
+#' @export
+`$<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+
 ### associated functions for {class_r}
 
 {associated_fns}
-"
+
+class(`{class_r}`) <- "{class_r_for_bundle}"
+
+#' @export
+`print.{class_r_for_bundle}` <- function(x, ...) {{
+  cat('{class_r}')
+}}
+
+#' @export
+`$<-.{class_r_for_bundle}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.{class_r_for_bundle}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+"#
     )
 }
 
 fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
     let class_r = e.ty.to_string();
+    let class_r_for_bundle = format!("{class_r}__bundle");
 
     let variants = e
         .variants
@@ -303,8 +330,30 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
         .join(", ");
 
     format!(
-        r#"{class_r} <- new.env(parent = emptyenv())
+        r#"`{class_r}` <- new.env(parent = emptyenv())
 {variants}
+
+#' @export
+`$.{class_r_for_bundle}` <- function(x, name) {{
+  if (!name %in% c({variant_labels})) {{
+    stop(paste0("Unknown variant: ", name), call. = FALSE)
+  }}
+
+  NextMethod()
+}}
+
+#' @export
+`[[.{class_r_for_bundle}` <- function(x, i) {{
+  if (is.numeric(i)) {{
+    stop("{class_r} cannot be subset by index", call. = FALSE)
+  }}
+
+  if (!i %in% c({variant_labels})) {{
+    stop(paste0("Unknown variant: ", i), call. = FALSE)
+  }}
+
+  NextMethod()
+}}
 
 #' @export
 `print.{class_r}` <- function(x, ...) {{

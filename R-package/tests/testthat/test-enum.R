@@ -9,7 +9,16 @@ test_that("enum works", {
   expect_output(print(FooEnum$A), "FooEnum::A")
   expect_output(print(FooEnum$B), "FooEnum::B")
 
+  # Reject invalid specifications
+  expect_error(FooEnum$C)
+  expect_error(FooEnum[["C"]])
+  expect_error(FooEnum[[1]])
+
+  # cannot be modified in a usual way
+  expect_error(FooEnum$C <- "C")
+  expect_error(FooEnum[["C"]] <- "C")
+
   # corrupt
-  FooEnum$B$.ptr <- 3L
+  assign(".ptr", 3L, envir = FooEnum$B)
   expect_error(print(FooEnum$B))
 })
