@@ -219,10 +219,10 @@ fn generate_r_impl_for_impl(
 }}
 
 #' @export
-`$<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`$<-.{class_r}` <- function(x, name, value) stop("{class_r} cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`[[<-.{class_r}` <- function(x, i, value) stop("{class_r} cannot be modified", call. = FALSE)
 "#
     );
 
@@ -285,10 +285,10 @@ fn generate_r_impl_for_impl(
 {init}
 
 #' @export
-`$<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`$<-.{class_r}` <- function(x, name, value) stop("{class_r} cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.{class_r}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`[[<-.{class_r}` <- function(x, i, value) stop("{class_r} cannot be modified", call. = FALSE)
 
 ### associated functions for {class_r}
 
@@ -302,10 +302,10 @@ class(`{class_r}`) <- "{class_r_for_bundle}"
 }}
 
 #' @export
-`$<-.{class_r_for_bundle}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`$<-.{class_r_for_bundle}` <- function(x, name, value) stop("{class_r} cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.{class_r_for_bundle}` <- function(...) stop("{class_r} cannot be modified", call. = FALSE)
+`[[<-.{class_r_for_bundle}` <- function(x, i, value) stop("{class_r} cannot be modified", call. = FALSE)
 "#
     )
 }

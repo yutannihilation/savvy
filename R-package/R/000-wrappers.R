@@ -614,10 +614,10 @@ NULL
 }
 
 #' @export
-`$<-.FooEnum` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooEnum` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 
 #' A Or B.
@@ -661,10 +661,10 @@ NULL
 
 
 #' @export
-`$<-.FooEnum` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooEnum` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 ### associated functions for FooEnum
 
@@ -678,10 +678,10 @@ class(`FooEnum`) <- "FooEnum__bundle"
 }
 
 #' @export
-`$<-.FooEnum__bundle` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`$<-.FooEnum__bundle` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooEnum__bundle` <- function(...) stop("FooEnum cannot be modified", call. = FALSE)
+`[[<-.FooEnum__bundle` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 ### wrapper functions for FooWithDefault
 
@@ -701,20 +701,20 @@ class(`FooEnum`) <- "FooEnum__bundle"
 }
 
 #' @export
-`$<-.FooWithDefault` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooWithDefault` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 
 
 `FooWithDefault` <- new.env(parent = emptyenv())
 
 #' @export
-`$<-.FooWithDefault` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooWithDefault` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### associated functions for FooWithDefault
 
@@ -735,10 +735,10 @@ class(`FooWithDefault`) <- "FooWithDefault__bundle"
 }
 
 #' @export
-`$<-.FooWithDefault__bundle` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`$<-.FooWithDefault__bundle` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.FooWithDefault__bundle` <- function(...) stop("FooWithDefault cannot be modified", call. = FALSE)
+`[[<-.FooWithDefault__bundle` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### wrapper functions for Person
 
@@ -772,10 +772,10 @@ class(`FooWithDefault`) <- "FooWithDefault__bundle"
 }
 
 #' @export
-`$<-.Person` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 
 #' A person with a name
@@ -784,10 +784,10 @@ class(`FooWithDefault`) <- "FooWithDefault__bundle"
 `Person` <- new.env(parent = emptyenv())
 
 #' @export
-`$<-.Person` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 ### associated functions for Person
 
@@ -820,10 +820,10 @@ class(`Person`) <- "Person__bundle"
 }
 
 #' @export
-`$<-.Person__bundle` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`$<-.Person__bundle` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person__bundle` <- function(...) stop("Person cannot be modified", call. = FALSE)
+`[[<-.Person__bundle` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 ### wrapper functions for Person2
 
@@ -843,20 +843,20 @@ class(`Person`) <- "Person__bundle"
 }
 
 #' @export
-`$<-.Person2` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person2` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 
 
 `Person2` <- new.env(parent = emptyenv())
 
 #' @export
-`$<-.Person2` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person2` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 ### associated functions for Person2
 
@@ -870,10 +870,10 @@ class(`Person2`) <- "Person2__bundle"
 }
 
 #' @export
-`$<-.Person2__bundle` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`$<-.Person2__bundle` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Person2__bundle` <- function(...) stop("Person2 cannot be modified", call. = FALSE)
+`[[<-.Person2__bundle` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 ### wrapper functions for Value
 
@@ -908,20 +908,20 @@ class(`Person2`) <- "Person2__bundle"
 }
 
 #' @export
-`$<-.Value` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Value` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 
 
 `Value` <- new.env(parent = emptyenv())
 
 #' @export
-`$<-.Value` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Value` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### associated functions for Value
 
@@ -938,10 +938,10 @@ class(`Value`) <- "Value__bundle"
 }
 
 #' @export
-`$<-.Value__bundle` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`$<-.Value__bundle` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.Value__bundle` <- function(...) stop("Value cannot be modified", call. = FALSE)
+`[[<-.Value__bundle` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### wrapper functions for ValuePair
 
@@ -961,20 +961,20 @@ class(`Value`) <- "Value__bundle"
 }
 
 #' @export
-`$<-.ValuePair` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.ValuePair` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 
 
 `ValuePair` <- new.env(parent = emptyenv())
 
 #' @export
-`$<-.ValuePair` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.ValuePair` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 ### associated functions for ValuePair
 
@@ -999,8 +999,8 @@ class(`ValuePair`) <- "ValuePair__bundle"
 }
 
 #' @export
-`$<-.ValuePair__bundle` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`$<-.ValuePair__bundle` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.ValuePair__bundle` <- function(...) stop("ValuePair cannot be modified", call. = FALSE)
+`[[<-.ValuePair__bundle` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
