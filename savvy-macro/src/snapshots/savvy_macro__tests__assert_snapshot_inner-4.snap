@@ -6,7 +6,7 @@ expression: lines
 - "    let orig_hook = std::panic::take_hook();"
 - "    std::panic::set_hook(Box::new(savvy::panic_hook::panic_hook));"
 - "    let result = std::panic::catch_unwind(|| {"
-- "        let x = <f64>::try_from(savvy::Sexp(x))?;"
+- "        let x = <f64>::try_from(savvy::Sexp(x)).map_err(|e| e.with_arg_name(\"x\"))?;"
 - "        foo(x)"
 - "    });"
 - "    std::panic::set_hook(orig_hook);"
