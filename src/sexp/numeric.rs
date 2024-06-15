@@ -291,10 +291,9 @@ impl TryFrom<Sexp> for NumericSexp {
 
     fn try_from(value: Sexp) -> Result<Self, Self::Error> {
         if !value.is_numeric() {
-            let expected = "numeric";
-            let actual = value.get_human_readable_type_name();
-            let msg = format!("expected: {expected}\n  actual: {actual}");
-            return Err(crate::Error::UnexpectedType(msg));
+            let expected = "numeric".to_string();
+            let actual = value.get_human_readable_type_name().to_string();
+            return Err(crate::error::Error::UnexpectedType { expected, actual });
         }
 
         match value.into_typed() {
@@ -450,10 +449,9 @@ impl TryFrom<Sexp> for NumericScalar {
 
     fn try_from(value: Sexp) -> Result<Self, Self::Error> {
         if !value.is_numeric() {
-            let expected = "numeric";
-            let actual = value.get_human_readable_type_name();
-            let msg = format!("expected: {expected}\n  actual: {actual}");
-            return Err(crate::Error::UnexpectedType(msg));
+            let expected = "numeric".to_string();
+            let actual = value.get_human_readable_type_name().to_string();
+            return Err(crate::error::Error::UnexpectedType { expected, actual });
         }
 
         match value.into_typed() {
