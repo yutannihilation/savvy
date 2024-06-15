@@ -136,10 +136,10 @@ macro_rules! impl_sexp_type_assert {
         if $self.is_sexp_type(savvy_ffi::$sexptype) {
             Ok(())
         } else {
-            let expected = unsafe { get_human_readable_type_name(savvy_ffi::$sexptype) };
-            let actual = $self.get_human_readable_type_name();
-            let msg = format!("expected: {expected}\n  actual: {actual}");
-            Err(crate::error::Error::UnexpectedType(msg))
+            let expected =
+                unsafe { get_human_readable_type_name(savvy_ffi::$sexptype).to_string() };
+            let actual = $self.get_human_readable_type_name().to_string();
+            Err(crate::error::Error::UnexpectedType { expected, actual })
         }
     };
 }

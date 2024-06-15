@@ -1,9 +1,11 @@
+use proc_macro2::Span;
 use quote::format_ident;
 use syn::{parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::utils::extract_docs;
 
 enum SavvyInputTypeCategory {
+    Sexp,
     SexpWrapper,
     PrimitiveType,
     UserDefinedTypeRef, // &T
@@ -90,8 +92,17 @@ impl SavvyInputType {
                         Err(syn::Error::new_spanned(type_path, msg))
                     }
 
+                    // Since Sexp doesn't need to be converted by try_from(),
+                    // this needs to be handled separately.
+                    "Sexp" => Ok(Self {
+                        category: SavvyInputTypeCategory::Sexp,
+                        ty_orig: ty.clone(),
+                        ty_str,
+                        optional: in_option,
+                    }),
+
                     // Read-only types
-                    "Sexp" | "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp"
+                    "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp"
                     | "LogicalSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
                     | "EnvironmentSexp" => Ok(Self {
                         category: SavvyInputTypeCategory::SexpWrapper,
@@ -400,29 +411,56 @@ impl SavvyFn {
                     };
                     let ty_ident = ty.to_rust_type_outer();
 
-                    match fn_type {
+                    match (&fn_type, &ty.category) {
                         // DllInfo is passed as it is
-                        SavvyFnType::InitFunction => {
-                            if !matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
-                                return Some(Err(syn::Error::new_spanned(
-                                    ty.ty_orig,
-                                    "#[savvy_init] can be used only on a function that takes `*mut DllInfo`",
-                                )));
-                            }
+                        (&SavvyFnType::InitFunction, &SavvyInputTypeCategory::DllInfo) => {}
+                        
+                        (&SavvyFnType::InitFunction, _) => {
+                            return Some(Err(syn::Error::new_spanned(
+                                ty.ty_orig,
+                                "#[savvy_init] can be used only on a function that takes `*mut DllInfo`",
+                            )));
                         }
-                        _ => {
-                            if matches!(ty.category, SavvyInputTypeCategory::DllInfo) {
+
+                        (_, &SavvyInputTypeCategory::DllInfo) => {
                                 return Some(Err(syn::Error::new_spanned(
                                     ty.ty_orig,
                                     "#[savvy] doesn't accept `*mut DllInfo`. Did you mean #[savvy_init]?",
                                 )));
-                            }
+                        }
 
+                        (_, &SavvyInputTypeCategory::Sexp) => {
                             if ty.optional {
                                 stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
-                                stmts_additional.push(parse_quote! { let #pat = if #pat.is_null() { None } else { Some(<#ty_ident>::try_from(#pat)?) }; })
+                                stmts_additional.push(parse_quote! { 
+                                    let #pat = if #pat.is_null() { 
+                                        None
+                                     } else { 
+                                        Some(#pat)
+                                    };
+                                })
                             } else {
-                                stmts_additional.push(parse_quote! { let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat))?; });
+                                stmts_additional.push(parse_quote! {
+                                    let #pat = savvy::Sexp(#pat);
+                                });
+                            }
+                        }
+
+                        (_, _) => {
+                            let arg_lit = syn::LitStr::new(&pat.to_string(), Span::call_site());
+                            if ty.optional {
+                                stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
+                                stmts_additional.push(parse_quote! { 
+                                    let #pat = if #pat.is_null() { 
+                                        None
+                                     } else { 
+                                        Some(<#ty_ident>::try_from(#pat).map_err(|e| e.with_arg_name(#arg_lit))?) 
+                                    };
+                                })
+                            } else {
+                                stmts_additional.push(parse_quote! {
+                                    let #pat = <#ty_ident>::try_from(savvy::Sexp(#pat)).map_err(|e| e.with_arg_name(#arg_lit))?;
+                                });
                             }
                         }
                     }
