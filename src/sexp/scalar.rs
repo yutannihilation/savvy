@@ -1,6 +1,6 @@
-use savvy_ffi::LOGICAL_ELT;
+use savvy_ffi::{LOGICAL_ELT, RAW_ELT};
 
-use crate::{IntegerSexp, LogicalSexp, RealSexp, Sexp, StringSexp};
+use crate::{IntegerSexp, LogicalSexp, RawSexp, RealSexp, Sexp, StringSexp};
 
 use super::na::NotAvailableValue;
 
@@ -47,6 +47,20 @@ impl TryFrom<Sexp> for bool {
         }
 
         Ok(result_int == 1)
+    }
+}
+
+// raw doesn't have na() method, so define manually.
+impl TryFrom<Sexp> for u8 {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
+        let value = <RawSexp>::try_from(value)?;
+        if value.len() != 1 {
+            return Err(crate::error::Error::NotScalar);
+        }
+
+        Ok(unsafe { RAW_ELT(value.0, 0) })
     }
 }
 
