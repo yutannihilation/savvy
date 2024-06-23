@@ -109,6 +109,20 @@ NULL
   .Call(savvy_or_logical__impl, `x`, `y`)
 }
 
+#' Reverse bits
+#'
+#' @param x A raw vector.
+`reverse_bits` <- function(`x`) {
+  .Call(savvy_reverse_bits__impl, `x`)
+}
+
+#' Reverse bits
+#'
+#' @param x A raw vector.
+`reverse_bit_scalar` <- function(`x`) {
+  .Call(savvy_reverse_bit_scalar__impl, `x`)
+}
+
 #' Print the content of list
 #'
 #' @param x A list vector.

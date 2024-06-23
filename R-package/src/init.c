@@ -84,6 +84,16 @@ SEXP savvy_or_logical__impl(SEXP x, SEXP y) {
     return handle_result(res);
 }
 
+SEXP savvy_reverse_bits__impl(SEXP x) {
+    SEXP res = savvy_reverse_bits__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_reverse_bit_scalar__impl(SEXP x) {
+    SEXP res = savvy_reverse_bit_scalar__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_print_list__impl(SEXP x) {
     SEXP res = savvy_print_list__ffi(x);
     return handle_result(res);
@@ -686,6 +696,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_flip_logical__impl", (DL_FUNC) &savvy_flip_logical__impl, 1},
     {"savvy_flip_logical_expert_only__impl", (DL_FUNC) &savvy_flip_logical_expert_only__impl, 1},
     {"savvy_or_logical__impl", (DL_FUNC) &savvy_or_logical__impl, 2},
+    {"savvy_reverse_bits__impl", (DL_FUNC) &savvy_reverse_bits__impl, 1},
+    {"savvy_reverse_bit_scalar__impl", (DL_FUNC) &savvy_reverse_bit_scalar__impl, 1},
     {"savvy_print_list__impl", (DL_FUNC) &savvy_print_list__impl, 1},
     {"savvy_list_with_no_values__impl", (DL_FUNC) &savvy_list_with_no_values__impl, 0},
     {"savvy_list_with_no_names__impl", (DL_FUNC) &savvy_list_with_no_names__impl, 0},

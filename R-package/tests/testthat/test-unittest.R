@@ -61,6 +61,16 @@ test_that("functions work", {
   )
 
   expect_equal(
+    reverse_bits(as.raw(c(0x0f, 0x00, 0x12))),
+    as.raw(c(0xf0, 0x00, 0x48))
+  )
+
+  expect_equal(
+    reverse_bit_scalar(as.raw(0x12)),
+    as.raw(0x48)
+  )
+
+  expect_equal(
     list_with_no_values(),
     list(foo = NULL, bar = NULL)
   )

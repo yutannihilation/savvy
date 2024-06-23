@@ -8,6 +8,8 @@ SEXP savvy_times_any_real__ffi(SEXP x, SEXP y);
 SEXP savvy_flip_logical__ffi(SEXP x);
 SEXP savvy_flip_logical_expert_only__ffi(SEXP x);
 SEXP savvy_or_logical__ffi(SEXP x, SEXP y);
+SEXP savvy_reverse_bits__ffi(SEXP x);
+SEXP savvy_reverse_bit_scalar__ffi(SEXP x);
 SEXP savvy_print_list__ffi(SEXP x);
 SEXP savvy_list_with_no_values__ffi(void);
 SEXP savvy_list_with_no_names__ffi(void);
