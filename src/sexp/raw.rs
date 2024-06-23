@@ -6,10 +6,10 @@ use super::utils::assert_len;
 use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
 use crate::protect::{self, local_protect};
 
-/// An external SEXP of an raw vector.
+/// An external SEXP of a raw vector.
 pub struct RawSexp(pub SEXP);
 
-/// A newly-created SEXP of an raw vector.
+/// A newly-created SEXP of a raw vector.
 pub struct OwnedRawSexp {
     inner: SEXP,
     token: SEXP,
@@ -27,9 +27,9 @@ impl RawSexp {
     /// # Examples
     ///
     /// ```
-    /// # let int_sexp = savvy::OwnedRawSexp::try_from_slice([1, 2, 3])?.as_read_only();
-    /// // `int_sexp` is c(1L, 2L, 3L)
-    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// # let raw_sexp = savvy::OwnedRawSexp::try_from_slice([1_u8, 2, 3])?.as_read_only();
+    /// // `raw_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(raw_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[u8] {
         unsafe { std::slice::from_raw_parts(RAW(self.inner()) as _, self.len()) }
@@ -40,9 +40,9 @@ impl RawSexp {
     /// # Examples
     ///
     /// ```
-    /// # let int_sexp = savvy::OwnedRawSexp::try_from_slice([1, 2, 3])?.as_read_only();
-    /// // `int_sexp` is c(1L, 2L, 3L)
-    /// let mut iter = int_sexp.iter();
+    /// # let raw_sexp = savvy::OwnedRawSexp::try_from_slice([1_u8, 2, 3])?.as_read_only();
+    /// // `raw_sexp` is c(1L, 2L, 3L)
+    /// let mut iter = raw_sexp.iter();
     /// assert_eq!(iter.next(), Some(&1));
     /// assert_eq!(iter.as_slice(), &[2, 3]);
     /// ```
@@ -62,9 +62,9 @@ impl RawSexp {
     /// # Examples
     ///
     /// ```
-    /// # let int_sexp = savvy::OwnedRawSexp::try_from_slice([1, 2, 3])?.as_read_only();
-    /// // `int_sexp` is c(1L, 2L, 3L)
-    /// assert_eq!(int_sexp.to_vec(), vec![1, 2, 3]);
+    /// # let raw_sexp = savvy::OwnedRawSexp::try_from_slice([1_u8, 2, 3])?.as_read_only();
+    /// // `raw_sexp` is c(1L, 2L, 3L)
+    /// assert_eq!(raw_sexp.to_vec(), vec![1, 2, 3]);
     /// ```
     pub fn to_vec(&self) -> Vec<u8> {
         self.as_slice().to_vec()
@@ -85,8 +85,8 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let int_sexp = OwnedRawSexp::try_from_slice([1, 2, 3])?;
-    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// let raw_sexp = OwnedRawSexp::try_from_slice([1_u8, 2, 3])?;
+    /// assert_eq!(raw_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[u8] {
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
@@ -99,10 +99,10 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let mut int_sexp = OwnedRawSexp::new(3)?;
-    /// let s = int_sexp.as_mut_slice();
+    /// let mut raw_sexp = OwnedRawSexp::new(3)?;
+    /// let s = raw_sexp.as_mut_slice();
     /// s[2] = 10;
-    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// assert_eq!(raw_sexp.as_slice(), &[0, 0, 10]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut [u8] {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
@@ -120,9 +120,9 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let mut int_sexp = OwnedRawSexp::try_from_slice([1, 2, 3])?;
-    /// int_sexp.iter_mut().for_each(|x| *x = *x * 2);
-    /// assert_eq!(int_sexp.as_slice(), &[2, 4, 6]);
+    /// let mut raw_sexp = OwnedRawSexp::try_from_slice([1_u8, 2, 3])?;
+    /// raw_sexp.iter_mut().for_each(|x| *x = *x * 2);
+    /// assert_eq!(raw_sexp.as_slice(), &[2, 4, 6]);
     /// ```
     pub fn iter_mut(&mut self) -> std::slice::IterMut<u8> {
         self.as_mut_slice().iter_mut()
@@ -140,9 +140,9 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let mut int_sexp = OwnedRawSexp::new(3)?;
-    /// int_sexp.set_elt(2, 10)?;
-    /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
+    /// let mut raw_sexp = OwnedRawSexp::new(3)?;
+    /// raw_sexp.set_elt(2, 10)?;
+    /// assert_eq!(raw_sexp.as_slice(), &[0, 0, 10]);
     /// ```
     pub fn set_elt(&mut self, i: usize, v: u8) -> crate::error::Result<()> {
         super::utils::assert_len(self.len, i)?;
@@ -209,8 +209,8 @@ impl OwnedRawSexp {
     /// }
     ///
     /// let pair = Pair { x: 1, y: 2 };
-    /// let int_sexp = <OwnedRawSexp>::try_from(pair)?;
-    /// assert_eq!(int_sexp.as_slice(), &[1, 2]);
+    /// let raw_sexp = <OwnedRawSexp>::try_from(pair)?;
+    /// assert_eq!(raw_sexp.as_slice(), &[1, 2]);
     /// ```
     ///
     /// # Safety
@@ -247,8 +247,8 @@ impl OwnedRawSexp {
     /// use savvy::OwnedRawSexp;
     ///
     /// let iter = (0..10).filter(|x| x % 2 == 0);
-    /// let int_sexp = OwnedRawSexp::try_from_iter(iter)?;
-    /// assert_eq!(int_sexp.as_slice(), &[0, 2, 4, 6, 8]);
+    /// let raw_sexp = OwnedRawSexp::try_from_iter(iter)?;
+    /// assert_eq!(raw_sexp.as_slice(), &[0, 2, 4, 6, 8]);
     /// ```
     pub fn try_from_iter<I>(iter: I) -> crate::error::Result<Self>
     where
@@ -309,8 +309,8 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let int_sexp = OwnedRawSexp::try_from_slice([1, 2, 3])?;
-    /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
+    /// let raw_sexp = OwnedRawSexp::try_from_slice([1_u8, 2, 3])?;
+    /// assert_eq!(raw_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn try_from_slice<S>(x: S) -> crate::error::Result<Self>
     where
@@ -329,8 +329,8 @@ impl OwnedRawSexp {
     /// ```
     /// use savvy::OwnedRawSexp;
     ///
-    /// let int_sexp = OwnedRawSexp::try_from_scalar(1)?;
-    /// assert_eq!(int_sexp.as_slice(), &[1]);
+    /// let raw_sexp = OwnedRawSexp::try_from_scalar(1)?;
+    /// assert_eq!(raw_sexp.as_slice(), &[1]);
     /// ```
     pub fn try_from_scalar(value: u8) -> crate::error::Result<Self> {
         let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_ScalarRaw(value))? };
@@ -350,7 +350,7 @@ impl TryFrom<Sexp> for RawSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        value.assert_integer()?;
+        value.assert_raw()?;
         Ok(Self(value.0))
     }
 }
