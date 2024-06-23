@@ -222,7 +222,8 @@ extern "C" {
     pub fn Rf_isEnvironment(arg1: SEXP) -> Rboolean;
     pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn Rf_defineVar(arg1: SEXP, arg2: SEXP, arg3: SEXP);
-    pub fn Rf_findVarInFrame3(arg1: SEXP, arg2: SEXP, arg3: Rboolean) -> SEXP;
+    pub fn Rf_findVarInFrame(arg1: SEXP, arg2: SEXP) -> SEXP;
+    pub fn R_existsVarInFrame(arg1: SEXP, arg2: SEXP) -> Rboolean;
 
     pub static mut R_GlobalEnv: SEXP;
     pub static mut R_UnboundValue: SEXP;

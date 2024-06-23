@@ -128,7 +128,6 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_ScalarLogical")
         .allowlist_function("Rf_isLogical")
         // String and character
-        .allowlist_function("STRING_PTR")
         .allowlist_function("STRING_PTR_RO")
         .allowlist_function("STRING_ELT")
         .allowlist_function("SET_STRING_ELT")
@@ -160,7 +159,8 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_isEnvironment")
         .allowlist_function("Rf_eval")
         .allowlist_var("R_GlobalEnv")
-        .allowlist_function("Rf_findVarInFrame3")
+        .allowlist_function("Rf_findVarInFrame")
+        .allowlist_function("R_existsVarInFrame")
         .allowlist_function("Rf_defineVar")
         .allowlist_var("R_UnboundValue")
         // parse
