@@ -27,7 +27,7 @@ mod mod1;
 
 mod log;
 
-use savvy::{r_print, savvy, OwnedListSexp};
+use savvy::{r_print, savvy, OwnedListSexp, OwnedRawSexp, RawSexp};
 
 use savvy::{
     IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
@@ -214,6 +214,29 @@ fn or_logical(x: LogicalSexp, y: bool) -> savvy::Result<savvy::Sexp> {
     }
 
     out.into()
+}
+
+/// Reverse bits
+///
+/// @param x A raw vector.
+#[savvy]
+fn reverse_bits(x: RawSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedRawSexp::new(x.len())?;
+
+    for (i, e) in x.iter().enumerate() {
+        out.set_elt(i, e.reverse_bits())?;
+    }
+
+    out.into()
+}
+
+/// Reverse bits
+///
+/// @param x A raw vector.
+#[savvy]
+fn reverse_bit_scalar(x: u8) -> savvy::Result<savvy::Sexp> {
+    let out: u8 = x.reverse_bits();
+    out.try_into()
 }
 
 /// Print the content of list

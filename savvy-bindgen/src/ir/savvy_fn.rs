@@ -84,7 +84,7 @@ impl SavvyInputType {
 
                     // Owned-types are not allowed for the input
                     "OwnedIntegerSexp" | "OwnedRealSexp" | "OwnedComplexSexp"
-                    | "OwnedLogicalSexp" | "OwnedStringSexp" | "OwnedListSexp" => {
+                    | "OwnedLogicalSexp" | "OwnedRawSexp" | "OwnedStringSexp" | "OwnedListSexp" => {
                         let msg = format!(
                             "`Owned-` types are not allowed here. Did you mean `{}`?",
                             ty_str.strip_prefix("Owned").unwrap()
@@ -103,7 +103,7 @@ impl SavvyInputType {
 
                     // Read-only types
                     "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp"
-                    | "LogicalSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
+                    | "LogicalSexp" | "RawSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
                     | "EnvironmentSexp" => Ok(Self {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
@@ -112,7 +112,7 @@ impl SavvyInputType {
                     }),
 
                     // Primitive types
-                    "i32" | "usize" | "f64" | "bool" | "NumericScalar" => Ok(Self {
+                    "i32" | "usize" | "f64" | "bool" | "u8" | "NumericScalar" => Ok(Self {
                         category: SavvyInputTypeCategory::PrimitiveType,
                         ty_orig: ty.clone(),
                         ty_str,

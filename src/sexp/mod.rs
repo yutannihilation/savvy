@@ -3,13 +3,13 @@ use std::ffi::{CStr, CString};
 use savvy_ffi::{
     R_NilValue, Rboolean_TRUE, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger,
     Rf_isLogical, Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP,
-    INTEGER, SEXP, SEXPTYPE, TYPEOF, VECSXP,
+    INTEGER, RAWSXP, SEXP, SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{
     EnvironmentSexp, ExternalPointerSexp, FunctionSexp, IntegerSexp, ListSexp, LogicalSexp,
-    NullSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp, OwnedStringSexp, RealSexp,
-    StringSexp,
+    NullSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRawSexp, OwnedRealSexp, OwnedStringSexp,
+    RawSexp, RealSexp, StringSexp,
 };
 
 #[cfg(feature = "complex")]
@@ -23,6 +23,7 @@ pub mod list;
 pub mod logical;
 pub mod na;
 pub mod null;
+pub mod raw;
 pub mod real;
 pub mod scalar;
 pub mod string;
@@ -69,6 +70,12 @@ impl Sexp {
         unsafe { Rf_isLogical(self.0) == Rboolean_TRUE }
     }
 
+    /// Returns `true` if the SEXP is a raw vector.
+    pub fn is_raw(&self) -> bool {
+        // There's no test function for RAWSXP
+        unsafe { TYPEOF(self.0) as u32 == RAWSXP }
+    }
+
     /// Returns `true` if the SEXP is a character vector.
     pub fn is_string(&self) -> bool {
         // There are two versions of `Rf_isString()``, but anyway this should be cheap.
@@ -105,6 +112,7 @@ impl Sexp {
             #[cfg(feature = "complex")]
             savvy_ffi::CPLXSXP => self.is_complex(),
             savvy_ffi::LGLSXP => self.is_logical(),
+            savvy_ffi::RAWSXP => self.is_raw(),
             savvy_ffi::STRSXP => self.is_string(),
             savvy_ffi::VECSXP => self.is_list(),
             savvy_ffi::EXTPTRSXP => self.is_external_pointer(),
@@ -171,6 +179,11 @@ impl Sexp {
         impl_sexp_type_assert!(self, LGLSXP)
     }
 
+    /// Returns error when the SEXP is not a raw vector.
+    pub fn assert_raw(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, RAWSXP)
+    }
+
     /// Returns error when the SEXP is not a string vector.
     pub fn assert_string(&self) -> crate::error::Result<()> {
         impl_sexp_type_assert!(self, STRSXP)
@@ -205,6 +218,7 @@ pub enum TypedSexp {
     #[cfg(feature = "complex")]
     Complex(ComplexSexp),
     Logical(LogicalSexp),
+    Raw(RawSexp),
     String(StringSexp),
     List(ListSexp),
     Null(NullSexp),
@@ -229,6 +243,7 @@ into_typed_sxp!(RealSexp, Real);
 #[cfg(feature = "complex")]
 into_typed_sxp!(ComplexSexp, Complex);
 into_typed_sxp!(LogicalSexp, Logical);
+into_typed_sxp!(RawSexp, Raw);
 into_typed_sxp!(StringSexp, String);
 into_typed_sxp!(ListSexp, List);
 into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
@@ -250,8 +265,9 @@ into_typed_sxp_owned!(OwnedIntegerSexp, Integer);
 into_typed_sxp_owned!(OwnedRealSexp, Real);
 #[cfg(feature = "complex")]
 into_typed_sxp_owned!(OwnedComplexSexp, Complex);
-into_typed_sxp_owned!(OwnedStringSexp, String);
 into_typed_sxp_owned!(OwnedLogicalSexp, Logical);
+into_typed_sxp_owned!(OwnedRawSexp, Raw);
+into_typed_sxp_owned!(OwnedStringSexp, String);
 
 impl From<TypedSexp> for SEXP {
     fn from(value: TypedSexp) -> Self {
@@ -261,8 +277,9 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::Real(sxp) => sxp.inner(),
             #[cfg(feature = "complex")]
             TypedSexp::Complex(sxp) => sxp.inner(),
-            TypedSexp::String(sxp) => sxp.inner(),
             TypedSexp::Logical(sxp) => sxp.inner(),
+            TypedSexp::Raw(sxp) => sxp.inner(),
+            TypedSexp::String(sxp) => sxp.inner(),
             TypedSexp::List(sxp) => sxp.inner(),
             TypedSexp::ExternalPointer(sxp) => sxp.inner(),
             TypedSexp::Function(sxp) => sxp.inner(),
@@ -282,6 +299,7 @@ impl Sexp {
             #[cfg(feature = "complex")]
             savvy_ffi::CPLXSXP => TypedSexp::Complex(ComplexSexp(self.0)),
             savvy_ffi::LGLSXP => TypedSexp::Logical(LogicalSexp(self.0)),
+            savvy_ffi::RAWSXP => TypedSexp::Raw(RawSexp(self.0)),
             savvy_ffi::STRSXP => TypedSexp::String(StringSexp(self.0)),
             savvy_ffi::VECSXP => TypedSexp::List(ListSexp(self.0)),
             savvy_ffi::EXTPTRSXP => TypedSexp::ExternalPointer(ExternalPointerSexp(self.0)),
