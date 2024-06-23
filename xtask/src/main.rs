@@ -32,7 +32,7 @@ fn show() -> Result<(), DynError> {
 
     let builder = bindgen::Builder::default().header("wrapper.h").clang_args([
         // TODO: this works only on my Windows laptop...
-        format!("-I{}", "C:/Program Files/R/R-devel/include"),
+        format!("-I{}", "C:/Program Files/R/R-4.4.1/include"),
         // format!("--target={target}"),
     ]);
 
@@ -101,11 +101,17 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("REAL")
         .allowlist_function("REAL_RO")
         .allowlist_function("REAL_ELT")
-        .allowlist_function("SET_COMPLEX_ELT")
+        .allowlist_function("SET_REAL_ELT")
         .allowlist_function("Rf_ScalarReal")
         .allowlist_function("Rf_isReal")
         // Numeric
         .allowlist_function("Rf_isNumeric")
+        // raw
+        .allowlist_function("RAW")
+        .allowlist_function("RAW_RO")
+        .allowlist_function("RAW_ELT")
+        .allowlist_function("SET_RAW_ELT")
+        .allowlist_function("Rf_ScalarRaw")
         // Complex
         .allowlist_type("RComplex")
         .allowlist_function("COMPLEX")

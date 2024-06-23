@@ -103,6 +103,22 @@ extern "C" {
     pub fn Rf_isReal(s: SEXP) -> Rboolean;
 }
 
+// Raw
+//
+// According to the doc[1], c_uchar is simply u8 unlike the complexity of
+// c_char.
+// 
+// [1]: https://doc.rust-lang.org/stable/core/ffi/type.c_uchar.html
+extern "C" {
+    pub fn RAW(x: SEXP) -> *mut u8;
+    pub fn RAW_RO(x: SEXP) -> *const u8;
+    pub fn RAW_ELT(x: SEXP, i: R_xlen_t) -> u8;
+    pub fn SET_RAW_ELT(x: SEXP, i: R_xlen_t, v: u8);
+    pub fn Rf_ScalarRaw(arg1: u8) -> SEXP;
+
+    // There's no `Rf_isRaw`.`
+}
+
 // Numeric
 extern "C" {
     pub fn Rf_isNumeric(arg1: SEXP) -> Rboolean;

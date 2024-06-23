@@ -11,6 +11,7 @@ and the latter, owned SEXP, is writable. Here's the list:
 |:--------------------------------|:------------------------|:---------------------|
 | `INTSXP` (integer)              | `IntegerSexp`           | `OwnedIntegerSexp`   |
 | `REALSXP` (double)              | `RealSexp`              | `OwnedRealSexp`      |
+| `RAWSXP` (raw)                  | `RawSexp`               | `OwnedRawSexp`       |
 | `LGLSXP` (logical)              | `LogicalSexp`           | `OwnedLogicalSexp`   |
 | `STRSXP` (character)            | `StringSexp`            | `OwnedStringSexp`    |
 | `VECSXP` (list)                 | `ListSexp`              | `OwnedListSexp`      |
