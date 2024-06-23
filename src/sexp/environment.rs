@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use savvy_ffi::{R_GlobalEnv, R_NilValue, R_UnboundValue, Rboolean_FALSE, Rboolean_TRUE, SEXP};
+use savvy_ffi::{R_GlobalEnv, R_NilValue, R_UnboundValue, Rboolean_TRUE, SEXP};
 
 use crate::Sexp;
 
@@ -37,9 +37,7 @@ impl EnvironmentSexp {
 
         // Note: since this SEXP already belongs to an environment, this doesn't
         // need protection.
-        let sexp = unsafe {
-            crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame3(self.0, sym, Rboolean_TRUE))?
-        };
+        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame(self.0, sym))? };
 
         if sexp == unsafe { R_UnboundValue } {
             Ok(None)
@@ -54,8 +52,15 @@ impl EnvironmentSexp {
         let sym = str_to_symsxp(name)?.ok_or("name must not be empty")?;
 
         let res = unsafe {
-            crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame3(self.0, sym, Rboolean_FALSE))?
-                != R_UnboundValue
+            crate::unwind_protect(|| {
+                if savvy_ffi::R_existsVarInFrame(self.0, sym) == Rboolean_TRUE {
+                    // Note this value can be anything. Since `unwind_protect()`
+                    // can only return an SEXP, we need some sentinel value to check the result outside.
+                    R_UnboundValue
+                } else {
+                    R_NilValue
+                }
+            })? == R_UnboundValue
         };
 
         Ok(res)

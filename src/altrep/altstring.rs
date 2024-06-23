@@ -12,7 +12,7 @@ use savvy_ffi::{
     },
     R_NaString, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
     Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_STRING_ELT, SEXP, SEXPTYPE, STRING_ELT,
-    STRING_PTR, STRSXP,
+    STRING_PTR_RO, STRSXP,
 };
 
 use crate::{IntoExtPtrSexp, StringSexp};
@@ -137,7 +137,7 @@ pub fn register_altstring_class<T: AltString>(
     // ALTSTRING usually doesn't have it's own array of CHARSXPs, so always materialize.
     fn altvec_dataptr_inner<T: AltString>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
         match get_materialized_sexp::<T>(&mut x, allow_allocate) {
-            Some(materialized) => unsafe { STRING_PTR(materialized) as _ },
+            Some(materialized) => unsafe { STRING_PTR_RO(materialized) as _ },
             // Returning C NULL (not R NULL!) is the convention
             None => std::ptr::null_mut(),
         }
