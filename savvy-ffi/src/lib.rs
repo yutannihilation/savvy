@@ -107,7 +107,7 @@ extern "C" {
 //
 // According to the doc[1], c_uchar is simply u8 unlike the complexity of
 // c_char.
-// 
+//
 // [1]: https://doc.rust-lang.org/stable/core/ffi/type.c_uchar.html
 extern "C" {
     pub fn RAW(x: SEXP) -> *mut u8;
@@ -171,7 +171,6 @@ pub const cetype_t_CE_ANY: cetype_t = 99;
 pub type cetype_t = ::std::os::raw::c_int;
 
 extern "C" {
-    pub fn STRING_PTR(x: SEXP) -> *mut SEXP;
     pub fn STRING_PTR_RO(x: SEXP) -> *const SEXP;
     pub fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP);
