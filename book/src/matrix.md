@@ -9,7 +9,7 @@ support column-major.
 * [nalgebra](https://crates.io/crates/nalgebra): column-major
 * [glam](https://crates.io/crates/glam) (and probably all other rust-gamedev crates): column-major, probably because GLSL is column-major
 
-The example code can be found at <https://github.com/yutannihilation/savvy-matrix-examples/tree/main/src/rust/src>.
+The example code can be found at <https://github.com/yutannihilation/savvy-matrix-examples/tree/master/src/rust/src>.
 
 ## R to Rust
 
