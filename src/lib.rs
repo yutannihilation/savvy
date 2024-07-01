@@ -7,7 +7,7 @@
 //! The name "savvy" comes from the Japanese word "錆" (pronounced as `sàbí`), which means "Rust".
 //!
 //! With savvy, you can automatically generate R functions from Rust code. This is
-//! an example of what savvy-powered function would look like.
+//! an example of what a savvy-powered function would look like.
 //!
 //! **Rust**:
 //!
