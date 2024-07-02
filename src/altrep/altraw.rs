@@ -10,7 +10,7 @@ use savvy_ffi::{
         R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate,
-    Rf_protect, Rf_unprotect, Rf_xlength, LGLSXP, LOGICAL, RAW_ELT, SEXP, SEXPTYPE,
+    Rf_protect, Rf_unprotect, Rf_xlength, RAW, RAWSXP, RAW_ELT, SEXP, SEXPTYPE,
 };
 
 use crate::{IntoExtPtrSexp, RawSexp};
@@ -34,7 +34,7 @@ pub trait AltRaw: Sized + IntoExtPtrSexp {
     ///
     /// For example, you can use `copy_from_slice()` for more efficient copying
     /// of the values.
-    fn copy_to(&mut self, new: &mut [i32], offset: usize) {
+    fn copy_to(&mut self, new: &mut [u8], offset: usize) {
         // TODO: return error
         if offset + new.len() > self.length() {
             return;
@@ -110,13 +110,10 @@ pub fn register_altraw_class<T: AltRaw>(
 
         let len = self_.length();
 
-        let new = crate::alloc_vector(LGLSXP, len).unwrap();
+        let new = crate::alloc_vector(RAWSXP, len).unwrap();
         unsafe { Rf_protect(new) };
 
-        self_.copy_to(
-            unsafe { std::slice::from_raw_parts_mut(LOGICAL(new), len) },
-            0,
-        );
+        self_.copy_to(unsafe { std::slice::from_raw_parts_mut(RAW(new), len) }, 0);
 
         crate::log::debug!("A {} object is materialized", T::CLASS_NAME);
 
@@ -145,7 +142,7 @@ pub fn register_altraw_class<T: AltRaw>(
 
     fn altvec_dataptr_inner<T: AltRaw>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
         match get_materialized_sexp::<T>(&mut x, allow_allocate) {
-            Some(materialized) => unsafe { LOGICAL(materialized) as _ },
+            Some(materialized) => unsafe { RAW(materialized) as _ },
             // Returning C NULL (not R NULL!) is the convention
             None => std::ptr::null_mut(),
         }
