@@ -130,7 +130,7 @@ extern "C" {
     );
 }
 
-// Real
+// real
 
 extern "C" {
     pub fn R_make_altreal_class(
@@ -209,6 +209,30 @@ extern "C" {
     pub fn R_set_altlogical_Sum_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> SEXP>,
+    );
+}
+
+// raw
+extern "C" {
+    pub fn R_make_altraw_class(
+        cname: *const c_char,
+        pname: *const c_char,
+        info: *mut crate::DllInfo,
+    ) -> R_altrep_class_t;
+    pub fn R_set_altraw_Elt_method(
+        cls: R_altrep_class_t,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> SEXP>,
+    );
+    pub fn R_set_altraw_Get_region_method(
+        cls: R_altrep_class_t,
+        fun: Option<
+            unsafe extern "C" fn(
+                arg1: SEXP,
+                arg2: R_xlen_t,
+                arg3: R_xlen_t,
+                arg4: *mut u8,
+            ) -> R_xlen_t,
+        >,
     );
 }
 

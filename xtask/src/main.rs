@@ -224,20 +224,24 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_set_altreal_Is_sorted_method")
         .allowlist_function("R_set_altreal_Get_region_method")
         .allowlist_function("R_make_altreal_class")
-        // altlogical
+        // ALTRAW
+        .allowlist_function("R_set_altraw_Elt_method")
+        .allowlist_function("R_set_altraw_Get_region_method")
+        .allowlist_function("R_make_altraw_class")
+        // ALTLOGICAL
         .allowlist_item("R_set_altlogical_Elt_method")
         .allowlist_item("R_set_altlogical_Sum_method")
         .allowlist_item("R_set_altlogical_No_NA_method")
         .allowlist_item("R_set_altlogical_Is_sorted_method")
         .allowlist_item("R_set_altlogical_Get_region_method")
         .allowlist_item("R_make_altlogical_class")
-        // altstring
+        // ALTSTRING
         .allowlist_item("R_set_altstring_Elt_method")
         .allowlist_item("R_set_altstring_No_NA_method")
         .allowlist_item("R_set_altstring_Is_sorted_method")
         .allowlist_item("R_set_altstring_Set_elt_method")
         .allowlist_item("R_make_altstring_class")
-        // altlist
+        // ALTLIST
         .allowlist_item("R_set_altlist_Elt_method")
         .allowlist_item("R_set_altlist_Set_elt_method")
         .allowlist_item("R_make_altlist_class");
