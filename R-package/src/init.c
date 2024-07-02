@@ -174,6 +174,21 @@ SEXP savvy_tweak_altlogical__impl(SEXP x) {
     return handle_result(res);
 }
 
+SEXP savvy_altraw__impl(void) {
+    SEXP res = savvy_altraw__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_print_altraw__impl(SEXP x) {
+    SEXP res = savvy_print_altraw__ffi(x);
+    return handle_result(res);
+}
+
+SEXP savvy_tweak_altraw__impl(SEXP x) {
+    SEXP res = savvy_tweak_altraw__ffi(x);
+    return handle_result(res);
+}
+
 SEXP savvy_altstring__impl(void) {
     SEXP res = savvy_altstring__ffi();
     return handle_result(res);
@@ -714,6 +729,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_altlogical__impl", (DL_FUNC) &savvy_altlogical__impl, 0},
     {"savvy_print_altlogical__impl", (DL_FUNC) &savvy_print_altlogical__impl, 1},
     {"savvy_tweak_altlogical__impl", (DL_FUNC) &savvy_tweak_altlogical__impl, 1},
+    {"savvy_altraw__impl", (DL_FUNC) &savvy_altraw__impl, 0},
+    {"savvy_print_altraw__impl", (DL_FUNC) &savvy_print_altraw__impl, 1},
+    {"savvy_tweak_altraw__impl", (DL_FUNC) &savvy_tweak_altraw__impl, 1},
     {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
     {"savvy_print_altstring__impl", (DL_FUNC) &savvy_print_altstring__impl, 1},
     {"savvy_tweak_altstring__impl", (DL_FUNC) &savvy_tweak_altstring__impl, 1},
