@@ -7,8 +7,7 @@ use savvy_ffi::{
     altrep::{
         R_altrep_data2, R_make_altstring_class, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
-        R_set_altrep_data2, R_set_altstring_Elt_method, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method,
+        R_set_altrep_data2, R_set_altstring_Elt_method, R_set_altvec_Dataptr_or_null_method,
     },
     R_NaString, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
     Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_STRING_ELT, SEXP, SEXPTYPE, STRING_ELT,
@@ -134,25 +133,22 @@ pub fn register_altstring_class<T: AltString>(
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    // ALTSTRING usually doesn't have it's own array of CHARSXPs, so always materialize.
-    fn altvec_dataptr_inner<T: AltString>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
-        match get_materialized_sexp::<T>(&mut x, allow_allocate) {
-            Some(materialized) => unsafe { STRING_PTR_RO(materialized) as _ },
-            // Returning C NULL (not R NULL!) is the convention
-            None => std::ptr::null_mut(),
-        }
-    }
+    // TODO: uncomment this when `STRING_PTR()` becomes available
+    //
+    // unsafe extern "C" fn altvec_dataptr<T: AltString>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+    //     crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
 
-    unsafe extern "C" fn altvec_dataptr<T: AltString>(x: SEXP, _writable: Rboolean) -> *mut c_void {
-        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+    //     altvec_dataptr_inner::<T>(x, true)
+    // }
 
-        altvec_dataptr_inner::<T>(x, true)
-    }
-
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltString>(x: SEXP) -> *const c_void {
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltString>(mut x: SEXP) -> *const c_void {
         crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
 
-        altvec_dataptr_inner::<T>(x, false)
+        match get_materialized_sexp::<T>(&mut x, false) {
+            Some(materialized) => unsafe { STRING_PTR_RO(materialized) as _ },
+            // Returning C NULL (not R NULL!) is the convention
+            None => std::ptr::null(),
+        }
     }
 
     unsafe extern "C" fn altrep_length<T: AltString>(mut x: SEXP) -> R_xlen_t {
@@ -203,7 +199,7 @@ pub fn register_altstring_class<T: AltString>(
         R_set_altrep_Inspect_method(class_t, Some(altrep_inspect::<T>));
         R_set_altrep_Duplicate_method(class_t, Some(altrep_duplicate::<T>));
         R_set_altrep_Coerce_method(class_t, Some(altrep_coerce::<T>));
-        R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
+        // R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
         R_set_altstring_Elt_method(class_t, Some(altstring_elt::<T>));
 
