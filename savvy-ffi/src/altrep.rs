@@ -221,7 +221,7 @@ extern "C" {
     ) -> R_altrep_class_t;
     pub fn R_set_altraw_Elt_method(
         cls: R_altrep_class_t,
-        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> SEXP>,
+        fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: R_xlen_t) -> u8>,
     );
     pub fn R_set_altraw_Get_region_method(
         cls: R_altrep_class_t,
