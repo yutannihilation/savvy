@@ -18,6 +18,7 @@
 * Remove the use of the following non-API calls:
   * `Rf_findVarInFrame3`
   * `STRING_PTR`
+  * `DATAPTR`
 
 ## [v0.6.4] (2024-05-25)
 
