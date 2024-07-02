@@ -1,10 +1,10 @@
 use savvy::altrep::{
     get_altrep_body_ref_unchecked, register_altinteger_class, register_altlist_class,
-    register_altlogical_class, register_altreal_class, register_altstring_class, AltInteger,
-    AltList, AltLogical, AltReal, AltString,
+    register_altlogical_class, register_altraw_class, register_altreal_class,
+    register_altstring_class, AltInteger, AltList, AltLogical, AltRaw, AltReal, AltString,
 };
 use savvy::{
-    r_println, savvy, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RealSexp,
+    r_println, savvy, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RawSexp, RealSexp,
     StringSexp,
 };
 
@@ -173,6 +173,61 @@ fn tweak_altlogical(mut x: LogicalSexp) -> savvy::Result<()> {
     Err("Not a known ALTREP".into())
 }
 
+// raw
+
+#[derive(Debug, Clone)]
+struct MyAltRaw(Vec<u8>);
+
+impl MyAltRaw {
+    fn new(x: Vec<u8>) -> Self {
+        Self(x)
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltRaw {}
+
+impl AltRaw for MyAltRaw {
+    const CLASS_NAME: &'static str = "MyAltRaw";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+
+    fn length(&mut self) -> usize {
+        self.0.len()
+    }
+
+    fn elt(&mut self, i: usize) -> u8 {
+        self.0[i]
+    }
+}
+
+#[savvy]
+fn altraw() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltRaw::new(vec![1u8, 2, 3]);
+    v.into_altrep()
+}
+
+#[savvy]
+fn print_altraw(x: RawSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltRaw::try_from_altrep_ref(&x) {
+        r_println!("{x:?}");
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
+}
+
+#[savvy]
+fn tweak_altraw(mut x: RawSexp) -> savvy::Result<()> {
+    if let Ok(x) = MyAltRaw::try_from_altrep_mut(&mut x, true) {
+        for i in x.0.iter_mut() {
+            *i += 1;
+        }
+        x.0.push(2);
+        return Ok(());
+    };
+
+    Err("Not a known ALTREP".into())
+}
+
 // string
 
 #[derive(Debug, Clone)]
@@ -311,6 +366,7 @@ fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
     register_altreal_class::<MyAltReal>(dll_info)?;
     register_altlogical_class::<MyAltLogical>(dll_info)?;
+    register_altraw_class::<MyAltRaw>(dll_info)?;
     register_altstring_class::<MyAltString>(dll_info)?;
     register_altlist_class::<MyAltList>(dll_info)?;
     Ok(())

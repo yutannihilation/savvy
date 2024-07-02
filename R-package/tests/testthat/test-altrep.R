@@ -65,6 +65,28 @@ test_that("altlogical works", {
   expect_equal(x, c(NA, TRUE, FALSE, FALSE))
 })
 
+test_that("altraw works", {
+  x <- altraw()
+
+  expect_equal(x[1], as.raw(1L)) # ELT method
+  expect_equal(length(x), 3L) # length method
+  expect_equal(as.character(x), c("01", "02", "03")) # coerce method
+  expect_equal(x, as.raw(1:3))
+
+  # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
+  tweak_altraw(x)
+  expect_output(print_altraw(x), "MyAltRaw([2, 3, 4, 2])", fixed = TRUE)
+
+  expect_equal(x[1], as.raw(2L)) # ELT method
+  expect_equal(length(x), 4L) # length method
+  expect_equal(as.character(x), c("02", "03", "04", "02")) # coerce method
+  expect_equal(x, as.raw(c(2L, 3L, 4L, 2L)))
+
+  # duplicate method? dataptr method? I'm not sure
+  x[1] <- as.raw(100L)
+  expect_equal(x, as.raw(c(100L, 3L, 4L, 2L)))
+})
+
 test_that("altstring works", {
   x <- altstring()
 

@@ -210,6 +210,21 @@ NULL
 }
 
 
+`altraw` <- function() {
+  .Call(savvy_altraw__impl)
+}
+
+
+`print_altraw` <- function(`x`) {
+  invisible(.Call(savvy_print_altraw__impl, `x`))
+}
+
+
+`tweak_altraw` <- function(`x`) {
+  invisible(.Call(savvy_tweak_altraw__impl, `x`))
+}
+
+
 `altstring` <- function() {
   .Call(savvy_altstring__impl)
 }

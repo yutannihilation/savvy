@@ -3,6 +3,14 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* Add support for raw, including ALTRAW.  
+  Please be aware that, while this support was added for consistency, I bet it's
+  really rare that a raw vector is actually needed; if you want to deal with a
+  binary data on Rust's side, your primary option should be to store it in an
+  external pointer (of a struct you define) rather than an R's raw vector.
+
 ### Minor Improvements
 
 * Wrapper environment of a Rust struct or enum now cannot be modified by users.
