@@ -8,6 +8,7 @@ You can use these types as an argument of a `#[savvy]` function.
 | double            | `RealSexp`      | `f64`       |
 | integer or double | `NumericSexp`   | `NumericScalar` |
 | logical           | `LogicalSexp`   | `bool`      |
+| raw               | `RawSexp`       | `u8`        |
 | character         | `StringSexp`    | `&str`      |
 | complex[^1]       | `ComplexSexp`   | `Complex64` |
 | list              | `ListSexp`      | n/a         |

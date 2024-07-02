@@ -19,6 +19,7 @@ fn scalar_input_int(x: i32) -> savvy::Result<()> {
 | integer    | `i32`              |
 | double     | `f64`              |
 | logical    | `bool`             |
+| raw        | `u8`               |
 | character  | `&str`             |
 | complex    | `num_complex::Complex64` |
 | integer or double   | `savvy::NumericScalar` |

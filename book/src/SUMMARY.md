@@ -15,7 +15,7 @@
 - [Handling Scalar](./scalar.md)
 - [Optional Argument](./optional_arg.md)
 - [Type-specific Topics](./type-overview.md)
-    - [Integer, Real, String, Logical, And Complex](./atomic_types.md)
+    - [Integer, Real, String, Logical, Raw, And Complex](./atomic_types.md)
     - [List](./list.md)
     - [Struct](./struct.md)
     - [Enum](./enum.md)

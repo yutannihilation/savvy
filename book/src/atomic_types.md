@@ -1,4 +1,4 @@
-# Integer, Real, String, Logical, And Complex
+# Integer, Real, String, Logical, Raw, And Complex
 
 ## Integer and real
 
@@ -212,6 +212,13 @@ very unsafe.
 [charsxp-cache]: https://cran.r-project.org/doc/manuals/r-devel/R-ints.html#The-CHARSXP-cache
 [Rf_translateCharUTF8]: https://github.com/wch/r-source/blob/c3423d28830acbbbf7b38daa58f436fb06d91381/src/main/sysutils.c#L1284-L1296
 
+
+## Raw
+
+A raw vector is the sequence of `u8`, which can be used for representing various
+binary data. But, please be aware that you can use a Rust struct (see [the
+section about struct](./struct.md)) to store the data instead of copying the
+whole data into R's memory.
 
 ## Complex
 
