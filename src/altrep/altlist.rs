@@ -7,10 +7,10 @@ use savvy_ffi::{
     altrep::{
         R_altrep_data2, R_make_altlist_class, R_set_altlist_Elt_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
-        R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
+        R_set_altrep_data2, R_set_altvec_Dataptr_or_null_method,
     },
     R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate,
-    Rf_protect, Rf_unprotect, Rf_xlength, DATAPTR, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
+    Rf_protect, Rf_unprotect, Rf_xlength, DATAPTR_RO, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
     VECTOR_ELT,
 };
 
@@ -130,25 +130,22 @@ pub fn register_altlist_class<T: AltList>(
         unsafe { Rf_coerceVector(materialized, sexp_type) }
     }
 
-    // ALTLIST usually doesn't have it's own array of SEXPs, so always materialize.
-    fn altvec_dataptr_inner<T: AltList>(mut x: SEXP, allow_allocate: bool) -> *mut c_void {
-        match get_materialized_sexp::<T>(&mut x, allow_allocate) {
-            Some(materialized) => unsafe { DATAPTR(materialized) as _ },
+    // TODO: uncomment this when DATAPTR() becomes available.
+    //
+    // unsafe extern "C" fn altvec_dataptr<T: AltList>(x: SEXP, _writable: Rboolean) -> *mut c_void {
+    //     crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
+    //
+    //     altvec_dataptr_inner::<T>(x, true)
+    // }
+
+    unsafe extern "C" fn altvec_dataptr_or_null<T: AltList>(mut x: SEXP) -> *const c_void {
+        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
+
+        match get_materialized_sexp::<T>(&mut x, false) {
+            Some(materialized) => unsafe { DATAPTR_RO(materialized) as _ },
             // Returning C NULL (not R NULL!) is the convention
             None => std::ptr::null_mut(),
         }
-    }
-
-    unsafe extern "C" fn altvec_dataptr<T: AltList>(x: SEXP, _writable: Rboolean) -> *mut c_void {
-        crate::log::trace!("DATAPTR({}) is called", T::CLASS_NAME);
-
-        altvec_dataptr_inner::<T>(x, true)
-    }
-
-    unsafe extern "C" fn altvec_dataptr_or_null<T: AltList>(x: SEXP) -> *const c_void {
-        crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
-
-        altvec_dataptr_inner::<T>(x, false)
     }
 
     unsafe extern "C" fn altrep_length<T: AltList>(mut x: SEXP) -> R_xlen_t {
@@ -197,7 +194,7 @@ pub fn register_altlist_class<T: AltList>(
         R_set_altrep_Inspect_method(class_t, Some(altrep_inspect::<T>));
         R_set_altrep_Duplicate_method(class_t, Some(altrep_duplicate::<T>));
         R_set_altrep_Coerce_method(class_t, Some(altrep_coerce::<T>));
-        R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
+        // R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
         R_set_altlist_Elt_method(class_t, Some(altlist_elt::<T>));
 

@@ -136,7 +136,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("R_CHAR")
         .allowlist_function("Rf_mkCharLenCE")
         // List
-        .allowlist_function("DATAPTR")
+        .allowlist_function("DATAPTR_RO")
         .allowlist_function("VECTOR_ELT")
         .allowlist_function("SET_VECTOR_ELT")
         // External pointer

@@ -187,7 +187,7 @@ extern "C" {
 
 // List
 extern "C" {
-    pub fn DATAPTR(x: SEXP) -> *mut ::std::os::raw::c_void;
+    pub fn DATAPTR_RO(x: SEXP) -> *const ::std::os::raw::c_void; // TODO: replace this to VECTOR_PTR_RO()
     pub fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP;
 }
