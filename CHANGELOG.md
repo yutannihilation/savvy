@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.5] (2024-07-02)
+
 ### New features
 
 * Add support for raw, including ALTRAW.  
@@ -683,7 +685,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.4...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.5...HEAD
+[v0.6.5]: https://github.com/yutannihilation/savvy/compare/v0.6.4...v0.6.5
 [v0.6.4]: https://github.com/yutannihilation/savvy/compare/v0.6.3...v0.6.4
 [v0.6.3]: https://github.com/yutannihilation/savvy/compare/v0.6.2...v0.6.3
 [v0.6.2]: https://github.com/yutannihilation/savvy/compare/v0.6.1...v0.6.2
