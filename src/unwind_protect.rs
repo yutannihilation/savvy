@@ -29,10 +29,11 @@ where
             }
         }
 
-        let do_call_ptr = std::mem::transmute::<_, Option<unsafe extern "C" fn(*mut c_void) -> SEXP>>(
-            do_call::<F> as *const (),
-        );
-        let actual_fn_ptr = std::mem::transmute::<_, *mut c_void>(&f as *const F);
+        let do_call_ptr = std::mem::transmute::<
+            *const (),
+            Option<unsafe extern "C" fn(*mut c_void) -> SEXP>,
+        >(do_call::<F> as *const ());
+        let actual_fn_ptr = std::mem::transmute::<*const F, *mut c_void>(&f as *const F);
         let res: SEXP = unwind_protect_impl(do_call_ptr, actual_fn_ptr);
 
         if (res as usize & 1) == 1 {
