@@ -49,7 +49,7 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResul
 
     unsafe {
         let charsxp = str_to_charsxp(text.as_ref())?;
-        local_protect(charsxp);
+        let _charsxp_guard = local_protect(charsxp);
         let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
 
         // According to WRE (https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Parsing-R-code-from-C),
@@ -76,7 +76,7 @@ pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResul
         let parsed = unwind_protect(|| {
             savvy_ffi::R_ParseVector(text_sexp, -1, parse_status.as_ptr(), R_NilValue)
         })?;
-        local_protect(parsed);
+        let _parsed_guard = local_protect(parsed);
 
         if parse_status.get() != savvy_ffi::ParseStatus_PARSE_OK {
             return Err(crate::error::Error::InvalidRCode(text.as_ref().to_string()));

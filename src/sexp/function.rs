@@ -125,7 +125,7 @@ impl FunctionSexp {
                 Rf_lcons(self.inner(), args.inner())
             };
 
-            local_protect(call);
+            let _call_guard = local_protect(call);
 
             // Note: here, probably the environment doesn't matter at all
             // because the first argument is the function, which preserves the

@@ -203,7 +203,7 @@ impl OwnedRawSexp {
     ///         let mut out = unsafe { OwnedRawSexp::new_without_init(2)? };
     ///         out[0] = value.x;
     ///         out[1] = value.y;
-    ///         
+    ///
     ///         Ok(out)
     ///     }
     /// }
@@ -264,7 +264,7 @@ impl OwnedRawSexp {
                 // truncated to the actual length at last.
 
                 let inner = crate::alloc_vector(RAWSXP, upper as _)?;
-                local_protect(inner);
+                let _inner_guard = local_protect(inner);
                 let raw = unsafe { RAW(inner) };
 
                 let mut last_index = 0;

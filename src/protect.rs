@@ -78,7 +78,7 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         }
 
         // Protect the object until the operation finishes
-        local_protect(obj);
+        let _obj_guard = local_protect(obj);
 
         let preserved = PRESERVED_LIST.get_or_init(|| {
             let r = Rf_cons(R_NilValue, R_NilValue);
@@ -87,7 +87,7 @@ pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
         });
         let token = Rf_cons(preserved.0, CDR(preserved.0));
 
-        local_protect(token);
+        let _token_guard = local_protect(token);
 
         SET_TAG(token, obj);
         SETCDR(preserved.0, token);

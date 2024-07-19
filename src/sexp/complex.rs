@@ -199,7 +199,7 @@ impl OwnedComplexSexp {
                 // truncated to the actual length at last.
 
                 let inner = crate::alloc_vector(CPLXSXP, upper as _)?;
-                local_protect(inner);
+                let _inner_guard = local_protect(inner);
                 let raw = unsafe { COMPLEX(inner) };
 
                 let mut last_index = 0;

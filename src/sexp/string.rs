@@ -186,7 +186,7 @@ impl OwnedStringSexp {
                 // truncated to the actual length at last.
 
                 let inner = crate::alloc_vector(STRSXP, upper as _)?;
-                local_protect(inner);
+                let _inner_guard = local_protect(inner);
 
                 let mut last_index = 0;
                 for (i, v) in iter.enumerate() {
@@ -260,7 +260,7 @@ impl OwnedStringSexp {
             // Note: unlike `new()`, this allocates a STRSXP after creating a
             // CHARSXP. So, the `CHARSXP` needs to be protected.
             let charsxp = str_to_charsxp(value.as_ref())?;
-            local_protect(charsxp);
+            let _charsxp_guard = local_protect(charsxp);
             crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?
         };
         Self::new_from_raw_sexp(sexp, 1)
