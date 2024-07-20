@@ -34,7 +34,7 @@ pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
     class_name: &'static str,
 ) -> crate::Result<SEXP> {
     let sexp = x.into_external_pointer().0;
-    local_protect(sexp);
+    let _sexp_guard = local_protect(sexp);
 
     let catalogue_mutex = ALTREP_CLASS_CATALOGUE.get().ok_or(crate::Error::new(
         "ALTREP_CLASS_CATALOGUE is not initialized",
@@ -47,7 +47,7 @@ pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
         .ok_or(crate::Error::new("Failed to get the ALTREP class"))?;
 
     let altrep = unsafe { R_new_altrep(*class, sexp, R_NilValue) };
-    local_protect(altrep);
+    let _altrep_guard = local_protect(altrep);
 
     unsafe { MARK_NOT_MUTABLE(altrep) };
 

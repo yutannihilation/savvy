@@ -60,7 +60,7 @@ pub trait IntoExtPtrSexp: Sized {
             let external_pointer =
                 R_MakeExternalPtr(ptr as *mut std::os::raw::c_void, R_NilValue, R_NilValue);
 
-            local_protect(external_pointer);
+            let _external_pointer_guard = local_protect(external_pointer);
 
             // Use R_RegisterCFinalizerEx(..., TRUE) instead of
             // R_RegisterCFinalizer() in order to make the cleanup happen during

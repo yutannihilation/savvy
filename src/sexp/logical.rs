@@ -199,7 +199,7 @@ impl OwnedLogicalSexp {
     ///         let mut out = unsafe { OwnedLogicalSexp::new_without_init(2)? };
     ///         out.set_elt(0, value.x)?;
     ///         out.set_elt(1, value.y)?;
-    ///         
+    ///
     ///         Ok(out)
     ///     }
     /// }
@@ -259,7 +259,7 @@ impl OwnedLogicalSexp {
                 // truncated to the actual length at last.
 
                 let inner = crate::alloc_vector(LGLSXP, upper as _)?;
-                local_protect(inner);
+                let _inner_guard = local_protect(inner);
                 let raw = unsafe { LOGICAL(inner) };
 
                 let mut last_index = 0;
