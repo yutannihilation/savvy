@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Bug fixes
+
+* Fix inappropriate use of `PROTECT`. Thanks @t-kalinowski!
+
 ## [v0.6.5] (2024-07-02)
 
 ### New features
