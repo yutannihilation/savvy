@@ -1,10 +1,9 @@
-use std::cell::Cell;
+use std::ffi::CString;
 
-use savvy_ffi::{R_NilValue, R_compute_identical, Rboolean_TRUE, Rf_eval, Rf_xlength, SEXP, VECTOR_ELT};
+use savvy_ffi::{R_ParseEvalString, R_compute_identical, Rboolean_TRUE, SEXP};
 
 use crate::{
-    protect::{self, local_protect},
-    sexp::utils::str_to_charsxp,
+    protect::{self},
     unwind_protect, Sexp,
 };
 
@@ -45,54 +44,10 @@ impl From<EvalResult> for crate::error::Result<Sexp> {
 /// For simplicity, this function accept only a single line of R code.
 ///
 pub fn eval_parse_text<T: AsRef<str>>(text: T) -> crate::error::Result<EvalResult> {
-    let parse_status: Cell<savvy_ffi::ParseStatus> = Cell::new(savvy_ffi::ParseStatus_PARSE_NULL);
-
     unsafe {
-        let charsxp = str_to_charsxp(text.as_ref())?;
-        let _charsxp_guard = local_protect(charsxp);
-        let text_sexp = crate::unwind_protect(|| savvy_ffi::Rf_ScalarString(charsxp))?;
-
-        // According to WRE (https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Parsing-R-code-from-C),
-        //
-        // - R_ParseVector is essentially the code used to implement
-        //   parse(text=) at R level.
-        //   - The first argument is a character vector (corresponding to text).
-        //   - The second the maximal number of expressions to parse
-        //     (corresponding to n).
-        //   - The third argument is a pointer to a variable of an enumeration
-        //     type.
-        //     - It is normal (as parse does) to regard all values other than
-        //       PARSE_OK as an error.
-        //     - Other values which might be returned are PARSE_INCOMPLETE (an
-        //       incomplete expression was found) and PARSE_ERROR (a syntax
-        //       error), in both cases the value returned being R_NilValue.
-        //   - The fourth argument is a length one character vector to be used
-        //     as a filename in error messages, a srcfile object or the R NULL
-        //     object (as in the example above).
-        //     - If a srcfile object was used, a srcref attribute would be
-        //       attached to the result, containing a list of srcref objects of
-        //       the same length as the expression, to allow it to be echoed
-        //       with its original formatting.
-        let parsed = unwind_protect(|| {
-            savvy_ffi::R_ParseVector(text_sexp, -1, parse_status.as_ptr(), R_NilValue)
-        })?;
-        let _parsed_guard = local_protect(parsed);
-
-        if parse_status.get() != savvy_ffi::ParseStatus_PARSE_OK {
-            return Err(crate::error::Error::InvalidRCode(text.as_ref().to_string()));
-        }
-
-        // For simplicity, accept only a single line of R code.
-        if Rf_xlength(parsed) != 1 {
-            return Err(crate::error::Error::GeneralError(format!(
-                "eval_parse_text() accepts only a single expression, but got: {}",
-                text.as_ref(),
-            )));
-        }
-
+        let text_cstr = CString::new(text.as_ref()).unwrap();
         let eval_result =
-            unwind_protect(|| Rf_eval(VECTOR_ELT(parsed, 0), savvy_ffi::R_GlobalEnv))?;
-
+            unwind_protect(|| R_ParseEvalString(text_cstr.as_ptr(), savvy_ffi::R_GlobalEnv))?;
         let token = protect::insert_to_preserved_list(eval_result);
         let out = EvalResult {
             inner: eval_result,
@@ -135,10 +90,7 @@ mod test {
     use super::eval_parse_text;
 
     fn assert_invalid_r_code(code: &str) {
-        assert!(matches!(
-            eval_parse_text(code),
-            Err(crate::error::Error::InvalidRCode(_))
-        ));
+        assert!(eval_parse_text(code).is_err());
     }
 
     #[test]
@@ -161,8 +113,7 @@ mod test {
         // error cases
         assert_invalid_r_code("foo(");
         assert_invalid_r_code("<- a");
-
-        assert!(eval_parse_text("1; 2; 3").is_err());
+        assert_invalid_r_code("1; 2; 3");
 
         Ok(())
     }

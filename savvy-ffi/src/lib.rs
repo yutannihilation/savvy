@@ -230,20 +230,8 @@ extern "C" {
 }
 
 // Parse
-pub const ParseStatus_PARSE_NULL: ParseStatus = 0;
-pub const ParseStatus_PARSE_OK: ParseStatus = 1;
-pub const ParseStatus_PARSE_INCOMPLETE: ParseStatus = 2;
-pub const ParseStatus_PARSE_ERROR: ParseStatus = 3;
-pub const ParseStatus_PARSE_EOF: ParseStatus = 4;
-pub type ParseStatus = ::std::os::raw::c_int;
 extern "C" {
-    pub fn R_ParseVector(
-        arg1: SEXP,
-        arg2: ::std::os::raw::c_int,
-        arg3: *mut ParseStatus,
-        arg4: SEXP,
-    ) -> SEXP;
-
+    pub fn R_ParseEvalString(arg1: *const ::std::os::raw::c_char, arg2: SEXP) -> SEXP;
     pub fn R_compute_identical(arg1: SEXP, arg2: SEXP, arg3: ::std::os::raw::c_int) -> Rboolean;
 }
 
