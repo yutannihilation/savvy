@@ -277,6 +277,26 @@ Of course, this is an expert-only usage and is rarely needed. Again, you should
 almost always use `&T` or `&mut T` instead of `T`. If you are really sure it
 doesn't work well, you can use `T`.
 
+## Lifetime
+
+`#[savvy]` macro doesn't support a struct with lifetimes. This is because
+crossing the boundary of FFI means losing the track of the lifetimes. 
+
+For example, the struct below contains a reference to a variable of `usize`.
+However, once an instance of `Foo` is passed to R's side, Rust cannot know
+whether the variable is still alive when `Foo` is passed back to Rust's side.
+
+```rust
+struct Foo<'a>(&'a usize)
+```
+
+Then, what should we do to deal with such structs? I'm yet to find the best
+practices, but you might be able to
+
+* use `'static` lifetime (i.e. `struct Foo(&'static usize)`) probably by
+  referencing a global variable
+* instead of passing the struct itself to R, store the struct in a global
+  `OnceCell<HashMap>` and pass the key
 
 ## External pointer?
 
