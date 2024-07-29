@@ -1,4 +1,4 @@
-use syn::parse_quote;
+use syn::{parse_quote, spanned::Spanned};
 
 use crate::extract_docs;
 
@@ -13,6 +13,13 @@ pub struct SavvyStruct {
 
 impl SavvyStruct {
     pub fn new(orig: &syn::ItemStruct) -> syn::Result<Self> {
+        if let Some(lt) = orig.generics.lifetimes().next() {
+            return Err(syn::Error::new(
+                lt.span(),
+                "#[savvy] macro doesn't support lifetime",
+            ));
+        }
+
         let mut attrs = orig.attrs.clone();
         // Remove #[savvy]
         attrs.retain(|attr| attr != &parse_quote!(#[savvy]));
