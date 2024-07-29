@@ -60,32 +60,38 @@ error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
 48 | fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()> {
    |                                          ^^^^^^^^^^^^^^^^
 
-error: savvy only supports a fieldless enum
-  --> tests/cases/simple_cases.rs:55:6
+error: #[savvy] macro doesn't support lifetime
+  --> tests/cases/simple_cases.rs:54:12
    |
-55 |     A(i32),
+54 | struct Foo<'a>(External::Bar<'a>);
+   |            ^^
+
+error: savvy only supports a fieldless enum
+  --> tests/cases/simple_cases.rs:59:6
+   |
+59 |     A(i32),
    |      ^^^^^
 
 error: savvy doesn't support an enum with discreminant
-  --> tests/cases/simple_cases.rs:63:9
+  --> tests/cases/simple_cases.rs:67:9
    |
-63 |     B = 100,
+67 |     B = 100,
    |         ^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:67:23
+  --> tests/cases/simple_cases.rs:71:23
    |
-67 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+71 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
    |                       ^^^^^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:72:24
+  --> tests/cases/simple_cases.rs:76:24
    |
-72 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+76 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
    |                        ^^^^^^^^^^^^^^
 
 error: #[savvy_init] can be used only on a function that takes `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:77:41
+  --> tests/cases/simple_cases.rs:81:41
    |
-77 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+81 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
    |                                         ^^^

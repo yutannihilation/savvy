@@ -49,6 +49,10 @@ fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()>
     Ok(())
 }
 
+// lifetime is not supported
+#[savvy]
+struct Foo<'a>(External::Bar<'a>);
+
 // only fieldless enums is supported
 #[savvy]
 enum Foo {
