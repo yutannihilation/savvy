@@ -95,7 +95,7 @@ impl Manifest {
             if let toml::Value::Table(ref mut spec) = v {
                 if let Some(toml::Value::String(ref mut path)) = spec.get_mut("path") {
                     *path =
-                        canonicalize(&base_dir.join(&path)).expect("Failed to canonicalize path");
+                        canonicalize(&base_dir.join(path)).expect("Failed to canonicalize path");
                 }
             }
         }
