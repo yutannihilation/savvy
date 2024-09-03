@@ -484,6 +484,11 @@ SEXP savvy_safe_warn__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_fn__impl(SEXP fn) {
+    SEXP res = savvy_fn__ffi(fn);
+    return handle_result(res);
+}
+
 SEXP savvy_do_call__impl(SEXP fun, SEXP args) {
     SEXP res = savvy_do_call__ffi(fun, args);
     return handle_result(res);
@@ -599,6 +604,7 @@ SEXP savvy_fun_mod1_1_foo__impl(void) {
     return handle_result(res);
 }
 
+
 SEXP savvy_FooEnum_print__impl(SEXP self__) {
     SEXP res = savvy_FooEnum_print__ffi(self__);
     return handle_result(res);
@@ -699,6 +705,16 @@ SEXP savvy_ValuePair_print__impl(SEXP self__) {
     return handle_result(res);
 }
 
+SEXP savvy_struct_new__impl(void) {
+    SEXP res = savvy_struct_new__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_struct_fn__impl(SEXP fn) {
+    SEXP res = savvy_struct_fn__ffi(fn);
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"savvy_is_built_with_debug__impl", (DL_FUNC) &savvy_is_built_with_debug__impl, 0},
@@ -789,6 +805,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
     {"savvy_safe_warn__impl", (DL_FUNC) &savvy_safe_warn__impl, 0},
+    {"savvy_fn__impl", (DL_FUNC) &savvy_fn__impl, 1},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
@@ -811,6 +828,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_filter_string_ascii__impl", (DL_FUNC) &savvy_filter_string_ascii__impl, 1},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
+
     {"savvy_FooEnum_print__impl", (DL_FUNC) &savvy_FooEnum_print__impl, 1},
     {"savvy_FooWithDefault_new__impl", (DL_FUNC) &savvy_FooWithDefault_new__impl, 1},
     {"savvy_FooWithDefault_default_value_method__impl", (DL_FUNC) &savvy_FooWithDefault_default_value_method__impl, 2},
@@ -831,6 +849,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_ValuePair_new__impl", (DL_FUNC) &savvy_ValuePair_new__impl, 2},
     {"savvy_ValuePair_new_copy__impl", (DL_FUNC) &savvy_ValuePair_new_copy__impl, 2},
     {"savvy_ValuePair_print__impl", (DL_FUNC) &savvy_ValuePair_print__impl, 1},
+    {"savvy_struct_new__impl", (DL_FUNC) &savvy_struct_new__impl, 0},
+    {"savvy_struct_fn__impl", (DL_FUNC) &savvy_struct_fn__impl, 1},
     {NULL, NULL, 0}
 };
 

@@ -88,6 +88,7 @@ SEXP savvy_safe_stop__ffi(void);
 SEXP savvy_raise_error__ffi(void);
 SEXP savvy_must_panic__ffi(void);
 SEXP savvy_safe_warn__ffi(void);
+SEXP savvy_fn__ffi(SEXP fn);
 SEXP savvy_do_call__ffi(SEXP fun, SEXP args);
 SEXP savvy_call_with_args__ffi(SEXP fun);
 SEXP savvy_get_args__ffi(SEXP args);
@@ -111,6 +112,9 @@ SEXP savvy_filter_string_ascii__ffi(SEXP x);
 SEXP savvy_fun_mod1__ffi(void);
 SEXP savvy_init_logger__ffi(DllInfo* dll_info);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
+
+// methods and associated functions for Enum
+
 
 // methods and associated functions for FooEnum
 SEXP savvy_FooEnum_print__ffi(SEXP self__);
@@ -143,3 +147,7 @@ SEXP savvy_Value_get2__ffi(SEXP self__);
 SEXP savvy_ValuePair_new__ffi(SEXP a, SEXP b);
 SEXP savvy_ValuePair_new_copy__ffi(SEXP a, SEXP b);
 SEXP savvy_ValuePair_print__ffi(SEXP self__);
+
+// methods and associated functions for struct
+SEXP savvy_struct_new__ffi(void);
+SEXP savvy_struct_fn__ffi(SEXP fn);

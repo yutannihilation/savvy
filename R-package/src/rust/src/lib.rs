@@ -8,6 +8,7 @@ mod convert_from_rust_types;
 mod enum_support;
 mod environment;
 mod error_handling;
+mod escape;
 mod function;
 mod init_vectors;
 mod numeric;

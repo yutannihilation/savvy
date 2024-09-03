@@ -514,6 +514,11 @@ NULL
 }
 
 
+`fn` <- function(`fn`) {
+  invisible(.Call(savvy_fn__impl, `fn`))
+}
+
+
 `do_call` <- function(`fun`, `args`) {
   .Call(savvy_do_call__impl, `fun`, `args`)
 }
@@ -624,6 +629,85 @@ NULL
 `fun_mod1_1_foo` <- function() {
   invisible(.Call(savvy_fun_mod1_1_foo__impl))
 }
+
+### wrapper functions for Enum
+
+
+`.savvy_wrap_Enum` <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+
+
+  class(e) <- "Enum"
+  e
+}
+
+#' @export
+`$<-.Enum` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Enum` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
+
+
+
+`Enum` <- new.env(parent = emptyenv())
+`Enum`$`enum` <- .savvy_wrap_Enum(0L)
+
+#' @export
+`$.Enum__bundle` <- function(x, name) {
+  if (!name %in% c("enum")) {
+    stop(paste0("Unknown variant: ", name), call. = FALSE)
+  }
+
+  NextMethod()
+}
+
+#' @export
+`[[.Enum__bundle` <- function(x, i) {
+  if (is.numeric(i)) {
+    stop("Enum cannot be subset by index", call. = FALSE)
+  }
+
+  if (!i %in% c("enum")) {
+    stop(paste0("Unknown variant: ", i), call. = FALSE)
+  }
+
+  NextMethod()
+}
+
+#' @export
+`print.Enum` <- function(x, ...) {
+  idx <- x$.ptr + 1L
+  label <- c("enum")[idx]
+  if (is.na(label)) {
+    stop("Unexpected value for Enum", call. = TRUE)
+  }
+  cat("Enum::", label, sep = "")
+}
+
+
+#' @export
+`$<-.Enum` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Enum` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
+
+### associated functions for Enum
+
+
+
+class(`Enum`) <- "Enum__bundle"
+
+#' @export
+`print.Enum__bundle` <- function(x, ...) {
+  cat('Enum')
+}
+
+#' @export
+`$<-.Enum__bundle` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.Enum__bundle` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
 
 ### wrapper functions for FooEnum
 
@@ -1032,4 +1116,56 @@ class(`ValuePair`) <- "ValuePair__bundle"
 
 #' @export
 `[[<-.ValuePair__bundle` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
+
+### wrapper functions for struct
+
+
+`.savvy_wrap_struct` <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+
+
+  class(e) <- "struct"
+  e
+}
+
+#' @export
+`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
+
+
+
+`struct` <- new.env(parent = emptyenv())
+
+#' @export
+`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
+
+### associated functions for struct
+
+`struct`$`new` <- function() {
+  .savvy_wrap_struct(.Call(savvy_struct_new__impl))
+}
+
+`struct`$`fn` <- function(`fn`) {
+  invisible(.Call(savvy_struct_fn__impl, `fn`))
+}
+
+
+class(`struct`) <- "struct__bundle"
+
+#' @export
+`print.struct__bundle` <- function(x, ...) {
+  cat('struct')
+}
+
+#' @export
+`$<-.struct__bundle` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+
+#' @export
+`[[<-.struct__bundle` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
 

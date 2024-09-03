@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::parse_quote;
+use syn::{ext::IdentExt, parse_quote};
 
 use crate::{
     extract_docs, ir::ParsedTestCase, utils::add_indent, ParsedResult, SavvyEnum, SavvyFn,
@@ -119,7 +119,7 @@ impl ParsedResult {
                 }
 
                 let self_ty = match item_impl.self_ty.as_ref() {
-                    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.to_string(),
+                    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.unraw().to_string(),
                     _ => "(unknown)".to_string(),
                 };
                 let label = format!("impl {}", self_ty);

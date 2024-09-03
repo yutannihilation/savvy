@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use quote::format_ident;
+use syn::ext::IdentExt;
 
 use crate::ir::SavvyMergedImpl;
 use crate::utils::add_indent;
@@ -19,15 +20,17 @@ impl SavvyFn {
     pub fn fn_name_r(&self) -> syn::Ident {
         match self.get_self_ty_ident() {
             Some(ty) => {
+                let fn_name = self.fn_name.unraw().to_string();
+
                 // Special convention. If the method name is "new", use type
                 // itself.
-                if self.fn_name.to_string().as_str() == "new" {
+                if fn_name.as_str() == "new" {
                     ty
                 } else {
                     format_ident!("{}_{}", ty, self.fn_name)
                 }
             }
-            None => self.fn_name.clone(),
+            None => self.fn_name.unraw(),
         }
     }
 
@@ -202,7 +205,7 @@ fn generate_r_impl_for_impl(
 
     let methods = method_fns
         .iter()
-        .map(|o| format!("  e$`{}` <- `{}`(ptr)", o.fn_name, o.fn_name_r()))
+        .map(|o| format!("  e$`{}` <- `{}`(ptr)", o.fn_name.unraw(), o.fn_name_r()))
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -229,7 +232,7 @@ fn generate_r_impl_for_impl(
     let associated_fns = associated_fns
         .iter()
         .map(|x| {
-            let fn_name = x.fn_name.clone();
+            let fn_name = x.fn_name.unraw();
             let fn_name_c = x.fn_name_c_impl();
 
             let args_sig = x.get_r_args_for_signature().join(", ");
@@ -311,21 +314,24 @@ class(`{class_r}`) <- "{class_r_for_bundle}"
 }
 
 fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
-    let class_r = e.ty.to_string();
+    let class_r = e.ty.unraw().to_string();
     let class_r_for_bundle = format!("{class_r}__bundle");
 
     let variants = e
         .variants
         .iter()
         .enumerate()
-        .map(|(i, v)| format!(r#"`{class_r}`$`{v}` <- .savvy_wrap_{class_r}({i}L)"#))
+        .map(|(i, v)| {
+            let v = v.unraw();
+            format!(r#"`{class_r}`$`{v}` <- .savvy_wrap_{class_r}({i}L)"#)
+        })
         .collect::<Vec<String>>()
         .join("\n");
 
     let variant_labels = e
         .variants
         .iter()
-        .map(|x| format!(r#""{x}""#))
+        .map(|x| format!(r#""{}""#, x.unraw()))
         .collect::<Vec<String>>()
         .join(", ");
 
@@ -369,8 +375,11 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
 }
 
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
-    let enum_types: HashMap<String, &SavvyEnum> =
-        result.enums.iter().map(|e| (e.ty.to_string(), e)).collect();
+    let enum_types: HashMap<String, &SavvyEnum> = result
+        .enums
+        .iter()
+        .map(|e| (e.ty.unraw().to_string(), e))
+        .collect();
 
     let r_fns = result
         .bare_fns
