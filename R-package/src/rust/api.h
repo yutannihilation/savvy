@@ -35,7 +35,7 @@ SEXP savvy_tweak_altstring__ffi(SEXP x);
 SEXP savvy_altlist__ffi(void);
 SEXP savvy_print_altlist__ffi(SEXP x);
 SEXP savvy_tweak_altlist__ffi(SEXP x);
-SEXP savvy_init_altrep_class__ffi(DllInfo* dll_info);
+SEXP savvy_init_altrep_class__ffi(DllInfo *dll_info);
 SEXP savvy_get_altrep_class_name__ffi(SEXP x);
 SEXP savvy_get_altrep_package_name__ffi(SEXP x);
 SEXP savvy_print_altint_by_weird_way__ffi(SEXP x);
@@ -82,13 +82,13 @@ SEXP savvy_foo_a__ffi(void);
 SEXP savvy_get_var_in_env__ffi(SEXP name, SEXP env);
 SEXP savvy_var_exists_in_env__ffi(SEXP name, SEXP env);
 SEXP savvy_set_var_in_env__ffi(SEXP name, SEXP value, SEXP env);
-SEXP savvy_init_foo_value__ffi(DllInfo* dll);
+SEXP savvy_init_foo_value__ffi(DllInfo *dll);
 SEXP savvy_get_foo_value__ffi(void);
 SEXP savvy_safe_stop__ffi(void);
 SEXP savvy_raise_error__ffi(void);
 SEXP savvy_must_panic__ffi(void);
 SEXP savvy_safe_warn__ffi(void);
-SEXP savvy_fn__ffi(SEXP fn);
+SEXP savvy_fn__ffi(SEXP r #struct);
 SEXP savvy_do_call__ffi(SEXP fun, SEXP args);
 SEXP savvy_call_with_args__ffi(SEXP fun);
 SEXP savvy_get_args__ffi(SEXP args);
@@ -110,11 +110,10 @@ SEXP savvy_filter_complex_without_im__ffi(SEXP x);
 SEXP savvy_filter_logical_duplicates__ffi(SEXP x);
 SEXP savvy_filter_string_ascii__ffi(SEXP x);
 SEXP savvy_fun_mod1__ffi(void);
-SEXP savvy_init_logger__ffi(DllInfo* dll_info);
+SEXP savvy_init_logger__ffi(DllInfo *dll_info);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
 
 // methods and associated functions for Enum
-
 
 // methods and associated functions for FooEnum
 SEXP savvy_FooEnum_print__ffi(SEXP self__);

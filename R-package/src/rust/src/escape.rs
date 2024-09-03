@@ -1,7 +1,7 @@
 use savvy::savvy;
 
 #[savvy]
-fn r#fn(r#fn: bool) -> savvy::Result<()> {
+fn r#fn(r#struct: bool) -> savvy::Result<()> {
     Ok(())
 }
 

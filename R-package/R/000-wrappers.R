@@ -514,8 +514,8 @@ NULL
 }
 
 
-`fn` <- function(`fn`) {
-  invisible(.Call(savvy_fn__impl, `fn`))
+`fn` <- function(`struct`) {
+  invisible(.Call(savvy_fn__impl, `struct`))
 }
 
 

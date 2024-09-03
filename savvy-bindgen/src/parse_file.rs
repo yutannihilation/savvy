@@ -119,7 +119,7 @@ impl ParsedResult {
                 }
 
                 let self_ty = match item_impl.self_ty.as_ref() {
-                    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.unraw().to_string(),
+                    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.to_string(),
                     _ => "(unknown)".to_string(),
                 };
                 let label = format!("impl {}", self_ty);

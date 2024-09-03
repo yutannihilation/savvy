@@ -484,8 +484,8 @@ SEXP savvy_safe_warn__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_fn__impl(SEXP fn) {
-    SEXP res = savvy_fn__ffi(fn);
+SEXP savvy_fn__impl(SEXP struct) {
+    SEXP res = savvy_fn__ffi(struct);
     return handle_result(res);
 }
 
