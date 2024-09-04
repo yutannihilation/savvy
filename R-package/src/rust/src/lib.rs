@@ -8,12 +8,14 @@ mod convert_from_rust_types;
 mod enum_support;
 mod environment;
 mod error_handling;
-mod escape;
 mod function;
 mod init_vectors;
 mod numeric;
 mod optional_arg;
 mod try_from_iter;
+
+// This doesn't need r#, but this is to test if a raw identifier is handled correctly
+mod r#escape;
 
 // to test if the definition over multiple files is accepted.
 // cf. https://github.com/yutannihilation/savvy/issues/118

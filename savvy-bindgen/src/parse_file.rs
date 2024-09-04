@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::parse_quote;
+use syn::{ext::IdentExt, parse_quote};
 
 use crate::{
     extract_docs, ir::ParsedTestCase, utils::add_indent, ParsedResult, SavvyEnum, SavvyFn,
@@ -174,7 +174,7 @@ impl ParsedResult {
 
                 match (&item_mod.content, is_test_mod) {
                     (None, false) => {
-                        self.child_mods.push(item_mod.ident.to_string());
+                        self.child_mods.push(item_mod.ident.unraw().to_string());
                     }
                     (None, true) => {}
                     (Some((_, items)), false) => {
@@ -183,7 +183,7 @@ impl ParsedResult {
                     (Some(_), true) => {
                         let label = self.mod_path.join("::");
                         let mut cur_mod_path = self.mod_path.clone();
-                        cur_mod_path.push(item_mod.ident.to_string());
+                        cur_mod_path.push(item_mod.ident.unraw().to_string());
 
                         self.tests.push(transform_test_mod(
                             item_mod,

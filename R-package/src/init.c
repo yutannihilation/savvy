@@ -484,11 +484,6 @@ SEXP savvy_safe_warn__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_fn__impl(SEXP c_arg__struct) {
-    SEXP res = savvy_fn__ffi(c_arg__struct);
-    return handle_result(res);
-}
-
 SEXP savvy_do_call__impl(SEXP c_arg__fun, SEXP c_arg__args) {
     SEXP res = savvy_do_call__ffi(c_arg__fun, c_arg__args);
     return handle_result(res);
@@ -586,6 +581,11 @@ SEXP savvy_filter_logical_duplicates__impl(SEXP c_arg__x) {
 
 SEXP savvy_filter_string_ascii__impl(SEXP c_arg__x) {
     SEXP res = savvy_filter_string_ascii__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_fn__impl(SEXP c_arg__struct) {
+    SEXP res = savvy_fn__ffi(c_arg__struct);
     return handle_result(res);
 }
 
@@ -805,7 +805,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
     {"savvy_safe_warn__impl", (DL_FUNC) &savvy_safe_warn__impl, 0},
-    {"savvy_fn__impl", (DL_FUNC) &savvy_fn__impl, 1},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
@@ -826,6 +825,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_filter_complex_without_im__impl", (DL_FUNC) &savvy_filter_complex_without_im__impl, 1},
     {"savvy_filter_logical_duplicates__impl", (DL_FUNC) &savvy_filter_logical_duplicates__impl, 1},
     {"savvy_filter_string_ascii__impl", (DL_FUNC) &savvy_filter_string_ascii__impl, 1},
+    {"savvy_fn__impl", (DL_FUNC) &savvy_fn__impl, 1},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
 

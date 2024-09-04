@@ -514,11 +514,6 @@ NULL
 }
 
 
-`fn` <- function(`struct`) {
-  invisible(.Call(savvy_fn__impl, `struct`))
-}
-
-
 `do_call` <- function(`fun`, `args`) {
   .Call(savvy_do_call__impl, `fun`, `args`)
 }
@@ -618,6 +613,11 @@ NULL
 
 `filter_string_ascii` <- function(`x`) {
   .Call(savvy_filter_string_ascii__impl, `x`)
+}
+
+
+`fn` <- function(`struct`) {
+  invisible(.Call(savvy_fn__impl, `struct`))
 }
 
 
