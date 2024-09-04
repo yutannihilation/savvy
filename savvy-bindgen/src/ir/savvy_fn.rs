@@ -554,7 +554,7 @@ fn get_savvy_return_type(
                         ("Result", _) => {}
                         // if Self or the same as the self type, it's allowed
                         (ret_ty_str, Some(ty_actual)) => {
-                            if ret_ty_str != "Self" && ret_ty_str != ty_actual.to_string() {
+                            if ret_ty_str != "Self" && ty_actual != ret_ty_str {
                                 return e;
                             } else {
                                 return Ok(SavvyFnReturnType::UserDefinedStruct(
