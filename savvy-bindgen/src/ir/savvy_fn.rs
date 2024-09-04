@@ -1,6 +1,6 @@
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::{parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
+use syn::{ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::utils::extract_docs;
 
@@ -443,7 +443,7 @@ impl SavvyFn {
                         }
 
                         (_, _) => {
-                            let arg_lit = syn::LitStr::new(&pat.to_string(), Span::call_site());
+                            let arg_lit = syn::LitStr::new(&pat.unraw().to_string(), Span::call_site());
                             if ty.optional {
                                 stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
                                 stmts_additional.push(parse_quote! { 
