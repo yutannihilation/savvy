@@ -7,6 +7,8 @@
 
 * Fix inappropriate use of `PROTECT`. Thanks @t-kalinowski!
 
+* Handle raw identifiers (e.g. `r#struct`) correctly.
+
 ## [v0.6.5] (2024-07-02)
 
 ### New features
