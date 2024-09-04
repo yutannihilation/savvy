@@ -71,7 +71,7 @@ case for now for simplicity.)
 ```rust
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
-pub unsafe extern "C" fn add_suffix(x: SEXP, y: SEXP) -> SEXP {
+pub unsafe extern "C" fn savvy_add_suffix__ffi(x: SEXP, y: SEXP) -> SEXP {
     match savvy_add_suffix_inner(x, y) {
         Ok(result) => result.0,
         Err(e) => savvy::handle_error(e),
@@ -82,7 +82,14 @@ unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp>
     let x = <savvy::RealSexp>::try_from(savvy::Sexp(x))?;
     let y = <&str>::try_from(savvy::Sexp(y))?;
     
-    // ...original body...
+    // original function
+    add_suffix(x, y)
+}
+
+// original function
+fn add_suffix(x: StringSexp, y: &str) -> savvy::Result<savvy::Sexp> {
+
+    // ..original body..
 
 }
 ```
@@ -90,7 +97,7 @@ unsafe fn savvy_add_suffix_inner(x: SEXP, y: SEXP) -> savvy::Result<savvy::Sexp>
 ### C function signature
 
 ```c
-SEXP add_suffix(SEXP x, SEXP y);
+SEXP savvy_add_suffix__ffi(SEXP c_arg__x, SEXP c_arg__y);
 ```
 
 ### C implementation
@@ -98,8 +105,8 @@ SEXP add_suffix(SEXP x, SEXP y);
 (let's skip the details about `handle_result` for now)
 
 ```c
-SEXP add_suffix__impl(SEXP x, SEXP y) {
-    SEXP res = add_suffix(x, y);
+SEXP savvy_add_suffix__impl(SEXP c_arg__x, SEXP c_arg__y) {
+    SEXP res = savvy_add_suffix__ffi(c_arg__x, c_arg__y);
     return handle_result(res);
 }
 ```
