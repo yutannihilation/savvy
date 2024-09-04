@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use quote::format_ident;
 use syn::ext::IdentExt;
+use syn::Ident;
 
 use crate::ir::SavvyMergedImpl;
 use crate::utils::add_indent;
-use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnType};
+use crate::{MergedResult, SavvyEnum, SavvyFn, SavvyFnArg, SavvyFnType};
 
 use crate::ir::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 
@@ -16,21 +16,51 @@ fn get_r_doc_comment(docs: &[String]) -> String {
         .join("\n")
 }
 
+fn ident_to_str_r(x: &Ident) -> String {
+    x.unraw().to_string()
+}
+
+impl SavvyEnum {
+    pub fn class_name_r(&self) -> String {
+        self.ty.unraw().to_string()
+    }
+}
+
+impl SavvyFnArg {
+    pub fn arg_name_r(&self) -> String {
+        self.pat.unraw().to_string()
+    }
+}
+
 impl SavvyFn {
-    pub fn fn_name_r(&self) -> syn::Ident {
+    pub fn fn_name_r(&self) -> String {
+        self.name_r(true)
+    }
+
+    pub fn field_name_r(&self) -> String {
+        self.name_r(false)
+    }
+
+    fn name_r(&self, with_ty: bool) -> String {
+        let fn_name = ident_to_str_r(&self.fn_name);
+
+        if !with_ty {
+            return fn_name;
+        }
+
         match self.get_self_ty_ident() {
             Some(ty) => {
-                let fn_name = self.fn_name.unraw().to_string();
+                let ty_name = ident_to_str_r(&ty);
 
                 // Special convention. If the method name is "new", use type
                 // itself.
                 if fn_name.as_str() == "new" {
-                    ty
+                    ty_name
                 } else {
-                    format_ident!("{}_{}", ty, self.fn_name)
+                    format!("{}_{}", ty, fn_name)
                 }
             }
-            None => self.fn_name.unraw(),
+            None => fn_name,
         }
     }
 
@@ -40,14 +70,14 @@ impl SavvyFn {
             .args
             .iter()
             .map(|arg| {
-                let pat = arg.pat_string();
+                let arg_name = arg.arg_name_r();
                 let default_value = if arg.is_optional() {
                     Some("NULL".to_string())
                 } else {
                     None
                 };
 
-                (pat, default_value)
+                (arg_name, default_value)
             })
             .collect();
 
@@ -62,11 +92,11 @@ impl SavvyFn {
     fn get_r_args_for_signature(&self) -> Vec<String> {
         self.get_r_args()
             .iter()
-            .map(|(pat, default_value)| {
+            .map(|(arg_name, default_value)| {
                 if let Some(value) = default_value {
-                    format!("`{pat}` = {value}")
+                    format!("`{arg_name}` = {value}")
                 } else {
-                    format!("`{pat}`")
+                    format!("`{arg_name}`")
                 }
             })
             .collect::<Vec<_>>()
@@ -75,7 +105,7 @@ impl SavvyFn {
     fn get_r_args_for_call(&self) -> Vec<String> {
         self.get_r_args()
             .iter()
-            .map(|(pat, _)| format!("`{pat}`"))
+            .map(|(arg_name, _)| format!("`{arg_name}`"))
             .collect::<Vec<_>>()
     }
 
@@ -99,9 +129,8 @@ impl SavvyFn {
                 format!("invisible(.Call({args_call}))")
             }
             SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
-            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                ty_str, ..
-            }) => {
+            SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType { ty, .. }) => {
+                let ty_str = ident_to_str_r(ty);
                 format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
             }
         };
@@ -126,7 +155,7 @@ impl SavvyFn {
                     return None;
                 }
 
-                let r_var = arg.pat_string();
+                let r_var = arg.arg_name_r();
                 let r_class = arg.ty_string();
                 Some(format!(
                     r#"`{r_var}` <- .savvy_extract_ptr(`{r_var}`, "{r_class}")"#
@@ -138,12 +167,12 @@ impl SavvyFn {
 
 fn generate_r_impl_for_impl(
     i: &SavvyMergedImpl,
-    ty: &str,
-    enum_types: &HashMap<String, &SavvyEnum>,
+    ty: &Ident,
+    enum_types: &HashMap<Ident, &SavvyEnum>,
 ) -> String {
     let mut associated_fns: Vec<&SavvyFn> = Vec::new();
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
-    let class_r = ty;
+    let class_r = ident_to_str_r(ty);
     let class_r_for_bundle = format!("{class_r}__bundle");
 
     for savvy_fn in &i.fns {
@@ -181,9 +210,9 @@ fn generate_r_impl_for_impl(
                 // If the result is an external pointer, wrap it with the
                 // corresponding wraping function
                 SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                    ty_str,
-                    ..
+                    ty, ..
                 }) => {
+                    let ty_str = ident_to_str_r(ty);
                     format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
                 }
             };
@@ -205,7 +234,7 @@ fn generate_r_impl_for_impl(
 
     let methods = method_fns
         .iter()
-        .map(|o| format!("  e$`{}` <- `{}`(ptr)", o.fn_name.unraw(), o.fn_name_r()))
+        .map(|o| format!("  e$`{}` <- `{}`(ptr)", o.field_name_r(), o.fn_name_r()))
         .collect::<Vec<String>>()
         .join("\n");
 
@@ -232,7 +261,7 @@ fn generate_r_impl_for_impl(
     let associated_fns = associated_fns
         .iter()
         .map(|x| {
-            let fn_name = x.fn_name.unraw();
+            let fn_name = x.field_name_r();
             let fn_name_c = x.fn_name_c_impl();
 
             let args_sig = x.get_r_args_for_signature().join(", ");
@@ -250,9 +279,9 @@ fn generate_r_impl_for_impl(
                 // If the result is an external pointer, wrap it with the
                 // corresponding wraping function
                 SavvyFnReturnType::UserDefinedStruct(UserDefinedStructReturnType {
-                    ty_str,
-                    ..
+                    ty, ..
                 }) => {
+                    let ty_str = ident_to_str_r(ty);
                     format!(".savvy_wrap_{ty_str}(.Call({args_call}))")
                 }
             };
@@ -314,7 +343,7 @@ class(`{class_r}`) <- "{class_r_for_bundle}"
 }
 
 fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
-    let class_r = e.ty.unraw().to_string();
+    let class_r = e.class_name_r();
     let class_r_for_bundle = format!("{class_r}__bundle");
 
     let variants = e
@@ -322,7 +351,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
         .iter()
         .enumerate()
         .map(|(i, v)| {
-            let v = v.unraw();
+            let v = ident_to_str_r(v);
             format!(r#"`{class_r}`$`{v}` <- .savvy_wrap_{class_r}({i}L)"#)
         })
         .collect::<Vec<String>>()
@@ -331,7 +360,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
     let variant_labels = e
         .variants
         .iter()
-        .map(|x| format!(r#""{}""#, x.unraw()))
+        .map(|x| format!(r#""{}""#, ident_to_str_r(x)))
         .collect::<Vec<String>>()
         .join(", ");
 
@@ -375,11 +404,8 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
 }
 
 pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
-    let enum_types: HashMap<String, &SavvyEnum> = result
-        .enums
-        .iter()
-        .map(|e| (e.ty.unraw().to_string(), e))
-        .collect();
+    let enum_types: HashMap<Ident, &SavvyEnum> =
+        result.enums.iter().map(|e| (e.ty.clone(), e)).collect();
 
     let r_fns = result
         .bare_fns
