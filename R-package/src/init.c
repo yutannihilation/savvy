@@ -39,63 +39,63 @@ SEXP savvy_is_built_with_debug__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_to_upper__impl(SEXP x) {
-    SEXP res = savvy_to_upper__ffi(x);
+SEXP savvy_to_upper__impl(SEXP c_arg__x) {
+    SEXP res = savvy_to_upper__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_add_suffix__impl(SEXP x, SEXP y) {
-    SEXP res = savvy_add_suffix__ffi(x, y);
+SEXP savvy_add_suffix__impl(SEXP c_arg__x, SEXP c_arg__y) {
+    SEXP res = savvy_add_suffix__ffi(c_arg__x, c_arg__y);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_int__impl(SEXP x) {
-    SEXP res = savvy_times_two_int__ffi(x);
+SEXP savvy_times_two_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_times_any_int__impl(SEXP x, SEXP y) {
-    SEXP res = savvy_times_any_int__ffi(x, y);
+SEXP savvy_times_any_int__impl(SEXP c_arg__x, SEXP c_arg__y) {
+    SEXP res = savvy_times_any_int__ffi(c_arg__x, c_arg__y);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_real__impl(SEXP x) {
-    SEXP res = savvy_times_two_real__ffi(x);
+SEXP savvy_times_two_real__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_real__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_times_any_real__impl(SEXP x, SEXP y) {
-    SEXP res = savvy_times_any_real__ffi(x, y);
+SEXP savvy_times_any_real__impl(SEXP c_arg__x, SEXP c_arg__y) {
+    SEXP res = savvy_times_any_real__ffi(c_arg__x, c_arg__y);
     return handle_result(res);
 }
 
-SEXP savvy_flip_logical__impl(SEXP x) {
-    SEXP res = savvy_flip_logical__ffi(x);
+SEXP savvy_flip_logical__impl(SEXP c_arg__x) {
+    SEXP res = savvy_flip_logical__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_flip_logical_expert_only__impl(SEXP x) {
-    SEXP res = savvy_flip_logical_expert_only__ffi(x);
+SEXP savvy_flip_logical_expert_only__impl(SEXP c_arg__x) {
+    SEXP res = savvy_flip_logical_expert_only__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_or_logical__impl(SEXP x, SEXP y) {
-    SEXP res = savvy_or_logical__ffi(x, y);
+SEXP savvy_or_logical__impl(SEXP c_arg__x, SEXP c_arg__y) {
+    SEXP res = savvy_or_logical__ffi(c_arg__x, c_arg__y);
     return handle_result(res);
 }
 
-SEXP savvy_reverse_bits__impl(SEXP x) {
-    SEXP res = savvy_reverse_bits__ffi(x);
+SEXP savvy_reverse_bits__impl(SEXP c_arg__x) {
+    SEXP res = savvy_reverse_bits__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_reverse_bit_scalar__impl(SEXP x) {
-    SEXP res = savvy_reverse_bit_scalar__ffi(x);
+SEXP savvy_reverse_bit_scalar__impl(SEXP c_arg__x) {
+    SEXP res = savvy_reverse_bit_scalar__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_print_list__impl(SEXP x) {
-    SEXP res = savvy_print_list__ffi(x);
+SEXP savvy_print_list__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_list__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -119,13 +119,13 @@ SEXP savvy_external_person_new__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_get_name_external__impl(SEXP x) {
-    SEXP res = savvy_get_name_external__ffi(x);
+SEXP savvy_get_name_external__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_name_external__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_set_name_external__impl(SEXP x, SEXP name) {
-    SEXP res = savvy_set_name_external__ffi(x, name);
+SEXP savvy_set_name_external__impl(SEXP c_arg__x, SEXP c_arg__name) {
+    SEXP res = savvy_set_name_external__ffi(c_arg__x, c_arg__name);
     return handle_result(res);
 }
 
@@ -134,13 +134,13 @@ SEXP savvy_altint__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altint__impl(SEXP x) {
-    SEXP res = savvy_print_altint__ffi(x);
+SEXP savvy_print_altint__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altint__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altint__impl(SEXP x) {
-    SEXP res = savvy_tweak_altint__ffi(x);
+SEXP savvy_tweak_altint__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altint__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -149,13 +149,13 @@ SEXP savvy_altreal__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altreal__impl(SEXP x) {
-    SEXP res = savvy_print_altreal__ffi(x);
+SEXP savvy_print_altreal__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altreal__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altreal__impl(SEXP x) {
-    SEXP res = savvy_tweak_altreal__ffi(x);
+SEXP savvy_tweak_altreal__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altreal__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -164,13 +164,13 @@ SEXP savvy_altlogical__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altlogical__impl(SEXP x) {
-    SEXP res = savvy_print_altlogical__ffi(x);
+SEXP savvy_print_altlogical__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altlogical__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altlogical__impl(SEXP x) {
-    SEXP res = savvy_tweak_altlogical__ffi(x);
+SEXP savvy_tweak_altlogical__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altlogical__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -179,13 +179,13 @@ SEXP savvy_altraw__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altraw__impl(SEXP x) {
-    SEXP res = savvy_print_altraw__ffi(x);
+SEXP savvy_print_altraw__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altraw__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altraw__impl(SEXP x) {
-    SEXP res = savvy_tweak_altraw__ffi(x);
+SEXP savvy_tweak_altraw__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altraw__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -194,13 +194,13 @@ SEXP savvy_altstring__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altstring__impl(SEXP x) {
-    SEXP res = savvy_print_altstring__ffi(x);
+SEXP savvy_print_altstring__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altstring__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altstring__impl(SEXP x) {
-    SEXP res = savvy_tweak_altstring__ffi(x);
+SEXP savvy_tweak_altstring__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altstring__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -209,53 +209,53 @@ SEXP savvy_altlist__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_print_altlist__impl(SEXP x) {
-    SEXP res = savvy_print_altlist__ffi(x);
+SEXP savvy_print_altlist__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altlist__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_tweak_altlist__impl(SEXP x) {
-    SEXP res = savvy_tweak_altlist__ffi(x);
+SEXP savvy_tweak_altlist__impl(SEXP c_arg__x) {
+    SEXP res = savvy_tweak_altlist__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_init_altrep_class__impl(DllInfo* dll_info) {
-    SEXP res = savvy_init_altrep_class__ffi(dll_info);
+SEXP savvy_init_altrep_class__impl(DllInfo* c_arg__dll_info) {
+    SEXP res = savvy_init_altrep_class__ffi(c_arg__dll_info);
     return handle_result(res);
 }
 
-SEXP savvy_get_altrep_class_name__impl(SEXP x) {
-    SEXP res = savvy_get_altrep_class_name__ffi(x);
+SEXP savvy_get_altrep_class_name__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_altrep_class_name__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_get_altrep_package_name__impl(SEXP x) {
-    SEXP res = savvy_get_altrep_package_name__ffi(x);
+SEXP savvy_get_altrep_package_name__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_altrep_package_name__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_print_altint_by_weird_way__impl(SEXP x) {
-    SEXP res = savvy_print_altint_by_weird_way__ffi(x);
+SEXP savvy_print_altint_by_weird_way__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_altint_by_weird_way__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_get_class_int__impl(SEXP x) {
-    SEXP res = savvy_get_class_int__ffi(x);
+SEXP savvy_get_class_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_class_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_get_names_int__impl(SEXP x) {
-    SEXP res = savvy_get_names_int__ffi(x);
+SEXP savvy_get_names_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_names_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_get_dim_int__impl(SEXP x) {
-    SEXP res = savvy_get_dim_int__ffi(x);
+SEXP savvy_get_dim_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_get_dim_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_get_attr_int__impl(SEXP x, SEXP attr) {
-    SEXP res = savvy_get_attr_int__ffi(x, attr);
+SEXP savvy_get_attr_int__impl(SEXP c_arg__x, SEXP c_arg__attr) {
+    SEXP res = savvy_get_attr_int__ffi(c_arg__x, c_arg__attr);
     return handle_result(res);
 }
 
@@ -274,53 +274,53 @@ SEXP savvy_set_dim_int__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_set_attr_int__impl(SEXP attr, SEXP value) {
-    SEXP res = savvy_set_attr_int__ffi(attr, value);
+SEXP savvy_set_attr_int__impl(SEXP c_arg__attr, SEXP c_arg__value) {
+    SEXP res = savvy_set_attr_int__ffi(c_arg__attr, c_arg__value);
     return handle_result(res);
 }
 
-SEXP savvy_new_complex__impl(SEXP size) {
-    SEXP res = savvy_new_complex__ffi(size);
+SEXP savvy_new_complex__impl(SEXP c_arg__size) {
+    SEXP res = savvy_new_complex__ffi(c_arg__size);
     return handle_result(res);
 }
 
-SEXP savvy_first_complex__impl(SEXP x) {
-    SEXP res = savvy_first_complex__ffi(x);
+SEXP savvy_first_complex__impl(SEXP c_arg__x) {
+    SEXP res = savvy_first_complex__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_abs_complex__impl(SEXP x) {
-    SEXP res = savvy_abs_complex__ffi(x);
+SEXP savvy_abs_complex__impl(SEXP c_arg__x) {
+    SEXP res = savvy_abs_complex__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_new_value_pair__impl(SEXP a, SEXP b) {
-    SEXP res = savvy_new_value_pair__ffi(a, b);
+SEXP savvy_new_value_pair__impl(SEXP c_arg__a, SEXP c_arg__b) {
+    SEXP res = savvy_new_value_pair__ffi(c_arg__a, c_arg__b);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_int__impl(SEXP x) {
-    SEXP res = savvy_scalar_input_int__ffi(x);
+SEXP savvy_scalar_input_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_scalar_input_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_usize__impl(SEXP x) {
-    SEXP res = savvy_scalar_input_usize__ffi(x);
+SEXP savvy_scalar_input_usize__impl(SEXP c_arg__x) {
+    SEXP res = savvy_scalar_input_usize__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_real__impl(SEXP x) {
-    SEXP res = savvy_scalar_input_real__ffi(x);
+SEXP savvy_scalar_input_real__impl(SEXP c_arg__x) {
+    SEXP res = savvy_scalar_input_real__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_logical__impl(SEXP x) {
-    SEXP res = savvy_scalar_input_logical__ffi(x);
+SEXP savvy_scalar_input_logical__impl(SEXP c_arg__x) {
+    SEXP res = savvy_scalar_input_logical__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_string__impl(SEXP x) {
-    SEXP res = savvy_scalar_input_string__ffi(x);
+SEXP savvy_scalar_input_string__impl(SEXP c_arg__x) {
+    SEXP res = savvy_scalar_input_string__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -374,63 +374,63 @@ SEXP savvy_scalar_output_complex2__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_sum_int__impl(SEXP x) {
-    SEXP res = savvy_sum_int__ffi(x);
+SEXP savvy_sum_int__impl(SEXP c_arg__x) {
+    SEXP res = savvy_sum_int__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_sum_real__impl(SEXP x) {
-    SEXP res = savvy_sum_real__ffi(x);
+SEXP savvy_sum_real__impl(SEXP c_arg__x) {
+    SEXP res = savvy_sum_real__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_int_vec__impl(SEXP x) {
-    SEXP res = savvy_rep_int_vec__ffi(x);
+SEXP savvy_rep_int_vec__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_int_vec__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_int_slice__impl(SEXP x) {
-    SEXP res = savvy_rep_int_slice__ffi(x);
+SEXP savvy_rep_int_slice__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_int_slice__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_real_vec__impl(SEXP x) {
-    SEXP res = savvy_rep_real_vec__ffi(x);
+SEXP savvy_rep_real_vec__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_real_vec__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_real_slice__impl(SEXP x) {
-    SEXP res = savvy_rep_real_slice__ffi(x);
+SEXP savvy_rep_real_slice__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_real_slice__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_bool_vec__impl(SEXP x) {
-    SEXP res = savvy_rep_bool_vec__ffi(x);
+SEXP savvy_rep_bool_vec__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_bool_vec__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_bool_slice__impl(SEXP x) {
-    SEXP res = savvy_rep_bool_slice__ffi(x);
+SEXP savvy_rep_bool_slice__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_bool_slice__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_str_vec__impl(SEXP x) {
-    SEXP res = savvy_rep_str_vec__ffi(x);
+SEXP savvy_rep_str_vec__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_str_vec__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_rep_str_slice__impl(SEXP x) {
-    SEXP res = savvy_rep_str_slice__ffi(x);
+SEXP savvy_rep_str_slice__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rep_str_slice__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_print_foo_enum__impl(SEXP x) {
-    SEXP res = savvy_print_foo_enum__ffi(x);
+SEXP savvy_print_foo_enum__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_foo_enum__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_print_foo_enum_ref__impl(SEXP x) {
-    SEXP res = savvy_print_foo_enum_ref__ffi(x);
+SEXP savvy_print_foo_enum_ref__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_foo_enum_ref__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -439,23 +439,23 @@ SEXP savvy_foo_a__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_get_var_in_env__impl(SEXP name, SEXP env) {
-    SEXP res = savvy_get_var_in_env__ffi(name, env);
+SEXP savvy_get_var_in_env__impl(SEXP c_arg__name, SEXP c_arg__env) {
+    SEXP res = savvy_get_var_in_env__ffi(c_arg__name, c_arg__env);
     return handle_result(res);
 }
 
-SEXP savvy_var_exists_in_env__impl(SEXP name, SEXP env) {
-    SEXP res = savvy_var_exists_in_env__ffi(name, env);
+SEXP savvy_var_exists_in_env__impl(SEXP c_arg__name, SEXP c_arg__env) {
+    SEXP res = savvy_var_exists_in_env__ffi(c_arg__name, c_arg__env);
     return handle_result(res);
 }
 
-SEXP savvy_set_var_in_env__impl(SEXP name, SEXP value, SEXP env) {
-    SEXP res = savvy_set_var_in_env__ffi(name, value, env);
+SEXP savvy_set_var_in_env__impl(SEXP c_arg__name, SEXP c_arg__value, SEXP c_arg__env) {
+    SEXP res = savvy_set_var_in_env__ffi(c_arg__name, c_arg__value, c_arg__env);
     return handle_result(res);
 }
 
-SEXP savvy_init_foo_value__impl(DllInfo* dll) {
-    SEXP res = savvy_init_foo_value__ffi(dll);
+SEXP savvy_init_foo_value__impl(DllInfo* c_arg__dll) {
+    SEXP res = savvy_init_foo_value__ffi(c_arg__dll);
     return handle_result(res);
 }
 
@@ -484,103 +484,108 @@ SEXP savvy_safe_warn__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_do_call__impl(SEXP fun, SEXP args) {
-    SEXP res = savvy_do_call__ffi(fun, args);
+SEXP savvy_fn__impl(SEXP c_arg__struct) {
+    SEXP res = savvy_fn__ffi(c_arg__struct);
     return handle_result(res);
 }
 
-SEXP savvy_call_with_args__impl(SEXP fun) {
-    SEXP res = savvy_call_with_args__ffi(fun);
+SEXP savvy_do_call__impl(SEXP c_arg__fun, SEXP c_arg__args) {
+    SEXP res = savvy_do_call__ffi(c_arg__fun, c_arg__args);
     return handle_result(res);
 }
 
-SEXP savvy_get_args__impl(SEXP args) {
-    SEXP res = savvy_get_args__ffi(args);
+SEXP savvy_call_with_args__impl(SEXP c_arg__fun) {
+    SEXP res = savvy_call_with_args__ffi(c_arg__fun);
     return handle_result(res);
 }
 
-SEXP savvy_new_int__impl(SEXP size) {
-    SEXP res = savvy_new_int__ffi(size);
+SEXP savvy_get_args__impl(SEXP c_arg__args) {
+    SEXP res = savvy_get_args__ffi(c_arg__args);
     return handle_result(res);
 }
 
-SEXP savvy_new_real__impl(SEXP size) {
-    SEXP res = savvy_new_real__ffi(size);
+SEXP savvy_new_int__impl(SEXP c_arg__size) {
+    SEXP res = savvy_new_int__ffi(c_arg__size);
     return handle_result(res);
 }
 
-SEXP savvy_new_bool__impl(SEXP size) {
-    SEXP res = savvy_new_bool__ffi(size);
+SEXP savvy_new_real__impl(SEXP c_arg__size) {
+    SEXP res = savvy_new_real__ffi(c_arg__size);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric_f64__impl(SEXP x) {
-    SEXP res = savvy_times_two_numeric_f64__ffi(x);
+SEXP savvy_new_bool__impl(SEXP c_arg__size) {
+    SEXP res = savvy_new_bool__ffi(c_arg__size);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric_i32__impl(SEXP x) {
-    SEXP res = savvy_times_two_numeric_i32__ffi(x);
+SEXP savvy_times_two_numeric_f64__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_numeric_f64__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric_f64_scalar__impl(SEXP x) {
-    SEXP res = savvy_times_two_numeric_f64_scalar__ffi(x);
+SEXP savvy_times_two_numeric_i32__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_numeric_i32__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_times_two_numeric_i32_scalar__impl(SEXP x) {
-    SEXP res = savvy_times_two_numeric_i32_scalar__ffi(x);
+SEXP savvy_times_two_numeric_f64_scalar__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_numeric_f64_scalar__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_print_numeric__impl(SEXP x) {
-    SEXP res = savvy_print_numeric__ffi(x);
+SEXP savvy_times_two_numeric_i32_scalar__impl(SEXP c_arg__x) {
+    SEXP res = savvy_times_two_numeric_i32_scalar__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_default_value_scalar__impl(SEXP x) {
-    SEXP res = savvy_default_value_scalar__ffi(x);
+SEXP savvy_print_numeric__impl(SEXP c_arg__x) {
+    SEXP res = savvy_print_numeric__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_default_value_vec__impl(SEXP x) {
-    SEXP res = savvy_default_value_vec__ffi(x);
+SEXP savvy_default_value_scalar__impl(SEXP c_arg__x) {
+    SEXP res = savvy_default_value_scalar__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_default_value_struct__impl(SEXP x) {
-    SEXP res = savvy_default_value_struct__ffi(x);
+SEXP savvy_default_value_vec__impl(SEXP c_arg__x) {
+    SEXP res = savvy_default_value_vec__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_default_value_enum__impl(SEXP x) {
-    SEXP res = savvy_default_value_enum__ffi(x);
+SEXP savvy_default_value_struct__impl(SEXP c_arg__x) {
+    SEXP res = savvy_default_value_struct__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_filter_integer_odd__impl(SEXP x) {
-    SEXP res = savvy_filter_integer_odd__ffi(x);
+SEXP savvy_default_value_enum__impl(SEXP c_arg__x) {
+    SEXP res = savvy_default_value_enum__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_filter_real_negative__impl(SEXP x) {
-    SEXP res = savvy_filter_real_negative__ffi(x);
+SEXP savvy_filter_integer_odd__impl(SEXP c_arg__x) {
+    SEXP res = savvy_filter_integer_odd__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_filter_complex_without_im__impl(SEXP x) {
-    SEXP res = savvy_filter_complex_without_im__ffi(x);
+SEXP savvy_filter_real_negative__impl(SEXP c_arg__x) {
+    SEXP res = savvy_filter_real_negative__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_filter_logical_duplicates__impl(SEXP x) {
-    SEXP res = savvy_filter_logical_duplicates__ffi(x);
+SEXP savvy_filter_complex_without_im__impl(SEXP c_arg__x) {
+    SEXP res = savvy_filter_complex_without_im__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_filter_string_ascii__impl(SEXP x) {
-    SEXP res = savvy_filter_string_ascii__ffi(x);
+SEXP savvy_filter_logical_duplicates__impl(SEXP c_arg__x) {
+    SEXP res = savvy_filter_logical_duplicates__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_filter_string_ascii__impl(SEXP c_arg__x) {
+    SEXP res = savvy_filter_string_ascii__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -589,8 +594,8 @@ SEXP savvy_fun_mod1__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_init_logger__impl(DllInfo* dll_info) {
-    SEXP res = savvy_init_logger__ffi(dll_info);
+SEXP savvy_init_logger__impl(DllInfo* c_arg__dll_info) {
+    SEXP res = savvy_init_logger__ffi(c_arg__dll_info);
     return handle_result(res);
 }
 
@@ -599,23 +604,24 @@ SEXP savvy_fun_mod1_1_foo__impl(void) {
     return handle_result(res);
 }
 
+
 SEXP savvy_FooEnum_print__impl(SEXP self__) {
     SEXP res = savvy_FooEnum_print__ffi(self__);
     return handle_result(res);
 }
 
-SEXP savvy_FooWithDefault_new__impl(SEXP default_value) {
-    SEXP res = savvy_FooWithDefault_new__ffi(default_value);
+SEXP savvy_FooWithDefault_new__impl(SEXP c_arg__default_value) {
+    SEXP res = savvy_FooWithDefault_new__ffi(c_arg__default_value);
     return handle_result(res);
 }
 
-SEXP savvy_FooWithDefault_default_value_method__impl(SEXP self__, SEXP x) {
-    SEXP res = savvy_FooWithDefault_default_value_method__ffi(self__, x);
+SEXP savvy_FooWithDefault_default_value_method__impl(SEXP self__, SEXP c_arg__x) {
+    SEXP res = savvy_FooWithDefault_default_value_method__ffi(self__, c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_FooWithDefault_default_value_associated_fn__impl(SEXP x) {
-    SEXP res = savvy_FooWithDefault_default_value_associated_fn__ffi(x);
+SEXP savvy_FooWithDefault_default_value_associated_fn__impl(SEXP c_arg__x) {
+    SEXP res = savvy_FooWithDefault_default_value_associated_fn__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -639,13 +645,13 @@ SEXP savvy_Person_another_person__impl(SEXP self__) {
     return handle_result(res);
 }
 
-SEXP savvy_Person_new_with_name__impl(SEXP name) {
-    SEXP res = savvy_Person_new_with_name__ffi(name);
+SEXP savvy_Person_new_with_name__impl(SEXP c_arg__name) {
+    SEXP res = savvy_Person_new_with_name__ffi(c_arg__name);
     return handle_result(res);
 }
 
-SEXP savvy_Person_set_name__impl(SEXP self__, SEXP name) {
-    SEXP res = savvy_Person_set_name__ffi(self__, name);
+SEXP savvy_Person_set_name__impl(SEXP self__, SEXP c_arg__name) {
+    SEXP res = savvy_Person_set_name__ffi(self__, c_arg__name);
     return handle_result(res);
 }
 
@@ -664,13 +670,13 @@ SEXP savvy_Person2_name__impl(SEXP self__) {
     return handle_result(res);
 }
 
-SEXP savvy_Value_new__impl(SEXP x) {
-    SEXP res = savvy_Value_new__ffi(x);
+SEXP savvy_Value_new__impl(SEXP c_arg__x) {
+    SEXP res = savvy_Value_new__ffi(c_arg__x);
     return handle_result(res);
 }
 
-SEXP savvy_Value_pair__impl(SEXP self__, SEXP b) {
-    SEXP res = savvy_Value_pair__ffi(self__, b);
+SEXP savvy_Value_pair__impl(SEXP self__, SEXP c_arg__b) {
+    SEXP res = savvy_Value_pair__ffi(self__, c_arg__b);
     return handle_result(res);
 }
 
@@ -684,18 +690,28 @@ SEXP savvy_Value_get2__impl(SEXP self__) {
     return handle_result(res);
 }
 
-SEXP savvy_ValuePair_new__impl(SEXP a, SEXP b) {
-    SEXP res = savvy_ValuePair_new__ffi(a, b);
+SEXP savvy_ValuePair_new__impl(SEXP c_arg__a, SEXP c_arg__b) {
+    SEXP res = savvy_ValuePair_new__ffi(c_arg__a, c_arg__b);
     return handle_result(res);
 }
 
-SEXP savvy_ValuePair_new_copy__impl(SEXP a, SEXP b) {
-    SEXP res = savvy_ValuePair_new_copy__ffi(a, b);
+SEXP savvy_ValuePair_new_copy__impl(SEXP c_arg__a, SEXP c_arg__b) {
+    SEXP res = savvy_ValuePair_new_copy__ffi(c_arg__a, c_arg__b);
     return handle_result(res);
 }
 
 SEXP savvy_ValuePair_print__impl(SEXP self__) {
     SEXP res = savvy_ValuePair_print__ffi(self__);
+    return handle_result(res);
+}
+
+SEXP savvy_struct_new__impl(void) {
+    SEXP res = savvy_struct_new__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_struct_fn__impl(SEXP c_arg__fn) {
+    SEXP res = savvy_struct_fn__ffi(c_arg__fn);
     return handle_result(res);
 }
 
@@ -789,6 +805,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
     {"savvy_safe_warn__impl", (DL_FUNC) &savvy_safe_warn__impl, 0},
+    {"savvy_fn__impl", (DL_FUNC) &savvy_fn__impl, 1},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
@@ -811,6 +828,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_filter_string_ascii__impl", (DL_FUNC) &savvy_filter_string_ascii__impl, 1},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
+
     {"savvy_FooEnum_print__impl", (DL_FUNC) &savvy_FooEnum_print__impl, 1},
     {"savvy_FooWithDefault_new__impl", (DL_FUNC) &savvy_FooWithDefault_new__impl, 1},
     {"savvy_FooWithDefault_default_value_method__impl", (DL_FUNC) &savvy_FooWithDefault_default_value_method__impl, 2},
@@ -831,6 +849,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_ValuePair_new__impl", (DL_FUNC) &savvy_ValuePair_new__impl, 2},
     {"savvy_ValuePair_new_copy__impl", (DL_FUNC) &savvy_ValuePair_new_copy__impl, 2},
     {"savvy_ValuePair_print__impl", (DL_FUNC) &savvy_ValuePair_print__impl, 1},
+    {"savvy_struct_new__impl", (DL_FUNC) &savvy_struct_new__impl, 0},
+    {"savvy_struct_fn__impl", (DL_FUNC) &savvy_struct_fn__impl, 1},
     {NULL, NULL, 0}
 };
 

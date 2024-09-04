@@ -93,6 +93,8 @@ impl Manifest {
         // Tweak path dependencies
         for (_, v) in dependency_list.iter_mut() {
             if let toml::Value::Table(ref mut spec) = v {
+                // this lint is false-positive
+                #[allow(clippy::needless_borrows_for_generic_args)]
                 if let Some(toml::Value::String(ref mut path)) = spec.get_mut("path") {
                     *path =
                         canonicalize(&base_dir.join(&path)).expect("Failed to canonicalize path");

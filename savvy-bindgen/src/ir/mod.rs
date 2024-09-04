@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use syn::Ident;
+
 use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 pub mod savvy_enum;
@@ -37,13 +39,13 @@ pub struct SavvyMergedImpl {
 
 pub struct MergedResult {
     pub bare_fns: Vec<SavvyFn>,
-    pub impls: Vec<(String, SavvyMergedImpl)>,
+    pub impls: Vec<(Ident, SavvyMergedImpl)>,
     pub enums: Vec<SavvyEnum>,
 }
 
 pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
     let mut bare_fns: Vec<SavvyFn> = Vec::new();
-    let mut impl_map: HashMap<String, SavvyMergedImpl> = HashMap::new();
+    let mut impl_map: HashMap<Ident, SavvyMergedImpl> = HashMap::new();
     let mut enums: Vec<SavvyEnum> = Vec::new();
 
     for result in results {
@@ -51,7 +53,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
         bare_fns.append(&mut fns);
 
         for i in result.impls {
-            let key = i.ty.to_string();
+            let key = i.ty.clone();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     let mut fns = i.fns;
@@ -72,7 +74,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
 
         // get documents from struct
         for s in result.structs {
-            let key = s.ty.to_string();
+            let key = s.ty.clone();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     merged.docs = s.docs;
@@ -91,7 +93,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
         }
 
         for e in result.enums {
-            let key = e.ty.to_string();
+            let key = e.ty.clone();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     merged.docs.clone_from(&e.docs);

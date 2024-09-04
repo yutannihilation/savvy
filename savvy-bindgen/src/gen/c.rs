@@ -1,4 +1,13 @@
-use crate::{MergedResult, SavvyFn, SavvyFnType};
+use syn::ext::IdentExt;
+
+use crate::{MergedResult, SavvyFn, SavvyFnArg, SavvyFnType};
+
+impl SavvyFnArg {
+    pub fn arg_name_c(&self) -> String {
+        // to avoid conflict with C keywords, add a unique prefix
+        format!("c_arg__{}", self.pat.unraw())
+    }
+}
 
 impl SavvyFn {
     // The return value is (pat, ty)
@@ -7,9 +16,9 @@ impl SavvyFn {
             .args
             .iter()
             .map(|arg| {
-                let pat = arg.pat_string();
+                let arg_name = arg.arg_name_c();
                 let ty = arg.to_c_type_string();
-                (pat, ty)
+                (arg_name, ty)
             })
             .collect();
 
@@ -28,7 +37,7 @@ impl SavvyFn {
             "void".to_string()
         } else {
             args.iter()
-                .map(|(pat, ty)| format!("{ty} {pat}"))
+                .map(|(arg_name, ty)| format!("{ty} {arg_name}"))
                 .collect::<Vec<String>>()
                 .join(", ")
         };
@@ -47,13 +56,13 @@ impl SavvyFn {
         } else {
             let args_sig = args
                 .iter()
-                .map(|(pat, ty)| format!("{ty} {pat}"))
+                .map(|(arg_name, ty)| format!("{ty} {arg_name}"))
                 .collect::<Vec<String>>()
                 .join(", ");
 
             let args_call = args
                 .iter()
-                .map(|(pat, _)| pat.as_str())
+                .map(|(arg_name, _)| arg_name.as_str())
                 .collect::<Vec<&str>>()
                 .join(", ");
 
