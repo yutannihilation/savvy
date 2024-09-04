@@ -13,8 +13,8 @@ exclude = ["/book", "/R-package", "README.qmd"]
 rust-version = "1.65.0"
 
 [dependencies]
-savvy-ffi = { version = "0.6.6", path = "./savvy-ffi" }
-savvy-macro = { version = "0.6.6", path = "./savvy-macro" }
+savvy-ffi = { version = "0.6.7-beta.1", path = "./savvy-ffi" }
+savvy-macro = { version = "0.6.7-beta.1", path = "./savvy-macro" }
 once_cell = "1"
 num-complex = { version = "0.4.5", optional = true }
 
@@ -62,7 +62,7 @@ members = ["savvy-macro", "savvy-bindgen", "savvy-cli", "savvy-ffi", "xtask"]
 resolver = "2"
 
 [workspace.package]
-version = "0.6.6"
+version = "0.6.7-beta.1"
 edition = "2021"
 authors = ["Hiroaki Yutani"]
 license = "MIT"
