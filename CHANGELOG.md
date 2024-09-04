@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.6] (2024-09-04)
+
 ### Bug fixes
 
 * Fix inappropriate use of `PROTECT`. Thanks @t-kalinowski!
@@ -691,7 +693,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.5...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.6...HEAD
+[v0.6.6]: https://github.com/yutannihilation/savvy/compare/v0.6.5...v0.6.6
 [v0.6.5]: https://github.com/yutannihilation/savvy/compare/v0.6.4...v0.6.5
 [v0.6.4]: https://github.com/yutannihilation/savvy/compare/v0.6.3...v0.6.4
 [v0.6.3]: https://github.com/yutannihilation/savvy/compare/v0.6.2...v0.6.3
