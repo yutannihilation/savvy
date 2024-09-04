@@ -514,8 +514,8 @@ NULL
 }
 
 
-`fn` <- function(`struct`) {
-  invisible(.Call(savvy_fn__impl, `struct`))
+`fn` <- function(`r#struct`) {
+  invisible(.Call(savvy_fn__impl, `r#struct`))
 }
 
 
@@ -1117,55 +1117,55 @@ class(`ValuePair`) <- "ValuePair__bundle"
 #' @export
 `[[<-.ValuePair__bundle` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
-### wrapper functions for struct
+### wrapper functions for r#struct
 
 
-`.savvy_wrap_struct` <- function(ptr) {
+`.savvy_wrap_r#struct` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
 
 
-  class(e) <- "struct"
+  class(e) <- "r#struct"
   e
 }
 
 #' @export
-`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+`$<-.r#struct` <- function(x, name, value) stop("r#struct cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
+`[[<-.r#struct` <- function(x, i, value) stop("r#struct cannot be modified", call. = FALSE)
 
 
 
-`struct` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+`r#struct` <- new.env(parent = emptyenv())
 
 #' @export
-`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
+`$<-.r#struct` <- function(x, name, value) stop("r#struct cannot be modified", call. = FALSE)
 
-### associated functions for struct
+#' @export
+`[[<-.r#struct` <- function(x, i, value) stop("r#struct cannot be modified", call. = FALSE)
 
-`struct`$`new` <- function() {
-  .savvy_wrap_struct(.Call(savvy_struct_new__impl))
+### associated functions for r#struct
+
+`r#struct`$`new` <- function() {
+  .savvy_wrap_r#struct(.Call(savvy_struct_new__impl))
 }
 
-`struct`$`fn` <- function(`fn`) {
-  invisible(.Call(savvy_struct_fn__impl, `fn`))
+`r#struct`$`fn` <- function(`r#fn`) {
+  invisible(.Call(savvy_struct_fn__impl, `r#fn`))
 }
 
 
-class(`struct`) <- "struct__bundle"
+class(`r#struct`) <- "r#struct__bundle"
 
 #' @export
-`print.struct__bundle` <- function(x, ...) {
-  cat('struct')
+`print.r#struct__bundle` <- function(x, ...) {
+  cat('r#struct')
 }
 
 #' @export
-`$<-.struct__bundle` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
+`$<-.r#struct__bundle` <- function(x, name, value) stop("r#struct cannot be modified", call. = FALSE)
 
 #' @export
-`[[<-.struct__bundle` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
+`[[<-.r#struct__bundle` <- function(x, i, value) stop("r#struct cannot be modified", call. = FALSE)
 

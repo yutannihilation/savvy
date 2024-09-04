@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use syn::ext::IdentExt;
-
 use crate::{SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct};
 
 pub mod savvy_enum;
@@ -53,7 +51,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
         bare_fns.append(&mut fns);
 
         for i in result.impls {
-            let key = i.ty.unraw().to_string();
+            let key = i.ty.to_string();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     let mut fns = i.fns;
@@ -74,7 +72,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
 
         // get documents from struct
         for s in result.structs {
-            let key = s.ty.unraw().to_string();
+            let key = s.ty.to_string();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     merged.docs = s.docs;
@@ -93,7 +91,7 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
         }
 
         for e in result.enums {
-            let key = e.ty.unraw().to_string();
+            let key = e.ty.to_string();
             match impl_map.get_mut(&key) {
                 Some(merged) => {
                     merged.docs.clone_from(&e.docs);

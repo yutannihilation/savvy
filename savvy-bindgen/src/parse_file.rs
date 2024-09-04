@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, path::Path};
 
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::{ext::IdentExt, parse_quote};
+use syn::parse_quote;
 
 use crate::{
     extract_docs, ir::ParsedTestCase, utils::add_indent, ParsedResult, SavvyEnum, SavvyFn,

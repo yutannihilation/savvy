@@ -1,6 +1,6 @@
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::{ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
+use syn::{parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
 
 use crate::utils::extract_docs;
 
@@ -28,7 +28,7 @@ impl SavvyInputType {
             // `&mut`. Note that `&str` also falls here.
             syn::Type::Reference(syn::TypeReference { elem, .. }) => {
                 if let syn::Type::Path(type_path) = elem.as_ref() {
-                    let ty_str = type_path.path.segments.last().unwrap().ident.unraw().to_string();
+                    let ty_str = type_path.path.segments.last().unwrap().ident.to_string();
                     if &ty_str == "str" {
                         Ok(Self {
                             category: SavvyInputTypeCategory::PrimitiveType,
@@ -55,7 +55,7 @@ impl SavvyInputType {
             syn::Type::Path(type_path) => {
                 let type_path_last = type_path.path.segments.last().unwrap();
                 let type_ident = &type_path_last.ident;
-                let ty_str = type_ident.unraw().to_string();
+                let ty_str = type_ident.to_string();
                 match ty_str.as_str() {
                     "Option" => {
                         if in_option {
@@ -138,7 +138,7 @@ impl SavvyInputType {
                 mutability, elem, ..
             }) => {
                 let type_ident = if let syn::Type::Path(p) = elem.as_ref() {
-                    p.path.segments.last().unwrap().ident.unraw().to_string()
+                    p.path.segments.last().unwrap().ident.to_string()
                 } else {
                     "".to_string()
                 };
@@ -214,7 +214,7 @@ impl SavvyFnArg {
     }
 
     pub fn pat_string(&self) -> String {
-        self.pat.unraw().to_string()
+        self.pat.to_string()
     }
 
     pub fn ty_string(&self) -> String {
@@ -512,7 +512,7 @@ impl SavvyFn {
 
 fn self_ty_to_string(self_ty: Option<&syn::Type>) -> Option<String> {
     if let Some(syn::Type::Path(type_path)) = self_ty {
-        Some(type_path.path.segments.last().unwrap().ident.unraw().to_string())
+        Some(type_path.path.segments.last().unwrap().ident.to_string())
     } else {
         None
     }
@@ -551,7 +551,7 @@ fn get_savvy_return_type(
 
                     let last_path_seg = type_path.path.segments.last().unwrap();
                     match (
-                        last_path_seg.ident.unraw().to_string().as_str(),
+                        last_path_seg.ident.to_string().as_str(),
                         self_ty_to_string(self_ty),
                     ) {
                         // if Result, do further investigation about hte inside.
@@ -599,7 +599,7 @@ fn get_savvy_return_type(
                         }
 
                         syn::Type::Path(type_path) => {
-                            let ty_str = type_path.path.segments.last().unwrap().ident.unraw().to_string();
+                            let ty_str = type_path.path.segments.last().unwrap().ident.to_string();
                             match ty_str.as_str() {
                                 "Sexp" => return Ok(SavvyFnReturnType::Sexp(return_type.clone())),
 
