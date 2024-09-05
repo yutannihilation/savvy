@@ -37,7 +37,16 @@ impl EnvironmentSexp {
 
         // Note: since this SEXP already belongs to an environment, this doesn't
         // need protection.
-        let sexp = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_findVarInFrame(self.0, sym))? };
+        let sexp = unsafe {
+            crate::unwind_protect(|| {
+                if savvy_ffi::R_existsVarInFrame(self.0, sym) == Rboolean_TRUE {
+                    // TODO: replace this with R_getVar() when savvy drop supports on R <4.5
+                    savvy_ffi::Rf_eval(sym, self.0)
+                } else {
+                    R_UnboundValue
+                }
+            })?
+        };
 
         if sexp == unsafe { R_UnboundValue } {
             Ok(None)
@@ -54,13 +63,15 @@ impl EnvironmentSexp {
         let res = unsafe {
             crate::unwind_protect(|| {
                 if savvy_ffi::R_existsVarInFrame(self.0, sym) == Rboolean_TRUE {
-                    // Note this value can be anything. Since `unwind_protect()`
-                    // can only return an SEXP, we need some sentinel value to check the result outside.
-                    R_UnboundValue
-                } else {
+                    // Note: Since `unwind_protect()` can only return an SEXP,
+                    // this needs to be some sentinel value. Any SEXP can be
+                    // used here as long as it can be used as a signal of a
+                    // success.
                     R_NilValue
+                } else {
+                    R_UnboundValue
                 }
-            })? == R_UnboundValue
+            })? == R_NilValue
         };
 
         Ok(res)
