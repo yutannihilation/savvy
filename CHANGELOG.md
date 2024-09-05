@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor Improvements
+
+* Remove the use of non-API call `Rf_findVarInFrame`.
+
 ## [v0.6.6] (2024-09-04)
 
 ### Bug fixes

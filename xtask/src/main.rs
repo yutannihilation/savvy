@@ -159,7 +159,6 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_isEnvironment")
         .allowlist_function("Rf_eval")
         .allowlist_var("R_GlobalEnv")
-        .allowlist_function("Rf_findVarInFrame")
         .allowlist_function("R_existsVarInFrame")
         .allowlist_function("Rf_defineVar")
         .allowlist_var("R_UnboundValue")
