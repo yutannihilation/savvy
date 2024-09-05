@@ -7,6 +7,17 @@
 
 * Remove the use of non-API call `Rf_findVarInFrame`.
 
+* Now the GitHub release includes an installation script to install the savvy
+  CLI into `$CARGO_HOME/bin`, thanks to [cargo-dist]. This should make it easier
+  to use `savvy-cli` on CI. 
+  ```sh
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/yutannihilation/savvy/releases/download/v0.6.7/savvy-cli-installer.sh | sh
+  ```
+
+[cargo-dist]: https://opensource.axo.dev/cargo-dist/
+
+* Improve handling of raw identifiers (e.g. `r#struct`) more.
+
 ## [v0.6.6] (2024-09-04)
 
 ### Bug fixes
