@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.6.7] (2024-09-05)
+
 ### Minor Improvements
 
 * Remove the use of non-API call `Rf_findVarInFrame`.
@@ -708,7 +710,8 @@
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.6...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.7...HEAD
+[v0.6.7]: https://github.com/yutannihilation/savvy/compare/v0.6.6...v0.6.7
 [v0.6.6]: https://github.com/yutannihilation/savvy/compare/v0.6.5...v0.6.6
 [v0.6.5]: https://github.com/yutannihilation/savvy/compare/v0.6.4...v0.6.5
 [v0.6.4]: https://github.com/yutannihilation/savvy/compare/v0.6.3...v0.6.4
