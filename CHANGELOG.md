@@ -5,8 +5,9 @@
 
 ### Minor Improvements
 
-* `savvy init` now generates a slightly better `configure` script that checks
-  if `cargo` command is available.
+* `savvy init` now generates
+  * slightly better `configure` script that checks if `cargo` command is available
+  * `cleanup` script to remove the generated `Makevars` after compilation
 
 ## [v0.6.7] (2024-09-05)
 
