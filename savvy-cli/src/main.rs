@@ -20,9 +20,10 @@ use std::path::PathBuf;
 use futures_lite::{io::BufReader, prelude::*};
 
 use savvy_bindgen::{
-    generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_config_toml,
-    generate_configure, generate_example_lib_rs, generate_gitignore, generate_makevars_in,
-    generate_makevars_win, generate_r_impl_file, generate_win_def, ParsedResult,
+    generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_cleanup,
+    generate_config_toml, generate_configure, generate_example_lib_rs, generate_gitignore,
+    generate_makevars_in, generate_makevars_win, generate_r_impl_file, generate_win_def,
+    ParsedResult,
 };
 
 /// Generate C bindings and R bindings for a Rust library
@@ -124,6 +125,7 @@ const PATH_CONFIG_TOML: &str = "src/rust/.cargo/config.toml";
 const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
 const PATH_CONFIGURE: &str = "configure";
+const PATH_CLEANUP: &str = "cleanup";
 const PATH_MAKEVARS_WIN: &str = "src/Makevars.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
 const PATH_C_HEADER: &str = "src/rust/api.h";
@@ -175,20 +177,25 @@ fn append_file(path: &Path, contents: &str) {
 }
 
 #[cfg(unix)]
-fn set_executable(path: &Path) {
+fn set_executable(paths: &[&Path]) {
     use std::os::unix::fs::PermissionsExt;
+    for path in paths {
+        let path_str = path.to_string_lossy();
+        println!("Setting {} as executable", path_str);
 
-    let path_str = path.to_string_lossy();
-    println!("Setting {} as executable", path_str);
-
-    let mut perm = std::fs::metadata(path).unwrap().permissions();
-    perm.set_mode(0o755);
-    std::fs::set_permissions(path, perm).unwrap();
+        let mut perm = std::fs::metadata(path).unwrap().permissions();
+        perm.set_mode(0o755);
+        std::fs::set_permissions(path, perm).unwrap();
+    }
 }
 
 #[cfg(not(unix))]
-fn set_executable(path: &Path) {
-    let path_str = path.to_string_lossy();
+fn set_executable(paths: &[&Path]) {
+    let path_str = paths
+        .iter()
+        .map(|p| p.to_string_lossy())
+        .collect::<Vec<_>>()
+        .join(" ");
     eprintln!(
         "
 ### Warning ###################################################################
@@ -335,7 +342,8 @@ savvy = "*""#,
         &generate_makevars_in(&pkg_metadata.package_name_for_rust()),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
-    set_executable(&path.join(PATH_CONFIGURE)); // This doesn't work on Windows!
+    write_file(&path.join(PATH_CLEANUP), &generate_cleanup());
+    set_executable(&[&path.join(PATH_CONFIGURE), &path.join(PATH_CLEANUP)]); // This doesn't work on Windows!
     write_file(
         &path.join(format!(
             "src/{}-win.def",
