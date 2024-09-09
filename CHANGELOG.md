@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor Improvements
+
+* `savvy init` now generates a slightly better `configure` script that checks
+  if `cargo` command is available.
+
 ## [v0.6.7] (2024-09-05)
 
 ### Minor Improvements
