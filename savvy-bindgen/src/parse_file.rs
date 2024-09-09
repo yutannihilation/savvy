@@ -411,7 +411,7 @@ pub fn generate_test_code(parsed_results: &Vec<ParsedResult>) -> String {
         #[allow(unused_imports)]
         use savvy::savvy;
 
-        pub(crate) fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicInfo) {
+        pub(crate) fn savvy_show_error(code: &str, label: &str, location: &str, panic_info: &std::panic::PanicHookInfo) {
             let mut msg: Vec<String> = Vec::new();
             let orig_msg = panic_info.to_string();
             let mut lines = orig_msg.lines();
