@@ -1,6 +1,11 @@
+# Note: this script is not executed on Windows. Please add `configure.win` if
+#       you want to check the Rust installation also on Windows. In addition,
+#       don't forget `cleanup.win` if you decide to generate `src/Makevars.win`
+#       in the script.
+
 # Even when `cargo` is on `PATH`, `rustc` might not in some cases. This adds
 # ~/.cargo/bin to PATH to address such cases. Note that is not always available
-# (e.g. on Windows, or on Ubuntu with Rust installed via APT).
+# (e.g. or on Ubuntu with Rust installed via APT).
 if [ -e "$(HOME)/.cargo/bin" ]; then
   export PATH="$(PATH):$(HOME)/.cargo/bin"
 fi

@@ -1,9 +1,13 @@
-# Even when `cargo` is on `PATH`, `rustc` might not. We need to source
-# ~/.cargo/env to ensure PATH is configured correctly in some cases
-# (c.f. yutannihilation/string2path#4). However, this file is not always
-# available (e.g. when Rust is installed via apt on Ubuntu).
-if [ -e "${HOME}/.cargo/env" ]; then
-  . "${HOME}/.cargo/env"
+# Note: this script is not executed on Windows. Please add `configure.win` if
+#       you want to check the Rust installation also on Windows. In addition,
+#       don't forget `cleanup.win` if you decide to generate `src/Makevars.win`
+#       in the script.
+
+# Even when `cargo` is on `PATH`, `rustc` might not in some cases. This adds
+# ~/.cargo/bin to PATH to address such cases. Note that is not always available
+# (e.g. or on Ubuntu with Rust installed via APT).
+if [ -e "$(HOME)/.cargo/bin" ]; then
+  export PATH="$(PATH):$(HOME)/.cargo/bin"
 fi
 
 CARGO_VERSION="$(cargo --version)"
