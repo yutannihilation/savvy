@@ -343,7 +343,7 @@ savvy = "*""#,
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
     write_file(&path.join(PATH_CLEANUP), &generate_cleanup());
-    set_executable([&path.join(PATH_CONFIGURE), &path.join(PATH_CLEANUP)]); // This doesn't work on Windows!
+    set_executable(&[&path.join(PATH_CONFIGURE), &path.join(PATH_CLEANUP)]); // This doesn't work on Windows!
     write_file(
         &path.join(format!(
             "src/{}-win.def",
