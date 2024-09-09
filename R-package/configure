@@ -1,3 +1,34 @@
+# Even when `cargo` is on `PATH`, `rustc` might not. We need to source
+# ~/.cargo/env to ensure PATH is configured correctly in some cases
+# (c.f. yutannihilation/string2path#4). However, this file is not always
+# available (e.g. when Rust is installed via apt on Ubuntu).
+if [ -e "${HOME}/.cargo/env" ]; then
+  . "${HOME}/.cargo/env"
+fi
+
+CARGO_VERSION="$(cargo --version)"
+
+if [ $ret -ne 0 ]; then
+  echo "-------------- ERROR: CONFIGURATION FAILED --------------------"
+  echo ""
+  echo "The cargo command is not available. To install Rust, please refer"
+  echo "to the official instruction:"
+  echo ""
+  echo "https://www.rust-lang.org/tools/install"
+  echo ""
+  echo "---------------------------------------------------------------"
+
+  exit $ret
+fi
+
+# There's a little chance that rustc is not available on PATH while cargo is.
+# So, just ignore the error case.
+RUSTC_VERSION="$(rustc --version || true)"
+
+# Report the version of Rustc to comply with the CRAN policy
+echo "using Rust package manager: '${CARGO_VERSION}'"
+echo "using Rust compiler: '${RUSTC_VERSION}'"
+
 if [ "$(uname)" = "Emscripten" ]; then
   TARGET="wasm32-unknown-emscripten"
 fi
