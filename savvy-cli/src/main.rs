@@ -2,6 +2,8 @@ mod parse_manifest;
 mod utils;
 
 use parse_manifest::*;
+use savvy_bindgen::generate_cleanup_win;
+use savvy_bindgen::generate_configure_win;
 use utils::*;
 
 use async_process::Stdio;
@@ -22,7 +24,7 @@ use futures_lite::{io::BufReader, prelude::*};
 use savvy_bindgen::{
     generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_cleanup,
     generate_config_toml, generate_configure, generate_example_lib_rs, generate_gitignore,
-    generate_makevars_in, generate_makevars_win, generate_r_impl_file, generate_win_def,
+    generate_makevars_in, generate_makevars_win_in, generate_r_impl_file, generate_win_def,
     ParsedResult,
 };
 
@@ -126,7 +128,9 @@ const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
 const PATH_CONFIGURE: &str = "configure";
 const PATH_CLEANUP: &str = "cleanup";
-const PATH_MAKEVARS_WIN: &str = "src/Makevars.win";
+const PATH_MAKEVARS_WIN_IN: &str = "src/Makevars.win.in";
+const PATH_CONFIGURE_WIN: &str = "configure.win";
+const PATH_CLEANUP_WIN: &str = "cleanup.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
 const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
@@ -337,13 +341,14 @@ savvy = "*""#,
     );
     write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
     write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
+
     write_file(
         &path.join(PATH_MAKEVARS_IN),
         &generate_makevars_in(&pkg_metadata.package_name_for_rust()),
     );
     write_file(&path.join(PATH_CONFIGURE), &generate_configure());
     write_file(&path.join(PATH_CLEANUP), &generate_cleanup());
-    set_executable(&[&path.join(PATH_CONFIGURE), &path.join(PATH_CLEANUP)]); // This doesn't work on Windows!
+
     write_file(
         &path.join(format!(
             "src/{}-win.def",
@@ -352,9 +357,20 @@ savvy = "*""#,
         &generate_win_def(&pkg_metadata.package_name_for_r()),
     );
     write_file(
-        &path.join(PATH_MAKEVARS_WIN),
-        &generate_makevars_win(&pkg_metadata.package_name_for_rust()),
+        &path.join(PATH_MAKEVARS_WIN_IN),
+        &generate_makevars_win_in(&pkg_metadata.package_name_for_rust()),
     );
+    write_file(&path.join(PATH_CONFIGURE_WIN), &generate_configure_win());
+    write_file(&path.join(PATH_CLEANUP_WIN), &generate_cleanup_win());
+
+    // This doesn't work on Windows!
+    set_executable(&[
+        &path.join(PATH_CONFIGURE),
+        &path.join(PATH_CONFIGURE_WIN),
+        &path.join(PATH_CLEANUP),
+        &path.join(PATH_CLEANUP_WIN),
+    ]);
+
     write_file(&path.join(PATH_GITIGNORE), &generate_gitignore());
 
     if pkg_metadata.has_sysreq {

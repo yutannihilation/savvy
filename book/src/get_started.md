@@ -73,11 +73,13 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 ├── R
 │   └── 000-wrappers.R      <-------(1)
 ├── configure               <-------(2)
+├── configure.win           <-------(2)
 ├── cleanup                 <-------(2)
+├── cleanup.win             <-------(2)
 ├── foofoofoofoo.Rproj
 └── src
     ├── Makevars.in         <-------(2)
-    ├── Makevars.win        <-------(2)
+    ├── Makevars.win.in     <-------(2)
     ├── init.c              <-------(3)
     ├── <your package>-win.def  <---(4)
     └── rust
@@ -90,8 +92,8 @@ After `savvy::savvy_init()`, the structure of your R package should look like be
 ```
 
 1. `000-wrappers.R`: R functions for the corresponding Rust functions
-2. `configure`, `cleanup`, `Makevars.in`, and `Makevars.win`: Necessary build
-   settings for compiling Rust code
+2. `configure*`, `cleanup*`, `Makevars.in`, and `Makevars.win.in`: Necessary
+   build settings for compiling Rust code
 3. `init.c` and `api.h`: C functions for the corresponding Rust functions
 4. `<your package>-win.def` and `.cargo/config.toml`: These are tricks to avoid
    a minor error on Windows. See [extendr/rextendr#211][1] and [savvy#98][2] for
