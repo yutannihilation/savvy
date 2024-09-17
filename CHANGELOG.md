@@ -8,6 +8,8 @@
 * `savvy init` now generates
   * slightly better `configure` script that checks if `cargo` command is available
   * `cleanup` script to remove the generated `Makevars` after compilation
+  * `configure.win` and `cleanup.win`
+  * `src/Makevars.win.in` instead of `src/Makevars.win` for consistency with Unix-alikes
 
 ## [v0.6.7] (2024-09-05)
 
