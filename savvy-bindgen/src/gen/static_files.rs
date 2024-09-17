@@ -13,11 +13,19 @@ pub fn generate_cleanup() -> String {
     include_str!("./templates/cleanup").to_string()
 }
 
-pub fn generate_makevars_win(crate_name: &str) -> String {
+pub fn generate_makevars_win_in(crate_name: &str) -> String {
     format!(
-        include_str!("./templates/Makevars.win"),
+        include_str!("./templates/Makevars.win.in"),
         crate_name, crate_name
     )
+}
+
+pub fn generate_configure_win() -> String {
+    include_str!("./templates/configure.win").to_string()
+}
+
+pub fn generate_cleanup_win() -> String {
+    include_str!("./templates/cleanup.win").to_string()
 }
 
 pub fn generate_win_def(crate_name: &str) -> String {

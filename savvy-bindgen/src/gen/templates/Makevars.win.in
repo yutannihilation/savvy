@@ -1,4 +1,4 @@
-TARGET = x86_64-pc-windows-gnu
+TARGET = @TARGET@
 
 # catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
 PROFILE = $(subst x,release,$(subst truex,dev,$(DEBUG)x))

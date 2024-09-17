@@ -3,3 +3,6 @@
 *.dll
 target
 .cargo
+
+Makevars
+Makevars.win
