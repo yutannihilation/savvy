@@ -3,7 +3,6 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
-
 ## [v0.6.8] (2024-09-17)
 
 ### Minor Improvements
