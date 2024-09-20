@@ -19,7 +19,7 @@ $(STATLIB):
 	# to set it here to ensure cargo can be invoked. It is appended to PATH and
 	# therefore is only used if cargo is absent from the user's PATH.
 	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
-	  cargo fetch $(CARGO_BUILD_ARGS) 2>/dev/null && \
+	  cargo fetch --manifest-path=./rust/Cargo.toml 2>/dev/null && \
 	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
 	    cargo build $(CARGO_BUILD_ARGS); \
 	  else \

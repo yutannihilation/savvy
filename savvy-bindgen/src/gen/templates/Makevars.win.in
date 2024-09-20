@@ -24,7 +24,7 @@ $(STATLIB):
 
 	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
 	  export LIBRARY_PATH="$${{LIBRARY_PATH}};$(LIBDIR)/libgcc_mock" && \
-	  cargo fetch --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR) 2>/dev/null && \
+	  cargo fetch --target $(TARGET) --manifest-path=./rust/Cargo.toml 2>/dev/null && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 C_clean:
