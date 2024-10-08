@@ -7,7 +7,7 @@ fi
 
 CARGO_VERSION="$(cargo --version)"
 
-if [ $ret -ne 0 ]; then
+if [ $? -ne 0 ]; then
   echo "-------------- ERROR: CONFIGURATION FAILED --------------------"
   echo ""
   echo "The cargo command is not available. To install Rust, please refer"
@@ -17,7 +17,7 @@ if [ $ret -ne 0 ]; then
   echo ""
   echo "---------------------------------------------------------------"
 
-  exit $ret
+  exit 1
 fi
 
 # There's a little chance that rustc is not available on PATH while cargo is.
