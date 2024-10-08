@@ -64,7 +64,7 @@ fn raise_error() -> savvy::Result<savvy::Sexp> {
     Err(savvy::Error::new("This is my custom error"))
 }
 
-#[allow(clippy::out_of_bounds_indexing)]
+#[allow(clippy::out_of_bounds_indexing, unconditional_panic)]
 #[savvy]
 fn must_panic() -> savvy::Result<()> {
     let x = &[1];
