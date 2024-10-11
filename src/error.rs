@@ -11,7 +11,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn new(msg: &str) -> Self {
+    pub fn new<T: ToString>(msg: T) -> Self {
         Self::GeneralError(msg.to_string())
     }
 }
@@ -35,18 +35,6 @@ impl std::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
-    }
-}
-
-impl From<Box<dyn std::error::Error>> for Error {
-    fn from(e: Box<dyn std::error::Error>) -> Error {
-        Error::new(&e.to_string())
-    }
-}
-
 impl crate::error::Error {
     pub fn with_arg_name(self, arg_name: &str) -> Self {
         match self {
@@ -64,20 +52,21 @@ impl crate::error::Error {
     }
 }
 
-impl From<&str> for Error {
-    fn from(msg: &str) -> Error {
-        Error::new(msg)
-    }
-}
-
-impl From<String> for Error {
-    fn from(msg: String) -> Error {
-        Error::new(&msg)
-    }
-}
-
-impl From<std::convert::Infallible> for Error {
-    fn from(value: std::convert::Infallible) -> Self {
-        Error::new(&value.to_string())
+// Note: Unlike anyhow::Error, this doesn't require Send and Sync. This is
+// because,
+//
+// - anyhow preserves the original implementation for std::error::Error by
+//   accessing vtable directly.
+// - anyhow needs to be async-aware (cf.
+//   https://github.com/dtolnay/anyhow/issues/81)
+//
+// However, savvy creates a string immediately here (because only a string can
+// be propagated to R session), so both won't be a problem.
+impl<E> From<E> for Error
+where
+    E: std::error::Error + 'static,
+{
+    fn from(value: E) -> Self {
+        Self::new(value)
     }
 }

@@ -1,6 +1,6 @@
 use once_cell::sync::OnceCell;
 
-use crate::{IntegerSexp, NotAvailableValue, RealSexp, Sexp};
+use crate::{savvy_err, IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 
 // --- Utils -------------------------
 
@@ -12,9 +12,9 @@ fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
     if f.is_na() || f.is_nan() {
         Ok(i32::na())
     } else if f.is_infinite() || !(I32MIN..=I32MAX).contains(&f) {
-        Err(format!("{f:?} is out of range for integer").into())
+        Err(savvy_err!("{f:?} is out of range for integer"))
     } else if (f - f.round()).abs() > TOLERANCE {
-        Err(format!("{f:?} is not integer-ish").into())
+        Err(savvy_err!("{f:?} is not integer-ish"))
     } else {
         Ok(f as i32)
     }

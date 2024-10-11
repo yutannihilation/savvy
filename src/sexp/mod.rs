@@ -315,10 +315,7 @@ impl Sexp {
 
     /// Returns the specified attribute.
     pub fn get_attrib(&self, attr: &str) -> crate::error::Result<Option<Sexp>> {
-        let attr_cstr = match CString::new(attr) {
-            Ok(cstr) => cstr,
-            Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-        };
+        let attr_cstr = CString::new(attr)?;
         let attr_sexp = unsafe {
             crate::unwind_protect(|| {
                 savvy_ffi::Rf_getAttrib(self.0, savvy_ffi::Rf_install(attr_cstr.as_ptr()))
@@ -361,10 +358,7 @@ impl Sexp {
 
     /// Set the input value to the specified attribute.
     pub fn set_attrib(&mut self, attr: &str, value: Sexp) -> crate::error::Result<()> {
-        let attr_cstr = match CString::new(attr) {
-            Ok(cstr) => cstr,
-            Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-        };
+        let attr_cstr = CString::new(attr)?;
         unsafe {
             crate::unwind_protect(|| {
                 savvy_ffi::Rf_setAttrib(self.0, savvy_ffi::Rf_install(attr_cstr.as_ptr()), value.0)

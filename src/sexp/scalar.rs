@@ -69,6 +69,6 @@ impl TryFrom<Sexp> for usize {
 
     fn try_from(value: Sexp) -> crate::error::Result<Self> {
         let value = <i32>::try_from(value)?;
-        <Self>::try_from(value).map_err(|e| crate::Error::new(&e.to_string()))
+        <Self>::try_from(value).map_err(|e| e.into())
     }
 }

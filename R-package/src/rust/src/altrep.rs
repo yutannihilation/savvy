@@ -4,8 +4,8 @@ use savvy::altrep::{
     register_altstring_class, AltInteger, AltList, AltLogical, AltRaw, AltReal, AltString,
 };
 use savvy::{
-    r_println, savvy, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RawSexp, RealSexp,
-    StringSexp,
+    r_println, savvy, savvy_err, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RawSexp,
+    RealSexp, StringSexp,
 };
 
 // integer
@@ -47,7 +47,7 @@ fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -60,7 +60,7 @@ fn tweak_altint(mut x: IntegerSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // real
@@ -102,7 +102,7 @@ fn print_altreal(x: RealSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -115,7 +115,7 @@ fn tweak_altreal(mut x: RealSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // logical
@@ -157,7 +157,7 @@ fn print_altlogical(x: LogicalSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -170,7 +170,7 @@ fn tweak_altlogical(mut x: LogicalSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // raw
@@ -212,7 +212,7 @@ fn print_altraw(x: RawSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -225,7 +225,7 @@ fn tweak_altraw(mut x: RawSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // string
@@ -267,7 +267,7 @@ fn print_altstring(x: StringSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -280,7 +280,7 @@ fn tweak_altstring(mut x: StringSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // list
@@ -337,7 +337,7 @@ fn print_altlist(x: ListSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 #[savvy]
@@ -356,7 +356,7 @@ fn tweak_altlist(mut x: ListSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 
 // initialization
@@ -400,6 +400,6 @@ fn print_altint_by_weird_way(x: IntegerSexp) -> savvy::Result<()> {
         r_println!("{out:?}");
         Ok(())
     } else {
-        Err("Not an altint".into())
+        Err(savvy_err!("Not an altint"))
     }
 }
