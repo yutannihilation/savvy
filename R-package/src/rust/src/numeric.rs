@@ -1,6 +1,6 @@
 use savvy::{
     r_println, savvy, NotAvailableValue, NumericScalar, NumericSexp, NumericTypedSexp,
-    OwnedIntegerSexp, OwnedRealSexp, Sexp,
+    OwnedIntegerSexp, OwnedRealSexp, OwnedStringSexp, Sexp,
 };
 
 #[savvy]
@@ -35,6 +35,16 @@ fn times_two_numeric_i32(x: NumericSexp) -> savvy::Result<Sexp> {
 }
 
 #[savvy]
+fn usize_to_string(x: NumericSexp) -> savvy::Result<Sexp> {
+    let mut out = OwnedStringSexp::new(x.len())?;
+    for (i, v) in x.iter_usize().enumerate() {
+        out.set_elt(i, &v?.to_string())?;
+    }
+
+    out.into()
+}
+
+#[savvy]
 fn times_two_numeric_f64_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
     let v = x.as_f64();
     if v.is_na() {
@@ -52,6 +62,11 @@ fn times_two_numeric_i32_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
     } else {
         (v * 2).try_into()
     }
+}
+
+#[savvy]
+fn usize_to_string_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
+    x.as_usize()?.to_string().try_into()
 }
 
 #[savvy]
