@@ -63,12 +63,3 @@ impl TryFrom<Sexp> for u8 {
         Ok(unsafe { RAW_ELT(value.0, 0) })
     }
 }
-
-impl TryFrom<Sexp> for usize {
-    type Error = crate::error::Error;
-
-    fn try_from(value: Sexp) -> crate::error::Result<Self> {
-        let value = <i32>::try_from(value)?;
-        <Self>::try_from(value).map_err(|e| crate::Error::new(&e.to_string()))
-    }
-}
