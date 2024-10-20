@@ -2,8 +2,8 @@ use savvy::savvy;
 use savvy::NotAvailableValue;
 
 #[savvy]
-fn new_complex(size: usize) -> savvy::Result<savvy::Sexp> {
-    savvy::OwnedComplexSexp::new(size)?.into()
+fn new_complex(size: i32) -> savvy::Result<savvy::Sexp> {
+    savvy::OwnedComplexSexp::new(size as usize)?.into()
 }
 
 #[savvy]
