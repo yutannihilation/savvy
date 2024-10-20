@@ -84,7 +84,10 @@ it fails when any of the values is
 - out of range for `i32`
 - not integer-ish (e.g. `1.1`)
 
-For example, you can rewrite the above function like this:
+For convenience, `NumericSexp` also provides `iter_usize()`, which returns an
+iterator of `Result<usize>`.
+
+With `NumericSexp`, you can rewrite the above `times_two` function like this:
 
 ```rust
 #[savvy]
@@ -104,7 +107,7 @@ fn times_two(x: NumericSexp) -> savvy::Result<Sexp> {
 }
 ```
 
-Another way is to use `.into_typed()` and `match` the result to apply an
+Alternatively, you can use `.into_typed()` and `match` the result to apply an
 appropriate function depneding on the type. In this case, you need to define two
 different functions, but this might be useful when the logic is very different
 for integer values and real values.

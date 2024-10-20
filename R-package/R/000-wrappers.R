@@ -337,11 +337,6 @@ NULL
 }
 
 
-`scalar_input_usize` <- function(`x`) {
-  invisible(.Call(savvy_scalar_input_usize__impl, `x`))
-}
-
-
 `scalar_input_real` <- function(`x`) {
   invisible(.Call(savvy_scalar_input_real__impl, `x`))
 }
@@ -554,6 +549,11 @@ NULL
 }
 
 
+`usize_to_string` <- function(`x`) {
+  .Call(savvy_usize_to_string__impl, `x`)
+}
+
+
 `times_two_numeric_f64_scalar` <- function(`x`) {
   .Call(savvy_times_two_numeric_f64_scalar__impl, `x`)
 }
@@ -561,6 +561,11 @@ NULL
 
 `times_two_numeric_i32_scalar` <- function(`x`) {
   .Call(savvy_times_two_numeric_i32_scalar__impl, `x`)
+}
+
+
+`usize_to_string_scalar` <- function(`x`) {
+  .Call(savvy_usize_to_string_scalar__impl, `x`)
 }
 
 
