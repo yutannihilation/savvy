@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.7.0] (2024-10-20)
+
 ### Breaking Change
 
 Removed `TryFrom<Sexp> for usize`, so the following code no longer compiles.
@@ -766,7 +768,8 @@ usize_to_string_scalar(2147483648)
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.6.8...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/yutannihilation/savvy/compare/v0.6.8...v0.7.0
 [v0.6.8]: https://github.com/yutannihilation/savvy/compare/v0.6.7...v0.6.8
 [v0.6.7]: https://github.com/yutannihilation/savvy/compare/v0.6.6...v0.6.7
 [v0.6.6]: https://github.com/yutannihilation/savvy/compare/v0.6.5...v0.6.6
