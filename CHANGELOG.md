@@ -3,6 +3,52 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking Change
+
+Removed `TryFrom<Sexp> for usize`, so the following code no longer compiles.
+
+```rust
+#[savvy]
+fn foo(x: usize) -> savvy::Result<()> {
+    ...
+}
+```
+
+Instead, you can use `i32` and convert it to `usize` by yourself. If you are
+sure the input number is never negative, you can just use the `as` conversion.
+If you are not sure, you should use `<usize>::try_from()` and handle the error
+by yourself. Also, please be aware you need to handle NA as well.
+
+```rust
+#[savvy]
+fn foo(x: i32) -> savvy::Result<()> {
+    if x.is_na() {
+        return Err("cannot convert NA to usize".into())?;
+    }
+    
+    let x = <usize>::try_from(x).map_err(|e| e.to_string().into());
+
+    ...
+}
+```
+
+Alternatively, you can use newly-added methods, `NumericScalar::as_usize()` and
+`NumericSexp::iter_usize()`. The good point is that this can handle integer-ish
+numerics, which means you can allow users to input more than the integer max
+(2147483647)!
+
+```rust
+fn usize_to_string_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
+    let x_usize = x.as_usize()?;
+    x_usize.to_string().try_into()
+}
+```
+
+```r
+usize_to_string_scalar(2147483648)
+#> [1] "2147483648"
+```
+
 ## [v0.6.8] (2024-09-17)
 
 ### Minor Improvements
