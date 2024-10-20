@@ -33,9 +33,9 @@ fn foo(x: i32) -> savvy::Result<()> {
 ```
 
 Alternatively, you can use newly-added methods, `NumericScalar::as_usize()` and
-`NumericSexp::iter_usize()`. The good point is that this can handle integer-ish
-numerics, which means you can allow users to input more than the integer max
-(2147483647)!
+`NumericSexp::iter_usize()`. What's good is that this can handle integer-ish
+numeric, which means you can allow users to input a larger number than the
+integer max (2147483647)!
 
 ```rust
 fn usize_to_string_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
