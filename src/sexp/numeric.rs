@@ -6,6 +6,7 @@ use crate::{IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 
 const I32MAX: f64 = i32::MAX as f64;
 const I32MIN: f64 = i32::MIN as f64;
+const USIZEMAX: f64 = usize::MAX as f64;
 const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
 
 fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
@@ -25,6 +26,26 @@ fn cast_i32_to_f64(i: i32) -> f64 {
         f64::na()
     } else {
         i as f64
+    }
+}
+
+fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {
+    if i.is_na() {
+        Err("cannot convert NA or NaN to usize".into())
+    } else {
+        <usize>::try_from(i).map_err(|e| e.to_string().into())
+    }
+}
+
+fn try_cast_f64_to_usize(f: f64) -> crate::Result<usize> {
+    if f.is_na() || f.is_nan() {
+        Err("cannot convert NA or NaN to usize".into())
+    } else if f.is_infinite() || !(0f64..=USIZEMAX).contains(&f) {
+        Err(format!("{f:?} is out of range for usize").into())
+    } else if (f - f.round()).abs() > TOLERANCE {
+        Err(format!("{f:?} is not integer-ish").into())
+    } else {
+        Ok(f as usize)
     }
 }
 
@@ -280,10 +301,19 @@ impl NumericSexp {
         }
     }
 
+    /// Returns an iterator over the underlying data of the SEXP.
+    pub fn iter_usize(&self) -> NumericIteratorUsize {
+        NumericIteratorUsize {
+            sexp: self,
+            i: 0,
+            len: self.len(),
+        }
+    }
+
     // Note: If the conversion is needed, to_vec_*() would copy the values twice
     // because it creates a `Vec` from to_slice(). This is inefficient, but I'm
-    // not sure which is worse to alwaays creates a `Vec` from scratch or use
-    // the cached one. So, I chose not to implement the method.
+    // not sure which is worse to always creates a `Vec` from scratch or use the
+    // cached one. So, I chose not to implement the method.
 }
 
 impl TryFrom<Sexp> for NumericSexp {
@@ -336,7 +366,7 @@ impl TryFrom<RealSexp> for NumericSexp {
 
 // --- Iterator -----------------------
 
-/// An iterator that retuns `i32` wrapped with `Result`.
+/// An iterator that returns `i32` wrapped with `Result`.
 ///
 /// - If the underlying data is integer, use the value as it is.
 /// - If the underlying data is real, but there's already the `i32` values
@@ -373,7 +403,7 @@ impl<'a> Iterator for NumericIteratorI32<'a> {
     }
 }
 
-/// An iterator that retuns `f64`.
+/// An iterator that returns `f64`.
 ///
 /// - If the underlying data is real, use the value as it is.
 /// - If the underlying data is integer, but there's already the `f64` values
@@ -410,6 +440,33 @@ impl<'a> Iterator for NumericIteratorF64<'a> {
     }
 }
 
+/// An iterator that returns `usize` wrapped with `Result`.
+pub struct NumericIteratorUsize<'a> {
+    sexp: &'a NumericSexp,
+    i: usize,
+    len: usize,
+}
+
+impl<'a> Iterator for NumericIteratorUsize<'a> {
+    type Item = crate::error::Result<usize>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = self.i;
+        self.i += 1;
+
+        if i >= self.len {
+            return None;
+        }
+
+        let elem = match &self.sexp.0 {
+            PrivateNumericSexp::Integer { orig, .. } => try_cast_i32_to_usize(orig.as_slice()[i]),
+            PrivateNumericSexp::Real { orig, .. } => try_cast_f64_to_usize(orig.as_slice()[i]),
+        };
+
+        Some(elem)
+    }
+}
+
 // --- Scalar -------------------------
 
 /// A struct that holds either an integer or a real scalar.
@@ -440,6 +497,13 @@ impl NumericScalar {
         match &self {
             NumericScalar::Integer(i) => *i as f64,
             NumericScalar::Real(r) => *r,
+        }
+    }
+
+    pub fn as_usize(&self) -> crate::error::Result<usize> {
+        match &self {
+            NumericScalar::Integer(i) => try_cast_i32_to_usize(*i),
+            NumericScalar::Real(r) => try_cast_f64_to_usize(*r),
         }
     }
 }
