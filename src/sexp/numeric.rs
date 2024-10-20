@@ -31,7 +31,7 @@ fn cast_i32_to_f64(i: i32) -> f64 {
 
 fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {
     if i.is_na() {
-        Err("cannot convert NA or NaN to usize".into())
+        Err("cannot convert NA to usize".into())
     } else {
         <usize>::try_from(i).map_err(|e| e.to_string().into())
     }
