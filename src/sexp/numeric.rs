@@ -8,7 +8,9 @@ const I32MAX: f64 = i32::MAX as f64;
 const I32MIN: f64 = i32::MIN as f64;
 
 // f64 can represent 2^53
-// cf. https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+//
+// cf. https://en.wikipedia.org/wiki/Double-precision_floating-point_format,
+//     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
 const F64_MAX_SIGFIG: f64 = (2_u64.pow(53) - 1) as f64;
 
 const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
