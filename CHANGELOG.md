@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Bug fixes
+
+* `NumericScalar::as_usize()` and `NumericSexp::iter_usize()` now fail if the
+  number is larger than `2^53 - 1` because this is the maximum number that can
+  be safely converted to usize.
+
 ## [v0.7.0] (2024-10-20)
 
 ### Breaking Change
