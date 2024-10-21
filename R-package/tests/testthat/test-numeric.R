@@ -39,7 +39,7 @@ test_that("NumericSexp works for usize conversions", {
   # f64 to usize
   expect_equal(
     # 2147483647 = .Machine$integer.max
-    usize_to_string(c(0.0, 10.0, 2147483648.0, 9007199254740991.0)),
+    usize_to_string(c(0.0, 10.0, 2147483648.0, 9007199254740991)),
     c("0", "10", "2147483648", "9007199254740991")
   )
 
@@ -82,7 +82,7 @@ test_that("NumericScalar works for usize conversions", {
   expect_equal(usize_to_string_scalar(10.0), "10")
   # 2147483647 = .Machine$integer.max
   expect_equal(usize_to_string_scalar(2147483648.0), "2147483648")
-  expect_equal(usize_to_string_scalar(9007199254740991.0), "9007199254740991")
+  expect_equal(usize_to_string_scalar(9007199254740991), "9007199254740991")
 
   # error cases
   expect_error(usize_to_string_scalar(NA_integer_))
