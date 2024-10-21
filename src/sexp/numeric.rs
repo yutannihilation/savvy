@@ -6,7 +6,13 @@ use crate::{IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 
 const I32MAX: f64 = i32::MAX as f64;
 const I32MIN: f64 = i32::MIN as f64;
-const USIZEMAX: f64 = usize::MAX as f64;
+
+// f64 can represent 2^53
+//
+// cf. https://en.wikipedia.org/wiki/Double-precision_floating-point_format,
+//     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+const F64_MAX_SIGFIG: f64 = (2_u64.pow(53) - 1) as f64;
+
 const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
 
 fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
@@ -40,8 +46,8 @@ fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {
 fn try_cast_f64_to_usize(f: f64) -> crate::Result<usize> {
     if f.is_na() || f.is_nan() {
         Err("cannot convert NA or NaN to usize".into())
-    } else if f.is_infinite() || !(0f64..=USIZEMAX).contains(&f) {
-        Err(format!("{f:?} is out of range for usize").into())
+    } else if f.is_infinite() || !(0f64..=F64_MAX_SIGFIG).contains(&f) {
+        Err(format!("{f:?} is out of range that can be safely converted to usize").into())
     } else if (f - f.round()).abs() > TOLERANCE {
         Err(format!("{f:?} is not integer-ish").into())
     } else {
