@@ -28,7 +28,7 @@ Currently, it also requires
 * `R` is on PATH
 * [pkgbuild R package][pkgbuild] is installed
 
-[okgbuild]: https://pkgbuild.r-lib.org/
+[pkgbuild]: https://pkgbuild.r-lib.org/
 
 #### R package for testing
 
