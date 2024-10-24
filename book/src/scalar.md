@@ -43,12 +43,29 @@ fn times_two_numeric_i32_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
 }
 ```
 
-Note that, while `as_f64()` is infallible,  `as_i32()` can fail when the
+Note that, while `as_f64()` is infallible, `as_i32()` can fail when the
 conversion is from `f64` to `i32` and
 
 - the value is `Inf` or `-Inf`
 - the value is out of range for `i32`
 - the value is not integer-ish (e.g. `1.1`)
+
+For convenience, `NumericScalar` also provides a conversion to usize by
+`as_usize()`. What's good is that this can handle integer-ish numeric, which
+means you can allow users to input a larger number than the integer max
+(2147483647)!
+
+```rust
+fn usize_to_string_scalar(x: NumericScalar) -> savvy::Result<Sexp> {
+    let x_usize = x.as_usize()?;
+    x_usize.to_string().try_into()
+}
+```
+
+```r
+usize_to_string_scalar(2147483648)
+#> [1] "2147483648"
+```
 
 ## Output
 

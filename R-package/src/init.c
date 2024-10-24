@@ -304,11 +304,6 @@ SEXP savvy_scalar_input_int__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
-SEXP savvy_scalar_input_usize__impl(SEXP c_arg__x) {
-    SEXP res = savvy_scalar_input_usize__ffi(c_arg__x);
-    return handle_result(res);
-}
-
 SEXP savvy_scalar_input_real__impl(SEXP c_arg__x) {
     SEXP res = savvy_scalar_input_real__ffi(c_arg__x);
     return handle_result(res);
@@ -524,6 +519,11 @@ SEXP savvy_times_two_numeric_i32__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
+SEXP savvy_usize_to_string__impl(SEXP c_arg__x) {
+    SEXP res = savvy_usize_to_string__ffi(c_arg__x);
+    return handle_result(res);
+}
+
 SEXP savvy_times_two_numeric_f64_scalar__impl(SEXP c_arg__x) {
     SEXP res = savvy_times_two_numeric_f64_scalar__ffi(c_arg__x);
     return handle_result(res);
@@ -531,6 +531,11 @@ SEXP savvy_times_two_numeric_f64_scalar__impl(SEXP c_arg__x) {
 
 SEXP savvy_times_two_numeric_i32_scalar__impl(SEXP c_arg__x) {
     SEXP res = savvy_times_two_numeric_i32_scalar__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_usize_to_string_scalar__impl(SEXP c_arg__x) {
+    SEXP res = savvy_usize_to_string_scalar__ffi(c_arg__x);
     return handle_result(res);
 }
 
@@ -770,7 +775,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_abs_complex__impl", (DL_FUNC) &savvy_abs_complex__impl, 1},
     {"savvy_new_value_pair__impl", (DL_FUNC) &savvy_new_value_pair__impl, 2},
     {"savvy_scalar_input_int__impl", (DL_FUNC) &savvy_scalar_input_int__impl, 1},
-    {"savvy_scalar_input_usize__impl", (DL_FUNC) &savvy_scalar_input_usize__impl, 1},
     {"savvy_scalar_input_real__impl", (DL_FUNC) &savvy_scalar_input_real__impl, 1},
     {"savvy_scalar_input_logical__impl", (DL_FUNC) &savvy_scalar_input_logical__impl, 1},
     {"savvy_scalar_input_string__impl", (DL_FUNC) &savvy_scalar_input_string__impl, 1},
@@ -813,8 +817,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_new_bool__impl", (DL_FUNC) &savvy_new_bool__impl, 1},
     {"savvy_times_two_numeric_f64__impl", (DL_FUNC) &savvy_times_two_numeric_f64__impl, 1},
     {"savvy_times_two_numeric_i32__impl", (DL_FUNC) &savvy_times_two_numeric_i32__impl, 1},
+    {"savvy_usize_to_string__impl", (DL_FUNC) &savvy_usize_to_string__impl, 1},
     {"savvy_times_two_numeric_f64_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_f64_scalar__impl, 1},
     {"savvy_times_two_numeric_i32_scalar__impl", (DL_FUNC) &savvy_times_two_numeric_i32_scalar__impl, 1},
+    {"savvy_usize_to_string_scalar__impl", (DL_FUNC) &savvy_usize_to_string_scalar__impl, 1},
     {"savvy_print_numeric__impl", (DL_FUNC) &savvy_print_numeric__impl, 1},
     {"savvy_default_value_scalar__impl", (DL_FUNC) &savvy_default_value_scalar__impl, 1},
     {"savvy_default_value_vec__impl", (DL_FUNC) &savvy_default_value_vec__impl, 1},

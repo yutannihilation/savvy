@@ -29,6 +29,31 @@ test_that("NumericSexp works", {
   expect_error(times_two_numeric_i32(c(1.1, -1.1))) # not integer-ish
 })
 
+test_that("NumericSexp works for usize conversions", {
+  # i32 to usize
+  expect_equal(
+    usize_to_string(c(0L, 10L)),
+    c("0", "10")
+  )
+
+  # f64 to usize
+  expect_equal(
+    # 2147483647 = .Machine$integer.max
+    usize_to_string(c(0.0, 10.0, 2147483648.0, 9007199254740991)),
+    c("0", "10", "2147483648", "9007199254740991")
+  )
+
+  # error cases
+  expect_error(usize_to_string(NA_integer_))
+  expect_error(usize_to_string(NA_real_))
+  expect_error(usize_to_string(Inf))
+  expect_error(usize_to_string(NaN))
+  expect_error(usize_to_string(-1L))
+  expect_error(usize_to_string(-1.0))
+  expect_error(usize_to_string_scalar(9007199254740992.0))
+})
+
+
 test_that("NumericScalar works", {
   expect_equal(times_two_numeric_f64_scalar(1L), 2)
   expect_equal(times_two_numeric_f64_scalar(1), 2)
@@ -45,4 +70,26 @@ test_that("NumericScalar works", {
   expect_error(times_two_numeric_i32_scalar(Inf))          # infinite
   expect_error(times_two_numeric_i32_scalar(2147483648))   # out of i32's range
   expect_error(times_two_numeric_i32_scalar(1.1))          # not integer-ish
+})
+
+test_that("NumericScalar works for usize conversions", {
+  # i32 to usize
+  expect_equal(usize_to_string_scalar(0L), "0")
+  expect_equal(usize_to_string_scalar(10L), "10")
+
+  # f64 to usize
+  expect_equal(usize_to_string_scalar(0.0), "0")
+  expect_equal(usize_to_string_scalar(10.0), "10")
+  # 2147483647 = .Machine$integer.max
+  expect_equal(usize_to_string_scalar(2147483648.0), "2147483648")
+  expect_equal(usize_to_string_scalar(9007199254740991), "9007199254740991")
+
+  # error cases
+  expect_error(usize_to_string_scalar(NA_integer_))
+  expect_error(usize_to_string_scalar(NA_real_))
+  expect_error(usize_to_string_scalar(Inf))
+  expect_error(usize_to_string_scalar(NaN))
+  expect_error(usize_to_string_scalar(-1L))
+  expect_error(usize_to_string_scalar(-1.0))
+  expect_error(usize_to_string_scalar(9007199254740992.0))
 })
