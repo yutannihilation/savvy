@@ -34,6 +34,12 @@ altrep = ["savvy-ffi/altrep"]
 # Support logger
 logger = ["log", "env_logger"]
 
+# By default, savvy provides `impl<E: std::error::Error + 'static> From<E> for Error`.
+# However, this conflicts if the user implements their custom error and the
+# conversion from it to savvy::Error. This flag removes the impl to allow such a
+# custom error.
+use-custom-error = []
+
 savvy-test = []
 
 [build-dependencies]

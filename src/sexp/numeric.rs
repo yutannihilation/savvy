@@ -37,19 +37,21 @@ fn cast_i32_to_f64(i: i32) -> f64 {
 
 fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {
     if i.is_na() {
-        Err("cannot convert NA to usize".into())
+        Err(savvy_err!("cannot convert NA to usize"))
     } else {
-        <usize>::try_from(i).map_err(|e| e.to_string().into())
+        Ok(<usize>::try_from(i)?)
     }
 }
 
 fn try_cast_f64_to_usize(f: f64) -> crate::Result<usize> {
     if f.is_na() || f.is_nan() {
-        Err("cannot convert NA or NaN to usize".into())
+        Err(savvy_err!("cannot convert NA or NaN to usize"))
     } else if f.is_infinite() || !(0f64..=F64_MAX_SIGFIG).contains(&f) {
-        Err(format!("{f:?} is out of range that can be safely converted to usize").into())
+        Err(savvy_err!(
+            "{f:?} is out of range that can be safely converted to usize"
+        ))
     } else if (f - f.round()).abs() > TOLERANCE {
-        Err(format!("{f:?} is not integer-ish").into())
+        Err(savvy_err!("{f:?} is not integer-ish"))
     } else {
         Ok(f as usize)
     }

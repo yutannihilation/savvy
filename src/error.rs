@@ -62,11 +62,45 @@ impl crate::error::Error {
 //
 // However, savvy creates a string immediately here (because only a string can
 // be propagated to R session), so both won't be a problem.
+#[cfg(not(feature = "use-custom-error"))]
 impl<E> From<E> for Error
 where
     E: std::error::Error + 'static,
 {
     fn from(value: E) -> Self {
+        Self::new(value)
+    }
+}
+
+// In the case of no automatic error conversion, provide some common conversion
+// for convenience.
+
+#[cfg(feature = "use-custom-error")]
+impl From<std::convert::Infallible> for Error {
+    fn from(value: std::convert::Infallible) -> Self {
+        Self::new(value)
+    }
+}
+
+#[cfg(feature = "use-custom-error")]
+impl From<std::num::TryFromIntError> for Error {
+    fn from(value: std::num::TryFromIntError) -> Self {
+        Self::new(value)
+    }
+}
+
+// For CString
+#[cfg(feature = "use-custom-error")]
+impl From<std::ffi::NulError> for Error {
+    fn from(value: std::ffi::NulError) -> Self {
+        Self::new(value)
+    }
+}
+
+// For Mutex
+#[cfg(feature = "use-custom-error")]
+impl<T> From<std::sync::PoisonError<T>> for Error {
+    fn from(value: std::sync::PoisonError<T>) -> Self {
         Self::new(value)
     }
 }
