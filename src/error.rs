@@ -104,3 +104,17 @@ impl<T> From<std::sync::PoisonError<T>> for Error {
         Self::new(value)
     }
 }
+
+#[cfg(feature = "use-custom-error")]
+impl From<String> for Error {
+    fn from(value: String) -> Self {
+        Self::new(value)
+    }
+}
+
+#[cfg(feature = "use-custom-error")]
+impl From<&str> for Error {
+    fn from(value: &str) -> Self {
+        Self::new(value)
+    }
+}
