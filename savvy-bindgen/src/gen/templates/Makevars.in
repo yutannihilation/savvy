@@ -1,7 +1,6 @@
 TARGET = @TARGET@
 
-# catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
-PROFILE = $(subst x,release,$(subst truex,dev,$(DEBUG)x))
+PROFILE = @PROFILE@
 
 TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
