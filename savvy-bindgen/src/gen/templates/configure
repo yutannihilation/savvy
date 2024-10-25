@@ -39,7 +39,6 @@ else
   PROFILE=release
 fi
 
-
 sed \
   -e "s/@TARGET@/${TARGET}/" \
   -e "s/@PROFILE@/${PROFILE}/" \
