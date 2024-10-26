@@ -496,7 +496,7 @@ async fn run_test(
             r###"
 # Check if necessary package is installed
 if (!"pkgbuild" %in% rownames(installed.packages())) {{
-    stop("Please install the pkgbuild package to run tests\n", call. = FALSE)
+  stop("Please install the pkgbuild package to run tests\n", call. = FALSE)
 }}
 
 # Compile
@@ -511,9 +511,9 @@ e <- new.env()
 source("{wrapper_r_str}", local = e)
 
 # Run test functions
-for (f in ls(e)) {{
-    f <- get(f, e, inherits = FALSE)
-    f()
+for (f in ls(e, pattern = "^test_")) {{
+  f <- get(f, e, inherits = FALSE)
+  f()
 }}
 
 cat("test result: ok\n")
