@@ -23,6 +23,20 @@ NULL
   }
 }
 
+# Prohibit modifying environments
+
+#' @export
+`$<-.savvy_savvyExamples__sealed` <- function(x, name, value) {
+  class <- gsub("__bundle$", "", class(x)[1])
+  stop(class, " cannot be modified", call. = FALSE)
+}
+
+#' @export
+`[[<-.savvy_savvyExamples__sealed` <- function(x, i, value) {
+  class <- gsub("__bundle$", "", class(x)[1])
+  stop(class, " cannot be modified", call. = FALSE)
+}
+
 
 `is_built_with_debug` <- function() {
   .Call(savvy_is_built_with_debug__impl)
@@ -643,15 +657,9 @@ NULL
   e$.ptr <- ptr
 
 
-  class(e) <- "Enum"
+  class(e) <- c("Enum", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.Enum` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Enum` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
 
 
 
@@ -691,28 +699,16 @@ NULL
 }
 
 
-#' @export
-`$<-.Enum` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Enum` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
-
 ### associated functions for Enum
 
 
 
-class(`Enum`) <- "Enum__bundle"
+class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Enum__bundle` <- function(x, ...) {
   cat('Enum')
 }
-
-#' @export
-`$<-.Enum__bundle` <- function(x, name, value) stop("Enum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Enum__bundle` <- function(x, i, value) stop("Enum cannot be modified", call. = FALSE)
 
 ### wrapper functions for FooEnum
 
@@ -727,15 +723,9 @@ class(`Enum`) <- "Enum__bundle"
   e$.ptr <- ptr
   e$`print` <- `FooEnum_print`(ptr)
 
-  class(e) <- "FooEnum"
+  class(e) <- c("FooEnum", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 
 #' A Or B.
@@ -778,28 +768,16 @@ class(`Enum`) <- "Enum__bundle"
 }
 
 
-#' @export
-`$<-.FooEnum` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooEnum` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
-
 ### associated functions for FooEnum
 
 
 
-class(`FooEnum`) <- "FooEnum__bundle"
+class(`FooEnum`) <- c("FooEnum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.FooEnum__bundle` <- function(x, ...) {
   cat('FooEnum')
 }
-
-#' @export
-`$<-.FooEnum__bundle` <- function(x, name, value) stop("FooEnum cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooEnum__bundle` <- function(x, i, value) stop("FooEnum cannot be modified", call. = FALSE)
 
 ### wrapper functions for FooWithDefault
 
@@ -814,25 +792,13 @@ class(`FooEnum`) <- "FooEnum__bundle"
   e$.ptr <- ptr
   e$`default_value_method` <- `FooWithDefault_default_value_method`(ptr)
 
-  class(e) <- "FooWithDefault"
+  class(e) <- c("FooWithDefault", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 
 
 `FooWithDefault` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.FooWithDefault` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooWithDefault` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### associated functions for FooWithDefault
 
@@ -845,18 +811,12 @@ class(`FooEnum`) <- "FooEnum__bundle"
 }
 
 
-class(`FooWithDefault`) <- "FooWithDefault__bundle"
+class(`FooWithDefault`) <- c("FooWithDefault__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.FooWithDefault__bundle` <- function(x, ...) {
   cat('FooWithDefault')
 }
-
-#' @export
-`$<-.FooWithDefault__bundle` <- function(x, name, value) stop("FooWithDefault cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.FooWithDefault__bundle` <- function(x, i, value) stop("FooWithDefault cannot be modified", call. = FALSE)
 
 ### wrapper functions for Person
 
@@ -885,27 +845,15 @@ class(`FooWithDefault`) <- "FooWithDefault__bundle"
   e$`set_name` <- `Person_set_name`(ptr)
   e$`name` <- `Person_name`(ptr)
 
-  class(e) <- "Person"
+  class(e) <- c("Person", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 
 #' A person with a name
 #'
 #' @export
 `Person` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.Person` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 ### associated functions for Person
 
@@ -930,18 +878,12 @@ class(`FooWithDefault`) <- "FooWithDefault__bundle"
 }
 
 
-class(`Person`) <- "Person__bundle"
+class(`Person`) <- c("Person__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Person__bundle` <- function(x, ...) {
   cat('Person')
 }
-
-#' @export
-`$<-.Person__bundle` <- function(x, name, value) stop("Person cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person__bundle` <- function(x, i, value) stop("Person cannot be modified", call. = FALSE)
 
 ### wrapper functions for Person2
 
@@ -956,42 +898,24 @@ class(`Person`) <- "Person__bundle"
   e$.ptr <- ptr
   e$`name` <- `Person2_name`(ptr)
 
-  class(e) <- "Person2"
+  class(e) <- c("Person2", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 
 
 `Person2` <- new.env(parent = emptyenv())
 
-#' @export
-`$<-.Person2` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person2` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
-
 ### associated functions for Person2
 
 
 
-class(`Person2`) <- "Person2__bundle"
+class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Person2__bundle` <- function(x, ...) {
   cat('Person2')
 }
-
-#' @export
-`$<-.Person2__bundle` <- function(x, name, value) stop("Person2 cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Person2__bundle` <- function(x, i, value) stop("Person2 cannot be modified", call. = FALSE)
 
 ### wrapper functions for Value
 
@@ -1021,25 +945,13 @@ class(`Person2`) <- "Person2__bundle"
   e$`get` <- `Value_get`(ptr)
   e$`get2` <- `Value_get2`(ptr)
 
-  class(e) <- "Value"
+  class(e) <- c("Value", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 
 
 `Value` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.Value` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Value` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### associated functions for Value
 
@@ -1048,18 +960,12 @@ class(`Person2`) <- "Person2__bundle"
 }
 
 
-class(`Value`) <- "Value__bundle"
+class(`Value`) <- c("Value__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Value__bundle` <- function(x, ...) {
   cat('Value')
 }
-
-#' @export
-`$<-.Value__bundle` <- function(x, name, value) stop("Value cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.Value__bundle` <- function(x, i, value) stop("Value cannot be modified", call. = FALSE)
 
 ### wrapper functions for ValuePair
 
@@ -1074,25 +980,13 @@ class(`Value`) <- "Value__bundle"
   e$.ptr <- ptr
   e$`print` <- `ValuePair_print`(ptr)
 
-  class(e) <- "ValuePair"
+  class(e) <- c("ValuePair", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 
 
 `ValuePair` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.ValuePair` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.ValuePair` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 ### associated functions for ValuePair
 
@@ -1109,18 +1003,12 @@ class(`Value`) <- "Value__bundle"
 }
 
 
-class(`ValuePair`) <- "ValuePair__bundle"
+class(`ValuePair`) <- c("ValuePair__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.ValuePair__bundle` <- function(x, ...) {
   cat('ValuePair')
 }
-
-#' @export
-`$<-.ValuePair__bundle` <- function(x, name, value) stop("ValuePair cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.ValuePair__bundle` <- function(x, i, value) stop("ValuePair cannot be modified", call. = FALSE)
 
 ### wrapper functions for struct
 
@@ -1130,25 +1018,13 @@ class(`ValuePair`) <- "ValuePair__bundle"
   e$.ptr <- ptr
 
 
-  class(e) <- "struct"
+  class(e) <- c("struct", "savvy_savvyExamples__sealed")
   e
 }
-
-#' @export
-`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
 
 
 
 `struct` <- new.env(parent = emptyenv())
-
-#' @export
-`$<-.struct` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.struct` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
 
 ### associated functions for struct
 
@@ -1161,16 +1037,10 @@ class(`ValuePair`) <- "ValuePair__bundle"
 }
 
 
-class(`struct`) <- "struct__bundle"
+class(`struct`) <- c("struct__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.struct__bundle` <- function(x, ...) {
   cat('struct')
 }
-
-#' @export
-`$<-.struct__bundle` <- function(x, name, value) stop("struct cannot be modified", call. = FALSE)
-
-#' @export
-`[[<-.struct__bundle` <- function(x, i, value) stop("struct cannot be modified", call. = FALSE)
 
