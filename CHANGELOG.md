@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor Improvements
+
+* savvy now generates a reduced number of R functions.
+
 ## [v0.7.1] (2024-10-21)
 
 ### Bug fixes
