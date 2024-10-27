@@ -7,6 +7,8 @@
 
 * savvy now generates a reduced number of R functions.
 
+* savvy-cli now rejects a package name containing `.`.
+
 ## [v0.7.1] (2024-10-21)
 
 ### Bug fixes
