@@ -17,6 +17,29 @@ pub(crate) fn to_snake_case(x: &str) -> String {
     out
 }
 
+pub(crate) fn dot_containing_to_camel_case(x: &str) -> String {
+    x.split('.')
+        .enumerate()
+        .map(|(i_split, split)| {
+            if i_split == 0 {
+                return split.to_string();
+            }
+            split
+                .chars()
+                .enumerate()
+                .map(|(i_char, c)| {
+                    if i_char == 0 {
+                        c.to_uppercase().next().unwrap()
+                    } else {
+                        c.to_lowercase().next().unwrap()
+                    }
+                })
+                .collect()
+        })
+        .collect::<Vec<String>>()
+        .join("")
+}
+
 pub(crate) fn canonicalize(path: &Path) -> Result<String, std::io::Error> {
     let crate_dir_abs = path.canonicalize()?;
     let crate_dir_abs = crate_dir_abs.to_string_lossy();
@@ -41,5 +64,12 @@ mod tests {
         assert_eq!(&to_snake_case("fooBar"), "foo_bar");
         assert_eq!(&to_snake_case("FooBar"), "foo_bar");
         assert_eq!(&to_snake_case("fooBarBaz"), "foo_bar_baz");
+    }
+
+    #[test]
+    fn test_camel_case() {
+        assert_eq!(&dot_containing_to_camel_case("foo.bar"), "fooBar");
+        assert_eq!(&dot_containing_to_camel_case("foo.bar.baz"), "fooBarBaz");
+        assert_eq!(&dot_containing_to_camel_case("foo.BAR.baz"), "fooBarBaz");
     }
 }

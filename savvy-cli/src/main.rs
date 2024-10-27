@@ -108,8 +108,24 @@ fn parse_description(path: &Path) -> PackageDescription {
     }
 
     if package_name_orig.is_empty() {
-        eprintln!("{} is not an R package root", path.to_string_lossy());
+        eprintln!(
+            "
+{} is not an R package root.
+",
+            path.to_string_lossy()
+        );
         std::process::exit(4);
+    }
+
+    if package_name_orig.contains('.') {
+        let package_name_new = dot_containing_to_camel_case(package_name_orig);
+        eprintln!(
+            r#"
+savvy doesn't support a package name with "." ({package_name_orig}).
+Please consider renaming it to "{package_name_new}".
+"#,
+        );
+        std::process::exit(5);
     }
 
     PackageDescription {
