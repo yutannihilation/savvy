@@ -29,4 +29,5 @@
 - [Advanced Topics](./advanced_topics.md)
     - [Initialization Routine](./initialization_routine.md)
     - [ALTREP](./altrep.md)
+    - [Linkage](./linkage.md)
 - [Comparison with extendr](./extendr.md)
