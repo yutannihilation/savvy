@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.7.2] (2024-10-27)
+
 ### Minor Improvements
 
 * savvy now generates a reduced number of R functions.
@@ -782,7 +784,8 @@ usize_to_string_scalar(2147483648)
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.7.2...HEAD
+[v0.7.2]: https://github.com/yutannihilation/savvy/compare/v0.7.1...v0.7.2
 [v0.7.1]: https://github.com/yutannihilation/savvy/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/yutannihilation/savvy/compare/v0.6.8...v0.7.0
 [v0.6.8]: https://github.com/yutannihilation/savvy/compare/v0.6.7...v0.6.8
