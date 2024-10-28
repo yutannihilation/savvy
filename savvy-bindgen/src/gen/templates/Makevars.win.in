@@ -2,6 +2,9 @@ TARGET = @TARGET@
 
 PROFILE = @PROFILE@
 
+# Add flags if necessary
+RUSTFLAGS = 
+
 TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
 STATLIB = $(LIBDIR)/lib{}.a
@@ -23,6 +26,9 @@ $(STATLIB):
 
 	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
 	  export LIBRARY_PATH="$${{LIBRARY_PATH}};$(LIBDIR)/libgcc_mock" && \
+	  export CC="$(CC)" && \
+	  export CFLAGS="$(CFLAGS)" && \
+	  export RUSTFLAGS="$(RUSTFLAGS)" && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 C_clean:

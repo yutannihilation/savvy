@@ -32,18 +32,18 @@ pro-tip!
 
 > The `--print=native-static-libs` flag may help with this.
 
-You can run `cargo rustc` (not `cargo build`) with the option like this.
-You might need to add more options to match with the actual `cargo build`.
-On Windows, `--target x86_64-pc-windows-gnu` is needed.
+You can add this option to `src/Makevars.in` and `src/Makevars.win.in` via
+`RUSTFLAGS` envvar. Please edit this line.
 
-```sh
-cargo rustc --lib --manifest-path ./src/rust/Cargo.toml -- --print=native-static-libs
+``` diff
+  # Add flags if necessary
+- RUSTFLAGS = 
++ RUSTFLAGS = --print=native-static-libs
 ```
 
-Then, you'll see this note.
+Then, you'll find this note in the installation log.
 
 ```sh
-❯ cargo rustc --lib --manifest-path ./src/rust/Cargo.toml -- --print=native-static-libs
    Compiling ahash v0.8.11
    Compiling serde v1.0.210
    Compiling zerocopy v0.7.35
@@ -55,6 +55,9 @@ note: Link against the following native artifacts when linking against this stat
 note: native-static-libs: -framework CoreText -framework CoreGraphics -framework CoreFoundation -framework Foundation -lobjc -liconv -lSystem -lc -lm
 
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 19.17s
+   gcc -shared -L/usr/lib64/R/lib -Wl,-O1 -Wl,--sort-common -Wl,...
+   installing to /tmp/RtmpvQv8Ur/devtools_install_...
+   ** checking absolute paths in shared objects and dynamic libraries
 ```
 
 You can copy these flags to `cargo build`. Please be aware that this differs on
