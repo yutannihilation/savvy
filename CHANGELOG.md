@@ -3,6 +3,9 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+* `NumericScalar::as_usize()` and `NumericSexp::iter_usize()` now rejects
+  numbers larger than `2^32` on 32-bit targets (i.e. webR). Thanks @eitsupi!
+
 ## [v0.7.2] (2024-10-27)
 
 ### Minor Improvements
