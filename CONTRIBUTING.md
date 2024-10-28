@@ -18,8 +18,8 @@ savvy-cli test .
 if you want to use the dev version of savvy-cli, you can run `cargo r-test`,
 which is an alias of `cargo run --manifest-path ./savvy-cli/Cargo.toml -- test`.
 
-The binary of [`savvy-cli`] is found on the [GitHub Releases][release]. You can
-also install it via `cargo install`.
+The binary of `savvy-cli` is available from the [GitHub Releases][release]. You
+can also install it via `cargo install`.
 
 [release]: https://github.com/yutannihilation/savvy/releases
 
