@@ -11,7 +11,12 @@ const I32MIN: f64 = i32::MIN as f64;
 //
 // cf. https://en.wikipedia.org/wiki/Double-precision_floating-point_format,
 //     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
-const F64_MAX_SIGFIG: f64 = (2_u64.pow(53) - 1) as f64;
+#[cfg(target_pointer_width = "64")]
+const F64_MAX_CASTABLE_TO_USIZE: f64 = (2_u64.pow(53) - 1) as f64;
+
+// On 32-bit target, usize::MAX is less than 2^53
+#[cfg(target_pointer_width = "32")]
+const F64_MAX_CASTABLE_TO_USIZE: f64 = usize::MAX as f64;
 
 const TOLERANCE: f64 = 0.01; // This is super-tolerant than vctrs, but this should be sufficient.
 
@@ -46,7 +51,7 @@ fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {
 fn try_cast_f64_to_usize(f: f64) -> crate::Result<usize> {
     if f.is_na() || f.is_nan() {
         Err("cannot convert NA or NaN to usize".into())
-    } else if f.is_infinite() || !(0f64..=F64_MAX_SIGFIG).contains(&f) {
+    } else if f.is_infinite() || !(0f64..=F64_MAX_CASTABLE_TO_USIZE).contains(&f) {
         Err(format!("{f:?} is out of range that can be safely converted to usize").into())
     } else if (f - f.round()).abs() > TOLERANCE {
         Err(format!("{f:?} is not integer-ish").into())
