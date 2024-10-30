@@ -87,6 +87,7 @@ SEXP savvy_safe_stop__ffi(void);
 SEXP savvy_raise_error__ffi(void);
 SEXP savvy_must_panic__ffi(void);
 SEXP savvy_safe_warn__ffi(void);
+SEXP savvy_error_conversion__ffi(void);
 SEXP savvy_do_call__ffi(SEXP c_arg__fun, SEXP c_arg__args);
 SEXP savvy_call_with_args__ffi(SEXP c_arg__fun);
 SEXP savvy_get_args__ffi(SEXP c_arg__args);

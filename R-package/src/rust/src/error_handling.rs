@@ -38,7 +38,7 @@ impl Drop for Foo {
 fn get_foo_value() -> savvy::Result<Sexp> {
     match FOO_VALUE.get() {
         Some(x) => {
-            let v = *x.lock().unwrap();
+            let v = *x.lock()?;
             v.try_into()
         }
         None => NullSexp.into(),
@@ -78,5 +78,11 @@ fn safe_warn() -> savvy::Result<()> {
 
     savvy::io::r_warn("foo")?;
 
+    Ok(())
+}
+
+#[savvy]
+fn error_conversion() -> savvy::Result<()> {
+    let _ = std::fs::read_to_string("no_such_file")?;
     Ok(())
 }
