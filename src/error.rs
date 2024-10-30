@@ -55,13 +55,11 @@ impl crate::error::Error {
 }
 
 #[derive(Debug)]
-struct ErrorImpl;
-
-const ERROR_IMPL: ErrorImpl = ErrorImpl;
+struct ErrorImpl(String);
 
 impl std::fmt::Display for ErrorImpl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "TODO")
+        write!(f, "{}", self.0)
     }
 }
 
@@ -70,35 +68,15 @@ unsafe impl Sync for ErrorImpl {}
 
 impl std::error::Error for ErrorImpl {}
 
-impl Deref for Error {
-    type Target = dyn std::error::Error + Send + Sync + 'static;
-
-    fn deref(&self) -> &Self::Target {
-        &ERROR_IMPL
-    }
-}
-
-impl AsRef<dyn std::error::Error> for Error {
-    fn as_ref(&self) -> &(dyn std::error::Error + 'static) {
-        &**self
-    }
-}
-
-impl AsRef<dyn std::error::Error + Send + Sync + 'static> for Error {
-    fn as_ref(&self) -> &(dyn std::error::Error + Send + Sync + 'static) {
-        &**self
-    }
-}
-
 impl From<Error> for Box<dyn std::error::Error + 'static> {
     fn from(value: Error) -> Self {
-        Box::new(ErrorImpl)
+        Box::new(ErrorImpl(value.to_string()))
     }
 }
 
 impl From<Error> for Box<dyn std::error::Error + Send + Sync + 'static> {
     fn from(value: Error) -> Self {
-        Box::new(ErrorImpl)
+        Box::new(ErrorImpl(value.to_string()))
     }
 }
 
