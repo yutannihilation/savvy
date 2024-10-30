@@ -1,4 +1,4 @@
-use savvy::{savvy, savvy_init, NullSexp, Sexp};
+use savvy::{savvy, savvy_err, savvy_init, NullSexp, Sexp};
 use savvy_ffi::DllInfo;
 use std::ffi::CString;
 
@@ -8,10 +8,10 @@ static FOO_VALUE: OnceLock<Mutex<i32>> = OnceLock::new();
 
 #[savvy_init]
 fn init_foo_value(dll: *mut DllInfo) -> savvy::Result<()> {
-    match FOO_VALUE.set(Mutex::new(-1)) {
-        Ok(_) => Ok(()),
-        Err(_) => Err("Failed to set values".into()),
-    }
+    FOO_VALUE
+        .set(Mutex::new(-1))
+        .map_err(|_| savvy_err!("Failed to set values"))?;
+    Ok(())
 }
 
 struct Foo {}
@@ -61,7 +61,7 @@ fn safe_stop() -> savvy::Result<()> {
 
 #[savvy]
 fn raise_error() -> savvy::Result<savvy::Sexp> {
-    Err(savvy::Error::new("This is my custom error"))
+    Err(savvy_err!("This is my custom error"))
 }
 
 #[allow(clippy::out_of_bounds_indexing, unconditional_panic)]

@@ -5,14 +5,13 @@ use std::{
 
 use savvy_ffi::{cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SEXP};
 
-use crate::NotAvailableValue;
+use crate::{savvy_err, NotAvailableValue};
 
 pub(crate) fn assert_len(len: usize, i: usize) -> crate::error::Result<()> {
     if i >= len {
-        Err(crate::error::Error::new(&format!(
-            "index out of bounds: the length is {} but the index is {}",
-            len, i
-        )))
+        Err(savvy_err!(
+            "index out of bounds: the length is {len} but the index is {i}",
+        ))
     } else {
         Ok(())
     }
@@ -59,10 +58,7 @@ pub(crate) fn str_to_symsxp<T: AsRef<str>>(name: T) -> crate::error::Result<Opti
         return Ok(None);
     }
 
-    let name_cstr = match CString::new(name) {
-        Ok(cstr) => cstr,
-        Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-    };
+    let name_cstr = CString::new(name)?;
     let sym = unsafe { crate::unwind_protect(|| savvy_ffi::Rf_install(name_cstr.as_ptr())) }?;
 
     Ok(Some(sym))

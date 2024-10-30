@@ -58,7 +58,7 @@ impl SavvyStruct {
 
                     let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                     let res = unsafe { x.as_ref() };
-                    res.ok_or("Failed to convert the external pointer to the Rust object".into())
+                    res.ok_or(savvy::savvy_err!("Failed to convert the external pointer to the Rust object"))
                 }
             }
         );
@@ -73,7 +73,7 @@ impl SavvyStruct {
 
                     let x = unsafe { savvy::get_external_pointer_addr(value.0)? as *mut #ty };
                     let res = unsafe { x.as_mut() };
-                    res.ok_or("Failed to convert the external pointer to the Rust object".into())
+                    res.ok_or(savvy::savvy_err!("Failed to convert the external pointer to the Rust object"))
                 }
             }
         );
