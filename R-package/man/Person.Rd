@@ -5,7 +5,7 @@
 \alias{Person}
 \title{A person with a name}
 \format{
-An object of class \code{Person__bundle} of length 5.
+An object of class \code{Person__bundle} (inherits from \code{savvy_savvyExamples__sealed}) of length 5.
 }
 \usage{
 Person
