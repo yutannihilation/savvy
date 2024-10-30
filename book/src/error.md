@@ -7,7 +7,6 @@ create a new error.
 ```rust
 use savvy::savvy_err;
 
-/// @export
 #[savvy]
 fn raise_error() -> savvy::Result<savvy::Sexp> {
     Err(savvy_err!("This is my custom error"))
@@ -25,9 +24,8 @@ Like [anyhow], you can use `?` to easily propagate any error that implements the
 [anyhow]: https://docs.rs/anyhow/latest/anyhow/index.html
 
 ```rust
-/// @export
 #[savvy]
-fn no_such_file() -> savvy::Result<savvy::Sexp> {
+fn no_such_file() -> savvy::Result<()> {
     let _ = std::fs::read_to_string("no_such_file")?;
     Ok(())
 }
