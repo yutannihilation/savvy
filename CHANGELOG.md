@@ -44,10 +44,10 @@ by yourself. Also, please be aware you need to handle NA as well.
 #[savvy]
 fn foo(x: i32) -> savvy::Result<()> {
     if x.is_na() {
-        return Err("cannot convert NA to usize".into())?;
+        return Err(savvy_err!("cannot convert NA to usize"));
     }
     
-    let x = <usize>::try_from(x).map_err(|e| e.to_string().into());
+    let x = <usize>::try_from(x)?;
 
     ...
 }

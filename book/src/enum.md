@@ -67,7 +67,7 @@ fn plot_line(x: IntegerSexp, y: IntegerSexp, line_type: &str) -> savvy::Result<(
             ...
         },
         _ => {
-            return Err("Unsupported line type!".into());
+            return Err(savvy_err!("Unsupported line type!"));
         }
     }
 }

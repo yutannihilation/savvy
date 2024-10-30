@@ -1,13 +1,16 @@
 # Error handling
 
-To propagate your errors to the R session, you can return a `savvy::Error`. You
-can easily create it by using `.into()` on a `&str` containing the error message.
+To propagate your errors to the R session, you can return a `savvy::Error`.
+`savvy_err!()` macro is a shortcut of `savvy::Error::new(format!(...))` to
+create a new error.
 
 ```rust
+use savvy::savvy_err;
+
 /// @export
 #[savvy]
 fn raise_error() -> savvy::Result<savvy::Sexp> {
-    Err("This is my custom error".into())
+    Err(savvy_err!("This is my custom error"))
 }
 ```
 
@@ -16,8 +19,30 @@ raise_error()
 #> Error: This is my custom error
 ```
 
-For the implementation details of the internals, please refer to [my blog
-post](https://yutani.rbind.io/post/dont-panic-we-can-unwind/#implementation).
+Like [anyhow], you can use `?` to easily propagate any error that implements the
+`std::error::Error` trait.
+
+[anyhow]: https://docs.rs/anyhow/latest/anyhow/index.html
+
+```rust
+/// @export
+#[savvy]
+fn no_such_file() -> savvy::Result<savvy::Sexp> {
+    let _ = std::fs::read_to_string("no_such_file")?;
+    Ok(())
+}
+```
+
+### Custom error
+
+If you want to implement your own error type and the conversion to
+`savvy::Error`, it would conflict with the conversion of `From<dyn std::error::Error>`.
+To avoid an compile error, please sepcify `use-custom-error` feature to opt-out
+the conversion.
+
+```toml
+savvy = { version = "...", features = ["use-custom-error"] }
+```
 
 ## Show a warning
 
