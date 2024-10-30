@@ -54,6 +54,12 @@ impl crate::error::Error {
     }
 }
 
+// To avoid the conflict with `From<dyn std::error::Error> for savvy::Error` and
+// `From<T> for T`, `savvy::Error` cannot implement `std::error::Error` trait
+// directly. Instead, it implements `From<Error> for Box<dyn std::error::Error>`.
+// This struct is to provide the std::error::Error trait.
+//
+// This idea is from anyhow crate. cf. https://github.com/dtolnay/anyhow/blob/master/src/error.rs
 #[derive(Debug)]
 struct ErrorImpl(String);
 
