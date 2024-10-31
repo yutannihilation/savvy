@@ -22,7 +22,7 @@ fn no_such_file() -> savvy::Result<()> {
 ```
 
 If you want to implement your own error type and the conversion to
-`savvy::Error`, please sepcify `use-custom-error` feature to opt-out the
+`savvy::Error`, please specify `use-custom-error` feature to opt-out the
 auto-conversion to avoid conflict with `impl From<dyn std::error::Error> for savvy::Error`
 
 ```toml
