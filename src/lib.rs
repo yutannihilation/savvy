@@ -3,11 +3,17 @@
 
 //! # Savvy - A Simple R Interface
 //!
-//! **savvy** is a simple R extension interface using Rust, like the [extendr] framework.
-//! The name "savvy" comes from the Japanese word "錆" (pronounced as `sàbí`), which means "Rust".
+//! **savvy** is a simple R extension interface using Rust, like the [extendr]
+//! framework. The name "savvy" comes from the Japanese word "錆" (pronounced as
+//! `sàbí`), which means "Rust".
 //!
-//! With savvy, you can automatically generate R functions from Rust code. This is
-//! an example of what a savvy-powered function would look like.
+//! With savvy, you can automatically generate R functions from Rust code.
+//! Please refer to [the user guide] for a detailed introduction!
+//!
+//! [extendr]: https://extendr.github.io/
+//! [the user guide]: https://yutannihilation.github.io/savvy/guide/
+//!
+//! ## Example
 //!
 //! **Rust**:
 //!
@@ -47,11 +53,20 @@
 //! #> [1] "A" "B" "C"
 //! ```
 //!
-//! [extendr]: https://extendr.github.io/
+//! ## Feature flags
 //!
-//! ## User guide
+//! * **complex**: Provides the support for complex with the [num-complex]
+//!   crate.
 //!
-//! <https://yutannihilation.github.io/savvy/guide/>
+//! * **altrep**: Provides the support for ALTREP.
+//!
+//! * **logger**: Provides an env_logger for R's stderr.
+//!
+//! * **use-custom-error**: Opt-out the auto error conversion in order to allow
+//!   defining custom errors. See [Error handling] section of the user guide.
+//!
+//! [num-complex]: https://crates.io/crates/num-complex  
+//! [Error handling]: https://yutannihilation.github.io/savvy/guide/error.html
 
 pub mod error;
 pub mod eval;
