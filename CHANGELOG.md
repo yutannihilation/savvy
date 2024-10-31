@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.8.0] (2024-10-31)
+
 ### New feature
 
 Like [anyhow], now you can use `?` to propagate any error that implements the
@@ -826,7 +828,8 @@ usize_to_string_scalar(2147483648)
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.0...HEAD
+[v0.8.0]: https://github.com/yutannihilation/savvy/compare/v0.7.2...v0.8.0
 [v0.7.2]: https://github.com/yutannihilation/savvy/compare/v0.7.1...v0.7.2
 [v0.7.1]: https://github.com/yutannihilation/savvy/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/yutannihilation/savvy/compare/v0.6.8...v0.7.0
