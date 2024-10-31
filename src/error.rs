@@ -1,14 +1,33 @@
+//! Error types. See [Error handling] section of the user guide.
+//!
+//! [Error handling]: https://yutannihilation.github.io/savvy/guide/error.html
+
 use std::ops::Deref;
 
 use savvy_ffi::SEXP;
 
+/// Represents savvy's error. Use [`savvy_err!`] macro to create a new error.
 #[derive(Debug)]
 pub enum Error {
+    /// Type mismatch.
     UnexpectedType { expected: String, actual: String },
+
+    /// Got a vector for an argument of scalar.
     NotScalar,
+
+    /// An error raised when the program aborted, e.g. R's `stop()` or Rust's
+    /// `panic!()`. The contained `SEXP` is supposed to be passed to
+    /// `R_ContinueUnwind()` in the wrapper C code.
     Aborted(SEXP),
+
+    /// The external pointer is null pointer (typically, this means it got
+    /// GC-ed).
     InvalidPointer,
+
+    /// Savvy fails to parse the provided R code.
     InvalidRCode(String),
+
+    /// An error to propagate the error message to the R session.
     GeneralError(String),
 }
 
