@@ -523,6 +523,11 @@ NULL
 }
 
 
+`error_conversion` <- function() {
+  invisible(.Call(savvy_error_conversion__impl))
+}
+
+
 `do_call` <- function(`fun`, `args`) {
   .Call(savvy_do_call__impl, `fun`, `args`)
 }

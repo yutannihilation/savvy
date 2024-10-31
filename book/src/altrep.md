@@ -147,7 +147,7 @@ fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 ```
 
@@ -183,7 +183,7 @@ fn tweak_altint(mut x: IntegerSexp) -> savvy::Result<()> {
         return Ok(());
     };
 
-    Err("Not a known ALTREP".into())
+    Err(savvy_err!("Not a known ALTREP"))
 }
 ```
 

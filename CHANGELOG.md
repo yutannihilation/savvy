@@ -3,12 +3,51 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New feature
+
+Like [anyhow], now you can use `?` to propagate any error that implements the
+`std::error::Error` trait.
+
+[anyhow]: https://docs.rs/anyhow/latest/anyhow/index.html
+
+```rust
+#[savvy]
+fn no_such_file() -> savvy::Result<()> {
+    // previously, you had to write .map_err(|e| e.to_string().into())
+    let _ = std::fs::read_to_string("no_such_file")?;
+    Ok(())
+}
+```
+
+If you want to implement your own error type and the conversion to
+`savvy::Error`, please sepcify `use-custom-error` feature to opt-out the
+auto-conversion to avoid conflict with `impl From<dyn std::error::Error> for savvy::Error`
+
+```toml
+savvy = { version = "...", features = ["use-custom-error"] }
+```
+
+### Breaking change
+
+By introducing the anyhow-like conversion, savvy loses the error conversion from
+a string (e.g. `Err("foo".into())`). Instead, please use `savvy_err!()` macro,
+which is a shorthand of `Error::new(format!(...))`.
+
+```rust
+#[savvy]
+fn raise_error() -> savvy::Result<savvy::Sexp> {
+    Err(savvy_err!("This is my custom error"))
+}
+```
+
+### Minor improvements
+
 * `NumericScalar::as_usize()` and `NumericSexp::iter_usize()` now rejects
   numbers larger than `2^32` on 32-bit targets (i.e. webR). Thanks @eitsupi!
 
 ## [v0.7.2] (2024-10-27)
 
-### Minor Improvements
+### Minor improvements
 
 * savvy now generates a reduced number of R functions.
 
@@ -24,7 +63,7 @@
 
 ## [v0.7.0] (2024-10-20)
 
-### Breaking Change
+### Breaking change
 
 Removed `TryFrom<Sexp> for usize`, so the following code no longer compiles.
 
@@ -44,10 +83,10 @@ by yourself. Also, please be aware you need to handle NA as well.
 #[savvy]
 fn foo(x: i32) -> savvy::Result<()> {
     if x.is_na() {
-        return Err("cannot convert NA to usize".into())?;
+        return Err(savvy_err!("cannot convert NA to usize"));
     }
     
-    let x = <usize>::try_from(x).map_err(|e| e.to_string().into());
+    let x = <usize>::try_from(x)?;
 
     ...
 }
@@ -72,7 +111,7 @@ usize_to_string_scalar(2147483648)
 
 ## [v0.6.8] (2024-09-17)
 
-### Minor Improvements
+### Minor improvements
 
 * `savvy init` now generates
   * slightly better `configure` script that checks if `cargo` command is available
@@ -82,7 +121,7 @@ usize_to_string_scalar(2147483648)
 
 ## [v0.6.7] (2024-09-05)
 
-### Minor Improvements
+### Minor improvements
 
 * Remove the use of non-API call `Rf_findVarInFrame`.
 
@@ -115,7 +154,7 @@ usize_to_string_scalar(2147483648)
   binary data on Rust's side, your primary option should be to store it in an
   external pointer (of a struct you define) rather than an R's raw vector.
 
-### Minor Improvements
+### Minor improvements
 
 * Wrapper environment of a Rust struct or enum now cannot be modified by users.
 
@@ -158,7 +197,7 @@ usize_to_string_scalar(2147483648)
 
 * `r_print!()` and `r_eprint!()` now can print strings containing `%`.
 
-### Breaking Change
+### Breaking change
 
 * The notation for `savvy-cli test` is now changed to `#[cfg(feature =
   "savvy-test")]` from `#[cfg(savvy_test)]`. This is to avoid the upcoming

@@ -94,7 +94,7 @@ fn identity_num(x: Sexp) -> savvy::Result<savvy::Sexp> {
     match x.into_typed() {
         TypedSexp::Integer(i) => identity_int(i),
         TypedSexp::Real(r) => identity_real(r),
-        _ => Err("Expected integer or numeric".into()),
+        _ => Err(savvy_err!("Expected integer or numeric")),
     }
 }
 ```

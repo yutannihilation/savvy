@@ -54,7 +54,7 @@ fn nalgebra_input(x: RealSexp) -> savvy::Result<()> {
     let dim = x.get_dim().ok_or("no dimension found")?;
 
     if dim.len() != 2 {
-        return Err("Input must be matrix!".into());
+        return Err(savvy_err!("Input must be matrix!"));
     }
 
     let m = DMatrix::from_vec(dim[0] as _, dim[1] as _, x.to_vec());
@@ -81,7 +81,7 @@ fn glam_input(x: RealSexp) -> savvy::Result<()> {
     let dim = x.get_dim().ok_or("no dimension found")?;
 
     if dim != [3, 3] {
-        return Err("Input must be 3x3 matrix!".into());
+        return Err(savvy_err!("Input must be 3x3 matrix!"));
     }
 
     // As we already check the dimension, this must not fail

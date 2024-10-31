@@ -1,4 +1,4 @@
-use savvy::{savvy, savvy_init, NullSexp, Sexp};
+use savvy::{savvy, savvy_err, savvy_init, NullSexp, Sexp};
 use savvy_ffi::DllInfo;
 use std::ffi::CString;
 
@@ -8,10 +8,10 @@ static FOO_VALUE: OnceLock<Mutex<i32>> = OnceLock::new();
 
 #[savvy_init]
 fn init_foo_value(dll: *mut DllInfo) -> savvy::Result<()> {
-    match FOO_VALUE.set(Mutex::new(-1)) {
-        Ok(_) => Ok(()),
-        Err(_) => Err("Failed to set values".into()),
-    }
+    FOO_VALUE
+        .set(Mutex::new(-1))
+        .map_err(|_| savvy_err!("Failed to set values"))?;
+    Ok(())
 }
 
 struct Foo {}
@@ -38,7 +38,7 @@ impl Drop for Foo {
 fn get_foo_value() -> savvy::Result<Sexp> {
     match FOO_VALUE.get() {
         Some(x) => {
-            let v = *x.lock().unwrap();
+            let v = *x.lock()?;
             v.try_into()
         }
         None => NullSexp.into(),
@@ -61,7 +61,7 @@ fn safe_stop() -> savvy::Result<()> {
 
 #[savvy]
 fn raise_error() -> savvy::Result<savvy::Sexp> {
-    Err(savvy::Error::new("This is my custom error"))
+    Err(savvy_err!("This is my custom error"))
 }
 
 #[allow(clippy::out_of_bounds_indexing, unconditional_panic)]
@@ -78,5 +78,11 @@ fn safe_warn() -> savvy::Result<()> {
 
     savvy::io::r_warn("foo")?;
 
+    Ok(())
+}
+
+#[savvy]
+fn error_conversion() -> savvy::Result<()> {
+    let _ = std::fs::read_to_string("no_such_file")?;
     Ok(())
 }

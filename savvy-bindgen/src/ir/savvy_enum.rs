@@ -116,7 +116,7 @@ impl SavvyEnum {
                         let i = <i32>::try_from(value)?;
                         match i {
                             #(#match_arms_ref),*,
-                            _ => Err("Unexpected enum variant".into()),
+                            _ => Err(savvy::savvy_err!("Unexpected enum variant")),
                         }
                     }
                 }
@@ -129,7 +129,7 @@ impl SavvyEnum {
                         let i = <i32>::try_from(value)?;
                         match i {
                             #(#match_arms),*,
-                            _ => Err("Unexpected enum variant".into()),
+                            _ => Err(savvy::savvy_err!("Unexpected enum variant")),
                         }
                     }
                 }

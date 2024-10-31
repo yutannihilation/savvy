@@ -479,6 +479,11 @@ SEXP savvy_safe_warn__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_error_conversion__impl(void) {
+    SEXP res = savvy_error_conversion__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_do_call__impl(SEXP c_arg__fun, SEXP c_arg__args) {
     SEXP res = savvy_do_call__ffi(c_arg__fun, c_arg__args);
     return handle_result(res);
@@ -809,6 +814,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_raise_error__impl", (DL_FUNC) &savvy_raise_error__impl, 0},
     {"savvy_must_panic__impl", (DL_FUNC) &savvy_must_panic__impl, 0},
     {"savvy_safe_warn__impl", (DL_FUNC) &savvy_safe_warn__impl, 0},
+    {"savvy_error_conversion__impl", (DL_FUNC) &savvy_error_conversion__impl, 0},
     {"savvy_do_call__impl", (DL_FUNC) &savvy_do_call__impl, 2},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},

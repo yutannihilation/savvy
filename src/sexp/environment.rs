@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use savvy_ffi::{R_GlobalEnv, R_NilValue, R_UnboundValue, Rboolean_TRUE, SEXP};
 
-use crate::Sexp;
+use crate::{savvy_err, Sexp};
 
 use super::utils::str_to_symsxp;
 
@@ -33,7 +33,7 @@ impl EnvironmentSexp {
     /// words, you should never use this if you don't understand how R's
     /// protection mechanism works.
     pub fn get<T: AsRef<str>>(&self, name: T) -> crate::error::Result<Option<crate::Sexp>> {
-        let sym = str_to_symsxp(name)?.ok_or("name must not be empty")?;
+        let sym = str_to_symsxp(name)?.ok_or(savvy_err!("name must not be empty"))?;
 
         // Note: since this SEXP already belongs to an environment, this doesn't
         // need protection.
@@ -58,7 +58,7 @@ impl EnvironmentSexp {
     /// Returns `true` the specified environment contains the specified
     /// variable.
     pub fn contains<T: AsRef<str>>(&self, name: T) -> crate::error::Result<bool> {
-        let sym = str_to_symsxp(name)?.ok_or("name must not be empty")?;
+        let sym = str_to_symsxp(name)?.ok_or(savvy_err!("name must not be empty"))?;
 
         let res = unsafe {
             crate::unwind_protect(|| {
@@ -79,10 +79,7 @@ impl EnvironmentSexp {
 
     /// Bind the SEXP to the specified environment as the specified name.
     pub fn set<T: AsRef<str>>(&self, name: T, value: Sexp) -> crate::error::Result<()> {
-        let name_cstr = match CString::new(name.as_ref()) {
-            Ok(cstr) => cstr,
-            Err(e) => return Err(crate::error::Error::new(&e.to_string())),
-        };
+        let name_cstr = CString::new(name.as_ref())?;
 
         unsafe {
             crate::unwind_protect(|| {

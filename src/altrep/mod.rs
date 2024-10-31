@@ -23,7 +23,7 @@ use savvy_ffi::{
     R_NilValue, Rboolean_TRUE, ATTRIB, CADR, CAR, PRINTNAME, SEXP,
 };
 
-use crate::{protect::local_protect, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
+use crate::{protect::local_protect, savvy_err, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
 
 /// This stores the ALTREP class objects
 static ALTREP_CLASS_CATALOGUE: OnceCell<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
@@ -39,9 +39,7 @@ pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
     let catalogue_mutex = ALTREP_CLASS_CATALOGUE.get().ok_or(crate::Error::new(
         "ALTREP_CLASS_CATALOGUE is not initialized",
     ))?;
-    let catalogue = catalogue_mutex
-        .lock()
-        .map_err(|e| crate::Error::new(&e.to_string()))?;
+    let catalogue = catalogue_mutex.lock()?;
     let class = catalogue
         .get(class_name)
         .ok_or(crate::Error::new("Failed to get the ALTREP class"))?;
@@ -64,16 +62,14 @@ fn register_altrep_class(
     let catalogue_mutex = ALTREP_CLASS_CATALOGUE.get().ok_or(crate::Error::new(
         "ALTREP_CLASS_CATALOGUE is not initialized",
     ))?;
-    let mut catalogue = catalogue_mutex
-        .lock()
-        .map_err(|e| crate::Error::new(&e.to_string()))?;
+    let mut catalogue = catalogue_mutex.lock()?;
 
     let existing_entry = catalogue.insert(class_name, class_t);
 
     if existing_entry.is_some() {
-        return Err(
-            "[WARN] ALTREP class {class_name} is already defined. Something seems wrong.".into(),
-        );
+        return Err(savvy_err!(
+            "[WARN] ALTREP class {class_name} is already defined. Something seems wrong."
+        ));
     }
 
     Ok(())
@@ -86,7 +82,7 @@ fn register_altrep_class(
 /// unexpected might happen.
 pub unsafe fn get_altrep_class_name(x: SEXP) -> crate::error::Result<&'static str> {
     if unsafe { ALTREP(x) } != 1 {
-        return Err("Not an ALTREP".into());
+        return Err(savvy_err!("Not an ALTREP"));
     }
 
     let class_name_symbol = unsafe { CAR(ATTRIB(ALTREP_CLASS(x))) };
@@ -100,7 +96,7 @@ pub unsafe fn get_altrep_class_name(x: SEXP) -> crate::error::Result<&'static st
 /// unexpected might happen.
 pub unsafe fn get_altrep_package_name(x: SEXP) -> crate::error::Result<&'static str> {
     if unsafe { ALTREP(x) } != 1 {
-        return Err("Not an ALTREP".into());
+        return Err(savvy_err!("Not an ALTREP"));
     }
 
     let class_name_symbol = unsafe { CADR(ATTRIB(ALTREP_CLASS(x))) };
@@ -114,12 +110,14 @@ pub unsafe fn get_altrep_package_name(x: SEXP) -> crate::error::Result<&'static 
 /// user's responsibility to ensure the underlying pointer is `T`.
 pub unsafe fn get_altrep_body_mut_unchecked<T>(x: &mut SEXP) -> crate::error::Result<&mut T> {
     if unsafe { ALTREP(*x) } != 1 {
-        return Err("Not an ALTREP".into());
+        return Err(savvy_err!("Not an ALTREP"));
     }
 
     let ptr = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x))? as *mut T };
     let ref_mut = unsafe { ptr.as_mut() };
-    ref_mut.ok_or("Failed to convert the external pointer to the Rust object".into())
+    ref_mut.ok_or(savvy_err!(
+        "Failed to convert the external pointer to the Rust object"
+    ))
 }
 
 /// Returns the `data1` of an ALTREP object as `&`.
@@ -129,12 +127,14 @@ pub unsafe fn get_altrep_body_mut_unchecked<T>(x: &mut SEXP) -> crate::error::Re
 /// user's responsibility to ensure the underlying pointer is `T`.
 pub unsafe fn get_altrep_body_ref_unchecked<T>(x: &SEXP) -> crate::error::Result<&T> {
     if unsafe { ALTREP(*x) } != 1 {
-        return Err("Not an ALTREP".into());
+        return Err(savvy_err!("Not an ALTREP"));
     }
 
     let ptr = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x))? as *const T };
     let ref_mut = unsafe { ptr.as_ref() };
-    ref_mut.ok_or("Failed to convert the external pointer to the Rust object".into())
+    ref_mut.ok_or(savvy_err!(
+        "Failed to convert the external pointer to the Rust object"
+    ))
 }
 
 // Some helpers
@@ -144,7 +144,9 @@ pub unsafe fn get_altrep_body_ref_unchecked<T>(x: &SEXP) -> crate::error::Result
 pub(crate) fn extract_ref_from_altrep<T>(x: &SEXP) -> crate::Result<&T> {
     let x = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x)).unwrap() as *mut T };
     let self_ = unsafe { x.as_ref() };
-    self_.ok_or("Failed to convert the external pointer to the Rust object".into())
+    self_.ok_or(savvy_err!(
+        "Failed to convert the external pointer to the Rust object"
+    ))
 }
 
 /// Extracts &mut T
@@ -153,7 +155,9 @@ pub(crate) fn extract_ref_from_altrep<T>(x: &SEXP) -> crate::Result<&T> {
 pub(crate) fn extract_mut_from_altrep<T>(x: &mut SEXP) -> crate::Result<&mut T> {
     let x = unsafe { crate::get_external_pointer_addr(R_altrep_data1(*x)).unwrap() as *mut T };
     let self_ = unsafe { x.as_mut() };
-    self_.ok_or("Failed to convert the external pointer to the Rust object".into())
+    self_.ok_or(savvy_err!(
+        "Failed to convert the external pointer to the Rust object"
+    ))
 }
 
 /// Extract T
@@ -169,20 +173,17 @@ pub(crate) fn assert_altrep_class(x: SEXP, class_name: &'static str) -> crate::e
     let catalogue_mutex = ALTREP_CLASS_CATALOGUE.get().ok_or(crate::Error::new(
         "ALTREP_CLASS_CATALOGUE is not initialized",
     ))?;
-    let catalogue = catalogue_mutex
-        .lock()
-        .map_err(|e| crate::Error::new(&e.to_string()))?;
+    let catalogue = catalogue_mutex.lock()?;
     let class = catalogue
         .get(class_name)
-        .ok_or(crate::Error::new("Failed to get the ALTREP class"))?;
+        .ok_or(savvy_err!("Failed to get the ALTREP class"))?;
 
     if unsafe { R_altrep_inherits(x, *class) == Rboolean_TRUE } {
         Ok(())
     } else {
-        Err(format!(
+        Err(savvy_err!(
             "Not an object of the specified ALTREP class ({})",
             class_name
-        )
-        .into())
+        ))
     }
 }

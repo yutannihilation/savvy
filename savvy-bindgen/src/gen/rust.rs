@@ -121,7 +121,7 @@ impl SavvyFn {
 
                 match result {
                     Ok(orig_result) => orig_result,
-                    Err(_) => Err("panic happened".into()),
+                    Err(_) => Err(savvy::savvy_err!("panic happened")),
                 }
             });
             out.block = Box::new(new_body);

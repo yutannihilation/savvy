@@ -508,7 +508,7 @@ fn wrap_with_test_function(
                     eprintln!("ok");
                     Ok(())
                 }
-                Err(_) => Err("test failed".into()),
+                Err(_) => Err(savvy::savvy_err!("test failed")),
             }
         }
     }
