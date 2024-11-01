@@ -62,9 +62,6 @@ identity_int(c(1, 2))
 #>   Unexpected type: Cannot convert double to integer
 ```
 
-Instead, you can use `NumericSexp` to accept both integer and a
-
-
 While you probably feel this is inconvenient, this is also a design decision.
 My concerns on supporting these conversion are
 
@@ -85,16 +82,19 @@ identity_int_wrapper <- function(x) {
 }
 ```
 
-Alternatively, you can use a general type `Sexp` as input and switch the
-function to apply depending on whether it's integer or real.
+Alternatively, you can use `NumericSexp` as input. This provides a method to
+convert the input either to `i32` or to `f64` on the fly. For more details,
+please read [the section about `NumericSexp`](https://yutannihilation.github.io/savvy/guide/atomic_types.html#numericsexp)
 
 ```rust
 #[savvy]
-fn identity_num(x: Sexp) -> savvy::Result<savvy::Sexp> {
-    match x.into_typed() {
-        TypedSexp::Integer(i) => identity_int(i),
-        TypedSexp::Real(r) => identity_real(r),
-        _ => Err(savvy_err!("Expected integer or numeric")),
+fn identity_num(x: NumericSexp) -> savvy::Result<savvy::Sexp> {
+    let mut out = OwnedIntegerSexp::new(x.len())?;
+
+    for (i, &v) in x.iter_i32().enumerate() {
+        out[i] = v;
     }
+
+    out.into()
 }
 ```
