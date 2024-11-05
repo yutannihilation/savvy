@@ -2,8 +2,6 @@
 //!
 //! [Error handling]: https://yutannihilation.github.io/savvy/guide/error.html
 
-use std::ops::Deref;
-
 use savvy_ffi::SEXP;
 
 /// Represents savvy's error. Use [`savvy_err!`] macro to create a new error.
