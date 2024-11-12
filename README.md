@@ -1,15 +1,14 @@
+# Savvy - A simple R extension interface using Rust
 
 
 <!-- README.md is generated from README.qmd. Please edit that file -->
-
-# Savvy - A simple R extension interface using Rust
 
 <!-- badges: start -->
 
 [![](https://img.shields.io/github/actions/workflow/status/yutannihilation/savvy/R-CMD-check.yaml?style=flat-square&logo=github)](https://github.com/yutannihilation/savvy/actions/workflows/R-CMD-check.yaml)
 [![](https://img.shields.io/crates/v/savvy.svg?style=flat-square&logo=rust)](https://crates.io/crates/savvy)
 [![](https://img.shields.io/docsrs/savvy.svg?style=flat-square&logo=docsdotrs)](https://docs.rs/savvy/latest/)
-[![](https://img.shields.io/badge/%C2%AF%5C_(%E3%83%84)_%2F%C2%AF-green?style=flat-square&logo=docsdotrs&label=docs%20(dev)&labelColor=grey.png)](https://yutannihilation.github.io/savvy/reference/savvy/)
+[![](https://img.shields.io/badge/%C2%AF%5C_(%E3%83%84)_%2F%C2%AF-green?style=flat-square&logo=docsdotrs&label=docs%20(dev)&labelColor=grey)](https://yutannihilation.github.io/savvy/reference/savvy/)
 
 <!-- badges: end -->
 
@@ -58,9 +57,10 @@ to_upper(c("a", "b", "c"))
 #> [1] "A" "B" "C"
 ```
 
-## User guide
+## Documents
 
-<https://yutannihilation.github.io/savvy/guide/>
+- [user guide](https://yutannihilation.github.io/savvy/guide/)
+- [savvy 入門](https://yutani.quarto.pub/intro-to-savvy-ja/) (Japanese)
 
 ## Contributing
 
@@ -70,6 +70,12 @@ to_upper(c("a", "b", "c"))
 
 A toy example R package can be found in [`R-package/`
 directory](https://github.com/yutannihilation/savvy/tree/main/R-package).
+
+Savvy is used in the following R packages:
+
+- [prqlr](https://prql.github.io/prqlc-r/)
+- [neopolars](https://eitsupi.r-universe.dev/neopolars)
+- [string2path](https://yutannihilation.github.io/string2path/)
 
 ## Thanks
 

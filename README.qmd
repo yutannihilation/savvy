@@ -1,5 +1,7 @@
 ---
+title: "Savvy - A simple R extension interface using Rust"
 format: gfm
+default-image-extension: "" # quarto-dev/quarto-cli#6092
 ---
 
 <!-- README.md is generated from README.qmd. Please edit that file -->
@@ -14,8 +16,6 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-
-# Savvy - A simple R extension interface using Rust
 
 <!-- badges: start -->
 
@@ -72,9 +72,10 @@ to_upper(c("a", "b", "c"))
 
 [extendr]: https://extendr.github.io/
 
-## User guide
+## Documents
 
-<https://yutannihilation.github.io/savvy/guide/>
+- [user guide](https://yutannihilation.github.io/savvy/guide/)
+- [savvy 入門](https://yutani.quarto.pub/intro-to-savvy-ja/) (Japanese)
 
 ## Contributing
 
@@ -83,6 +84,12 @@ to_upper(c("a", "b", "c"))
 ## Examples
 
 A toy example R package can be found in [`R-package/` directory](https://github.com/yutannihilation/savvy/tree/main/R-package).
+
+Savvy is used in the following R packages:
+
+- [prqlr](https://prql.github.io/prqlc-r/)
+- [neopolars](https://eitsupi.r-universe.dev/neopolars)
+- [string2path](https://yutannihilation.github.io/string2path/)
 
 ## Thanks
 
