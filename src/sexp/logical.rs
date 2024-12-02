@@ -425,7 +425,7 @@ pub struct LogicalSexpIter<'a> {
     iter_raw: std::slice::Iter<'a, i32>,
 }
 
-impl<'a> Iterator for LogicalSexpIter<'a> {
+impl Iterator for LogicalSexpIter<'_> {
     type Item = bool;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -437,4 +437,4 @@ impl<'a> Iterator for LogicalSexpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for LogicalSexpIter<'a> {}
+impl ExactSizeIterator for LogicalSexpIter<'_> {}

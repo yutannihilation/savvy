@@ -375,7 +375,7 @@ pub struct StringSexpIter<'a> {
     len: usize,
 }
 
-impl<'a> Iterator for StringSexpIter<'a> {
+impl Iterator for StringSexpIter<'_> {
     // The lifetime here is 'static, not 'a, in the assumption that strings in
     // `R_StringHash`, the global `CHARSXP` cache, won't be deleted during the R
     // session.
@@ -416,4 +416,4 @@ impl<'a> Iterator for StringSexpIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StringSexpIter<'a> {}
+impl ExactSizeIterator for StringSexpIter<'_> {}

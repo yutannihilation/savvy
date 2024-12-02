@@ -392,7 +392,7 @@ pub struct NumericIteratorI32<'a> {
     len: usize,
 }
 
-impl<'a> Iterator for NumericIteratorI32<'a> {
+impl Iterator for NumericIteratorI32<'_> {
     type Item = crate::error::Result<i32>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -429,7 +429,7 @@ pub struct NumericIteratorF64<'a> {
     len: usize,
 }
 
-impl<'a> Iterator for NumericIteratorF64<'a> {
+impl Iterator for NumericIteratorF64<'_> {
     type Item = f64;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -460,7 +460,7 @@ pub struct NumericIteratorUsize<'a> {
     len: usize,
 }
 
-impl<'a> Iterator for NumericIteratorUsize<'a> {
+impl Iterator for NumericIteratorUsize<'_> {
     type Item = crate::error::Result<usize>;
 
     fn next(&mut self) -> Option<Self::Item> {

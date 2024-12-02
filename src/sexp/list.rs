@@ -288,7 +288,7 @@ pub struct ListSexpValueIter<'a> {
     len: usize,
 }
 
-impl<'a> Iterator for ListSexpValueIter<'a> {
+impl Iterator for ListSexpValueIter<'_> {
     type Item = Sexp;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -307,6 +307,6 @@ impl<'a> Iterator for ListSexpValueIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for ListSexpValueIter<'a> {}
+impl ExactSizeIterator for ListSexpValueIter<'_> {}
 
 type ListSexpIter<'a> = std::iter::Zip<std::vec::IntoIter<&'static str>, ListSexpValueIter<'a>>;
