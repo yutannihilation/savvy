@@ -11,7 +11,7 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bindgen = "0.70.0"
+bindgen = "0.71.1"
 
 [package.metadata.dist]
 dist = false
