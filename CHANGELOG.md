@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* savvy CLI is now available for Arm Windows thanks to [cargo-dist's cross-compilation feature](https://opensource.axo.dev/cargo-dist/book/ci/customizing.html#cross-compilation).
+
 ## [v0.8.1] (2024-11-17)
 
 ### Bug fixes
@@ -11,7 +15,7 @@
 
 ## [v0.8.0] (2024-10-31)
 
-### New feature
+### New features
 
 Like [anyhow], now you can use `?` to propagate any error that implements the
 `std::error::Error` trait.
@@ -35,7 +39,7 @@ auto-conversion to avoid conflict with `impl From<dyn std::error::Error> for sav
 savvy = { version = "...", features = ["use-custom-error"] }
 ```
 
-### Breaking change
+### Breaking changes
 
 By introducing the anyhow-like conversion, savvy loses the error conversion from
 a string (e.g. `Err("foo".into())`). Instead, please use `savvy_err!()` macro,
@@ -71,7 +75,7 @@ fn raise_error() -> savvy::Result<savvy::Sexp> {
 
 ## [v0.7.0] (2024-10-20)
 
-### Breaking change
+### Breaking changes
 
 Removed `TryFrom<Sexp> for usize`, so the following code no longer compiles.
 
@@ -205,7 +209,7 @@ usize_to_string_scalar(2147483648)
 
 * `r_print!()` and `r_eprint!()` now can print strings containing `%`.
 
-### Breaking change
+### Breaking changes
 
 * The notation for `savvy-cli test` is now changed to `#[cfg(feature =
   "savvy-test")]` from `#[cfg(savvy_test)]`. This is to avoid the upcoming
