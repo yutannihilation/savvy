@@ -29,6 +29,13 @@ test_that("NumericSexp works", {
   expect_error(times_two_numeric_i32(c(1.1, -1.1))) # not integer-ish
 })
 
+test_that("NumericSexp can handle 0-length vectors", {
+  expect_equal(times_two_numeric_f64(integer(0L)), numeric(0L))
+  expect_equal(times_two_numeric_f64(numeric(0L)), numeric(0L))
+  expect_equal(times_two_numeric_i32(integer(0L)), integer(0L))
+  expect_equal(times_two_numeric_i32(numeric(0L)), integer(0L))
+})
+
 test_that("NumericSexp works for usize conversions", {
   # i32 to usize
   expect_equal(
