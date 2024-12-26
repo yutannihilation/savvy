@@ -86,6 +86,14 @@ test_that("functions work", {
   )
 })
 
+test_that("functions can handle 0-length vectors", {
+  expect_equal(to_upper(character(0L)),     character(0L))
+  expect_equal(times_two_int(integer(0L)),  integer(0L))
+  expect_equal(times_two_real(numeric(0L)), numeric(0L))
+  expect_equal(flip_logical(logical(0L)),   logical(0L))
+  expect_equal(reverse_bits(raw(0L)),       raw(0L))
+})
+
 test_that("functions can handle ALTREP", {
   expect_equal(times_two_int(1:10), 1:10 * 2L)
 })
