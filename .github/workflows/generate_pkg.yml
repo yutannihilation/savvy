@@ -18,7 +18,11 @@ jobs:
       - name: check wrapper file generation
         run: |
           cargo run --manifest-path ./savvy-cli/Cargo.toml -- update ./R-package/
+
           # If there's any change, exit with non-zero status
+          # (the code is derived from https://stackoverflow.com/a/3879077)
+          git add ./R-package/
+          git update-index --refresh
           if ! git diff-index --quiet HEAD -- ./R-package/; then
             echo
             echo "some change on wrapper file generation was detected!"
