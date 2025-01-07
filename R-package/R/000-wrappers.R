@@ -169,11 +169,6 @@ NULL
 }
 
 
-`fn_w_cfg` <- function(`x`) {
-  invisible(.Call(savvy_fn_w_cfg__impl, `x`))
-}
-
-
 `foo_a` <- function() {
   .savvy_wrap_FooEnum(.Call(savvy_foo_a__impl))
 }
