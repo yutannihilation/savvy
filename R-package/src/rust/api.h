@@ -22,6 +22,7 @@ SEXP savvy_filter_string_ascii__ffi(SEXP c_arg__x);
 SEXP savvy_first_complex__ffi(SEXP c_arg__x);
 SEXP savvy_flip_logical__ffi(SEXP c_arg__x);
 SEXP savvy_flip_logical_expert_only__ffi(SEXP c_arg__x);
+SEXP savvy_fn_w_cfg__ffi(SEXP c_arg__x);
 SEXP savvy_foo_a__ffi(void);
 SEXP savvy_fun_mod1__ffi(void);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
