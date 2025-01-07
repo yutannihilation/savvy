@@ -320,8 +320,8 @@ fn update(path: &Path) {
 
     let merged = match merge_parsed_results(parsed) {
         Ok(merged) => merged,
-        Err(error_list) => {
-            let details = error_list
+        Err(parse_errors) => {
+            let details = parse_errors
                 .iter()
                 .map(|e| format!("  - {e}"))
                 .collect::<Vec<String>>()
