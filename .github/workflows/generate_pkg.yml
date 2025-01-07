@@ -15,6 +15,12 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@nightly
 
+      - name: check wrapper file generation
+        run: |
+          cargo run --manifest-path ./savvy-cli/Cargo.toml -- update ./R-package/
+          # If there's any change, exit with non-zero status
+          git diff-index --quiet HEAD -- ./R-package/
+
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
