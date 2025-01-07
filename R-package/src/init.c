@@ -154,11 +154,6 @@ SEXP savvy_flip_logical_expert_only__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
-SEXP savvy_fn_w_cfg__impl(SEXP c_arg__x) {
-    SEXP res = savvy_fn_w_cfg__ffi(c_arg__x);
-    return handle_result(res);
-}
-
 SEXP savvy_foo_a__impl(void) {
     SEXP res = savvy_foo_a__ffi();
     return handle_result(res);
@@ -756,7 +751,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_first_complex__impl", (DL_FUNC) &savvy_first_complex__impl, 1},
     {"savvy_flip_logical__impl", (DL_FUNC) &savvy_flip_logical__impl, 1},
     {"savvy_flip_logical_expert_only__impl", (DL_FUNC) &savvy_flip_logical_expert_only__impl, 1},
-    {"savvy_fn_w_cfg__impl", (DL_FUNC) &savvy_fn_w_cfg__impl, 1},
     {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
