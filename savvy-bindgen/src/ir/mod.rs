@@ -195,7 +195,7 @@ fn remove_duplicated_fns(fns: &[SavvyFn]) -> Result<Vec<SavvyFn>, Vec<SavvyParse
 
     if parse_errors.is_empty() {
         let mut fns: Vec<SavvyFn> = fn_map.into_values().collect();
-        fns.sort_by_key(|f| f.fn_name.clone());
+        fns.sort_by_key(|f| f.fn_name.clone()); // make the order deterministic
         Ok(fns)
     } else {
         Err(parse_errors)
