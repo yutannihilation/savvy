@@ -43,7 +43,24 @@ pub struct MergedResult {
     pub enums: Vec<SavvyEnum>,
 }
 
-pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
+#[derive(Debug, Clone)]
+pub enum SavvyParseError {
+    ConflictingDefinitions(syn::Ident),
+}
+
+impl std::fmt::Display for SavvyParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SavvyParseError::ConflictingDefinitions(ident) => {
+                write!(f, "Different definitions are found for fn `{ident}`")
+            }
+        }
+    }
+}
+
+pub fn merge_parsed_results(
+    results: Vec<ParsedResult>,
+) -> Result<MergedResult, Vec<SavvyParseError>> {
     let mut bare_fns: Vec<SavvyFn> = Vec::new();
     let mut impl_map: HashMap<Ident, SavvyMergedImpl> = HashMap::new();
     let mut enums: Vec<SavvyEnum> = Vec::new();
@@ -118,9 +135,9 @@ pub fn merge_parsed_results(results: Vec<ParsedResult>) -> MergedResult {
     // in order to make the wrapper generation deterministic, sort by the type
     impls.sort_by_key(|(k, _)| k.clone());
 
-    MergedResult {
+    Ok(MergedResult {
         bare_fns,
         impls,
         enums,
-    }
+    })
 }
