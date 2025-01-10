@@ -685,6 +685,11 @@ SEXP savvy_Person2_name__impl(SEXP self__) {
     return handle_result(res);
 }
 
+SEXP savvy_StructWithConfig_new__impl(SEXP self__, SEXP c_arg__x) {
+    SEXP res = savvy_StructWithConfig_new__ffi(self__, c_arg__x);
+    return handle_result(res);
+}
+
 SEXP savvy_Value_get__impl(SEXP self__) {
     SEXP res = savvy_Value_get__ffi(self__);
     return handle_result(res);
@@ -860,6 +865,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_Person_new_with_name__impl", (DL_FUNC) &savvy_Person_new_with_name__impl, 1},
     {"savvy_Person_set_name__impl", (DL_FUNC) &savvy_Person_set_name__impl, 2},
     {"savvy_Person2_name__impl", (DL_FUNC) &savvy_Person2_name__impl, 1},
+    {"savvy_StructWithConfig_new__impl", (DL_FUNC) &savvy_StructWithConfig_new__impl, 2},
     {"savvy_Value_get__impl", (DL_FUNC) &savvy_Value_get__impl, 1},
     {"savvy_Value_get2__impl", (DL_FUNC) &savvy_Value_get2__impl, 1},
     {"savvy_Value_new__impl", (DL_FUNC) &savvy_Value_new__impl, 1},

@@ -140,6 +140,9 @@ SEXP savvy_Person_set_name__ffi(SEXP self__, SEXP c_arg__name);
 // methods and associated functions for Person2
 SEXP savvy_Person2_name__ffi(SEXP self__);
 
+// methods and associated functions for StructWithConfig
+SEXP savvy_StructWithConfig_new__ffi(SEXP self__, SEXP c_arg__x);
+
 // methods and associated functions for Value
 SEXP savvy_Value_get__ffi(SEXP self__);
 SEXP savvy_Value_get2__ffi(SEXP self__);

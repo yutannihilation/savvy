@@ -927,6 +927,38 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
   cat('Person2')
 }
 
+### wrapper functions for StructWithConfig
+
+`StructWithConfig` <- function(self) {
+  function(`x`) {
+    .savvy_wrap_StructWithConfig(.Call(savvy_StructWithConfig_new__impl, `self`, `x`))
+  }
+}
+
+`.savvy_wrap_StructWithConfig` <- function(ptr) {
+  e <- new.env(parent = emptyenv())
+  e$.ptr <- ptr
+  e$`new` <- `StructWithConfig`(ptr)
+
+  class(e) <- c("StructWithConfig", "savvy_savvyExamples__sealed")
+  e
+}
+
+
+
+`StructWithConfig` <- new.env(parent = emptyenv())
+
+### associated functions for StructWithConfig
+
+
+
+class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples__sealed")
+
+#' @export
+`print.StructWithConfig__bundle` <- function(x, ...) {
+  cat('StructWithConfig')
+}
+
 ### wrapper functions for Value
 
 `Value_get` <- function(self) {
