@@ -20,12 +20,22 @@ struct StructWithConfig(i32);
 #[savvy]
 impl StructWithConfig {
     #[cfg(target_os = "windows")]
-    fn new(&self, x: i32) -> savvy::Result<Self> {
+    fn new_method(&self, x: i32) -> savvy::Result<Self> {
         Ok(Self(x))
     }
 
     #[cfg(not(target_os = "windows"))]
-    fn new(&self, x: i32) -> savvy::Result<Self> {
+    fn new_method(&self, x: i32) -> savvy::Result<Self> {
+        Ok(Self(x * 2))
+    }
+
+    #[cfg(target_os = "windows")]
+    fn new_associated_fn(x: i32) -> savvy::Result<Self> {
+        Ok(Self(x))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    fn new_associated_fn(x: i32) -> savvy::Result<Self> {
         Ok(Self(x * 2))
     }
 }

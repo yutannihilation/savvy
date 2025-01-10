@@ -929,16 +929,16 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
 
 ### wrapper functions for StructWithConfig
 
-`StructWithConfig` <- function(self) {
+`StructWithConfig_new_method` <- function(self) {
   function(`x`) {
-    .savvy_wrap_StructWithConfig(.Call(savvy_StructWithConfig_new__impl, `self`, `x`))
+    .savvy_wrap_StructWithConfig(.Call(savvy_StructWithConfig_new_method__impl, `self`, `x`))
   }
 }
 
 `.savvy_wrap_StructWithConfig` <- function(ptr) {
   e <- new.env(parent = emptyenv())
   e$.ptr <- ptr
-  e$`new` <- `StructWithConfig`(ptr)
+  e$`new_method` <- `StructWithConfig_new_method`(ptr)
 
   class(e) <- c("StructWithConfig", "savvy_savvyExamples__sealed")
   e
@@ -950,6 +950,9 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
 
 ### associated functions for StructWithConfig
 
+`StructWithConfig`$`new_associated_fn` <- function(`x`) {
+  .savvy_wrap_StructWithConfig(.Call(savvy_StructWithConfig_new_associated_fn__impl, `x`))
+}
 
 
 class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples__sealed")
