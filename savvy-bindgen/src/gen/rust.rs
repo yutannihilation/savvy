@@ -141,6 +141,8 @@ impl SavvyFn {
             .map(|arg| arg.to_rust_type_inner())
             .collect();
 
+        let attrs = &self.attrs;
+
         let (ok_lhs, ok_rhs, wrapped_with_result): (syn::Expr, syn::Expr, bool) =
             match &self.return_type {
                 SavvyFnReturnType::Unit(_) => (
@@ -171,6 +173,7 @@ impl SavvyFn {
                 // `-> Self` is allowed
                 if wrapped_with_result {
                     parse_quote!(
+                        #(#attrs)*
                         #[allow(clippy::missing_safety_doc)]
                         #[no_mangle]
                         pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
@@ -182,6 +185,7 @@ impl SavvyFn {
                     )
                 } else {
                     parse_quote!(
+                        #(#attrs)*
                         #[allow(clippy::missing_safety_doc)]
                         #[no_mangle]
                         pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
