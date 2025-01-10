@@ -195,6 +195,7 @@ impl SavvyFn {
                 }
             }
             _ => parse_quote!(
+                #(#attrs)*
                 #[allow(clippy::missing_safety_doc)]
                 #[no_mangle]
                 pub unsafe extern "C" fn #fn_name_ffi( #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
