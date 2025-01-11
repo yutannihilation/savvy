@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+* savvy CLI can handle function definitions with `#[cfg()]` switch (See [#333](https://github.com/yutannihilation/savvy/issues/333)
+  for more details).
+
 ## [v0.8.2] (2024-12-25)
 
 ### New features

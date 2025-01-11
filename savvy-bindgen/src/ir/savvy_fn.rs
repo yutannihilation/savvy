@@ -4,6 +4,7 @@ use syn::{ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatTy
 
 use crate::utils::extract_docs;
 
+#[derive(Clone, PartialEq)]
 enum SavvyInputTypeCategory {
     Sexp,
     SexpWrapper,
@@ -13,6 +14,7 @@ enum SavvyInputTypeCategory {
     DllInfo,
 }
 
+#[derive(Clone)]
 struct SavvyInputType {
     category: SavvyInputTypeCategory,
     ty_orig: syn::Type,
@@ -196,6 +198,7 @@ impl SavvyInputType {
     }
 }
 
+#[derive(Clone)]
 pub struct SavvyFnArg {
     pub(crate) pat: syn::Ident,
     ty: SavvyInputType,
@@ -234,11 +237,18 @@ impl SavvyFnArg {
     }
 }
 
+impl PartialEq for SavvyFnArg {
+    fn eq(&self, other: &Self) -> bool {
+        self.pat == other.pat && self.ty.category == other.ty.category && self.ty.ty_str == other.ty.ty_str && self.ty.optional == other.ty.optional
+    }
+}
+
 /// Return type of a user-defined struct. This can be either
 ///
 /// - `savvy::Result<Foo>`
 /// - `savvy::Result<Self>`
 /// - `Self`
+#[derive(Clone)]
 pub struct UserDefinedStructReturnType {
     pub(crate) ty: syn::Ident,
     pub(crate) return_type: syn::ReturnType,
@@ -253,6 +263,7 @@ pub struct UserDefinedStructReturnType {
 ///     - `savvy::Result<Foo>`
 ///     - `savvy::Result<Self>`
 ///     - `Self`
+#[derive(Clone)]
 pub enum SavvyFnReturnType {
     Sexp(syn::ReturnType),
     Unit(syn::ReturnType),
@@ -269,6 +280,7 @@ impl SavvyFnReturnType {
     }
 }
 
+#[derive(Clone)]
 pub enum SavvyFnType {
     /// A function that doesn't belong to a struct
     BareFunction,
@@ -286,6 +298,7 @@ pub enum SavvyFnType {
     InitFunction,
 }
 
+#[derive(Clone)]
 pub struct SavvyFn {
     /// Doc comments
     pub docs: Vec<String>,

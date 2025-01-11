@@ -318,7 +318,18 @@ fn update(path: &Path) {
 
     let parsed = parse_crate(&lib_rs, &manifest.crate_name);
 
-    let merged = merge_parsed_results(parsed);
+    let merged = match merge_parsed_results(parsed) {
+        Ok(merged) => merged,
+        Err(parse_errors) => {
+            let details = parse_errors
+                .iter()
+                .map(|e| format!("  - {e}"))
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            panic!("Failed to parse files:\n{details}");
+        }
+    };
 
     write_file(&path.join(PATH_C_HEADER), &generate_c_header_file(&merged));
     write_file(
