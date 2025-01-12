@@ -44,7 +44,7 @@ savvy-test = []
 
 [build-dependencies]
 # TODO: remove this when https://github.com/yutannihilation/savvy/issues/335 is fixed
-cc = "1.2.7"
+cc = { version = "1.2.7", git = "https://github.com/rust-lang/cc-rs", tag = "cc-v1.2.7" }
 
 [patch.crates-io]
 cc = { git = "https://github.com/rust-lang/cc-rs", tag = "cc-v1.2.7" }
