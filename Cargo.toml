@@ -45,6 +45,10 @@ savvy-test = []
 [build-dependencies]
 cc = "1"
 
+# TODO: workaround for https://github.com/yutannihilation/savvy/issues/335
+[patch.crates-io]
+cc = { git = "https://github.com/rust-lang/cc-rs", tag = "cc-v1.2.7" }
+
 [package.metadata.docs.rs]
 features = ["complex", "altrep", "logger"]
 
