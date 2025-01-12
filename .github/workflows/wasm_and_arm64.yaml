@@ -47,7 +47,7 @@ jobs:
           # TODO: workaround for https://github.com/yutannihilation/savvy/issues/335
           pushd ./R-package/src/rust
           cargo update
-          cargo update cargo update cc --precise 1.2.7
+          cargo update cc --precise 1.2.7
         shell: bash
 
       - name: Build wasm packages
