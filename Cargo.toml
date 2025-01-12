@@ -43,7 +43,7 @@ use-custom-error = []
 savvy-test = []
 
 [build-dependencies]
-cc = "1"
+cc = "1.2.9" # 1.2.8 had a problem with webr build
 
 [package.metadata.docs.rs]
 features = ["complex", "altrep", "logger"]
