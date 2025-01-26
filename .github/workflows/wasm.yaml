@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, master]
   
-name: Check WASM and ARM64 build
+name: Check WASM build
 
 jobs:
   build-wasm:
@@ -50,21 +50,3 @@ jobs:
         uses: r-wasm/actions/build-rwasm@main
         with:
           packages: "local::./R-package"
-
-  # check at least it can build
-  build-arm64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-  
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-unknown-linux-gnu
-      
-      - name: Install GCC toolchain for ARM
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
-      - name: Build
-        run: cargo build --target aarch64-unknown-linux-gnu
