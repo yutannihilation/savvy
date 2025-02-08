@@ -32,7 +32,7 @@ fn show() -> Result<(), DynError> {
 
     let builder = bindgen::Builder::default().header("wrapper.h").clang_args([
         // TODO: this works only on my Windows laptop...
-        format!("-I{}", "C:/Program Files/R/R-4.4.1/include"),
+        format!("-I{}", "C:/Program Files/R/R-devel/include"),
         // format!("--target={target}"),
     ]);
 

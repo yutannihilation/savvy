@@ -1,4 +1,4 @@
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
 use crate::{savvy_err, IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 
@@ -70,11 +70,11 @@ fn try_cast_f64_to_usize(f: f64) -> crate::Result<usize> {
 enum PrivateNumericSexp {
     Integer {
         orig: IntegerSexp,
-        converted: OnceCell<Vec<f64>>,
+        converted: OnceLock<Vec<f64>>,
     },
     Real {
         orig: RealSexp,
-        converted: OnceCell<Vec<i32>>,
+        converted: OnceLock<Vec<i32>>,
     },
 }
 
@@ -342,11 +342,11 @@ impl TryFrom<Sexp> for NumericSexp {
         match value.into_typed() {
             crate::TypedSexp::Integer(i) => Ok(Self(PrivateNumericSexp::Integer {
                 orig: i,
-                converted: OnceCell::new(),
+                converted: OnceLock::new(),
             })),
             crate::TypedSexp::Real(r) => Ok(Self(PrivateNumericSexp::Real {
                 orig: r,
-                converted: OnceCell::new(),
+                converted: OnceLock::new(),
             })),
             _ => Err(crate::Error::GeneralError(
                 "Should not reach here!".to_string(),
@@ -361,7 +361,7 @@ impl TryFrom<IntegerSexp> for NumericSexp {
     fn try_from(value: IntegerSexp) -> Result<Self, Self::Error> {
         Ok(Self(PrivateNumericSexp::Integer {
             orig: value,
-            converted: OnceCell::new(),
+            converted: OnceLock::new(),
         }))
     }
 }
@@ -372,7 +372,7 @@ impl TryFrom<RealSexp> for NumericSexp {
     fn try_from(value: RealSexp) -> Result<Self, Self::Error> {
         Ok(Self(PrivateNumericSexp::Real {
             orig: value,
-            converted: OnceCell::new(),
+            converted: OnceLock::new(),
         }))
     }
 }

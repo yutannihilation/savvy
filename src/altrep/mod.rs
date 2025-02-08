@@ -14,7 +14,6 @@ pub use altstring::*;
 
 use std::{collections::HashMap, sync::Mutex};
 
-use once_cell::sync::OnceCell;
 use savvy_ffi::{
     altrep::{
         R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, ALTREP, ALTREP_CLASS,
@@ -22,12 +21,13 @@ use savvy_ffi::{
     },
     R_NilValue, Rboolean_TRUE, ATTRIB, CADR, CAR, PRINTNAME, SEXP,
 };
+use std::sync::OnceLock;
 
 use crate::{protect::local_protect, savvy_err, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
 
 /// This stores the ALTREP class objects
-static ALTREP_CLASS_CATALOGUE: OnceCell<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
-    OnceCell::new();
+static ALTREP_CLASS_CATALOGUE: OnceLock<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
+    OnceLock::new();
 
 pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
     x: T,
