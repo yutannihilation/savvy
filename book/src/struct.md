@@ -296,7 +296,7 @@ practices, but you might be able to
 * use `'static` lifetime (i.e. `struct Foo(&'static usize)`) probably by
   referencing a global variable
 * instead of passing the struct itself to R, store the struct in a global
-  `OnceCell<HashMap>` and pass the key
+  `std::sync::OnceLock<HashMap>` and pass the key
 
 ## External pointer?
 

@@ -3,7 +3,14 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+* Drop dependency on the once_cell crate by using `std::sync::OnceLock` instead.
+  Consequently, the MSRV is bumped to 1.70.
+
 ## [v0.8.4] (2025-02-08)
+
+(No changes to note. This is mistakenly published without the change intended to be included...)
 
 ## [v0.8.3] (2025-01-11)
 
