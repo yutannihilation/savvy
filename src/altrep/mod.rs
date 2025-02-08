@@ -26,8 +26,8 @@ use std::sync::OnceLock;
 use crate::{protect::local_protect, savvy_err, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
 
 /// This stores the ALTREP class objects
-static ALTREP_CLASS_CATALOGUE: OnceCell<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
-    OnceCell::new();
+static ALTREP_CLASS_CATALOGUE: OnceLock<Mutex<HashMap<&'static str, R_altrep_class_t>>> =
+    OnceLock::new();
 
 pub(crate) fn create_altrep_instance<T: IntoExtPtrSexp>(
     x: T,
