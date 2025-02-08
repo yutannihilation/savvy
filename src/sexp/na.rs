@@ -42,9 +42,9 @@ impl NotAvailableValue for num_complex::Complex64 {
     }
 }
 
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
-pub(crate) static NA_CHAR_PTR: OnceCell<&str> = OnceCell::new();
+pub(crate) static NA_CHAR_PTR: OnceLock<&str> = OnceLock::new();
 
 impl NotAvailableValue for &str {
     fn is_na(&self) -> bool {

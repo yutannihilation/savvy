@@ -31,11 +31,11 @@
 // But, my implementation doesn't implement `Clone` trait, so I don't need to
 // worry that there still exists another instance on dropping it.
 
-use once_cell::sync::OnceCell;
 use savvy_ffi::{
     R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
     SET_TAG, SEXP,
 };
+use std::sync::OnceLock;
 
 // Protection mechanism by `Rf_protect()`. This struct is needed for
 // auto-unprotect when returning from the scope.
@@ -68,7 +68,7 @@ pub(crate) struct PreservedList(SEXP);
 unsafe impl Send for PreservedList {}
 unsafe impl Sync for PreservedList {}
 
-pub(crate) static PRESERVED_LIST: OnceCell<PreservedList> = OnceCell::new();
+pub(crate) static PRESERVED_LIST: OnceLock<PreservedList> = OnceLock::new();
 
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn insert_to_preserved_list(obj: SEXP) -> SEXP {
