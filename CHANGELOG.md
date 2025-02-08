@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Bug fixes
+
+* Remove mistakenly commited CRLF.
+
 ## [v0.8.5] (2025-02-08)
 
 ### Minor improvements
