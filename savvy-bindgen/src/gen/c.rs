@@ -110,7 +110,7 @@ pub fn generate_c_header_file(result: &MergedResult) -> String {
         .collect::<Vec<String>>()
         .join("\n");
 
-    format!("{bare_fns}\n{impls}")
+    format!("{bare_fns}\n{impls}\n")
 }
 
 fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
