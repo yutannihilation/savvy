@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.8.7] (2025-03-16)
+
 * Tweak some line breaks ([#353](https://github.com/yutannihilation/savvy/pull/353), [#350](https://github.com/yutannihilation/savvy/pull/350)).
 
 ## [v0.8.6] (2025-02-08)
@@ -866,7 +868,8 @@ usize_to_string_scalar(2147483648)
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.6...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.7...HEAD
+[v0.8.7]: https://github.com/yutannihilation/savvy/compare/v0.8.6...v0.8.7
 [v0.8.6]: https://github.com/yutannihilation/savvy/compare/v0.8.5...v0.8.6
 [v0.8.5]: https://github.com/yutannihilation/savvy/compare/v0.8.4...v0.8.5
 [v0.8.4]: https://github.com/yutannihilation/savvy/compare/v0.8.3...v0.8.4
