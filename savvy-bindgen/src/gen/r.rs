@@ -320,7 +320,7 @@ class(`{class_r}`) <- c("{class_r_for_bundle}", "{class_r_sealed}")
 
 #' @export
 `print.{class_r_for_bundle}` <- function(x, ...) {{
-  cat('{class_r}')
+  cat('{class_r}\n')
 }}
 "#
     )
@@ -381,7 +381,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
   if (is.na(label)) {{
     stop("Unexpected value for {class_r}", call. = TRUE)
   }}
-  cat("{class_r}::", label, sep = "")
+  cat("{class_r}::", label, "\n", sep = "")
 }}
 "#
     )
