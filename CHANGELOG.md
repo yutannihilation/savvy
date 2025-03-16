@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+* Tweak some line breaks ([#353](https://github.com/yutannihilation/savvy/pull/353), [#350](https://github.com/yutannihilation/savvy/pull/350)).
+
 ## [v0.8.6] (2025-02-08)
 
 ### Bug fixes
