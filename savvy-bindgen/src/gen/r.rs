@@ -381,7 +381,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
   if (is.na(label)) {{
     stop("Unexpected value for {class_r}", call. = TRUE)
   }}
-  cat("{class_r}::", label, sep = "")
+  cat("{class_r}::", label, "\n", sep = "")
 }}
 "#
     )

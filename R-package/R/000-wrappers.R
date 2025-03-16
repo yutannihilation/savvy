@@ -705,7 +705,7 @@ NULL
   if (is.na(label)) {
     stop("Unexpected value for Enum", call. = TRUE)
   }
-  cat("Enum::", label, sep = "")
+  cat("Enum::", label, "\n", sep = "")
 }
 
 
@@ -774,7 +774,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
   if (is.na(label)) {
     stop("Unexpected value for FooEnum", call. = TRUE)
   }
-  cat("FooEnum::", label, sep = "")
+  cat("FooEnum::", label, "\n", sep = "")
 }
 
 
