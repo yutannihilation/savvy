@@ -320,7 +320,7 @@ class(`{class_r}`) <- c("{class_r_for_bundle}", "{class_r_sealed}")
 
 #' @export
 `print.{class_r_for_bundle}` <- function(x, ...) {{
-  cat('{class_r}')
+  cat('{class_r}\n')
 }}
 "#
     )

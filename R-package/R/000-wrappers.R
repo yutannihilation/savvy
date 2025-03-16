@@ -717,7 +717,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Enum__bundle` <- function(x, ...) {
-  cat('Enum')
+  cat('Enum\n')
 }
 
 ### wrapper functions for FooEnum
@@ -786,7 +786,7 @@ class(`FooEnum`) <- c("FooEnum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.FooEnum__bundle` <- function(x, ...) {
-  cat('FooEnum')
+  cat('FooEnum\n')
 }
 
 ### wrapper functions for FooWithDefault
@@ -825,7 +825,7 @@ class(`FooWithDefault`) <- c("FooWithDefault__bundle", "savvy_savvyExamples__sea
 
 #' @export
 `print.FooWithDefault__bundle` <- function(x, ...) {
-  cat('FooWithDefault')
+  cat('FooWithDefault\n')
 }
 
 ### wrapper functions for Person
@@ -892,7 +892,7 @@ class(`Person`) <- c("Person__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Person__bundle` <- function(x, ...) {
-  cat('Person')
+  cat('Person\n')
 }
 
 ### wrapper functions for Person2
@@ -924,7 +924,7 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Person2__bundle` <- function(x, ...) {
-  cat('Person2')
+  cat('Person2\n')
 }
 
 ### wrapper functions for StructWithConfig
@@ -959,7 +959,7 @@ class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples_
 
 #' @export
 `print.StructWithConfig__bundle` <- function(x, ...) {
-  cat('StructWithConfig')
+  cat('StructWithConfig\n')
 }
 
 ### wrapper functions for Value
@@ -1009,7 +1009,7 @@ class(`Value`) <- c("Value__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.Value__bundle` <- function(x, ...) {
-  cat('Value')
+  cat('Value\n')
 }
 
 ### wrapper functions for ValuePair
@@ -1052,7 +1052,7 @@ class(`ValuePair`) <- c("ValuePair__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.ValuePair__bundle` <- function(x, ...) {
-  cat('ValuePair')
+  cat('ValuePair\n')
 }
 
 ### wrapper functions for struct
@@ -1086,6 +1086,6 @@ class(`struct`) <- c("struct__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
 `print.struct__bundle` <- function(x, ...) {
-  cat('struct')
+  cat('struct\n')
 }
 
