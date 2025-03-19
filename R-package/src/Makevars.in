@@ -33,9 +33,9 @@ $(STATLIB):
 	  fi
 
 clean_intermediate:
-	rm -Rf $(STATLIB) ./rust/.cargo
+	rm -f $(STATLIB)
 
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/.cargo ./rust/vendor ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
 
 .PHONY: all clean_intermediate clean

@@ -32,9 +32,9 @@ $(STATLIB):
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 clean_intermediate:
-	rm -Rf $(STATLIB) ./rust/.cargo
+	rm -f $(STATLIB)
 
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/.cargo ./rust/vendor ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
 
 .PHONY: all clean_intermediate clean
