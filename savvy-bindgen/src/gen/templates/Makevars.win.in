@@ -14,7 +14,7 @@ PKG_LIBS = -L$(LIBDIR) -l{} -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 # to overwrite it via configuration.
 CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
-all: C_clean
+all: $(SHLIB) clean_intermediate
 
 $(SHLIB): $(STATLIB)
 
@@ -31,8 +31,10 @@ $(STATLIB):
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
-C_clean:
-	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS)
+clean_intermediate:
+	rm -Rf $(STATLIB) ./rust/.cargo
 
 clean:
-	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS) rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/.cargo ./rust/vendor ./rust/target
+
+.PHONY: all clean_intermediate clean
