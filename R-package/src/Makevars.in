@@ -33,7 +33,7 @@ $(STATLIB):
 	  fi
 
 clean_intermediate:
-	rm -Rf $(STATLIB)
+	rm -f $(STATLIB)
 
 clean:
 	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
