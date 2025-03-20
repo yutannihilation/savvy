@@ -31,7 +31,7 @@ $(STATLIB):
 	  export LIBRARY_PATH="$${LIBRARY_PATH};$(LIBDIR)/libgcc_mock" && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
-clean_intermediate:
+clean_intermediate: $(SHLIB)
 	rm -f $(STATLIB)
 
 clean:
