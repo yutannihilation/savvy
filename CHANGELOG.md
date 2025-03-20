@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+* Improve `Makevars.in` and `Makevars.win.in` to clean up intermediate objects in order to avoid a CRAN check warning ([#355](https://github.com/yutannihilation/savvy/issues/355)).
+
 ## [v0.8.7] (2025-03-16)
 
 * Tweak some line breaks ([#353](https://github.com/yutannihilation/savvy/pull/353), [#350](https://github.com/yutannihilation/savvy/pull/350)).
