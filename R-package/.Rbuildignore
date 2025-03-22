@@ -4,7 +4,9 @@
 ^README\.Rmd$
 ^\.github$
 
-^src/rust/.cargo$
-^src/rust/.vscode$
+^src/rust/\.cargo$
+^src/rust/\.vscode$
 ^src/rust/target$
 
+^src/Makevars$
+^src/Makevars\.win$

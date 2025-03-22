@@ -275,7 +275,12 @@ fn parse_crate(lib_rs: &Path, crate_name: &str) -> Vec<ParsedResult> {
 }
 
 fn tweak_r_buildignore(path: &Path) {
-    let ignores = ["^src/rust/.cargo$", "^src/rust/target$"];
+    let ignores = [
+        r#"^src/rust/\.cargo$"#,
+        "^src/rust/target$",
+        "^src/Makevars$",
+        r#"^src/Makevars\.win$"#,
+    ];
     let r_buildignore = path.join(PATH_R_BUILDIGNORE);
     if !r_buildignore.exists() {
         write_file(&r_buildignore, &format!("{}\n", ignores.join("\n")));
