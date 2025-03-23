@@ -12,9 +12,9 @@ PKG_LIBS = -L$(LIBDIR) -l{}
 
 CARGO_BUILD_ARGS = --lib --profile $(PROFILE) --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
-all: $(SHLIB) clean_intermediate
+OBJECTS = $(STATLIB)
 
-$(SHLIB): $(STATLIB)
+all: $(SHLIB)
 
 $(STATLIB):
 	# In some environments, ~/.cargo/bin might not be included in PATH, so we need
@@ -32,10 +32,7 @@ $(STATLIB):
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
 	  fi
 
-clean_intermediate: $(SHLIB)
-	rm -f $(STATLIB)
-
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) ./rust/target
 
-.PHONY: all clean_intermediate clean
+.PHONY: all clean

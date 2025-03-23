@@ -14,9 +14,9 @@ PKG_LIBS = -L$(LIBDIR) -l{} -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 # to overwrite it via configuration.
 CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
 
-all: $(SHLIB) clean_intermediate
+OBJECTS = $(STATLIB)
 
-$(SHLIB): $(STATLIB)
+all: $(SHLIB)
 
 $(STATLIB):
 	# When the GNU toolchain is used (i.e. on CRAN), -lgcc_eh is specified for
@@ -31,10 +31,7 @@ $(STATLIB):
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
-clean_intermediate: $(SHLIB)
-	rm -f $(STATLIB)
-
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) ./rust/target
 
-.PHONY: all clean_intermediate clean
+.PHONY: all clean
