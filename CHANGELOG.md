@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.8.8] (2025-03-26)
+
 * Improve `Makevars.in` and `Makevars.win.in` to clean up intermediate objects in order to avoid a CRAN check warning ([#355](https://github.com/yutannihilation/savvy/issues/355)).
 
 ## [v0.8.7] (2025-03-16)
@@ -870,7 +872,8 @@ usize_to_string_scalar(2147483648)
 * `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.7...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.8...HEAD
+[v0.8.8]: https://github.com/yutannihilation/savvy/compare/v0.8.7...v0.8.8
 [v0.8.7]: https://github.com/yutannihilation/savvy/compare/v0.8.6...v0.8.7
 [v0.8.6]: https://github.com/yutannihilation/savvy/compare/v0.8.5...v0.8.6
 [v0.8.5]: https://github.com/yutannihilation/savvy/compare/v0.8.4...v0.8.5
