@@ -99,3 +99,5 @@ jobs:
           args: 'c("--no-manual")'  # no --as-cran
           upload-snapshots: true
           working-directory: R-package
+        env:
+          MAKEFLAGS: -j2   # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471

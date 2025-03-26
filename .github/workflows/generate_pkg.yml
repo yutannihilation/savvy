@@ -59,6 +59,8 @@ jobs:
         with:
           args: 'c("--no-manual")'
           working-directory: ${{ runner.temp }}/sawy
+        env:
+          MAKEFLAGS: -j2   # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
 
       - name: Run Rust tests
         run: |
