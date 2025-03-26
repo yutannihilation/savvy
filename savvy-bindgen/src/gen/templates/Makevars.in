@@ -32,7 +32,7 @@ $(STATLIB):
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
 	  fi
 
-clean_intermediate:
+clean_intermediate: $(SHLIB)
 	rm -f $(STATLIB)
 
 clean:
