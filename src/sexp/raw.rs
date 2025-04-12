@@ -32,6 +32,9 @@ impl RawSexp {
     /// assert_eq!(raw_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[u8] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(RAW(self.inner()) as _, self.len()) }
     }
 
@@ -89,6 +92,9 @@ impl OwnedRawSexp {
     /// assert_eq!(raw_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[u8] {
+        if self.len == 0 {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
@@ -105,6 +111,9 @@ impl OwnedRawSexp {
     /// assert_eq!(raw_sexp.as_slice(), &[0, 0, 10]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut [u8] {
+        if self.len == 0 {
+            return &mut [];
+        }
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 

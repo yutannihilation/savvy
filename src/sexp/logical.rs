@@ -35,6 +35,9 @@ impl LogicalSexp {
     /// assert_eq!(lgl_sexp.as_slice_raw(), &[1, 0, <i32>::na()]);
     /// ```
     pub fn as_slice_raw(&self) -> &[i32] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(LOGICAL(self.0), self.len()) }
     }
 
@@ -80,6 +83,9 @@ impl OwnedLogicalSexp {
     /// expert-only function which might be found useful when you really need to
     /// distinguish NAs.
     pub fn as_slice_raw(&self) -> &[i32] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(self.raw, self.len()) }
     }
 

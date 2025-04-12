@@ -47,6 +47,9 @@ impl ComplexSexp {
     /// );
     /// ```
     pub fn as_slice(&self) -> &[Complex64] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(COMPLEX(self.inner()) as _, self.len()) }
     }
 
@@ -98,10 +101,16 @@ impl OwnedComplexSexp {
     }
 
     pub fn as_slice(&self) -> &[Complex64] {
+        if self.len == 0 {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [Complex64] {
+        if self.len == 0 {
+            return &mut [];
+        }
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
