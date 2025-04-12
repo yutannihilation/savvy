@@ -32,8 +32,11 @@ if [ "$(uname)" = "Emscripten" ]; then
   TARGET="wasm32-unknown-emscripten"
 fi
 
+# allow overriding profile on CI
+if [ -n "${PROFILE_OVERRIDE}" ]; then
+  PROFILE="${PROFILE_OVERRIDE}"
 # catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
-if [ "${DEBUG}" = "true" ]; then
+elif [ "${DEBUG}" = "true" ]; then
   PROFILE=dev
 else
   PROFILE=release

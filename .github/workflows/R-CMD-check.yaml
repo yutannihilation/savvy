@@ -65,6 +65,8 @@ jobs:
 
           # run `savvy-cli test` on R-package to test `savvy-cli test`
           cargo r-test ./R-package/src/rust/
+        env:
+          PROFILE_OVERRIDE: dev
 
       - name: Tweak
         run: |
@@ -102,3 +104,4 @@ jobs:
           working-directory: R-package
         env:
           MAKEFLAGS: -j2   # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
+          PROFILE_OVERRIDE: dev

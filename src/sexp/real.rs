@@ -33,6 +33,9 @@ impl RealSexp {
     /// assert_eq!(real_sexp.as_slice(), &[1.0, 2.0, 3.0]);
     /// ```
     pub fn as_slice(&self) -> &[f64] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(REAL(self.0), self.len()) }
     }
 
@@ -90,6 +93,9 @@ impl OwnedRealSexp {
     /// assert_eq!(real_sexp.to_vec(), vec![1.0, 2.0, 3.0]);
     /// ```
     pub fn as_slice(&self) -> &[f64] {
+        if self.len == 0 {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
@@ -106,6 +112,9 @@ impl OwnedRealSexp {
     /// assert_eq!(real_sexp.as_slice(), &[0.0, 0.0, 10.0]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut [f64] {
+        if self.len == 0 {
+            return &mut [];
+        }
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
@@ -185,7 +194,7 @@ impl OwnedRealSexp {
         let inner = crate::alloc_vector(REALSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(REAL(inner), 0, len);
             }

@@ -33,6 +33,9 @@ impl IntegerSexp {
     /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[i32] {
+        if self.is_empty() {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(INTEGER(self.inner()) as _, self.len()) }
     }
 
@@ -90,6 +93,9 @@ impl OwnedIntegerSexp {
     /// assert_eq!(int_sexp.as_slice(), &[1, 2, 3]);
     /// ```
     pub fn as_slice(&self) -> &[i32] {
+        if self.len == 0 {
+            return &[];
+        }
         unsafe { std::slice::from_raw_parts(self.raw, self.len) }
     }
 
@@ -106,6 +112,9 @@ impl OwnedIntegerSexp {
     /// assert_eq!(int_sexp.as_slice(), &[0, 0, 10]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut [i32] {
+        if self.len == 0 {
+            return &mut [];
+        }
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
@@ -182,7 +191,7 @@ impl OwnedIntegerSexp {
         let inner = crate::alloc_vector(INTSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(INTEGER(inner), 0, len);
             }

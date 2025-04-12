@@ -21,8 +21,11 @@ RUSTC_VERSION="$(rustc --version || true)"
 echo "using Rust package manager: '${CARGO_VERSION}'"
 echo "using Rust compiler: '${RUSTC_VERSION}'"
 
+# allow overriding profile on CI
+if [ -n "${PROFILE_OVERRIDE}" ]; then
+  PROFILE="${PROFILE_OVERRIDE}"
 # catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
-if [ "${DEBUG}" = "true" ]; then
+elif [ "${DEBUG}" = "true" ]; then
   PROFILE=dev
 else
   PROFILE=release
