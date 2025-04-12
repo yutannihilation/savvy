@@ -182,7 +182,7 @@ impl OwnedIntegerSexp {
         let inner = crate::alloc_vector(INTSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(INTEGER(inner), 0, len);
             }

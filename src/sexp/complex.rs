@@ -144,7 +144,7 @@ impl OwnedComplexSexp {
         let inner = crate::alloc_vector(CPLXSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(COMPLEX(inner), 0, len);
             }

@@ -185,7 +185,7 @@ impl OwnedRealSexp {
         let inner = crate::alloc_vector(REALSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(REAL(inner), 0, len);
             }

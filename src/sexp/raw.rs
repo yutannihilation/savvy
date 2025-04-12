@@ -161,7 +161,7 @@ impl OwnedRawSexp {
         let inner = crate::alloc_vector(RAWSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(RAW(inner), 0, len);
             }

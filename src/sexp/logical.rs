@@ -157,7 +157,7 @@ impl OwnedLogicalSexp {
         let inner = crate::alloc_vector(LGLSXP, len as _)?;
 
         // Fill the vector with default values
-        if init {
+        if len > 0 && init {
             unsafe {
                 std::ptr::write_bytes(LOGICAL(inner), 0, len);
             }
