@@ -1,8 +1,10 @@
 # Changelog
 
 <!-- next-header -->
-
 ## [Unreleased] (ReleaseDate)
+
+
+## [v0.8.9] (2025-04-12)
 
 - Fix handling of 0-length vectors ([#365](https://github.com/yutannihilation/savvy/issues/365)). Thanks @etiennebacher and @eitsupi for investigating the issue!
 
@@ -881,8 +883,9 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.9...HEAD
 
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.8...HEAD
+[v0.8.9]: https://github.com/yutannihilation/savvy/compare/v0.8.8...v0.8.9
 [v0.8.8]: https://github.com/yutannihilation/savvy/compare/v0.8.7...v0.8.8
 [v0.8.7]: https://github.com/yutannihilation/savvy/compare/v0.8.6...v0.8.7
 [v0.8.6]: https://github.com/yutannihilation/savvy/compare/v0.8.5...v0.8.6
