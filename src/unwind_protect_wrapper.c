@@ -32,5 +32,10 @@ SEXP unwind_protect_impl(SEXP (*fun)(void *data), void *data) {
     // https://github.com/r-lib/cpp11/blob/4c840c03c8d62496cdab52e0c2c0d1857925debe/inst/include/cpp11/protect.hpp#L130-L133)
     SETCAR(token, R_NilValue);
 
+    // A token needs to be released. But, it seems cpp11 doesn't explicitly do
+    // this, yet has no memory leak. I still don't understand the difference, 
+    // but anyway it seems this is needed in savvy's case.
+    R_ReleaseObject(token);
+
     return res;
 }
