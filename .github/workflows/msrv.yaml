@@ -1,9 +1,9 @@
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
-  
+    branches: [main]
+
 name: check MSRV
 
 jobs:
@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-  
+
       - uses: dtolnay/rust-toolchain@1.70.0
-      
+
       - name: Build
         run: cargo build

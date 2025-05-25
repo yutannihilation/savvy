@@ -1,8 +1,8 @@
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 name: Generate R package using savvy
 
@@ -41,7 +41,7 @@ jobs:
             any::rcmdcheck
             any::devtools
             any::usethis
-          working-directory: R-package  # this isn't the actual R package, but this is needed to avoid an error
+          working-directory: R-package # this isn't the actual R package, but this is needed to avoid an error
 
       - name: create tempdir
         run: echo "TEMP_DIR=$(mktemp -d)" >> ${GITHUB_ENV}
@@ -60,7 +60,7 @@ jobs:
           args: 'c("--no-manual")'
           working-directory: ${{ runner.temp }}/sawy
         env:
-          MAKEFLAGS: -j2   # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
+          MAKEFLAGS: -j2 # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
           PROFILE_OVERRIDE: dev
 
       - name: Run Rust tests
