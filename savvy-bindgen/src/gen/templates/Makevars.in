@@ -23,12 +23,13 @@ $(STATLIB):
 	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
 	  export CC="$(CC)" && \
 	  export CFLAGS="$(CFLAGS)" && \
-	  export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
+	  export RUSTFLAGS="$(RUSTFLAGS)" && \
 	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
 	    cargo build $(CARGO_BUILD_ARGS); \
 	  else \
 	    export CARGO_PROFILE_DEV_PANIC="abort" && \
 	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
+	    export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
 	  fi
 

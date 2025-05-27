@@ -28,6 +28,10 @@ pub fn generate_cleanup_win() -> String {
     include_str!("./templates/cleanup.win").to_string()
 }
 
+pub fn generate_win_def(crate_name: &str) -> String {
+    format!(include_str!("./templates/dllname-win.def"), crate_name)
+}
+
 pub fn generate_gitignore() -> String {
     include_str!("./templates/gitignore").to_string()
 }
