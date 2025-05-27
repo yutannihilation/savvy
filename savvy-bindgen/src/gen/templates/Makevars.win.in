@@ -28,7 +28,7 @@ $(STATLIB):
 	  export LIBRARY_PATH="$${{LIBRARY_PATH}};$(LIBDIR)/libgcc_mock" && \
 	  export CC="$(CC)" && \
 	  export CFLAGS="$(CFLAGS)" && \
-	  export RUSTFLAGS="$(RUSTFLAGS)" && \
+	  export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
 	  cargo build --target $(TARGET) --lib --profile $(PROFILE) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 clean_intermediate: $(SHLIB)
