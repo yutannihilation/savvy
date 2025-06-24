@@ -31,9 +31,9 @@ else
   PROFILE=release
 fi
 
-# e.g. SAVVY_FEATURES="a,b"  -->  "--features a --features b"
+# e.g. SAVVY_FEATURES="a b"  -->  "--features 'a b'"
 if [ -n "${SAVVY_FEATURES}" ]; then
-  FEATURE_FLAGS="--features $(echo -n ${SAVVY_FEATURES} | sed 's/,/ --features /g')"
+  FEATURE_FLAGS="--features '${SAVVY_FEATURES}'"
 fi
 
 sed \
