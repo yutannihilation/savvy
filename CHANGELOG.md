@@ -1,8 +1,12 @@
 # Changelog
 
 <!-- next-header -->
+
 ## [Unreleased] (ReleaseDate)
 
+- Now the template `configure` script accepts the following customization (#374)
+  - `SAVVY_PROFILE` envvar to override profile (e.g. `SAVVY_PROFILE=bench` means `--profile bench`)
+  - `SAVVY_FEATURES` envvar to add features (e.g. `SAVVY_FEATURES=a,b` means `--features a --features b`)
 
 ## [v0.8.10] (2025-04-18)
 
@@ -887,8 +891,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.10...HEAD
 
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.10...HEAD
 [v0.8.10]: https://github.com/yutannihilation/savvy/compare/v0.8.9...v0.8.10
 [v0.8.9]: https://github.com/yutannihilation/savvy/compare/v0.8.8...v0.8.9
 [v0.8.8]: https://github.com/yutannihilation/savvy/compare/v0.8.7...v0.8.8
