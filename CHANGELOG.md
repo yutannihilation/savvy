@@ -6,7 +6,7 @@
 
 - Now the template `configure` script accepts the following customization (#374)
   - `SAVVY_PROFILE` envvar to override profile (e.g. `SAVVY_PROFILE=bench` means `--profile bench`)
-  - `SAVVY_FEATURES` envvar to add features (e.g. `SAVVY_FEATURES=a,b` means `--features a --features b`)
+  - `SAVVY_FEATURES` envvar to add features (e.g. `SAVVY_FEATURES=a b` means `--features 'a b'`)
 
 ## [v0.8.10] (2025-04-18)
 
