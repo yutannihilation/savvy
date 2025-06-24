@@ -21,9 +21,9 @@ RUSTC_VERSION="$(rustc --version || true)"
 echo "using Rust package manager: '${CARGO_VERSION}'"
 echo "using Rust compiler: '${RUSTC_VERSION}'"
 
-# allow overriding profile on CI
-if [ -n "${PROFILE_OVERRIDE}" ]; then
-  PROFILE="${PROFILE_OVERRIDE}"
+# allow overriding profile externally (e.g. on CI)
+if [ -n "${SAVVY_PROFILE}" ]; then
+  PROFILE="${SAVVY_PROFILE}"
 # catch DEBUG envvar, which is passed from pkgbuild::compile_dll()
 elif [ "${DEBUG}" = "true" ]; then
   PROFILE=dev
@@ -31,7 +31,13 @@ else
   PROFILE=release
 fi
 
+# e.g. SAVVY_FEATURES="a,b"  -->  "--features a --features b"
+if [ -n "${SAVVY_FEATURES}" ]; then
+  FEATURE_FLAGS="--features $(echo -n ${SAVVY_FEATURES} | sed 's/,/ --features /g')"
+fi
+
 sed \
   -e "s/@TARGET@/x86_64-pc-windows-gnu/" \
   -e "s/@PROFILE@/${PROFILE}/" \
+  -e "s/@FEATURE_FLAGS@/${FEATURE_FLAGS}/" \
   src/Makevars.win.in > src/Makevars.win

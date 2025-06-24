@@ -61,7 +61,7 @@ jobs:
           working-directory: ${{ runner.temp }}/sawy
         env:
           MAKEFLAGS: -j2 # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
-          PROFILE_OVERRIDE: dev
+          SAVVY_PROFILE: dev
 
       - name: Run Rust tests
         run: |
