@@ -74,7 +74,7 @@ directory](https://github.com/yutannihilation/savvy/tree/main/R-package).
 Savvy is used in the following R packages:
 
 - [prqlr](https://prql.github.io/prqlc-r/)
-- [neopolars](https://eitsupi.r-universe.dev/neopolars)
+- [polars](https://github.com/pola-rs/r-polars)
 - [string2path](https://yutannihilation.github.io/string2path/)
 
 ## Thanks
