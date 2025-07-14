@@ -23,7 +23,7 @@ savvy-bindgen = { version = "0.8.11", path = "../savvy-bindgen", features = [
     "use_formatter",
 ] }
 dirs = "6"
-toml = "0.8"
+toml = "0.9"
 
 [package.metadata.dist]
 dist = true
