@@ -122,7 +122,7 @@ impl ParsedResult {
                     syn::Type::Path(p) => p.path.segments.last().unwrap().ident.to_string(),
                     _ => "(unknown)".to_string(),
                 };
-                let label = format!("impl {}", self_ty);
+                let label = format!("impl {self_ty}");
 
                 item_impl
                     .items
@@ -200,7 +200,7 @@ impl ParsedResult {
                     Some(i) => i.to_string(),
                     None => "unknown".to_string(),
                 };
-                let label = format!("macro {}", ident);
+                let label = format!("macro {ident}");
 
                 self.tests.append(&mut parse_doctests(
                     &extract_docs(&item_macro.attrs),
@@ -253,10 +253,7 @@ fn parse_doctests<T: AsRef<str>>(lines: &[T], label: &str, location: &str) -> Ve
                     "ignore" | "no_run" | "text" => true,
                     "" => false,
                     _ => {
-                        eprintln!(
-                            "[WARN] Ignoring unsupported code block attribute: {}",
-                            code_attr
-                        );
+                        eprintln!("[WARN] Ignoring unsupported code block attribute: {code_attr}");
                         true
                     }
                 }

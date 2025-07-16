@@ -57,7 +57,7 @@ impl IntegerSexp {
     /// most efficient. However, it seems Rust's slice implementation is very
     /// fast, so probably being efficient for ALTREP is not worth giving up the
     /// benefit.
-    pub fn iter(&self) -> std::slice::Iter<i32> {
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, i32> {
         self.as_slice().iter()
     }
 
@@ -119,7 +119,7 @@ impl OwnedIntegerSexp {
     }
 
     /// Returns an iterator over the underlying data of the SEXP.
-    pub fn iter(&self) -> std::slice::Iter<i32> {
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, i32> {
         self.as_slice().iter()
     }
 
@@ -134,7 +134,7 @@ impl OwnedIntegerSexp {
     /// int_sexp.iter_mut().for_each(|x| *x = *x * 2);
     /// assert_eq!(int_sexp.as_slice(), &[2, 4, 6]);
     /// ```
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<i32> {
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, i32> {
         self.as_mut_slice().iter_mut()
     }
 

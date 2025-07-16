@@ -31,7 +31,7 @@ impl StringSexp {
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.collect::<Vec<&str>>(), vec!["b", "c"]);
     /// ```
-    pub fn iter(&self) -> StringSexpIter {
+    pub fn iter<'a>(&'a self) -> StringSexpIter<'a> {
         StringSexpIter {
             sexp: &self.0,
             i: 0,
@@ -72,7 +72,7 @@ impl OwnedStringSexp {
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.collect::<Vec<&str>>(), vec!["b", "c"]);
     /// ```
-    pub fn iter(&self) -> StringSexpIter {
+    pub fn iter<'a>(&'a self) -> StringSexpIter<'a> {
         StringSexpIter {
             sexp: &self.inner,
             i: 0,
