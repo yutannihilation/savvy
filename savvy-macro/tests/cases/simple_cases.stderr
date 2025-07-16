@@ -60,38 +60,73 @@ error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
 48 | fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()> {
    |                                          ^^^^^^^^^^^^^^^^
 
-error: #[savvy] macro doesn't support lifetime
-  --> tests/cases/simple_cases.rs:54:12
+error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+       You can use .try_into() to convert String to savvy::Sexp.
+  --> tests/cases/simple_cases.rs:55:42
    |
-54 | struct Foo<'a>(External::Bar<'a>);
+55 | fn wrong_return_type1() -> savvy::Result<String> {
+   |                                          ^^^^^^
+
+error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+       You can use .try_into() to convert i32 to savvy::Sexp.
+  --> tests/cases/simple_cases.rs:60:42
+   |
+60 | fn wrong_return_type2() -> savvy::Result<i32> {
+   |                                          ^^^
+
+error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+       You can use .try_into() to convert usize to savvy::Sexp.
+  --> tests/cases/simple_cases.rs:65:42
+   |
+65 | fn wrong_return_type3() -> savvy::Result<usize> {
+   |                                          ^^^^^
+
+error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+       You can use .try_into() to convert bool to savvy::Sexp.
+  --> tests/cases/simple_cases.rs:70:42
+   |
+70 | fn wrong_return_type4() -> savvy::Result<bool> {
+   |                                          ^^^^
+
+error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+       You can use .try_into() to convert f64 to savvy::Sexp.
+  --> tests/cases/simple_cases.rs:75:42
+   |
+75 | fn wrong_return_type5() -> savvy::Result<f64> {
+   |                                          ^^^
+
+error: #[savvy] macro doesn't support lifetime
+  --> tests/cases/simple_cases.rs:81:12
+   |
+81 | struct Foo<'a>(External::Bar<'a>);
    |            ^^
 
 error: savvy only supports a fieldless enum
-  --> tests/cases/simple_cases.rs:59:6
+  --> tests/cases/simple_cases.rs:86:6
    |
-59 |     A(i32),
+86 |     A(i32),
    |      ^^^^^
 
 error: savvy doesn't support an enum with discreminant
-  --> tests/cases/simple_cases.rs:67:9
+  --> tests/cases/simple_cases.rs:94:9
    |
-67 |     B = 100,
+94 |     B = 100,
    |         ^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:71:23
+  --> tests/cases/simple_cases.rs:98:23
    |
-71 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
+98 | fn init_wrong_type(x: DllInfo) -> savvy::Result<()> {
    |                       ^^^^^^^
 
 error: DllInfo must be `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:76:24
-   |
-76 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
-   |                        ^^^^^^^^^^^^^^
+   --> tests/cases/simple_cases.rs:103:24
+    |
+103 | fn init_wrong_type2(x: *const DllInfo) -> savvy::Result<()> {
+    |                        ^^^^^^^^^^^^^^
 
 error: #[savvy_init] can be used only on a function that takes `*mut DllInfo`
-  --> tests/cases/simple_cases.rs:81:41
-   |
-81 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
-   |                                         ^^^
+   --> tests/cases/simple_cases.rs:108:41
+    |
+108 | fn init_wrong_type3(x: *mut DllInfo, y: i32) -> savvy::Result<()> {
+    |                                         ^^^
