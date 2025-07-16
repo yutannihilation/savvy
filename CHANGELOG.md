@@ -3,6 +3,7 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+- Unsupported return types like `savvy::Result<String>` now fail with a better compile error message (#382).
 
 ## [v0.8.11] (2025-06-25)
 
