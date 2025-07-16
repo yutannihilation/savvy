@@ -3,7 +3,11 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
-- Unsupported return types like `savvy::Result<String>` now fail with a better compile error message (#382).
+- Unsupported return types like `savvy::Result<String>` now fail with a better
+  compile error message (#382).
+- The iterators returned by `.iter()` etc. are now properly annotated with
+  lifetimes. This should not break any existing code, but please report if
+  you find any issues.
 
 ## [v0.8.11] (2025-06-25)
 
