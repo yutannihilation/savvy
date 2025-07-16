@@ -53,7 +53,7 @@ impl ListSexp {
         }
     }
 
-    pub fn values_iter(&self) -> ListSexpValueIter {
+    pub fn values_iter<'a>(&'a self) -> ListSexpValueIter<'a> {
         ListSexpValueIter {
             sexp: self,
             i: 0,
@@ -78,7 +78,7 @@ impl ListSexp {
         crate::Sexp(self.inner()).get_class()
     }
 
-    pub fn iter(&self) -> ListSexpIter {
+    pub fn iter<'a>(&'a self) -> ListSexpIter<'a> {
         let names = self.names_iter();
         let values = self.values_iter();
 
@@ -123,7 +123,7 @@ impl OwnedListSexp {
         unsafe { self.values.get_by_index_unchecked(i) }
     }
 
-    pub fn values_iter(&self) -> ListSexpValueIter {
+    pub fn values_iter<'a>(&'a self) -> ListSexpValueIter<'a> {
         self.values.values_iter()
     }
 
@@ -131,7 +131,7 @@ impl OwnedListSexp {
         self.values.names_iter()
     }
 
-    pub fn iter(&self) -> ListSexpIter {
+    pub fn iter<'a>(&'a self) -> ListSexpIter<'a> {
         self.values.iter()
     }
 

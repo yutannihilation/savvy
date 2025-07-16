@@ -52,7 +52,7 @@ impl LogicalSexp {
     /// assert_eq!(iter.next(), Some(true));
     /// assert_eq!(iter.collect::<Vec<bool>>(), vec![true, false]);
     /// ```
-    pub fn iter(&self) -> LogicalSexpIter {
+    pub fn iter<'a>(&'a self) -> LogicalSexpIter<'a> {
         LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }
@@ -102,7 +102,7 @@ impl OwnedLogicalSexp {
     /// assert_eq!(iter.next(), Some(true));
     /// assert_eq!(iter.collect::<Vec<bool>>(), vec![true, false]);
     /// ```
-    pub fn iter(&self) -> LogicalSexpIter {
+    pub fn iter<'a>(&'a self) -> LogicalSexpIter<'a> {
         LogicalSexpIter {
             iter_raw: self.as_slice_raw().iter(),
         }

@@ -57,7 +57,7 @@ impl SavvyFn {
                 if fn_name.as_str() == "new" {
                     ty_name
                 } else {
-                    format!("{}_{}", ty, fn_name)
+                    format!("{ty}_{fn_name}")
                 }
             }
             None => fn_name,
@@ -240,7 +240,7 @@ fn generate_r_impl_for_impl(
         .collect::<Vec<String>>()
         .join("\n");
 
-    let wrap_fn_name = format!(".savvy_wrap_{}", class_r);
+    let wrap_fn_name = format!(".savvy_wrap_{class_r}");
 
     let wrap_fn = format!(
         r#"`{wrap_fn_name}` <- function(ptr) {{

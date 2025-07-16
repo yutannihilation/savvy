@@ -245,7 +245,7 @@ impl NumericSexp {
     /// assert!(e1.is_some());
     /// assert!(e1.unwrap().is_na());
     /// ```
-    pub fn iter_i32(&self) -> NumericIteratorI32 {
+    pub fn iter_i32<'a>(&'a self) -> NumericIteratorI32<'a> {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => NumericIteratorI32 {
                 sexp: self,
@@ -294,7 +294,7 @@ impl NumericSexp {
     /// assert!(e2.is_some());
     /// assert!(e2.unwrap().is_err());
     /// ```
-    pub fn iter_f64(&self) -> NumericIteratorF64 {
+    pub fn iter_f64<'a>(&'a self) -> NumericIteratorF64<'a> {
         match &self.0 {
             PrivateNumericSexp::Real { orig, .. } => NumericIteratorF64 {
                 sexp: self,
@@ -315,7 +315,7 @@ impl NumericSexp {
     }
 
     /// Returns an iterator over the underlying data of the SEXP.
-    pub fn iter_usize(&self) -> NumericIteratorUsize {
+    pub fn iter_usize<'a>(&'a self) -> NumericIteratorUsize<'a> {
         NumericIteratorUsize {
             sexp: self,
             i: 0,

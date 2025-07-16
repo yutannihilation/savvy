@@ -105,7 +105,7 @@ pub fn generate_c_header_file(result: &MergedResult) -> String {
                 .collect::<Vec<String>>()
                 .join("\n");
 
-            format!("\n// methods and associated functions for {}\n{}", ty, fns)
+            format!("\n// methods and associated functions for {ty}\n{fns}")
         })
         .collect::<Vec<String>>()
         .join("\n");
