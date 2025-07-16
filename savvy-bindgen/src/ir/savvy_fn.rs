@@ -625,6 +625,15 @@ fn get_savvy_return_type(
                                     }
                                 }
 
+                                // catch common mistakes
+                                wrong_ty @ ("String" | "i32" | "usize" | "f64" | "bool") => {
+                                    let msg = format!(
+"Return type mmust be either (), savvy::Sexp, or a user-defined type.
+You can use .try_into() to convert {wrong_ty} to savvy::Sexp."
+                                    );
+                                    return Err(syn::Error::new_spanned(type_path, msg));
+                                }
+
                                 // if it's the actual type, use it as it is.
                                 _ => {
                                     return Ok(SavvyFnReturnType::UserDefinedStruct(

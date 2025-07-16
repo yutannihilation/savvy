@@ -49,6 +49,33 @@ fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()>
     Ok(())
 }
 
+// wrong return type
+
+#[savvy]
+fn wrong_return_type1() -> savvy::Result<String> {
+    Ok(String::new())
+}
+
+#[savvy]
+fn wrong_return_type2() -> savvy::Result<i32> {
+    Ok(0)
+}
+
+#[savvy]
+fn wrong_return_type3() -> savvy::Result<usize> {
+    Ok(0)
+}
+
+#[savvy]
+fn wrong_return_type4() -> savvy::Result<bool> {
+    Ok(false)
+}
+
+#[savvy]
+fn wrong_return_type5() -> savvy::Result<f64> {
+    Ok(0.0)
+}
+
 // lifetime is not supported
 #[savvy]
 struct Foo<'a>(External::Bar<'a>);
