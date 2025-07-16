@@ -60,35 +60,35 @@ error: `Owned-` types are not allowed here. Did you mean `IntegerSexp`?
 48 | fn wrong_type_option_owned_int(x: Option<OwnedIntegerSexp>) -> savvy::Result<()> {
    |                                          ^^^^^^^^^^^^^^^^
 
-error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+error: Return type must be either (), savvy::Sexp, or a user-defined type.
        You can use .try_into() to convert String to savvy::Sexp.
   --> tests/cases/simple_cases.rs:55:42
    |
 55 | fn wrong_return_type1() -> savvy::Result<String> {
    |                                          ^^^^^^
 
-error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+error: Return type must be either (), savvy::Sexp, or a user-defined type.
        You can use .try_into() to convert i32 to savvy::Sexp.
   --> tests/cases/simple_cases.rs:60:42
    |
 60 | fn wrong_return_type2() -> savvy::Result<i32> {
    |                                          ^^^
 
-error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+error: Return type must be either (), savvy::Sexp, or a user-defined type.
        You can use .try_into() to convert usize to savvy::Sexp.
   --> tests/cases/simple_cases.rs:65:42
    |
 65 | fn wrong_return_type3() -> savvy::Result<usize> {
    |                                          ^^^^^
 
-error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+error: Return type must be either (), savvy::Sexp, or a user-defined type.
        You can use .try_into() to convert bool to savvy::Sexp.
   --> tests/cases/simple_cases.rs:70:42
    |
 70 | fn wrong_return_type4() -> savvy::Result<bool> {
    |                                          ^^^^
 
-error: Return type mmust be either (), savvy::Sexp, or a user-defined type.
+error: Return type must be either (), savvy::Sexp, or a user-defined type.
        You can use .try_into() to convert f64 to savvy::Sexp.
   --> tests/cases/simple_cases.rs:75:42
    |
