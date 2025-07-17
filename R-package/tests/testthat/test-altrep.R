@@ -3,6 +3,9 @@ test_that("altinteger works", {
 
   expect_equal(x[1], 1L) # ELT method
   expect_equal(length(x), 3L) # length method
+  expect_equal(sum(x), 6L) # default sum method
+  expect_equal(min(x), 1L) # default min method
+  expect_equal(max(x), 3L) # default max method
   expect_equal(as.character(x), c("1", "2", "3")) # coerce method
   expect_equal(x, c(1L, 2L, 3L))
 
@@ -12,6 +15,9 @@ test_that("altinteger works", {
 
   expect_equal(x[1], 2L) # ELT method
   expect_equal(length(x), 4L) # length method
+  expect_equal(sum(x), 12L) # default sum method
+  expect_equal(min(x), 0L) # default min method
+  expect_equal(max(x), 6L) # default max method
   expect_equal(as.character(x), c("2", "4", "6", "0")) # coerce method
   expect_equal(x, c(2L, 4L, 6L, 0L))
 
