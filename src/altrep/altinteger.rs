@@ -6,16 +6,17 @@ use std::{
 use savvy_ffi::{
     altrep::{
         R_altrep_data2, R_make_altinteger_class, R_set_altinteger_Elt_method,
-        R_set_altrep_Coerce_method, R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method,
-        R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
-        R_set_altvec_Dataptr_or_null_method,
+        R_set_altinteger_Is_sorted_method, R_set_altinteger_Max_method,
+        R_set_altinteger_Min_method, R_set_altinteger_Sum_method, R_set_altrep_Coerce_method,
+        R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
+        R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, INTEGER, INTEGER_ELT, INTSXP, SEXP,
-    SEXPTYPE,
+    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_ScalarInteger,
+    Rf_ScalarReal, Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, INTEGER,
+    INTEGER_ELT, INTSXP, SEXP, SEXPTYPE,
 };
 
-use crate::{IntegerSexp, IntoExtPtrSexp};
+use crate::{r_eprintln, IntegerSexp, IntoExtPtrSexp, NotAvailableValue};
 
 pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -45,6 +46,65 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
         for (i, v) in new.iter_mut().enumerate() {
             *v = self.elt(i + offset);
         }
+    }
+
+    /// Return the sum of all values.
+    ///
+    /// This returns `f64` because the sum of `i32` might be beyond the range of `i32`.
+    fn sum(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = 0.0;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result += x as f64;
+            }
+        }
+
+        Some(result)
+    }
+
+    /// Return the minimum value
+    fn min(&mut self, na_rm: bool) -> Option<i32> {
+        let mut result = i32::MAX;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result = std::cmp::min(result, x);
+            }
+        }
+
+        Some(result)
+    }
+
+    /// Return the minimum value
+    fn max(&mut self, na_rm: bool) -> Option<i32> {
+        let mut result = i32::MAX;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result = std::cmp::max(result, x);
+            }
+        }
+
+        Some(result)
     }
 
     /// What gets printed when `.Internal(inspect(x))` is used.
@@ -215,6 +275,108 @@ pub fn register_altinteger_class<T: AltInteger>(
         }
     }
 
+    unsafe extern "C" fn altinteger_sum<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTINTEGER_SUM({}) is called", T::CLASS_NAME);
+        let sum: f64 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let s = unsafe {
+                std::slice::from_raw_parts(
+                    INTEGER(materialized) as _,
+                    Rf_xlength(materialized) as _,
+                )
+            };
+            s.iter().sum()
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => match self_.sum(na_rm == Rboolean_TRUE) {
+                    Some(sum) => sum,
+                    None => return unsafe { Rf_ScalarInteger(i32::na()) },
+                },
+                Err(_) => {
+                    // TODO: should be error, but there's no way to throw error safely from here.
+                    return unsafe { Rf_ScalarInteger(i32::na()) };
+                }
+            }
+        };
+
+        if i32::MIN as f64 <= sum && sum <= i32::MAX as f64 {
+            unsafe { Rf_ScalarInteger(sum.to_int_unchecked()) }
+        } else {
+            unsafe { Rf_ScalarReal(sum) }
+        }
+    }
+
+    unsafe extern "C" fn altinteger_min<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTINTEGER_MIN({}) is called", T::CLASS_NAME);
+        let sum: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let s = unsafe {
+                let len = Rf_xlength(materialized) as _;
+                if len == 0 {
+                    return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                }
+                std::slice::from_raw_parts(INTEGER(materialized) as _, len)
+            };
+            match s.iter().min() {
+                Some(min) => *min,
+                None => return unsafe { Rf_ScalarInteger(i32::na()) },
+            }
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => {
+                    if self_.length() == 0 {
+                        return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                    }
+
+                    match self_.min(na_rm == Rboolean_TRUE) {
+                        Some(min) => min,
+                        None => return unsafe { Rf_ScalarInteger(i32::na()) },
+                    }
+                }
+                Err(_) => {
+                    // TODO: should be error, but there's no way to throw error safely from here.
+                    return unsafe { Rf_ScalarInteger(i32::na()) };
+                }
+            }
+        };
+
+        unsafe { Rf_ScalarInteger(sum) }
+    }
+
+    unsafe extern "C" fn altinteger_max<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTINTEGER_MAX({}) is called", T::CLASS_NAME);
+        let sum: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let s = unsafe {
+                let len = Rf_xlength(materialized) as _;
+                if len == 0 {
+                    return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                }
+                std::slice::from_raw_parts(INTEGER(materialized) as _, len)
+            };
+            match s.iter().max() {
+                Some(max) => *max,
+                None => return unsafe { Rf_ScalarInteger(i32::na()) },
+            }
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => {
+                    if self_.length() == 0 {
+                        return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                    }
+
+                    match self_.max(na_rm == Rboolean_TRUE) {
+                        Some(max) => max,
+                        None => return unsafe { Rf_ScalarInteger(i32::na()) },
+                    }
+                }
+                Err(_) => {
+                    // TODO: should be error, but there's no way to throw error safely from here.
+                    return unsafe { Rf_ScalarInteger(i32::na()) };
+                }
+            }
+        };
+
+        unsafe { Rf_ScalarInteger(sum) }
+    }
+
     unsafe {
         R_set_altrep_Length_method(class_t, Some(altrep_length::<T>));
         R_set_altrep_Inspect_method(class_t, Some(altrep_inspect::<T>));
@@ -223,6 +385,9 @@ pub fn register_altinteger_class<T: AltInteger>(
         R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
         R_set_altinteger_Elt_method(class_t, Some(altinteger_elt::<T>));
+        R_set_altinteger_Sum_method(class_t, Some(altinteger_sum::<T>));
+        R_set_altinteger_Min_method(class_t, Some(altinteger_min::<T>));
+        R_set_altinteger_Max_method(class_t, Some(altinteger_max::<T>));
     }
 
     super::register_altrep_class(T::CLASS_NAME, class_t)?;
