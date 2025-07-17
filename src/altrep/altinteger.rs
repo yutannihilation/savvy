@@ -6,17 +6,17 @@ use std::{
 use savvy_ffi::{
     altrep::{
         R_altrep_data2, R_make_altinteger_class, R_set_altinteger_Elt_method,
-        R_set_altinteger_Is_sorted_method, R_set_altinteger_Max_method,
-        R_set_altinteger_Min_method, R_set_altinteger_Sum_method, R_set_altrep_Coerce_method,
-        R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
-        R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
+        R_set_altinteger_Max_method, R_set_altinteger_Min_method, R_set_altinteger_Sum_method,
+        R_set_altrep_Coerce_method, R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method,
+        R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
+        R_set_altvec_Dataptr_or_null_method,
     },
     R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_ScalarInteger,
     Rf_ScalarReal, Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, INTEGER,
     INTEGER_ELT, INTSXP, SEXP, SEXPTYPE,
 };
 
-use crate::{r_eprintln, IntegerSexp, IntoExtPtrSexp, NotAvailableValue};
+use crate::{IntegerSexp, IntoExtPtrSexp, NotAvailableValue};
 
 pub trait AltInteger: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -311,7 +311,7 @@ pub fn register_altinteger_class<T: AltInteger>(
             let s = unsafe {
                 let len = Rf_xlength(materialized) as _;
                 if len == 0 {
-                    return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                    return Rf_ScalarReal(f64::NEG_INFINITY);
                 }
                 std::slice::from_raw_parts(INTEGER(materialized) as _, len)
             };
@@ -347,7 +347,7 @@ pub fn register_altinteger_class<T: AltInteger>(
             let s = unsafe {
                 let len = Rf_xlength(materialized) as _;
                 if len == 0 {
-                    return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+                    return Rf_ScalarReal(f64::NEG_INFINITY);
                 }
                 std::slice::from_raw_parts(INTEGER(materialized) as _, len)
             };
