@@ -90,7 +90,7 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
 
     /// Return the minimum value
     fn max(&mut self, na_rm: bool) -> Option<i32> {
-        let mut result = i32::MAX;
+        let mut result = i32::MIN;
         for i in 0..self.length() {
             let x = self.elt(i);
             if x.is_na() {
@@ -309,7 +309,7 @@ pub fn register_altinteger_class<T: AltInteger>(
         crate::log::trace!("ALTINTEGER_MIN({}) is called", T::CLASS_NAME);
 
         // min(integer()) returns -Inf
-        let len = unsafe { Rf_xlength(x) };
+        let len = unsafe { altrep_length::<T>(x) };
         if len == 0 {
             return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
         }
@@ -341,7 +341,7 @@ pub fn register_altinteger_class<T: AltInteger>(
         crate::log::trace!("ALTINTEGER_MAX({}) is called", T::CLASS_NAME);
 
         // max(integer()) returns Inf
-        let len = unsafe { Rf_xlength(x) };
+        let len = unsafe { altrep_length::<T>(x) };
         if len == 0 {
             return unsafe { Rf_ScalarReal(f64::INFINITY) };
         }
