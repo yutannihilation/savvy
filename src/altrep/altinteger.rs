@@ -307,74 +307,66 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     unsafe extern "C" fn altinteger_min<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
         crate::log::trace!("ALTINTEGER_MIN({}) is called", T::CLASS_NAME);
-        let sum: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            let s = unsafe {
-                let len = Rf_xlength(materialized) as _;
-                if len == 0 {
-                    return Rf_ScalarReal(f64::NEG_INFINITY);
-                }
-                std::slice::from_raw_parts(INTEGER(materialized) as _, len)
-            };
+
+        // min(integer()) returns -Inf
+        let len = unsafe { Rf_xlength(x) };
+        if len == 0 {
+            return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+        }
+
+        let min: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let s = unsafe { std::slice::from_raw_parts(INTEGER(materialized) as _, len as _) };
             match s.iter().min() {
                 Some(min) => *min,
                 None => return unsafe { Rf_ScalarInteger(i32::na()) },
             }
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => {
-                    if self_.length() == 0 {
-                        return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
-                    }
-
-                    match self_.min(na_rm == Rboolean_TRUE) {
-                        Some(min) => min,
-                        None => return unsafe { Rf_ScalarInteger(i32::na()) },
-                    }
-                }
+                Ok(self_) => match self_.min(na_rm == Rboolean_TRUE) {
+                    Some(min) => min,
+                    None => return unsafe { Rf_ScalarInteger(i32::na()) },
+                },
                 Err(_) => {
-                    // TODO: should be error, but there's no way to throw error safely from here.
+                    // TODO: probably this should be error (or panic?),
+                    // but there's no safe way to throw error from here.
                     return unsafe { Rf_ScalarInteger(i32::na()) };
                 }
             }
         };
 
-        unsafe { Rf_ScalarInteger(sum) }
+        unsafe { Rf_ScalarInteger(min) }
     }
 
     unsafe extern "C" fn altinteger_max<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
         crate::log::trace!("ALTINTEGER_MAX({}) is called", T::CLASS_NAME);
-        let sum: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            let s = unsafe {
-                let len = Rf_xlength(materialized) as _;
-                if len == 0 {
-                    return Rf_ScalarReal(f64::NEG_INFINITY);
-                }
-                std::slice::from_raw_parts(INTEGER(materialized) as _, len)
-            };
+
+        // max(integer()) returns Inf
+        let len = unsafe { Rf_xlength(x) };
+        if len == 0 {
+            return unsafe { Rf_ScalarReal(f64::INFINITY) };
+        }
+
+        let max: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let s = unsafe { std::slice::from_raw_parts(INTEGER(materialized) as _, len as _) };
             match s.iter().max() {
                 Some(max) => *max,
                 None => return unsafe { Rf_ScalarInteger(i32::na()) },
             }
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => {
-                    if self_.length() == 0 {
-                        return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
-                    }
-
-                    match self_.max(na_rm == Rboolean_TRUE) {
-                        Some(max) => max,
-                        None => return unsafe { Rf_ScalarInteger(i32::na()) },
-                    }
-                }
+                Ok(self_) => match self_.max(na_rm == Rboolean_TRUE) {
+                    Some(max) => max,
+                    None => return unsafe { Rf_ScalarInteger(i32::na()) },
+                },
                 Err(_) => {
-                    // TODO: should be error, but there's no way to throw error safely from here.
+                    // TODO: probably this should be error (or panic?),
+                    // but there's no safe way to throw error from here.
                     return unsafe { Rf_ScalarInteger(i32::na()) };
                 }
             }
         };
 
-        unsafe { Rf_ScalarInteger(sum) }
+        unsafe { Rf_ScalarInteger(max) }
     }
 
     unsafe {
