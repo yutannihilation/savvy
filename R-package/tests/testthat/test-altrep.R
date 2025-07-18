@@ -24,7 +24,21 @@ test_that("altinteger works", {
   # duplicate method? dataptr method? I'm not sure
   x[1] <- 10L
   expect_equal(x, c(10L, 4L, 6L, 0L))
+})
 
+test_that("empty altinteger returns Inf", {
+  x <- altint_empty()
+
+  expect_equal(length(x), 0L) # length method
+  expect_equal(sum(x), 0L) # default sum method
+  expect_equal(min(x), Inf) # default min method
+  expect_equal(max(x), -Inf) # default max method
+})
+
+test_that("empty altinteger returns Inf", {
+  x <- altint_toobig()
+
+  expect_equal(sum(x), 2.0 * .Machine$integer.max)
 })
 
 test_that("altreal works", {
@@ -37,7 +51,11 @@ test_that("altreal works", {
 
   # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
   tweak_altreal(x)
-  expect_output(print_altreal(x), "MyAltReal([2.0, 4.0, 6.0, 0.0])", fixed = TRUE)
+  expect_output(
+    print_altreal(x),
+    "MyAltReal([2.0, 4.0, 6.0, 0.0])",
+    fixed = TRUE
+  )
 
   expect_equal(x[1], 2) # ELT method
   expect_equal(length(x), 4L) # length method
@@ -47,6 +65,15 @@ test_that("altreal works", {
   # duplicate method? dataptr method? I'm not sure
   x[1] <- 10
   expect_equal(x, c(10, 4, 6, 0))
+})
+
+test_that("empty altreal returns Inf", {
+  x <- altreal_empty()
+
+  expect_equal(length(x), 0L) # length method
+  expect_equal(sum(x), 0.0) # default sum method
+  expect_equal(min(x), Inf) # default min method
+  expect_equal(max(x), -Inf) # default max method
 })
 
 test_that("altlogical works", {
@@ -59,7 +86,11 @@ test_that("altlogical works", {
 
   # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
   tweak_altlogical(x)
-  expect_output(print_altlogical(x), "MyAltLogical([false, true, false, false])", fixed = TRUE)
+  expect_output(
+    print_altlogical(x),
+    "MyAltLogical([false, true, false, false])",
+    fixed = TRUE
+  )
 
   expect_equal(x[1], FALSE) # ELT method
   expect_equal(length(x), 4L) # length method
@@ -103,7 +134,11 @@ test_that("altstring works", {
 
   # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
   tweak_altstring(x)
-  expect_output(print_altstring(x), "MyAltString([\"10\", \"20\", \"30\", \"-1\"])", fixed = TRUE)
+  expect_output(
+    print_altstring(x),
+    "MyAltString([\"10\", \"20\", \"30\", \"-1\"])",
+    fixed = TRUE
+  )
 
   expect_equal(x[1], "10") # ELT method
   expect_equal(length(x), 4L) # length method
@@ -125,20 +160,31 @@ test_that("altlist works", {
 
   # after the first materialization, the values reflect to R's side if invalidate_cache = TRUE
   tweak_altlist(x)
-  expect_output(print_altlist(x), 'MyAltList { one: MyAltInt([2, 4, 6, 0]), two: MyAltString(["a0", "b0", "c0", "-1"]) }', fixed = TRUE)
+  expect_output(
+    print_altlist(x),
+    'MyAltList { one: MyAltInt([2, 4, 6, 0]), two: MyAltString(["a0", "b0", "c0", "-1"]) }',
+    fixed = TRUE
+  )
 
   expect_equal(x[[1]], c(2L, 4L, 6L, 0L)) # ELT method
   expect_equal(x[[2]], c("a0", "b0", "c0", "-1")) # ELT method
   expect_equal(length(x), 2L) # length method
-  expect_equal(x, list(one = c(2L, 4L, 6L, 0L), two = c("a0", "b0", "c0", "-1")))
+  expect_equal(
+    x,
+    list(one = c(2L, 4L, 6L, 0L), two = c("a0", "b0", "c0", "-1"))
+  )
 
   # duplicate method? dataptr method? I'm not sure
   x[[1]] <- "A"
-  expect_equal(x, list(one = "A", two =  c("a0", "b0", "c0", "-1")))
+  expect_equal(x, list(one = "A", two = c("a0", "b0", "c0", "-1")))
 })
 
 test_that("get_altrep_body_ref_unchecked() works", {
   x <- altint()
   # The same result of print_altint() is archieved by treating MyAltInt as the external class.
-  expect_output(print_altint_by_weird_way(x), "MyAltInt([1, 2, 3])", fixed = TRUE)
+  expect_output(
+    print_altint_by_weird_way(x),
+    "MyAltInt([1, 2, 3])",
+    fixed = TRUE
+  )
 })

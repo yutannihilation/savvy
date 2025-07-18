@@ -41,6 +41,18 @@ fn altint() -> savvy::Result<savvy::Sexp> {
 }
 
 #[savvy]
+fn altint_empty() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltInt::new(vec![]);
+    v.into_altrep()
+}
+
+#[savvy]
+fn altint_toobig() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltInt::new(vec![i32::MAX, i32::MAX]);
+    v.into_altrep()
+}
+
+#[savvy]
 fn print_altint(x: IntegerSexp) -> savvy::Result<()> {
     if let Ok(x) = MyAltInt::try_from_altrep_ref(&x) {
         r_println!("{x:?}");
@@ -92,6 +104,12 @@ impl AltReal for MyAltReal {
 #[savvy]
 fn altreal() -> savvy::Result<savvy::Sexp> {
     let v = MyAltReal::new(vec![1.0, 2.0, 3.0]);
+    v.into_altrep()
+}
+
+#[savvy]
+fn altreal_empty() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltReal::new(vec![]);
     v.into_altrep()
 }
 

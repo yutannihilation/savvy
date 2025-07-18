@@ -1,10 +1,13 @@
 SEXP savvy_abs_complex__ffi(SEXP c_arg__x);
 SEXP savvy_add_suffix__ffi(SEXP c_arg__x, SEXP c_arg__y);
 SEXP savvy_altint__ffi(void);
+SEXP savvy_altint_empty__ffi(void);
+SEXP savvy_altint_toobig__ffi(void);
 SEXP savvy_altlist__ffi(void);
 SEXP savvy_altlogical__ffi(void);
 SEXP savvy_altraw__ffi(void);
 SEXP savvy_altreal__ffi(void);
+SEXP savvy_altreal_empty__ffi(void);
 SEXP savvy_altstring__ffi(void);
 SEXP savvy_call_with_args__ffi(SEXP c_arg__fun);
 SEXP savvy_default_value_enum__ffi(SEXP c_arg__x);

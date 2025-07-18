@@ -70,8 +70,8 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
     }
 
     /// Return the minimum value
-    fn min(&mut self, na_rm: bool) -> Option<i32> {
-        let mut result = i32::MAX;
+    fn min(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = f64::INFINITY;
         for i in 0..self.length() {
             let x = self.elt(i);
             if x.is_na() {
@@ -81,16 +81,16 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = std::cmp::min(result, x);
+                result = f64::min(result, x as f64);
             }
         }
 
         Some(result)
     }
 
-    /// Return the minimum value
-    fn max(&mut self, na_rm: bool) -> Option<i32> {
-        let mut result = i32::MIN;
+    /// Return the minimum value.
+    fn max(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = f64::NEG_INFINITY;
         for i in 0..self.length() {
             let x = self.elt(i);
             if x.is_na() {
@@ -100,7 +100,7 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = std::cmp::max(result, x);
+                result = f64::max(result, x as f64);
             }
         }
 
@@ -298,31 +298,39 @@ pub fn register_altinteger_class<T: AltInteger>(
             }
         };
 
-        if i32::MIN as f64 <= sum && sum <= i32::MAX as f64 {
-            unsafe { Rf_ScalarInteger(sum.to_int_unchecked()) }
-        } else {
-            unsafe { Rf_ScalarReal(sum) }
-        }
+        maybe_int(sum)
     }
 
     unsafe extern "C" fn altinteger_min<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
         crate::log::trace!("ALTINTEGER_MIN({}) is called", T::CLASS_NAME);
 
-        // min(integer()) returns -Inf
+        let na_rm = na_rm == Rboolean_TRUE;
+
+        // min(integer()) returns Inf
         let len = unsafe { altrep_length::<T>(x) };
         if len == 0 {
-            return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+            return unsafe { Rf_ScalarReal(f64::INFINITY) };
         }
 
-        let min: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            let s = unsafe { std::slice::from_raw_parts(INTEGER(materialized) as _, len as _) };
-            match s.iter().min() {
-                Some(min) => *min,
-                None => return unsafe { Rf_ScalarInteger(i32::na()) },
+        let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let mut result = f64::INFINITY;
+            for &x in
+                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) }
+            {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarInteger(i32::na()) };
+                    }
+                } else {
+                    result = f64::min(result, x as f64);
+                }
             }
+            result
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => match self_.min(na_rm == Rboolean_TRUE) {
+                Ok(self_) => match self_.min(na_rm) {
                     Some(min) => min,
                     None => return unsafe { Rf_ScalarInteger(i32::na()) },
                 },
@@ -334,27 +342,39 @@ pub fn register_altinteger_class<T: AltInteger>(
             }
         };
 
-        unsafe { Rf_ScalarInteger(min) }
+        maybe_int(result)
     }
 
     unsafe extern "C" fn altinteger_max<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
         crate::log::trace!("ALTINTEGER_MAX({}) is called", T::CLASS_NAME);
 
-        // max(integer()) returns Inf
+        let na_rm = na_rm == Rboolean_TRUE;
+
+        // max(integer()) returns -Inf
         let len = unsafe { altrep_length::<T>(x) };
         if len == 0 {
-            return unsafe { Rf_ScalarReal(f64::INFINITY) };
+            return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
         }
 
-        let max: i32 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            let s = unsafe { std::slice::from_raw_parts(INTEGER(materialized) as _, len as _) };
-            match s.iter().max() {
-                Some(max) => *max,
-                None => return unsafe { Rf_ScalarInteger(i32::na()) },
+        let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let mut result = f64::NEG_INFINITY;
+            for &x in
+                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) }
+            {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarInteger(i32::na()) };
+                    }
+                } else {
+                    result = f64::max(result, x as f64);
+                }
             }
+            result
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => match self_.max(na_rm == Rboolean_TRUE) {
+                Ok(self_) => match self_.max(na_rm) {
                     Some(max) => max,
                     None => return unsafe { Rf_ScalarInteger(i32::na()) },
                 },
@@ -366,7 +386,7 @@ pub fn register_altinteger_class<T: AltInteger>(
             }
         };
 
-        unsafe { Rf_ScalarInteger(max) }
+        maybe_int(result)
     }
 
     unsafe {
@@ -384,4 +404,14 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     super::register_altrep_class(T::CLASS_NAME, class_t)?;
     Ok(())
+}
+
+fn maybe_int(x: f64) -> SEXP {
+    // Note: Why we add +1 to i32::MIN? This is a bit tricky.
+    // i32::MIN is R_NaInt, so it cannot be included in the range.
+    if (i32::MIN + 1) as f64 <= x && x <= i32::MAX as f64 {
+        unsafe { Rf_ScalarInteger(x.to_int_unchecked()) }
+    } else {
+        unsafe { Rf_ScalarReal(x) }
+    }
 }

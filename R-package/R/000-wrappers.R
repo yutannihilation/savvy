@@ -58,6 +58,16 @@ NULL
 }
 
 
+`altint_empty` <- function() {
+  .Call(savvy_altint_empty__impl)
+}
+
+
+`altint_toobig` <- function() {
+  .Call(savvy_altint_toobig__impl)
+}
+
+
 `altlist` <- function() {
   .Call(savvy_altlist__impl)
 }
@@ -75,6 +85,11 @@ NULL
 
 `altreal` <- function() {
   .Call(savvy_altreal__impl)
+}
+
+
+`altreal_empty` <- function() {
+  .Call(savvy_altreal_empty__impl)
 }
 
 
