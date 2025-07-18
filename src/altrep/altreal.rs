@@ -5,15 +5,17 @@ use std::{
 
 use savvy_ffi::{
     altrep::{
-        R_altrep_data2, R_make_altreal_class, R_set_altreal_Elt_method, R_set_altrep_Coerce_method,
+        R_altrep_data2, R_make_altreal_class, R_set_altreal_Elt_method, R_set_altreal_Max_method,
+        R_set_altreal_Min_method, R_set_altreal_Sum_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
         R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaReal, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, REAL, REALSXP, REAL_ELT, SEXP, SEXPTYPE,
+    R_NaReal, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_ScalarReal,
+    Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, REAL, REALSXP, REAL_ELT,
+    SEXP, SEXPTYPE,
 };
 
-use crate::{IntoExtPtrSexp, RealSexp};
+use crate::{IntoExtPtrSexp, NotAvailableValue, RealSexp};
 
 pub trait AltReal: Sized + IntoExtPtrSexp {
     /// Class name to identify the ALTREP class.
@@ -43,6 +45,73 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
         for (i, v) in new.iter_mut().enumerate() {
             *v = self.elt(i + offset);
         }
+    }
+
+    /// Return the sum of all values.
+    fn sum(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = 0.0;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result += x as f64;
+            }
+        }
+
+        Some(result)
+    }
+
+    /// Return the minimum value.
+    ///
+    /// Note that `min()` of an empty vector is `Inf`; it's this function's responsibility to handle such cases:
+    ///
+    /// - `min(numeric(0L))`
+    /// - `min(c(NA_real_), na.rm = TRUE)`
+    fn min(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = f64::INFINITY;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result = f64::min(result, x as f64);
+            }
+        }
+
+        Some(result)
+    }
+
+    /// Return the maximum value.
+    ///
+    /// Note that `max()` of an empty vector is `-Inf`; it's this function's responsibility to handle such cases:
+    ///
+    /// - `max(numeric(0L))`
+    /// - `max(c(NA_real_), na.rm = TRUE)`
+    fn max(&mut self, na_rm: bool) -> Option<f64> {
+        let mut result = f64::NEG_INFINITY;
+        for i in 0..self.length() {
+            let x = self.elt(i);
+            if x.is_na() {
+                if na_rm {
+                    continue;
+                } else {
+                    return None;
+                }
+            } else {
+                result = f64::max(result, x as f64);
+            }
+        }
+
+        Some(result)
     }
 
     /// What gets printed when `.Internal(inspect(x))` is used.
@@ -201,6 +270,135 @@ pub fn register_altreal_class<T: AltReal>(
         }
     }
 
+    unsafe extern "C" fn altreal_sum<T: AltReal>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTREAL_SUM({}) is called", T::CLASS_NAME);
+
+        let na_rm = na_rm == Rboolean_TRUE;
+
+        let sum: f64 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let mut result = 0.0;
+            let slice = unsafe {
+                std::slice::from_raw_parts(
+                    REAL(materialized) as *mut f64,
+                    Rf_xlength(materialized) as _,
+                )
+            };
+            for &x in slice {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarReal(f64::na()) };
+                    }
+                } else {
+                    result = result + x;
+                }
+            }
+            result
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => match self_.sum(na_rm) {
+                    Some(sum) => sum,
+                    None => return unsafe { Rf_ScalarReal(f64::na()) },
+                },
+                Err(_) => {
+                    // TODO: should be error, but there's no way to throw error safely from here.
+                    return unsafe { Rf_ScalarReal(f64::na()) };
+                }
+            }
+        };
+
+        unsafe { Rf_ScalarReal(sum) }
+    }
+
+    unsafe extern "C" fn altreal_min<T: AltReal>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTREAL_MIN({}) is called", T::CLASS_NAME);
+
+        let na_rm = na_rm == Rboolean_TRUE;
+
+        // min(numeric()) returns Inf
+        let len = unsafe { altrep_length::<T>(x) };
+        if len == 0 {
+            return unsafe { Rf_ScalarReal(f64::INFINITY) };
+        }
+
+        let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let mut result = f64::INFINITY;
+            let slice =
+                unsafe { std::slice::from_raw_parts(REAL(materialized) as *mut f64, len as _) };
+            for &x in slice {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarReal(f64::na()) };
+                    }
+                } else {
+                    result = f64::min(result, x);
+                }
+            }
+            result
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => match self_.min(na_rm) {
+                    Some(min) => min,
+                    None => return unsafe { Rf_ScalarReal(f64::na()) },
+                },
+                Err(_) => {
+                    // TODO: probably this should be error (or panic?),
+                    // but there's no safe way to throw error from here.
+                    return unsafe { Rf_ScalarReal(f64::na()) };
+                }
+            }
+        };
+
+        unsafe { Rf_ScalarReal(result) }
+    }
+
+    unsafe extern "C" fn altreal_max<T: AltReal>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
+        crate::log::trace!("ALTREAL_MAX({}) is called", T::CLASS_NAME);
+
+        let na_rm = na_rm == Rboolean_TRUE;
+
+        // max(numeric()) returns Inf
+        let len = unsafe { altrep_length::<T>(x) };
+        if len == 0 {
+            return unsafe { Rf_ScalarReal(f64::NEG_INFINITY) };
+        }
+
+        let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
+            let mut result = f64::NEG_INFINITY;
+            let slice =
+                unsafe { std::slice::from_raw_parts(REAL(materialized) as *mut f64, len as _) };
+            for &x in slice {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarReal(f64::na()) };
+                    }
+                } else {
+                    result = f64::max(result, x);
+                }
+            }
+            result
+        } else {
+            match super::extract_mut_from_altrep::<T>(&mut x) {
+                Ok(self_) => match self_.max(na_rm) {
+                    Some(max) => max,
+                    None => return unsafe { Rf_ScalarReal(f64::na()) },
+                },
+                Err(_) => {
+                    // TODO: probably this should be error (or panic?),
+                    // but there's no safe way to throw error from here.
+                    return unsafe { Rf_ScalarReal(f64::na()) };
+                }
+            }
+        };
+
+        unsafe { Rf_ScalarReal(result) }
+    }
+
     unsafe {
         R_set_altrep_Length_method(class_t, Some(altrep_length::<T>));
         R_set_altrep_Inspect_method(class_t, Some(altrep_inspect::<T>));
@@ -209,6 +407,9 @@ pub fn register_altreal_class<T: AltReal>(
         R_set_altvec_Dataptr_method(class_t, Some(altvec_dataptr::<T>));
         R_set_altvec_Dataptr_or_null_method(class_t, Some(altvec_dataptr_or_null::<T>));
         R_set_altreal_Elt_method(class_t, Some(altreal_elt::<T>));
+        R_set_altreal_Sum_method(class_t, Some(altreal_sum::<T>));
+        R_set_altreal_Min_method(class_t, Some(altreal_min::<T>));
+        R_set_altreal_Max_method(class_t, Some(altreal_max::<T>));
     }
 
     super::register_altrep_class(T::CLASS_NAME, class_t)?;

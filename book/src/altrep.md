@@ -72,6 +72,10 @@ impl AltInteger for MyAltInt {
 
 Optionally, you can implement these methods:
 
+* `sum()`: This is used when R function `sum()` is called.
+* `min()`, `max()`: This is used when R function `min()` or `max()` is called.
+  Note that, you need to handle empty cases (e.g. `min(integer(0L))` and 
+  `min(NA, na.rm = TRUE)`), which is supposed to return `Inf` and `-Inf`.
 * `copy_date(dst, offset)`: This copies the range of values starting from
   `offset` into `dst`, a `&mut [T]`. The default implementation does just call
   `elt()` repeatedly, but there might be more efficient implementation (e.g.

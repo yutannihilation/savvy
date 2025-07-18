@@ -58,6 +58,26 @@ NULL
 }
 
 
+`altint2` <- function() {
+  .Call(savvy_altint2__impl)
+}
+
+
+`altint_empty` <- function() {
+  .Call(savvy_altint_empty__impl)
+}
+
+
+`altint_na_only` <- function() {
+  .Call(savvy_altint_na_only__impl)
+}
+
+
+`altint_toobig` <- function() {
+  .Call(savvy_altint_toobig__impl)
+}
+
+
 `altlist` <- function() {
   .Call(savvy_altlist__impl)
 }
@@ -75,6 +95,21 @@ NULL
 
 `altreal` <- function() {
   .Call(savvy_altreal__impl)
+}
+
+
+`altreal2` <- function() {
+  .Call(savvy_altreal2__impl)
+}
+
+
+`altreal_empty` <- function() {
+  .Call(savvy_altreal_empty__impl)
+}
+
+
+`altreal_na_only` <- function() {
+  .Call(savvy_altreal_na_only__impl)
 }
 
 
