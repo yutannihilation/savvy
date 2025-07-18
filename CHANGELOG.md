@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+- `AltInteger` and `AltReal` trait now provide `sum()`, `min()` and `max()` (#380).
+
+### Minor improvements
+
 - Unsupported return types like `savvy::Result<String>` now fail with a better
   compile error message (#382).
 - The iterators returned by `.iter()` etc. are now properly annotated with
