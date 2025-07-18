@@ -47,6 +47,14 @@ test_that("altinteger sum can handle larger number than i32::MAX", {
   expect_equal(sum(x), 2.0 * .Machine$integer.max)
 })
 
+test_that("altinteger with custom sum(), min(), and max() works", {
+  x <- altint2()
+
+  expect_equal(sum(x), 20)
+  expect_equal(min(x), 30)
+  expect_equal(max(x), 40)
+})
+
 test_that("altreal works", {
   x <- altreal()
 
@@ -92,6 +100,14 @@ test_that("empty altreal returns Inf", {
   expect_equal(sum(x2, na.rm = TRUE), 0.0) # default sum method
   expect_equal(min(x2, na.rm = TRUE), Inf) # default min method
   expect_equal(max(x2, na.rm = TRUE), -Inf) # default max method
+})
+
+test_that("altreal with custom sum(), min(), and max() works", {
+  x <- altreal2()
+
+  expect_equal(sum(x), 20)
+  expect_equal(min(x), 30)
+  expect_equal(max(x), 40)
 })
 
 test_that("altlogical works", {

@@ -58,6 +58,11 @@ NULL
 }
 
 
+`altint2` <- function() {
+  .Call(savvy_altint2__impl)
+}
+
+
 `altint_empty` <- function() {
   .Call(savvy_altint_empty__impl)
 }
@@ -90,6 +95,11 @@ NULL
 
 `altreal` <- function() {
   .Call(savvy_altreal__impl)
+}
+
+
+`altreal2` <- function() {
+  .Call(savvy_altreal2__impl)
 }
 
 

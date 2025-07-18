@@ -81,6 +81,48 @@ fn tweak_altint(mut x: IntegerSexp) -> savvy::Result<()> {
     Err(savvy_err!("Not a known ALTREP"))
 }
 
+#[derive(Debug, Clone)]
+struct MyAltInt2;
+
+impl MyAltInt2 {
+    fn new() -> Self {
+        Self
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltInt2 {}
+
+impl AltInteger for MyAltInt2 {
+    const CLASS_NAME: &'static str = "MyAltInt2";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+
+    fn length(&mut self) -> usize {
+        1
+    }
+
+    fn elt(&mut self, i: usize) -> i32 {
+        10
+    }
+
+    fn sum(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(20.0)
+    }
+
+    fn min(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(30.0)
+    }
+
+    fn max(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(40.0)
+    }
+}
+
+#[savvy]
+fn altint2() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltInt2::new();
+    v.into_altrep()
+}
+
 // real
 
 #[derive(Debug, Clone)]
@@ -146,6 +188,48 @@ fn tweak_altreal(mut x: RealSexp) -> savvy::Result<()> {
     };
 
     Err(savvy_err!("Not a known ALTREP"))
+}
+
+#[derive(Debug, Clone)]
+struct MyAltReal2;
+
+impl MyAltReal2 {
+    fn new() -> Self {
+        Self
+    }
+}
+
+impl savvy::IntoExtPtrSexp for MyAltReal2 {}
+
+impl AltReal for MyAltReal2 {
+    const CLASS_NAME: &'static str = "MyAltReal2";
+    const PACKAGE_NAME: &'static str = "TestPackage";
+
+    fn length(&mut self) -> usize {
+        1
+    }
+
+    fn elt(&mut self, i: usize) -> f64 {
+        10.0
+    }
+
+    fn sum(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(20.0)
+    }
+
+    fn min(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(30.0)
+    }
+
+    fn max(&mut self, _na_rm: bool) -> Option<f64> {
+        Some(40.0)
+    }
+}
+
+#[savvy]
+fn altreal2() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltReal2::new();
+    v.into_altrep()
 }
 
 // logical
@@ -394,7 +478,9 @@ fn tweak_altlist(mut x: ListSexp) -> savvy::Result<()> {
 #[savvy_init]
 fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
     register_altinteger_class::<MyAltInt>(dll_info)?;
+    register_altinteger_class::<MyAltInt2>(dll_info)?;
     register_altreal_class::<MyAltReal>(dll_info)?;
+    register_altreal_class::<MyAltReal2>(dll_info)?;
     register_altlogical_class::<MyAltLogical>(dll_info)?;
     register_altraw_class::<MyAltRaw>(dll_info)?;
     register_altstring_class::<MyAltString>(dll_info)?;
