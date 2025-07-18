@@ -4,8 +4,8 @@ use savvy::altrep::{
     register_altstring_class, AltInteger, AltList, AltLogical, AltRaw, AltReal, AltString,
 };
 use savvy::{
-    r_println, savvy, savvy_err, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NullSexp, RawSexp,
-    RealSexp, StringSexp,
+    r_println, savvy, savvy_err, savvy_init, IntegerSexp, ListSexp, LogicalSexp, NotAvailableValue,
+    NullSexp, RawSexp, RealSexp, StringSexp,
 };
 
 // integer
@@ -43,6 +43,12 @@ fn altint() -> savvy::Result<savvy::Sexp> {
 #[savvy]
 fn altint_empty() -> savvy::Result<savvy::Sexp> {
     let v = MyAltInt::new(vec![]);
+    v.into_altrep()
+}
+
+#[savvy]
+fn altint_na_only() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltInt::new(vec![i32::na(), i32::na()]);
     v.into_altrep()
 }
 
@@ -110,6 +116,12 @@ fn altreal() -> savvy::Result<savvy::Sexp> {
 #[savvy]
 fn altreal_empty() -> savvy::Result<savvy::Sexp> {
     let v = MyAltReal::new(vec![]);
+    v.into_altrep()
+}
+
+#[savvy]
+fn altreal_na_only() -> savvy::Result<savvy::Sexp> {
+    let v = MyAltReal::new(vec![f64::na(), f64::na()]);
     v.into_altrep()
 }
 

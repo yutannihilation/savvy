@@ -63,6 +63,11 @@ NULL
 }
 
 
+`altint_na_only` <- function() {
+  .Call(savvy_altint_na_only__impl)
+}
+
+
 `altint_toobig` <- function() {
   .Call(savvy_altint_toobig__impl)
 }
@@ -90,6 +95,11 @@ NULL
 
 `altreal_empty` <- function() {
   .Call(savvy_altreal_empty__impl)
+}
+
+
+`altreal_na_only` <- function() {
+  .Call(savvy_altreal_na_only__impl)
 }
 
 

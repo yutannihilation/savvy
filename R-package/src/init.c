@@ -54,6 +54,11 @@ SEXP savvy_altint_empty__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_altint_na_only__impl(void) {
+    SEXP res = savvy_altint_na_only__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_altint_toobig__impl(void) {
     SEXP res = savvy_altint_toobig__ffi();
     return handle_result(res);
@@ -81,6 +86,11 @@ SEXP savvy_altreal__impl(void) {
 
 SEXP savvy_altreal_empty__impl(void) {
     SEXP res = savvy_altreal_empty__ffi();
+    return handle_result(res);
+}
+
+SEXP savvy_altreal_na_only__impl(void) {
+    SEXP res = savvy_altreal_na_only__ffi();
     return handle_result(res);
 }
 
@@ -761,12 +771,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_add_suffix__impl", (DL_FUNC) &savvy_add_suffix__impl, 2},
     {"savvy_altint__impl", (DL_FUNC) &savvy_altint__impl, 0},
     {"savvy_altint_empty__impl", (DL_FUNC) &savvy_altint_empty__impl, 0},
+    {"savvy_altint_na_only__impl", (DL_FUNC) &savvy_altint_na_only__impl, 0},
     {"savvy_altint_toobig__impl", (DL_FUNC) &savvy_altint_toobig__impl, 0},
     {"savvy_altlist__impl", (DL_FUNC) &savvy_altlist__impl, 0},
     {"savvy_altlogical__impl", (DL_FUNC) &savvy_altlogical__impl, 0},
     {"savvy_altraw__impl", (DL_FUNC) &savvy_altraw__impl, 0},
     {"savvy_altreal__impl", (DL_FUNC) &savvy_altreal__impl, 0},
     {"savvy_altreal_empty__impl", (DL_FUNC) &savvy_altreal_empty__impl, 0},
+    {"savvy_altreal_na_only__impl", (DL_FUNC) &savvy_altreal_na_only__impl, 0},
     {"savvy_altstring__impl", (DL_FUNC) &savvy_altstring__impl, 0},
     {"savvy_call_with_args__impl", (DL_FUNC) &savvy_call_with_args__impl, 1},
     {"savvy_default_value_enum__impl", (DL_FUNC) &savvy_default_value_enum__impl, 1},

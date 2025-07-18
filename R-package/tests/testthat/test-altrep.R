@@ -33,9 +33,15 @@ test_that("empty altinteger returns Inf", {
   expect_equal(sum(x), 0L) # default sum method
   expect_equal(min(x), Inf) # default min method
   expect_equal(max(x), -Inf) # default max method
+
+  x2 <- altint_na_only()
+  expect_equal(sum(x2), NA_integer_) # default sum method
+  expect_equal(sum(x2, na.rm = TRUE), 0L) # default sum method
+  expect_equal(min(x2, na.rm = TRUE), Inf) # default min method
+  expect_equal(max(x2, na.rm = TRUE), -Inf) # default max method
 })
 
-test_that("empty altinteger returns Inf", {
+test_that("altinteger sum can handle larger number than i32::MAX", {
   x <- altint_toobig()
 
   expect_equal(sum(x), 2.0 * .Machine$integer.max)
@@ -46,6 +52,9 @@ test_that("altreal works", {
 
   expect_equal(x[1], 1) # ELT method
   expect_equal(length(x), 3L) # length method
+  expect_equal(sum(x), 6) # default sum method
+  expect_equal(min(x), 1) # default min method
+  expect_equal(max(x), 3) # default max method
   expect_equal(as.character(x), c("1", "2", "3")) # coerce method
   expect_equal(x, c(1, 2, 3))
 
@@ -59,6 +68,9 @@ test_that("altreal works", {
 
   expect_equal(x[1], 2) # ELT method
   expect_equal(length(x), 4L) # length method
+  expect_equal(sum(x), 12) # default sum method
+  expect_equal(min(x), 0) # default min method
+  expect_equal(max(x), 6) # default max method
   expect_equal(as.character(x), c("2", "4", "6", "0")) # coerce method
   expect_equal(x, c(2, 4, 6, 0))
 
@@ -74,6 +86,12 @@ test_that("empty altreal returns Inf", {
   expect_equal(sum(x), 0.0) # default sum method
   expect_equal(min(x), Inf) # default min method
   expect_equal(max(x), -Inf) # default max method
+
+  x2 <- altreal_na_only()
+  expect_equal(sum(x2), NA_real_) # default sum method
+  expect_equal(sum(x2, na.rm = TRUE), 0.0) # default sum method
+  expect_equal(min(x2, na.rm = TRUE), Inf) # default min method
+  expect_equal(max(x2, na.rm = TRUE), -Inf) # default max method
 })
 
 test_that("altlogical works", {
