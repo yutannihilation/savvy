@@ -69,7 +69,13 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
         Some(result)
     }
 
-    /// Return the minimum value
+    /// Return the minimum value.
+    ///
+    /// This returns `f64` because `min()` of an empty vector is `Inf`. Note
+    /// that it's this function's responsibility to handle such cases:
+    ///
+    /// - `min(integer(0L))`
+    /// - `min(c(NA_integer_), na.rm = TRUE)`
     fn min(&mut self, na_rm: bool) -> Option<f64> {
         let mut result = f64::INFINITY;
         for i in 0..self.length() {
@@ -88,7 +94,13 @@ pub trait AltInteger: Sized + IntoExtPtrSexp {
         Some(result)
     }
 
-    /// Return the minimum value.
+    /// Return the maximum value.
+    ///
+    /// This returns `f64` because `max()` of an empty vector is `-Inf`. Note
+    /// that it's this function's responsibility to handle such cases:
+    ///
+    /// - `max(integer(0L))`
+    /// - `max(c(NA_integer_), na.rm = TRUE)`
     fn max(&mut self, na_rm: bool) -> Option<f64> {
         let mut result = f64::NEG_INFINITY;
         for i in 0..self.length() {
@@ -277,17 +289,32 @@ pub fn register_altinteger_class<T: AltInteger>(
 
     unsafe extern "C" fn altinteger_sum<T: AltInteger>(mut x: SEXP, na_rm: Rboolean) -> SEXP {
         crate::log::trace!("ALTINTEGER_SUM({}) is called", T::CLASS_NAME);
+
+        let na_rm = na_rm == Rboolean_TRUE;
+
         let sum: f64 = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
-            let s = unsafe {
+            let mut result = 0.0;
+            let slice = unsafe {
                 std::slice::from_raw_parts(
-                    INTEGER(materialized) as _,
+                    INTEGER(materialized) as *mut i32,
                     Rf_xlength(materialized) as _,
                 )
             };
-            s.iter().sum()
+            for &x in slice {
+                if x.is_na() {
+                    if na_rm {
+                        continue;
+                    } else {
+                        return unsafe { Rf_ScalarInteger(i32::na()) };
+                    }
+                } else {
+                    result = result + x as f64;
+                }
+            }
+            result
         } else {
             match super::extract_mut_from_altrep::<T>(&mut x) {
-                Ok(self_) => match self_.sum(na_rm == Rboolean_TRUE) {
+                Ok(self_) => match self_.sum(na_rm) {
                     Some(sum) => sum,
                     None => return unsafe { Rf_ScalarInteger(i32::na()) },
                 },
@@ -314,9 +341,9 @@ pub fn register_altinteger_class<T: AltInteger>(
 
         let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             let mut result = f64::INFINITY;
-            for &x in
-                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) }
-            {
+            let slice =
+                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) };
+            for &x in slice {
                 if x.is_na() {
                     if na_rm {
                         continue;
@@ -358,9 +385,9 @@ pub fn register_altinteger_class<T: AltInteger>(
 
         let result = if let Some(materialized) = get_materialized_sexp::<T>(&mut x, false) {
             let mut result = f64::NEG_INFINITY;
-            for &x in
-                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) }
-            {
+            let slice =
+                unsafe { std::slice::from_raw_parts(INTEGER(materialized) as *mut i32, len as _) };
+            for &x in slice {
                 if x.is_na() {
                     if na_rm {
                         continue;
