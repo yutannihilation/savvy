@@ -93,7 +93,9 @@ enum PrivateNumericSexp {
         orig: RealSexp,
         converted: OnceLock<Vec<i32>>,
     },
-    NA,
+    NA {
+        orig: Sexp, // almost unused, but it seems NA needs to hold this just for compatibility...
+    },
 }
 
 /// An enum to be used for `match`ing the content of `NumericSexp`.
@@ -112,7 +114,7 @@ impl NumericSexp {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => orig.0,
             PrivateNumericSexp::Real { orig, .. } => orig.0,
-            PrivateNumericSexp::NA => unsafe { savvy_ffi::R_NilValue },
+            PrivateNumericSexp::NA { orig, .. } => orig.0,
         }
     }
 
@@ -123,7 +125,7 @@ impl NumericSexp {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => &orig.0,
             PrivateNumericSexp::Real { orig, .. } => &orig.0,
-            PrivateNumericSexp::NA => unsafe { &savvy_ffi::R_NilValue },
+            PrivateNumericSexp::NA { orig, .. } => &orig.0,
         }
     }
 
@@ -166,7 +168,7 @@ impl NumericSexp {
         match self.0 {
             PrivateNumericSexp::Integer { orig, .. } => NumericTypedSexp::Integer(orig),
             PrivateNumericSexp::Real { orig, .. } => NumericTypedSexp::Real(orig),
-            PrivateNumericSexp::NA => NumericTypedSexp::NA,
+            PrivateNumericSexp::NA { .. } => NumericTypedSexp::NA,
         }
     }
 
@@ -206,7 +208,7 @@ impl NumericSexp {
 
                 Ok(v.as_slice())
             }
-            PrivateNumericSexp::NA => Ok(scalar_na_integer!()),
+            PrivateNumericSexp::NA { .. } => Ok(scalar_na_integer!()),
         }
     }
 
@@ -238,7 +240,7 @@ impl NumericSexp {
 
                 v.as_slice()
             }
-            PrivateNumericSexp::NA => scalar_na_real!(),
+            PrivateNumericSexp::NA { .. } => scalar_na_real!(),
         }
     }
 
@@ -286,7 +288,7 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
-            PrivateNumericSexp::NA => NumericIteratorI32 {
+            PrivateNumericSexp::NA { .. } => NumericIteratorI32 {
                 sexp: self,
                 raw: Some(scalar_na_integer!()),
                 i: 0,
@@ -341,7 +343,7 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
-            PrivateNumericSexp::NA => NumericIteratorF64 {
+            PrivateNumericSexp::NA { .. } => NumericIteratorF64 {
                 sexp: self,
                 raw: Some(scalar_na_real!()),
                 i: 0,
@@ -390,7 +392,7 @@ impl TryFrom<Sexp> for NumericSexp {
         if !value.is_numeric() {
             // NA and NA_character_ are not numeric, but allow them for convenience.
             if unsafe { is_na_scalar(&value) } {
-                return Ok(NumericSexp(PrivateNumericSexp::NA));
+                return Ok(NumericSexp(PrivateNumericSexp::NA { orig: value }));
             }
 
             let expected = "numeric".to_string();
@@ -533,7 +535,7 @@ impl Iterator for NumericIteratorUsize<'_> {
         let elem = match &self.sexp.0 {
             PrivateNumericSexp::Integer { orig, .. } => try_cast_i32_to_usize(orig.as_slice()[i]),
             PrivateNumericSexp::Real { orig, .. } => try_cast_f64_to_usize(orig.as_slice()[i]),
-            PrivateNumericSexp::NA => Err(savvy_err!("cannot convert NA to usize")),
+            PrivateNumericSexp::NA { .. } => Err(savvy_err!("cannot convert NA to usize")),
         };
 
         Some(elem)
