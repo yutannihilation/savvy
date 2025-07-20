@@ -47,6 +47,7 @@ SEXP savvy_init_altrep_class__ffi(DllInfo* c_arg__dll_info);
 SEXP savvy_init_foo_value__ffi(DllInfo* c_arg__dll);
 SEXP savvy_init_logger__ffi(DllInfo* c_arg__dll_info);
 SEXP savvy_is_built_with_debug__ffi(void);
+SEXP savvy_is_numeric__ffi(SEXP c_arg__x);
 SEXP savvy_list_with_names_and_values__ffi(void);
 SEXP savvy_list_with_no_names__ffi(void);
 SEXP savvy_list_with_no_values__ffi(void);

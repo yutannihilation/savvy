@@ -56,7 +56,11 @@ impl Sexp {
 
     /// Returns `true` if the SEXP is a real or integer vector.
     pub fn is_numeric(&self) -> bool {
-        unsafe { Rf_isNumeric(self.0) == Rboolean_TRUE }
+        // For some historical reason, Rf_isNumeric returns TRUE for logical.
+        // But, we want to assume logical (e.g. NA) is not numeric.
+        //
+        // cf. https://github.com/r-devel/r-svn/blob/cc4aa7f99b0107e42b368a405f77bfb1fd385299/src/include/Rinlinedfuns.h#L976-L991
+        unsafe { Rf_isNumeric(self.0) == Rboolean_TRUE && Rf_isLogical(self.0) != Rboolean_TRUE }
     }
 
     #[cfg(feature = "complex")]
