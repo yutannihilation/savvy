@@ -63,3 +63,22 @@ impl NotAvailableValue for &str {
         })
     }
 }
+
+/// Return true if the SEXP is a length-1 of vector containing NA.
+pub(crate) unsafe fn is_na_scalar(x: savvy_ffi::SEXP) -> bool {
+    if unsafe { savvy_ffi::Rf_xlength(x) } != 1 {
+        return false;
+    }
+
+    let ty = unsafe { savvy_ffi::TYPEOF(x) };
+    match ty {
+        savvy_ffi::INTSXP => unsafe { savvy_ffi::INTEGER_ELT(x, 0) }.is_na(),
+        savvy_ffi::REALSXP => unsafe { savvy_ffi::REAL_ELT(x, 0) }.is_na(),
+        #[cfg(feature = "complex")]
+        savvy_ffi::CPLXSXP => unsafe { savvy_ffi::COMPLEX_ELT(x, 0) }.is_na(),
+        savvy_ffi::LGLSXP => unsafe { savvy_ffi::LOGICAL_ELT(x, 0) }.is_na(),
+        savvy_ffi::RAWSXP => false, // raw doesn't have NA
+        savvy_ffi::STRSXP => unsafe { savvy_ffi::STRING_ELT(x, 0) == savvy_ffi::R_NaString },
+        _ => false,
+    }
+}
