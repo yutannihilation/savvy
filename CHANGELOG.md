@@ -1,6 +1,7 @@
 # Changelog
 
 <!-- next-header -->
+
 ## [Unreleased] (ReleaseDate)
 
 ### New features
@@ -14,6 +15,10 @@
 - The iterators returned by `.iter()` etc. are now properly annotated with
   lifetimes. This should not break any existing code, but please report if
   you find any issues.
+
+### Bug fixes
+
+- `Sexp::is_numeric()` now returns `false` for a logical vector, e.g. `NA` (#387).
 
 ## [v0.8.11] (2025-06-25)
 
@@ -904,8 +909,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.11...HEAD
 
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.11...HEAD
 [v0.8.11]: https://github.com/yutannihilation/savvy/compare/v0.8.10...v0.8.11
 [v0.8.10]: https://github.com/yutannihilation/savvy/compare/v0.8.9...v0.8.10
 [v0.8.9]: https://github.com/yutannihilation/savvy/compare/v0.8.8...v0.8.9
