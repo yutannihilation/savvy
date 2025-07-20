@@ -76,12 +76,14 @@ enum PrivateNumericSexp {
         orig: RealSexp,
         converted: OnceLock<Vec<i32>>,
     },
+    NA,
 }
 
 /// An enum to be used for `match`ing the content of `NumericSexp`.
 pub enum NumericTypedSexp {
     Integer(IntegerSexp),
     Real(RealSexp),
+    NA,
 }
 
 /// A struct that holds either an integer or a real vector.
@@ -93,6 +95,7 @@ impl NumericSexp {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => orig.0,
             PrivateNumericSexp::Real { orig, .. } => orig.0,
+            PrivateNumericSexp::NA => unsafe { savvy_ffi::R_NilValue },
         }
     }
 
@@ -103,6 +106,7 @@ impl NumericSexp {
         match &self.0 {
             PrivateNumericSexp::Integer { orig, .. } => &orig.0,
             PrivateNumericSexp::Real { orig, .. } => &orig.0,
+            PrivateNumericSexp::NA => unsafe { &savvy_ffi::R_NilValue },
         }
     }
 
@@ -145,6 +149,7 @@ impl NumericSexp {
         match self.0 {
             PrivateNumericSexp::Integer { orig, .. } => NumericTypedSexp::Integer(orig),
             PrivateNumericSexp::Real { orig, .. } => NumericTypedSexp::Real(orig),
+            PrivateNumericSexp::NA => NumericTypedSexp::NA,
         }
     }
 
@@ -184,6 +189,7 @@ impl NumericSexp {
 
                 Ok(v.as_slice())
             }
+            PrivateNumericSexp::NA => Ok(&[unsafe { savvy_ffi::R_NaInt }]),
         }
     }
 
@@ -215,6 +221,7 @@ impl NumericSexp {
 
                 v.as_slice()
             }
+            PrivateNumericSexp::NA => Ok(&[unsafe { savvy_ffi::R_NaReal }]),
         }
     }
 
@@ -262,6 +269,7 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
+            PrivateNumericSexp::NA => todo!(),
         }
     }
 
@@ -311,6 +319,7 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
+            PrivateNumericSexp::NA => todo!(),
         }
     }
 
@@ -329,11 +338,34 @@ impl NumericSexp {
     // cached one. So, I chose not to implement the method.
 }
 
+unsafe fn is_na_scalar(x: &Sexp) -> bool {
+    if unsafe { savvy_ffi::Rf_xlength(x.0) } != 1 {
+        return false;
+    }
+
+    let ty = unsafe { savvy_ffi::TYPEOF(x.0) };
+    match ty {
+        savvy_ffi::INTSXP => unsafe { savvy_ffi::INTEGER_ELT(x.0, 0) }.is_na(),
+        savvy_ffi::REALSXP => unsafe { savvy_ffi::REAL_ELT(x.0, 0) }.is_na(),
+        #[cfg(feature = "complex")]
+        savvy_ffi::CPLXSXP => unsafe { savvy_ffi::COMPLEX_ELT(x.0, 0) }.is_na(),
+        savvy_ffi::LGLSXP => unsafe { savvy_ffi::LOGICAL_ELT(x.0, 0) }.is_na(),
+        savvy_ffi::RAWSXP => false, // raw doesn't have NA
+        savvy_ffi::STRSXP => unsafe { savvy_ffi::STRING_ELT(x.0, 0) == savvy_ffi::R_NaString },
+        _ => false,
+    }
+}
+
 impl TryFrom<Sexp> for NumericSexp {
     type Error = crate::error::Error;
 
     fn try_from(value: Sexp) -> Result<Self, Self::Error> {
         if !value.is_numeric() {
+            // NA and NA_character_ are not numeric, but allow them for convenience.
+            if unsafe { is_na_scalar(&value) } {
+                return Ok(NumericSexp(PrivateNumericSexp::NA));
+            }
+
             let expected = "numeric".to_string();
             let actual = value.get_human_readable_type_name().to_string();
             return Err(crate::error::Error::UnexpectedType { expected, actual });
@@ -474,6 +506,7 @@ impl Iterator for NumericIteratorUsize<'_> {
         let elem = match &self.sexp.0 {
             PrivateNumericSexp::Integer { orig, .. } => try_cast_i32_to_usize(orig.as_slice()[i]),
             PrivateNumericSexp::Real { orig, .. } => try_cast_f64_to_usize(orig.as_slice()[i]),
+            PrivateNumericSexp::NA => Err(todo!()),
         };
 
         Some(elem)
@@ -486,6 +519,7 @@ impl Iterator for NumericIteratorUsize<'_> {
 pub enum NumericScalar {
     Integer(i32),
     Real(f64),
+    NA,
 }
 
 impl NumericScalar {
@@ -500,6 +534,7 @@ impl NumericScalar {
         match &self {
             NumericScalar::Integer(i) => Ok(*i),
             NumericScalar::Real(r) => try_cast_f64_to_i32(*r),
+            NumericScalar::NA => Ok(i32::na()),
         }
     }
 
@@ -510,6 +545,7 @@ impl NumericScalar {
         match &self {
             NumericScalar::Integer(i) => *i as f64,
             NumericScalar::Real(r) => *r,
+            NumericScalar::NA => f64::na(),
         }
     }
 
@@ -517,6 +553,7 @@ impl NumericScalar {
         match &self {
             NumericScalar::Integer(i) => try_cast_i32_to_usize(*i),
             NumericScalar::Real(r) => try_cast_f64_to_usize(*r),
+            NumericScalar::NA => Err(todo!()),
         }
     }
 }
