@@ -280,6 +280,11 @@ NULL
 }
 
 
+`is_numeric` <- function(`x`) {
+  .Call(savvy_is_numeric__impl, `x`)
+}
+
+
 `list_with_names_and_values` <- function() {
   .Call(savvy_list_with_names_and_values__impl)
 }

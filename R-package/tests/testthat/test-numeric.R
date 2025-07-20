@@ -24,8 +24,8 @@ test_that("NumericSexp works", {
   )
 
   # error cases
-  expect_error(times_two_numeric_i32(Inf))          # infinite
-  expect_error(times_two_numeric_i32(2147483648))   # out of i32's range
+  expect_error(times_two_numeric_i32(Inf)) # infinite
+  expect_error(times_two_numeric_i32(2147483648)) # out of i32's range
   expect_error(times_two_numeric_i32(c(1.1, -1.1))) # not integer-ish
 })
 
@@ -74,9 +74,9 @@ test_that("NumericScalar works", {
   expect_equal(times_two_numeric_i32_scalar(1), 2L)
   expect_error(times_two_numeric_i32_scalar(NA_integer_))
   expect_error(times_two_numeric_i32_scalar(NA_real_))
-  expect_error(times_two_numeric_i32_scalar(Inf))          # infinite
-  expect_error(times_two_numeric_i32_scalar(2147483648))   # out of i32's range
-  expect_error(times_two_numeric_i32_scalar(1.1))          # not integer-ish
+  expect_error(times_two_numeric_i32_scalar(Inf)) # infinite
+  expect_error(times_two_numeric_i32_scalar(2147483648)) # out of i32's range
+  expect_error(times_two_numeric_i32_scalar(1.1)) # not integer-ish
 })
 
 test_that("NumericScalar works for usize conversions", {
@@ -99,4 +99,14 @@ test_that("NumericScalar works for usize conversions", {
   expect_error(usize_to_string_scalar(-1L))
   expect_error(usize_to_string_scalar(-1.0))
   expect_error(usize_to_string_scalar(9007199254740992.0))
+})
+
+test_that("is_numeric() rejects logical (#387)", {
+  expect_true(is_numeric(0))
+  expect_true(is_numeric(NA_real_))
+  expect_true(is_numeric(0L))
+  expect_true(is_numeric(NA_integer_))
+
+  expect_false(NA)
+  expect_false(NA_character_)
 })

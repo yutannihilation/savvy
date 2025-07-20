@@ -81,3 +81,9 @@ fn print_numeric(x: NumericSexp) -> savvy::Result<()> {
     }
     Ok(())
 }
+
+// https://github.com/yutannihilation/savvy/issues/387
+#[savvy]
+fn is_numeric(x: Sexp) -> savvy::Result<Sexp> {
+    x.is_numeric().try_into()
+}
