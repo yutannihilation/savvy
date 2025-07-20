@@ -107,6 +107,6 @@ test_that("is_numeric() rejects logical (#387)", {
   expect_true(is_numeric(0L))
   expect_true(is_numeric(NA_integer_))
 
-  expect_false(NA)
-  expect_false(NA_character_)
+  expect_false(is_numeric(NA))
+  expect_false(is_numeric(NA_character_))
 })
