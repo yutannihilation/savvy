@@ -78,6 +78,9 @@ fn print_numeric(x: NumericSexp) -> savvy::Result<()> {
         NumericTypedSexp::Real(r) => {
             r_println!("Real {:?}", r.as_slice());
         }
+        NumericTypedSexp::ScalarNA => {
+            r_println!("Scalar NA");
+        }
     }
     Ok(())
 }
