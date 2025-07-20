@@ -7,6 +7,23 @@ use crate::{savvy_err, IntegerSexp, NotAvailableValue, RealSexp, Sexp};
 const I32MAX: f64 = i32::MAX as f64;
 const I32MIN: f64 = i32::MIN as f64;
 
+static SCALAR_NA_INTEGER: OnceLock<[i32; 1]> = OnceLock::new();
+static SCALAR_NA_REAL: OnceLock<[f64; 1]> = OnceLock::new();
+
+macro_rules! scalar_na_integer {
+    () => {{
+        let na = SCALAR_NA_INTEGER.get_or_init(|| [i32::na()]);
+        na.as_slice()
+    }};
+}
+
+macro_rules! scalar_na_real {
+    () => {{
+        let na = SCALAR_NA_REAL.get_or_init(|| [f64::na()]);
+        na.as_slice()
+    }};
+}
+
 // f64 can represent 2^53
 //
 // cf. https://en.wikipedia.org/wiki/Double-precision_floating-point_format,
@@ -189,7 +206,7 @@ impl NumericSexp {
 
                 Ok(v.as_slice())
             }
-            PrivateNumericSexp::NA => Ok(&[unsafe { savvy_ffi::R_NaInt }]),
+            PrivateNumericSexp::NA => Ok(scalar_na_integer!()),
         }
     }
 
@@ -221,7 +238,7 @@ impl NumericSexp {
 
                 v.as_slice()
             }
-            PrivateNumericSexp::NA => Ok(&[unsafe { savvy_ffi::R_NaReal }]),
+            PrivateNumericSexp::NA => scalar_na_real!(),
         }
     }
 
@@ -269,7 +286,12 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
-            PrivateNumericSexp::NA => todo!(),
+            PrivateNumericSexp::NA => NumericIteratorI32 {
+                sexp: self,
+                raw: Some(scalar_na_integer!()),
+                i: 0,
+                len: 1,
+            },
         }
     }
 
@@ -319,7 +341,12 @@ impl NumericSexp {
                     len: self.len(),
                 }
             }
-            PrivateNumericSexp::NA => todo!(),
+            PrivateNumericSexp::NA => NumericIteratorF64 {
+                sexp: self,
+                raw: Some(scalar_na_real!()),
+                i: 0,
+                len: 1,
+            },
         }
     }
 
@@ -506,7 +533,7 @@ impl Iterator for NumericIteratorUsize<'_> {
         let elem = match &self.sexp.0 {
             PrivateNumericSexp::Integer { orig, .. } => try_cast_i32_to_usize(orig.as_slice()[i]),
             PrivateNumericSexp::Real { orig, .. } => try_cast_f64_to_usize(orig.as_slice()[i]),
-            PrivateNumericSexp::NA => Err(todo!()),
+            PrivateNumericSexp::NA => Err(savvy_err!("cannot convert NA to usize")),
         };
 
         Some(elem)
@@ -553,7 +580,7 @@ impl NumericScalar {
         match &self {
             NumericScalar::Integer(i) => try_cast_i32_to_usize(*i),
             NumericScalar::Real(r) => try_cast_f64_to_usize(*r),
-            NumericScalar::NA => Err(todo!()),
+            NumericScalar::NA => Err(savvy_err!("cannot convert NA to usize")),
         }
     }
 }
