@@ -68,9 +68,9 @@ The good news is that R uses the sentinel values to represent `NA`, so it's
 possible to check if a value is `NA` to R in case the type is either `i32`,
 `f64` or `&str`.
 
-* `i32`: [The minimum value of `int`][na_int] is used for representing `NA`.
-* `f64`: [A special value][na_real] is used for representing `NA`.
-* `&str`: [A `CHARSXP` of string `"NA"`][na_string] is used for representing
+- `i32`: [The minimum value of `int`][na_int] is used for representing `NA`.
+- `f64`: [A special value][na_real] is used for representing `NA`.
+- `&str`: [A `CHARSXP` of string `"NA"`][na_string] is used for representing
   `NA`; this cannot be distinguished by comparing the content of the string, but
   we can compare the pointer address of the underlying C `char` array.
 
@@ -88,7 +88,7 @@ use savvy::NotAvailableValue;
 
 /// @export
 #[savvy]
-fn sum(x: RealSexp) -> savvy::Result<savvy::Sexp> {
+fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
     let mut sum: f64 = 0.0;
     for e in x.iter() {
         if !e.is_na() {
@@ -127,3 +127,40 @@ identity_logical(c(TRUE, FALSE, NA))
 The good news is that `LogicalSexp` has an expert-only method `as_slice_raw()`.
 See "Logical" section of [Integer, Real, String, Logical, And Complex](./atomic_types.md)
 for the details.
+
+### Handling a scalar `NA`
+
+You might find it a bit inconvenient that these functions that takes `RealSexp`
+and `IntegerSexp` doesn't accept `NA`; `NA` is logical.
+
+```r
+sum_real(NA)
+#> Error:
+#> ! Argument `x` must be double, not logical
+```
+
+If you want to accept such a scalar `NA`, the primary recommendation is to
+handle it in R code. But, you can also use `Sexp` as input. You can detect a
+missing value by `is_scalar_na()` and then convert it to a specific type by
+`try_into()`.
+
+```rust
+/// @export
+#[savvy]
+fn sum_v2(x: savvy::Sexp) -> savvy::Result<savvy::Sexp> {
+    if x.is_scalar_na() {
+        return 0.0.try_into();
+    }
+
+    let x_real: RealSexp = x.try_into()?;
+
+    let mut sum: f64 = 0.0;
+    for e in x_real.iter() {
+        if !e.is_na() {
+            sum += e;
+        }
+    }
+
+    ...snip...
+}
+```
