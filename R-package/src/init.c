@@ -284,6 +284,11 @@ SEXP savvy_is_numeric__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
+SEXP savvy_is_scalar_na__impl(SEXP c_arg__x) {
+    SEXP res = savvy_is_scalar_na__ffi(c_arg__x);
+    return handle_result(res);
+}
+
 SEXP savvy_list_with_names_and_values__impl(void) {
     SEXP res = savvy_list_with_names_and_values__ffi();
     return handle_result(res);
@@ -829,6 +834,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_get_var_in_env__impl", (DL_FUNC) &savvy_get_var_in_env__impl, 2},
     {"savvy_is_built_with_debug__impl", (DL_FUNC) &savvy_is_built_with_debug__impl, 0},
     {"savvy_is_numeric__impl", (DL_FUNC) &savvy_is_numeric__impl, 1},
+    {"savvy_is_scalar_na__impl", (DL_FUNC) &savvy_is_scalar_na__impl, 1},
     {"savvy_list_with_names_and_values__impl", (DL_FUNC) &savvy_list_with_names_and_values__impl, 0},
     {"savvy_list_with_no_names__impl", (DL_FUNC) &savvy_list_with_no_names__impl, 0},
     {"savvy_list_with_no_values__impl", (DL_FUNC) &savvy_list_with_no_values__impl, 0},

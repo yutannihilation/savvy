@@ -10,6 +10,7 @@ mod environment;
 mod error_handling;
 mod function;
 mod init_vectors;
+mod missing_values;
 mod multiple_defs;
 mod numeric;
 mod optional_arg;
