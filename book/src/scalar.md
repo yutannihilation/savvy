@@ -14,15 +14,15 @@ fn scalar_input_int(x: i32) -> savvy::Result<()> {
 }
 ```
 
-| R type     | Rust scalar type   |
-|:-----------|:-------------------|
-| integer    | `i32`              |
-| double     | `f64`              |
-| logical    | `bool`             |
-| raw        | `u8`               |
-| character  | `&str`             |
-| complex    | `num_complex::Complex64` |
-| integer or double   | `savvy::NumericScalar` |
+| R type            | Rust scalar type         |
+| :---------------- | :----------------------- |
+| integer           | `i32`                    |
+| double            | `f64`                    |
+| logical           | `bool`                   |
+| raw               | `u8`                     |
+| character         | `&str`                   |
+| complex           | `num_complex::Complex64` |
+| integer or double | `savvy::NumericScalar`   |
 
 ### `NumericScalar`
 
@@ -75,7 +75,7 @@ Just like a Rust vector, a Rust scalar value can be converted into `Sexp` by
 ```rust
 /// @export
 #[savvy]
-fn scalar_output_int() -> savvy::Result<savvy::Sexp> {
+fn scalar_output_int() -> savvy::Result<Sexp> {
     1.try_into()
 }
 ```
@@ -86,7 +86,7 @@ Alternatively, the same conversion is available in the form of
 ```rust
 /// @export
 #[savvy]
-fn scalar_output_int() -> savvy::Result<savvy::Sexp> {
+fn scalar_output_int() -> savvy::Result<Sexp> {
     let out = OwnedIntegerSexp::try_from_scalar(1)?;
     out.into()
 }
@@ -102,7 +102,7 @@ side.
 ```rust
 /// @export
 #[savvy]
-fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
+fn identity_logical_single(x: bool) -> savvy::Result<Sexp> {
     let mut out = OwnedLogicalSexp::new(1)?;
     out.set_elt(0, x)?;
     out.into()
@@ -111,6 +111,27 @@ fn identity_logical_single(x: bool) -> savvy::Result<savvy::Sexp> {
 
 ```r
 identity_logical_single(NA)
-#> Error in identity_logical_single(NA) : 
+#> Error in identity_logical_single(NA) :
 #>   Must be length 1 of non-missing value
+```
+
+If you want to accept `NA`, the primary recommendation is to handle it in R
+code. But, you can also use `Sexp` as input. You can detect a missing value
+by `is_scalar_na()` and then convert it to a specific type by `try_into()`.
+
+```rust
+/// @export
+#[savvy]
+fn times_two_numeric_i32_scalar_v2(x: Sexp) -> savvy::Result<Sexp> {
+    if x.is_scalar_na() {
+        return (i32::na()).try_into();
+    }
+
+    let x_num: NumericScalar = x.try_into()?;
+    let v = x_num.as_i32()?;
+
+    // Note: NA check is already done, so you don't need to check v.is_na()
+
+    (v * 2).try_into()
+}
 ```
