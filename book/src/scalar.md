@@ -128,7 +128,7 @@ fn times_two_numeric_i32_scalar_v2(x: savvy::Sexp) -> savvy::Result<savvy::Sexp>
     }
 
     let x_num: NumericScalar = x.try_into()?;
-    let v = x.as_i32()?;
+    let v = x_num.as_i32()?;
 
     // Note: NA check is already done, so you don't need to check v.is_na()
 
