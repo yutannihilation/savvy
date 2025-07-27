@@ -285,6 +285,11 @@ NULL
 }
 
 
+`is_scalar_na` <- function(`x`) {
+  .Call(savvy_is_scalar_na__impl, `x`)
+}
+
+
 `list_with_names_and_values` <- function() {
   .Call(savvy_list_with_names_and_values__impl)
 }
