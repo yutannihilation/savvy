@@ -44,6 +44,11 @@ impl Sexp {
         unsafe { self.0 == R_NilValue }
     }
 
+    /// Return true if the SEXP is a length-1 of vector containing NA.
+    pub fn is_scalar_na(&self) -> bool {
+        unsafe { na::is_scalar_na(self.0) }
+    }
+
     /// Returns `true` if the SEXP is an integer vector.
     pub fn is_integer(&self) -> bool {
         unsafe { Rf_isInteger(self.0) == Rboolean_TRUE }
