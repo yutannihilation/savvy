@@ -7,7 +7,21 @@
 ### New features
 
 - `Sexp` now has `.is_scalar_na()`, which returns `true` if the SEXP is a length-1 of
-  vector containing `NA` (#391).
+  vector containing `NA`. This is useful when you want to let your function accept
+  `NA` in addition to a typed vector (#391).
+
+  ```rs
+  #[savvy]
+  fn some_func_handling_double(x: savvy::Sexp) -> savvy::Result<savvy::Sexp> {
+      if x.is_scalar_na() {
+          // treat NA
+      }
+
+      let x_real: RealSexp = x.try_into()?;
+
+      ...
+  }
+  ```
 
 ## [v0.8.12] (2025-07-20)
 
