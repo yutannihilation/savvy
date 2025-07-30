@@ -25,13 +25,15 @@ $(STATLIB):
 	  export CC="$(CC)" && \
 	  export CFLAGS="$(CFLAGS)" && \
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
-	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
-	    cargo build $(CARGO_BUILD_ARGS); \
-	  else \
+	  if [ "$(TARGET)" == "wasm32-unknown-emscripten" ]; then \
 	    export CARGO_PROFILE_DEV_PANIC="abort" && \
 	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
 	    export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
 	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET) -Zbuild-std=panic_abort,std; \
+	  elif [ -n "$(TARGET)" ]; then \
+	    cargo build $(CARGO_BUILD_ARGS) --target $(TARGET); \
+	  else \
+	    cargo build $(CARGO_BUILD_ARGS); \
 	  fi
 
 clean_intermediate: $(SHLIB)

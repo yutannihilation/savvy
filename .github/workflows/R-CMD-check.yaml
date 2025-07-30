@@ -70,6 +70,7 @@ jobs:
           cargo r-test ./R-package/src/rust/
         env:
           SAVVY_PROFILE: dev
+          SAVVY_TARGET: ${{ matrix.config.rust_target }}
 
       - name: Tweak
         run: |
