@@ -26,5 +26,7 @@ env_logger = { version = "0.11", default-features = false }
 # crate and there's little you can do. In such cases, you can change the
 # following line to `panic = "unwind"` to always catch a panic.
 panic = "abort"
+lto = true
+codegen-units = 1
 
 [workspace]
