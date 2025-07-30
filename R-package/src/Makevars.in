@@ -30,7 +30,8 @@ $(STATLIB):
 	  else \
 	    export CARGO_PROFILE_DEV_PANIC="abort" && \
 	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
-	    cargo build $(CARGO_BUILD_ARGS) --target $(TARGET); \
+	    export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
+	    cargo +nightly build $(CARGO_BUILD_ARGS) --target $(TARGET); \
 	  fi
 
 clean_intermediate: $(SHLIB)
