@@ -32,7 +32,7 @@ if [ "$(uname)" = "Emscripten" ]; then
   TARGET="wasm32-unknown-emscripten"
 # if target is specified via envvar, use it.
 elif [ -n "${SAVVY_TARGET}" ]; then
-  TARGET="${TARGET}"
+  TARGET="${SAVVY_TARGET}"
 fi
 
 # allow overriding profile externally (e.g. on CI)
