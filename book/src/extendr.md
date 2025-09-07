@@ -16,7 +16,6 @@ not to be a complete alternative to extendr.
 Pros:
 
 * You can use `Result` for error handling instead of `panic!`
-* You can compile your package for webR (I hope extendr gets webR-ready soon)
 
 Cos:
 
