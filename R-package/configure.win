@@ -1,5 +1,32 @@
 CARGO_VERSION="$(cargo --version)"
 
+cat - <<EOF > ./src/rust/Cargo.toml
+[package]
+name = "simple-savvy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+savvy = { path = "../savvy", features = ["complex", "altrep", "logger"] }
+savvy-ffi = { path = "../savvy/savvy-ffi" }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Hiroaki Yutani"]
+license = "MIT"
+repository = "https://github.com/yutannihilation/savvy/"
+EOF
+
+mkdir ./src/savvy
+mv ../src/ ../Cargo.toml ../build.rs ./src/savvy/
+mv ../savvy-macro/ ./src/savvy/
+mv ../savvy-bindgen/ ./src/savvy/
+mv ../savvy-ffi/ ./src/savvy/
+
 if [ $? -ne 0 ]; then
   echo "-------------- ERROR: CONFIGURATION FAILED --------------------"
   echo ""
