@@ -1,5 +1,17 @@
 CARGO_VERSION="$(cargo --version)"
 
+echo printenv
+printenv
+
+echo pwd
+pwd
+
+echo ls .
+ls .
+
+echo ls ..
+ls ..
+
 cat - <<EOF > ./src/rust/Cargo.toml
 [package]
 name = "simple-savvy"
