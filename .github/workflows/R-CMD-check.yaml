@@ -24,6 +24,7 @@ jobs:
         config:
           # prettier-ignore
           - { os: "macos-latest",     r: "release", rust: "stable" }
+          - { os: "macos-15-intel",   r: "release", rust: "stable" }
           - { os: "windows-latest",   r: "release", rust: "stable" }
           - { os: "ubuntu-latest",    r: "release", rust: "stable" }
           - { os: "ubuntu-latest",    r: "devel",   rust: "stable", http-user-agent: "release" }
