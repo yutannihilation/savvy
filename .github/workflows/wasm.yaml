@@ -17,36 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Tweak
-        run: |
-          cat - <<EOF > ./R-package/src/rust/Cargo.toml
-          [package]
-          name = "simple-savvy"
-          version = "0.1.0"
-          edition = "2021"
-
-          [lib]
-          crate-type = ["staticlib"]
-
-          [dependencies]
-          savvy = { path = "../savvy", features = ["complex", "altrep", "logger"] }
-          savvy-ffi = { path = "../savvy/savvy-ffi" }
-
-          [workspace.package]
-          version = "0.1.0"
-          edition = "2021"
-          authors = ["Hiroaki Yutani"]
-          license = "MIT"
-          repository = "https://github.com/yutannihilation/savvy/"
-          EOF
-
-          mkdir ./R-package/src/savvy
-          mv src/ Cargo.toml build.rs ./R-package/src/savvy/
-          mv savvy-macro/ ./R-package/src/savvy/
-          mv savvy-bindgen/ ./R-package/src/savvy/
-          mv savvy-ffi/ ./R-package/src/savvy/
-        shell: bash
-
       - name: Build wasm packages
         uses: r-wasm/actions/build-rwasm@main
         with:
