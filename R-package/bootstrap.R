@@ -1,5 +1,3 @@
-dep_dir <- "dep_crates"
-
 # Tweak Cargo.toml
 cargo_toml <- "src/rust/Cargo.toml"
 lines <- readLines(cargo_toml)
