@@ -4,11 +4,11 @@ dep_dir <- "dep_crates"
 cargo_toml <- "src/rust/Cargo.toml"
 lines <- readLines(cargo_toml)
 writeLines(
-  gsub("../../../", paste0("../", dep_dir, "/"), lines, fixed = TRUE),
+  gsub("../../../", "../dep_crates/", lines, fixed = TRUE),
   cargo_toml
 )
 
-dir.create(dep_dir)
+dir.create("src/dep_crates/")
 file.copy(
   c(
     "src",
@@ -18,6 +18,6 @@ file.copy(
     "savvy-bindgen",
     "savvy-ffi"
   ),
-  dep_dir,
+  "src/dep_crates/",
   recursive = TRUE
 )
