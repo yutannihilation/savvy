@@ -10,3 +10,5 @@
 
 ^src/Makevars$
 ^src/Makevars\.win$
+
+^bootstrap\.R$
