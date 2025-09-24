@@ -11,12 +11,12 @@ writeLines(
 dir.create("src/dep_crates/")
 file.copy(
   c(
-    "src",
-    "Cargo.toml",
-    "build.rs",
-    "savvy-macro",
-    "savvy-bindgen",
-    "savvy-ffi"
+    "../src",
+    "../Cargo.toml",
+    "../build.rs",
+    "../savvy-macro",
+    "../savvy-bindgen",
+    "../savvy-ffi"
   ),
   "src/dep_crates/",
   recursive = TRUE
