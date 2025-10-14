@@ -42,6 +42,9 @@ enum Commands {
     Update {
         /// Path to the root of an R package
         r_pkg_dir: PathBuf,
+
+        /// Path to the root of Rust sources
+        rust_dir: Option<PathBuf>,
     },
 
     /// Init savvy-powered Rust crate in an R package
@@ -136,11 +139,6 @@ Please consider renaming it to "{package_name_new}".
 
 const PATH_DESCRIPTION: &str = "DESCRIPTION";
 const PATH_NAMESPACE: &str = "NAMESPACE";
-const PATH_SRC_DIR: &str = "src/rust/src";
-const PATH_DOT_CARGO_DIR: &str = "src/rust/.cargo";
-const PATH_CARGO_TOML: &str = "src/rust/Cargo.toml";
-const PATH_CONFIG_TOML: &str = "src/rust/.cargo/config.toml";
-const PATH_LIB_RS: &str = "src/rust/src/lib.rs";
 const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
 const PATH_CONFIGURE: &str = "configure";
 const PATH_CLEANUP: &str = "cleanup";
@@ -148,9 +146,16 @@ const PATH_MAKEVARS_WIN_IN: &str = "src/Makevars.win.in";
 const PATH_CONFIGURE_WIN: &str = "configure.win";
 const PATH_CLEANUP_WIN: &str = "cleanup.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
-const PATH_C_HEADER: &str = "src/rust/api.h";
 const PATH_C_IMPL: &str = "src/init.c";
 const PATH_R_BUILDIGNORE: &str = ".Rbuildignore";
+
+const PATH_DEFAULT_RUST_DIR: &str = "src/rust";
+const PATH_SRC_DIR: &str = "src";
+const PATH_DOT_CARGO_DIR: &str = ".cargo";
+const PATH_CARGO_TOML: &str = "Cargo.toml";
+const PATH_CONFIG_TOML: &str = ".cargo/config.toml";
+const PATH_LIB_RS: &str = "src/lib.rs";
+const PATH_C_HEADER: &str = "api.h";
 
 // In order to let users override the functions provided by the savvy framework
 // (e.g. print() method for enum), this wrapper file needs to be loaded first,
@@ -316,10 +321,14 @@ fn remove_old_wrapper_r(path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-fn update(path: &Path) {
+fn update(path: &Path, rust_dir: &Option<PathBuf>) {
     let pkg_metadata = get_pkg_metadata(path);
-    let lib_rs = path.join(PATH_SRC_DIR).join("lib.rs");
-    let manifest = Manifest::new(&path.join(PATH_CARGO_TOML), &[]);
+    let rust_dir = match rust_dir {
+        Some(rust_dir) => rust_dir.to_path_buf(),
+        None => path.join(PATH_DEFAULT_RUST_DIR),
+    };
+    let lib_rs = rust_dir.join(PATH_SRC_DIR).join("lib.rs");
+    let manifest = Manifest::new(&rust_dir.join(PATH_CARGO_TOML), &[]);
 
     let parsed = parse_crate(&lib_rs, &manifest.crate_name);
 
@@ -336,7 +345,10 @@ fn update(path: &Path) {
         }
     };
 
-    write_file(&path.join(PATH_C_HEADER), &generate_c_header_file(&merged));
+    write_file(
+        &rust_dir.join(PATH_C_HEADER),
+        &generate_c_header_file(&merged),
+    );
     write_file(
         &path.join(PATH_C_IMPL),
         &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
@@ -360,19 +372,22 @@ fn init(path: &Path, skip_update: bool) {
         return;
     }
 
-    std::fs::create_dir_all(path.join(PATH_SRC_DIR)).expect("Failed to create src dir");
-    std::fs::create_dir_all(path.join(PATH_DOT_CARGO_DIR)).expect("Failed to create .cargo dir");
+    let rust_dir = path.join(PATH_DEFAULT_RUST_DIR);
+
+    std::fs::create_dir_all(rust_dir.join(PATH_SRC_DIR)).expect("Failed to create src dir");
+    std::fs::create_dir_all(rust_dir.join(PATH_DOT_CARGO_DIR))
+        .expect("Failed to create .cargo dir");
 
     write_file(
-        &path.join(PATH_CARGO_TOML),
+        &rust_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
             &pkg_metadata.package_name_for_rust(),
             r#"[dependencies]
 savvy = "*""#,
         ),
     );
-    write_file(&path.join(PATH_CONFIG_TOML), &generate_config_toml());
-    write_file(&path.join(PATH_LIB_RS), &generate_example_lib_rs());
+    write_file(&rust_dir.join(PATH_CONFIG_TOML), &generate_config_toml());
+    write_file(&rust_dir.join(PATH_LIB_RS), &generate_example_lib_rs());
 
     write_file(
         &path.join(PATH_MAKEVARS_IN),
@@ -426,7 +441,7 @@ Please make sure \"Cargo (Rust's package manager), rustc\" is included.
     }
 
     if !skip_update {
-        update(path);
+        update(path, &None);
     }
 }
 
@@ -513,7 +528,7 @@ async fn run_test(
     write_file(&tmp_r_pkg_dir.join(PATH_LIB_RS), &tests);
 
     // Generate wrapper files
-    update(tmp_r_pkg_dir);
+    update(tmp_r_pkg_dir, &None);
 
     let wrapper_r = tmp_r_pkg_dir.join(PATH_R_IMPL);
     tweak_wrapper_r(&wrapper_r);
@@ -580,7 +595,10 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Update { r_pkg_dir } => update(&r_pkg_dir),
+        Commands::Update {
+            r_pkg_dir,
+            rust_dir,
+        } => update(&r_pkg_dir, &rust_dir),
         Commands::Init { r_pkg_dir } => init(&r_pkg_dir, false),
         Commands::Test {
             crate_dir,
