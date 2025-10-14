@@ -1,8 +1,12 @@
 # Changelog
 
 <!-- next-header -->
+
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+- `savvy-cli` got a new optional argument to specify the path to the Rust code dir (#402).
 
 ## [v0.8.13] (2025-07-28)
 
@@ -932,8 +936,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.13...HEAD
 
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.13...HEAD
 [v0.8.13]: https://github.com/yutannihilation/savvy/compare/v0.8.12...v0.8.13
 [v0.8.12]: https://github.com/yutannihilation/savvy/compare/v0.8.11...v0.8.12
 [v0.8.11]: https://github.com/yutannihilation/savvy/compare/v0.8.10...v0.8.11
