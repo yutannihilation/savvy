@@ -1,6 +1,8 @@
 use proc_macro2::Span;
 use quote::format_ident;
-use syn::{ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt};
+use syn::{
+    ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt,
+};
 
 use crate::utils::extract_docs;
 
@@ -104,8 +106,8 @@ impl SavvyInputType {
                     }),
 
                     // Read-only types
-                    "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp"
-                    | "LogicalSexp" | "RawSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
+                    "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp" | "LogicalSexp"
+                    | "RawSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
                     | "EnvironmentSexp" => Ok(Self {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
@@ -239,7 +241,10 @@ impl SavvyFnArg {
 
 impl PartialEq for SavvyFnArg {
     fn eq(&self, other: &Self) -> bool {
-        self.pat == other.pat && self.ty.category == other.ty.category && self.ty.ty_str == other.ty.ty_str && self.ty.optional == other.ty.optional
+        self.pat == other.pat
+            && self.ty.category == other.ty.category
+            && self.ty.ty_str == other.ty.ty_str
+            && self.ty.optional == other.ty.optional
     }
 }
 

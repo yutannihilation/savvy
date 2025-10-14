@@ -150,12 +150,40 @@ const PATH_C_IMPL: &str = "src/init.c";
 const PATH_R_BUILDIGNORE: &str = ".Rbuildignore";
 
 const PATH_DEFAULT_RUST_DIR: &str = "src/rust";
-const PATH_SRC_DIR: &str = "src";
-const PATH_DOT_CARGO_DIR: &str = ".cargo";
-const PATH_CARGO_TOML: &str = "Cargo.toml";
-const PATH_CONFIG_TOML: &str = ".cargo/config.toml";
-const PATH_LIB_RS: &str = "src/lib.rs";
-const PATH_C_HEADER: &str = "api.h";
+
+struct RustDirPaths {
+    rust_dir: PathBuf,
+}
+
+impl RustDirPaths {
+    fn new(rust_dir: PathBuf) -> Self {
+        Self { rust_dir }
+    }
+
+    fn src_dir(&self) -> PathBuf {
+        self.rust_dir.join("src")
+    }
+
+    fn dot_cargo_dir(&self) -> PathBuf {
+        self.rust_dir.join(".cargo")
+    }
+
+    fn cargo_toml(&self) -> PathBuf {
+        self.rust_dir.join("Cargo.toml")
+    }
+
+    fn config_toml(&self) -> PathBuf {
+        self.rust_dir.join(".cargo/config.toml")
+    }
+
+    fn lib_rs(&self) -> PathBuf {
+        self.rust_dir.join("src/lib.rs")
+    }
+
+    fn c_header(&self) -> PathBuf {
+        self.rust_dir.join("api.h")
+    }
+}
 
 // In order to let users override the functions provided by the savvy framework
 // (e.g. print() method for enum), this wrapper file needs to be loaded first,
@@ -323,14 +351,13 @@ fn remove_old_wrapper_r(path: &Path) -> std::io::Result<()> {
 
 fn update(path: &Path, rust_dir: &Option<PathBuf>) {
     let pkg_metadata = get_pkg_metadata(path);
-    let rust_dir = match rust_dir {
+    let rust_paths = RustDirPaths::new(match rust_dir {
         Some(rust_dir) => rust_dir.to_path_buf(),
         None => path.join(PATH_DEFAULT_RUST_DIR),
-    };
-    let lib_rs = rust_dir.join(PATH_SRC_DIR).join("lib.rs");
-    let manifest = Manifest::new(&rust_dir.join(PATH_CARGO_TOML), &[]);
+    });
+    let manifest = Manifest::new(&rust_paths.cargo_toml(), &[]);
 
-    let parsed = parse_crate(&lib_rs, &manifest.crate_name);
+    let parsed = parse_crate(&rust_paths.lib_rs(), &manifest.crate_name);
 
     let merged = match merge_parsed_results(parsed) {
         Ok(merged) => merged,
@@ -345,10 +372,7 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
         }
     };
 
-    write_file(
-        &rust_dir.join(PATH_C_HEADER),
-        &generate_c_header_file(&merged),
-    );
+    write_file(&rust_paths.c_header(), &generate_c_header_file(&merged));
     write_file(
         &path.join(PATH_C_IMPL),
         &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
@@ -372,22 +396,21 @@ fn init(path: &Path, skip_update: bool) {
         return;
     }
 
-    let rust_dir = path.join(PATH_DEFAULT_RUST_DIR);
+    let rust_paths = RustDirPaths::new(path.join(PATH_DEFAULT_RUST_DIR));
 
-    std::fs::create_dir_all(rust_dir.join(PATH_SRC_DIR)).expect("Failed to create src dir");
-    std::fs::create_dir_all(rust_dir.join(PATH_DOT_CARGO_DIR))
-        .expect("Failed to create .cargo dir");
+    std::fs::create_dir_all(rust_paths.src_dir()).expect("Failed to create src dir");
+    std::fs::create_dir_all(rust_paths.dot_cargo_dir()).expect("Failed to create .cargo dir");
 
     write_file(
-        &rust_dir.join(PATH_CARGO_TOML),
+        &rust_paths.cargo_toml(),
         &generate_cargo_toml(
             &pkg_metadata.package_name_for_rust(),
             r#"[dependencies]
 savvy = "*""#,
         ),
     );
-    write_file(&rust_dir.join(PATH_CONFIG_TOML), &generate_config_toml());
-    write_file(&rust_dir.join(PATH_LIB_RS), &generate_example_lib_rs());
+    write_file(&rust_paths.config_toml(), &generate_config_toml());
+    write_file(&rust_paths.lib_rs(), &generate_example_lib_rs());
 
     write_file(
         &path.join(PATH_MAKEVARS_IN),
@@ -513,9 +536,10 @@ async fn run_test(
     let rust_pkg_name = pkg.package_name_for_rust();
     let r_pkg_name = pkg.package_name_for_r();
     let rust_dir = tmp_r_pkg_dir.join(PATH_DEFAULT_RUST_DIR);
+    let rust_paths = RustDirPaths::new(rust_dir.clone());
 
     write_file(
-        &rust_dir.join(PATH_CARGO_TOML),
+        &rust_paths.cargo_toml(),
         &generate_cargo_toml(
             &rust_pkg_name,
             // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
@@ -524,9 +548,9 @@ async fn run_test(
     );
     // Since this can be within the workspace of a Rust package, clarify this is
     // not the part of it, otherwise the compilation will fail.
-    append_file(&rust_dir.join(PATH_CARGO_TOML), "[workspace]\n");
+    append_file(&rust_paths.cargo_toml(), "[workspace]\n");
 
-    write_file(&rust_dir.join(PATH_LIB_RS), &tests);
+    write_file(&rust_paths.lib_rs(), &tests);
 
     // Generate wrapper files
     update(tmp_r_pkg_dir, &Some(rust_dir));
