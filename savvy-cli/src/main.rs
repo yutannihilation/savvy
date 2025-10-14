@@ -512,9 +512,10 @@ async fn run_test(
     let pkg = get_pkg_metadata(tmp_r_pkg_dir);
     let rust_pkg_name = pkg.package_name_for_rust();
     let r_pkg_name = pkg.package_name_for_r();
+    let rust_dir = tmp_r_pkg_dir.join(PATH_DEFAULT_RUST_DIR);
 
     write_file(
-        &tmp_r_pkg_dir.join(PATH_CARGO_TOML),
+        &rust_dir.join(PATH_CARGO_TOML),
         &generate_cargo_toml(
             &rust_pkg_name,
             // Cargo.toml is located at <crate dir>/.savvy/temporary-R-package-for-tests/src/rust/Cargo.toml
@@ -523,12 +524,12 @@ async fn run_test(
     );
     // Since this can be within the workspace of a Rust package, clarify this is
     // not the part of it, otherwise the compilation will fail.
-    append_file(&tmp_r_pkg_dir.join(PATH_CARGO_TOML), "[workspace]\n");
+    append_file(&rust_dir.join(PATH_CARGO_TOML), "[workspace]\n");
 
-    write_file(&tmp_r_pkg_dir.join(PATH_LIB_RS), &tests);
+    write_file(&rust_dir.join(PATH_LIB_RS), &tests);
 
     // Generate wrapper files
-    update(tmp_r_pkg_dir, &None);
+    update(tmp_r_pkg_dir, &Some(rust_dir));
 
     let wrapper_r = tmp_r_pkg_dir.join(PATH_R_IMPL);
     tweak_wrapper_r(&wrapper_r);
