@@ -381,7 +381,7 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
         let default_rust_paths = RustDirPaths::new(default_rust_dir.clone());
 
         if !default_rust_dir.exists() {
-            std::fs::create_dir(default_rust_dir).expect("Failed to create default Rust directory");
+            std::fs::create_dir_all(default_rust_dir).expect("Failed to create default Rust directory");
         }
 
         std::fs::copy(&rust_paths.c_header(), &default_rust_paths.c_header())
