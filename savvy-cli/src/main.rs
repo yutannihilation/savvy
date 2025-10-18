@@ -373,6 +373,21 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
     };
 
     write_file(&rust_paths.c_header(), &generate_c_header_file(&merged));
+    // Note: for convenience, copy api.h to the R package directory. Otherwise,
+    // we need to tweak the path in init.c. Probably, this is easier than
+    // struggling with the path problems...
+    if rust_dir.is_some() {
+        let default_rust_dir = path.join(PATH_DEFAULT_RUST_DIR);
+        let default_rust_paths = RustDirPaths::new(default_rust_dir.clone());
+
+        if !default_rust_dir.exists() {
+            std::fs::create_dir(default_rust_dir).expect("Failed to create default Rust directory");
+        }
+
+        std::fs::copy(&rust_paths.c_header(), &default_rust_paths.c_header())
+            .expect("Failed to copy C header file");
+    }
+
     write_file(
         &path.join(PATH_C_IMPL),
         &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
