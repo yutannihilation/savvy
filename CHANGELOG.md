@@ -1,8 +1,10 @@
 # Changelog
 
 <!-- next-header -->
-
 ## [Unreleased] (ReleaseDate)
+
+
+## [v0.8.14] (2025-10-25)
 
 ### New features
 
@@ -936,8 +938,9 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.14...HEAD
 
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.13...HEAD
+[v0.8.14]: https://github.com/yutannihilation/savvy/compare/v0.8.13...v0.8.14
 [v0.8.13]: https://github.com/yutannihilation/savvy/compare/v0.8.12...v0.8.13
 [v0.8.12]: https://github.com/yutannihilation/savvy/compare/v0.8.11...v0.8.12
 [v0.8.11]: https://github.com/yutannihilation/savvy/compare/v0.8.10...v0.8.11
