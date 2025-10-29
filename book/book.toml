@@ -1,7 +1,6 @@
 [book]
 authors = ["Hiroaki Yutani"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Savvy - A simple R extension interface using Rust"
 
