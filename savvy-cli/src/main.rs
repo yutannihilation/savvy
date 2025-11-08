@@ -351,6 +351,7 @@ fn remove_old_wrapper_r(path: &Path) -> std::io::Result<()> {
 
 fn update(path: &Path, rust_dir: &Option<PathBuf>) {
     let pkg_metadata = get_pkg_metadata(path);
+    let pkg_name = &pkg_metadata.package_name_for_r();
     let rust_paths = RustDirPaths::new(match rust_dir {
         Some(rust_dir) => rust_dir.to_path_buf(),
         None => path.join(PATH_DEFAULT_RUST_DIR),
@@ -393,7 +394,7 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
 
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(&merged, &pkg_metadata.package_name_for_r()),
+        &generate_c_impl_file(&merged, &pkg_name),
     );
 
     // TODO: remove this tweak
@@ -401,7 +402,7 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
 
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(&merged, &pkg_metadata.package_name_for_r()),
+        &generate_r_impl_file(&merged, &pkg_name),
     );
     tweak_r_buildignore(path);
 }

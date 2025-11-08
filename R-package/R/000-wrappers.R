@@ -124,7 +124,7 @@ NULL
 
 
 `default_value_enum` <- function(`x` = NULL) {
-  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::FooEnum")
   .Call(savvy_default_value_enum__impl, `x`)
 }
 
@@ -135,7 +135,7 @@ NULL
 
 
 `default_value_struct` <- function(`x` = NULL) {
-  `x` <- .savvy_extract_ptr(`x`, "FooWithDefault")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::FooWithDefault")
   .Call(savvy_default_value_struct__impl, `x`)
 }
 
@@ -260,7 +260,7 @@ NULL
 
 
 `get_name_external` <- function(`x`) {
-  `x` <- .savvy_extract_ptr(`x`, "Person")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::Person")
   .Call(savvy_get_name_external__impl, `x`)
 }
 
@@ -331,8 +331,8 @@ NULL
 
 
 `new_value_pair` <- function(`a`, `b`) {
-  `a` <- .savvy_extract_ptr(`a`, "Value")
-  `b` <- .savvy_extract_ptr(`b`, "Value")
+  `a` <- .savvy_extract_ptr(`a`, "savvyExamples::Value")
+  `b` <- .savvy_extract_ptr(`b`, "savvyExamples::Value")
   .savvy_wrap_ValuePair(.Call(savvy_new_value_pair__impl, `a`, `b`))
 }
 
@@ -383,13 +383,13 @@ NULL
 
 
 `print_foo_enum` <- function(`x`) {
-  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::FooEnum")
   invisible(.Call(savvy_print_foo_enum__impl, `x`))
 }
 
 
 `print_foo_enum_ref` <- function(`x`) {
-  `x` <- .savvy_extract_ptr(`x`, "FooEnum")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::FooEnum")
   invisible(.Call(savvy_print_foo_enum_ref__impl, `x`))
 }
 
@@ -568,7 +568,7 @@ NULL
 
 
 `set_name_external` <- function(`x`, `name`) {
-  `x` <- .savvy_extract_ptr(`x`, "Person")
+  `x` <- .savvy_extract_ptr(`x`, "savvyExamples::Person")
   invisible(.Call(savvy_set_name_external__impl, `x`, `name`))
 }
 
@@ -712,7 +712,7 @@ NULL
   e$.ptr <- ptr
 
 
-  class(e) <- c("Enum", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Enum", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -722,7 +722,7 @@ NULL
 `Enum`$`enum` <- .savvy_wrap_Enum(0L)
 
 #' @export
-`$.Enum__bundle` <- function(x, name) {
+`$.savvyExamples::Enum__bundle` <- function(x, name) {
   if (!name %in% c("enum")) {
     stop(paste0("Unknown variant: ", name), call. = FALSE)
   }
@@ -731,7 +731,7 @@ NULL
 }
 
 #' @export
-`[[.Enum__bundle` <- function(x, i) {
+`[[.savvyExamples::Enum__bundle` <- function(x, i) {
   if (is.numeric(i)) {
     stop("Enum cannot be subset by index", call. = FALSE)
   }
@@ -744,7 +744,7 @@ NULL
 }
 
 #' @export
-`print.Enum` <- function(x, ...) {
+`print.savvyExamples::Enum` <- function(x, ...) {
   idx <- x$.ptr + 1L
   label <- c("enum")[idx]
   if (is.na(label)) {
@@ -758,11 +758,11 @@ NULL
 
 
 
-class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
+class(`Enum`) <- c("savvyExamples::Enum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.Enum__bundle` <- function(x, ...) {
-  cat('Enum\n')
+`print.savvyExamples::Enum__bundle` <- function(x, ...) {
+  cat('savvyExamples::Enum\n')
 }
 
 ### wrapper functions for FooEnum
@@ -778,7 +778,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`print` <- `FooEnum_print`(ptr)
 
-  class(e) <- c("FooEnum", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::FooEnum", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -791,7 +791,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 `FooEnum`$`B` <- .savvy_wrap_FooEnum(1L)
 
 #' @export
-`$.FooEnum__bundle` <- function(x, name) {
+`$.savvyExamples::FooEnum__bundle` <- function(x, name) {
   if (!name %in% c("A", "B")) {
     stop(paste0("Unknown variant: ", name), call. = FALSE)
   }
@@ -800,7 +800,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 }
 
 #' @export
-`[[.FooEnum__bundle` <- function(x, i) {
+`[[.savvyExamples::FooEnum__bundle` <- function(x, i) {
   if (is.numeric(i)) {
     stop("FooEnum cannot be subset by index", call. = FALSE)
   }
@@ -813,7 +813,7 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 }
 
 #' @export
-`print.FooEnum` <- function(x, ...) {
+`print.savvyExamples::FooEnum` <- function(x, ...) {
   idx <- x$.ptr + 1L
   label <- c("A", "B")[idx]
   if (is.na(label)) {
@@ -827,11 +827,11 @@ class(`Enum`) <- c("Enum__bundle", "savvy_savvyExamples__sealed")
 
 
 
-class(`FooEnum`) <- c("FooEnum__bundle", "savvy_savvyExamples__sealed")
+class(`FooEnum`) <- c("savvyExamples::FooEnum__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.FooEnum__bundle` <- function(x, ...) {
-  cat('FooEnum\n')
+`print.savvyExamples::FooEnum__bundle` <- function(x, ...) {
+  cat('savvyExamples::FooEnum\n')
 }
 
 ### wrapper functions for FooWithDefault
@@ -847,7 +847,7 @@ class(`FooEnum`) <- c("FooEnum__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`default_value_method` <- `FooWithDefault_default_value_method`(ptr)
 
-  class(e) <- c("FooWithDefault", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::FooWithDefault", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -866,11 +866,11 @@ class(`FooEnum`) <- c("FooEnum__bundle", "savvy_savvyExamples__sealed")
 }
 
 
-class(`FooWithDefault`) <- c("FooWithDefault__bundle", "savvy_savvyExamples__sealed")
+class(`FooWithDefault`) <- c("savvyExamples::FooWithDefault__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.FooWithDefault__bundle` <- function(x, ...) {
-  cat('FooWithDefault\n')
+`print.savvyExamples::FooWithDefault__bundle` <- function(x, ...) {
+  cat('savvyExamples::FooWithDefault\n')
 }
 
 ### wrapper functions for Person
@@ -900,7 +900,7 @@ class(`FooWithDefault`) <- c("FooWithDefault__bundle", "savvy_savvyExamples__sea
   e$`name` <- `Person_name`(ptr)
   e$`set_name` <- `Person_set_name`(ptr)
 
-  class(e) <- c("Person", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Person", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -933,11 +933,11 @@ class(`FooWithDefault`) <- c("FooWithDefault__bundle", "savvy_savvyExamples__sea
 }
 
 
-class(`Person`) <- c("Person__bundle", "savvy_savvyExamples__sealed")
+class(`Person`) <- c("savvyExamples::Person__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.Person__bundle` <- function(x, ...) {
-  cat('Person\n')
+`print.savvyExamples::Person__bundle` <- function(x, ...) {
+  cat('savvyExamples::Person\n')
 }
 
 ### wrapper functions for Person2
@@ -953,7 +953,7 @@ class(`Person`) <- c("Person__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`name` <- `Person2_name`(ptr)
 
-  class(e) <- c("Person2", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Person2", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -965,11 +965,11 @@ class(`Person`) <- c("Person__bundle", "savvy_savvyExamples__sealed")
 
 
 
-class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
+class(`Person2`) <- c("savvyExamples::Person2__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.Person2__bundle` <- function(x, ...) {
-  cat('Person2\n')
+`print.savvyExamples::Person2__bundle` <- function(x, ...) {
+  cat('savvyExamples::Person2\n')
 }
 
 ### wrapper functions for StructWithConfig
@@ -985,7 +985,7 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`new_method` <- `StructWithConfig_new_method`(ptr)
 
-  class(e) <- c("StructWithConfig", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::StructWithConfig", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1000,11 +1000,11 @@ class(`Person2`) <- c("Person2__bundle", "savvy_savvyExamples__sealed")
 }
 
 
-class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples__sealed")
+class(`StructWithConfig`) <- c("savvyExamples::StructWithConfig__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.StructWithConfig__bundle` <- function(x, ...) {
-  cat('StructWithConfig\n')
+`print.savvyExamples::StructWithConfig__bundle` <- function(x, ...) {
+  cat('savvyExamples::StructWithConfig\n')
 }
 
 ### wrapper functions for Value
@@ -1023,7 +1023,7 @@ class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples_
 
 `Value_pair` <- function(self) {
   function(`b`) {
-    `b` <- .savvy_extract_ptr(`b`, "Value")
+    `b` <- .savvy_extract_ptr(`b`, "savvyExamples::Value")
     .savvy_wrap_ValuePair(.Call(savvy_Value_pair__impl, `self`, `b`))
   }
 }
@@ -1035,7 +1035,7 @@ class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples_
   e$`get2` <- `Value_get2`(ptr)
   e$`pair` <- `Value_pair`(ptr)
 
-  class(e) <- c("Value", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Value", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1050,11 +1050,11 @@ class(`StructWithConfig`) <- c("StructWithConfig__bundle", "savvy_savvyExamples_
 }
 
 
-class(`Value`) <- c("Value__bundle", "savvy_savvyExamples__sealed")
+class(`Value`) <- c("savvyExamples::Value__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.Value__bundle` <- function(x, ...) {
-  cat('Value\n')
+`print.savvyExamples::Value__bundle` <- function(x, ...) {
+  cat('savvyExamples::Value\n')
 }
 
 ### wrapper functions for ValuePair
@@ -1070,7 +1070,7 @@ class(`Value`) <- c("Value__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`print` <- `ValuePair_print`(ptr)
 
-  class(e) <- c("ValuePair", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::ValuePair", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1081,23 +1081,23 @@ class(`Value`) <- c("Value__bundle", "savvy_savvyExamples__sealed")
 ### associated functions for ValuePair
 
 `ValuePair`$`new` <- function(`a`, `b`) {
-  `a` <- .savvy_extract_ptr(`a`, "Value")
-  `b` <- .savvy_extract_ptr(`b`, "Value")
+  `a` <- .savvy_extract_ptr(`a`, "savvyExamples::Value")
+  `b` <- .savvy_extract_ptr(`b`, "savvyExamples::Value")
   .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new__impl, `a`, `b`))
 }
 
 `ValuePair`$`new_copy` <- function(`a`, `b`) {
-  `a` <- .savvy_extract_ptr(`a`, "Value")
-  `b` <- .savvy_extract_ptr(`b`, "Value")
+  `a` <- .savvy_extract_ptr(`a`, "savvyExamples::Value")
+  `b` <- .savvy_extract_ptr(`b`, "savvyExamples::Value")
   .savvy_wrap_ValuePair(.Call(savvy_ValuePair_new_copy__impl, `a`, `b`))
 }
 
 
-class(`ValuePair`) <- c("ValuePair__bundle", "savvy_savvyExamples__sealed")
+class(`ValuePair`) <- c("savvyExamples::ValuePair__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.ValuePair__bundle` <- function(x, ...) {
-  cat('ValuePair\n')
+`print.savvyExamples::ValuePair__bundle` <- function(x, ...) {
+  cat('savvyExamples::ValuePair\n')
 }
 
 ### wrapper functions for struct
@@ -1108,7 +1108,7 @@ class(`ValuePair`) <- c("ValuePair__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
 
 
-  class(e) <- c("struct", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::struct", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1127,10 +1127,10 @@ class(`ValuePair`) <- c("ValuePair__bundle", "savvy_savvyExamples__sealed")
 }
 
 
-class(`struct`) <- c("struct__bundle", "savvy_savvyExamples__sealed")
+class(`struct`) <- c("savvyExamples::struct__bundle", "savvy_savvyExamples__sealed")
 
 #' @export
-`print.struct__bundle` <- function(x, ...) {
-  cat('struct\n')
+`print.savvyExamples::struct__bundle` <- function(x, ...) {
+  cat('savvyExamples::struct\n')
 }
 
