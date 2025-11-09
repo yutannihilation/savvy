@@ -61,7 +61,7 @@ impl crate::error::Error {
                 "Argument `{arg_name}` must be {expected}, not {actual}"
             )),
             Error::NotScalar => Error::GeneralError(format!(
-                "Argument `{arg_name}` must be be length 1 of non-missing value"
+                "Argument `{arg_name}` must be length 1 of non-missing value"
             )),
             Error::InvalidPointer => Error::GeneralError(format!(
                 "Argument `{arg_name}` is already consumed or deleted"
