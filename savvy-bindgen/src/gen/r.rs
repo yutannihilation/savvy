@@ -109,7 +109,7 @@ impl SavvyFn {
             .collect::<Vec<_>>()
     }
 
-    fn to_r_function(&self) -> String {
+    fn to_r_function(&self, pkg_name: &str) -> String {
         let fn_name = self.fn_name_r();
         let fn_name_c = self.fn_name_c_impl();
 
@@ -121,7 +121,7 @@ impl SavvyFn {
         args_call.insert(0, format!("{fn_name_c}"));
         let args_call = args_call.join(", ");
 
-        let mut body_lines = self.get_extractions();
+        let mut body_lines = self.get_extractions(pkg_name);
 
         // If the result is NULL, wrap it with invisible
         let fn_call = match &self.return_type {
@@ -147,7 +147,7 @@ impl SavvyFn {
         )
     }
 
-    fn get_extractions(&self) -> Vec<String> {
+    fn get_extractions(&self, pkg_name: &str) -> Vec<String> {
         self.args
             .iter()
             .flat_map(|arg| {
@@ -158,7 +158,7 @@ impl SavvyFn {
                 let r_var = arg.arg_name_r();
                 let r_class = arg.ty_string();
                 Some(format!(
-                    r#"`{r_var}` <- .savvy_extract_ptr(`{r_var}`, "{r_class}")"#
+                    r#"`{r_var}` <- .savvy_extract_ptr(`{r_var}`, "{pkg_name}::{r_class}")"#
                 ))
             })
             .collect::<Vec<String>>()
@@ -175,7 +175,7 @@ fn generate_r_impl_for_impl(
     let mut method_fns: Vec<&SavvyFn> = Vec::new();
     let class_r = ident_to_str_r(ty);
     let class_r_sealed = format!("savvy_{pkg_name}__sealed");
-    let class_r_for_bundle = format!("{class_r}__bundle");
+    let class_r_for_bundle = format!("{pkg_name}::{class_r}__bundle");
 
     for savvy_fn in &i.fns {
         match savvy_fn.fn_type {
@@ -203,7 +203,7 @@ fn generate_r_impl_for_impl(
             args_call.insert(0, format!("{fn_name_c}"));
             let args_call = args_call.join(", ");
 
-            let mut body_lines = x.get_extractions();
+            let mut body_lines = x.get_extractions(pkg_name);
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -248,7 +248,7 @@ fn generate_r_impl_for_impl(
   e$.ptr <- ptr
 {methods}
 
-  class(e) <- c("{class_r}", "{class_r_sealed}")
+  class(e) <- c("{pkg_name}::{class_r}", "{class_r}", "{class_r_sealed}")
   e
 }}
 "#
@@ -266,7 +266,7 @@ fn generate_r_impl_for_impl(
             args_call.insert(0, format!("{fn_name_c}"));
             let args_call = args_call.join(", ");
 
-            let mut body_lines = x.get_extractions();
+            let mut body_lines = x.get_extractions(pkg_name);
 
             let fn_call = match &x.return_type {
                 SavvyFnReturnType::Sexp(_) => format!(".Call({args_call})"),
@@ -297,7 +297,7 @@ fn generate_r_impl_for_impl(
         .join("\n");
 
     let init = match enum_types.get(ty) {
-        Some(e) => generate_r_impl_for_enum(e),
+        Some(e) => generate_r_impl_for_enum(e, pkg_name),
         None => format!("`{class_r}` <- new.env(parent = emptyenv())"),
     };
 
@@ -320,15 +320,15 @@ class(`{class_r}`) <- c("{class_r_for_bundle}", "{class_r_sealed}")
 
 #' @export
 `print.{class_r_for_bundle}` <- function(x, ...) {{
-  cat('{class_r}\n')
+  cat('{pkg_name}::{class_r}\n')
 }}
 "#
     )
 }
 
-fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
+fn generate_r_impl_for_enum(e: &SavvyEnum, pkg_name: &str) -> String {
     let class_r = e.class_name_r();
-    let class_r_for_bundle = format!("{class_r}__bundle");
+    let class_r_for_bundle = format!("{pkg_name}::{class_r}__bundle");
 
     let variants = e
         .variants
@@ -375,7 +375,7 @@ fn generate_r_impl_for_enum(e: &SavvyEnum) -> String {
 }}
 
 #' @export
-`print.{class_r}` <- function(x, ...) {{
+`print.{pkg_name}::{class_r}` <- function(x, ...) {{
   idx <- x$.ptr + 1L
   label <- c({variant_labels})[idx]
   if (is.na(label)) {{
@@ -396,7 +396,7 @@ pub fn generate_r_impl_file(result: &MergedResult, pkg_name: &str) -> String {
         .iter()
         // initializaion functions don't need the R interface
         .filter(|x| !matches!(x.fn_type, SavvyFnType::InitFunction))
-        .map(|x| x.to_r_function())
+        .map(|x| x.to_r_function(pkg_name))
         .collect::<Vec<String>>()
         .join("\n");
 

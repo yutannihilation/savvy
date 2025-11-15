@@ -5,7 +5,7 @@
 \alias{FooEnum}
 \title{A Or B.}
 \format{
-An object of class \code{FooEnum__bundle} (inherits from \code{savvy_savvyExamples__sealed}) of length 2.
+An object of class \code{savvyExamples::FooEnum__bundle} (inherits from \code{savvy_savvyExamples__sealed}) of length 2.
 }
 \usage{
 FooEnum
