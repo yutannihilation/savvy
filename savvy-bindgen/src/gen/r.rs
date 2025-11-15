@@ -248,7 +248,7 @@ fn generate_r_impl_for_impl(
   e$.ptr <- ptr
 {methods}
 
-  class(e) <- c("{pkg_name}::{class_r}", "{class_r_sealed}")
+  class(e) <- c("{pkg_name}::{class_r}", "{class_r}", "{class_r_sealed}")
   e
 }}
 "#

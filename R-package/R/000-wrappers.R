@@ -712,7 +712,7 @@ NULL
   e$.ptr <- ptr
 
 
-  class(e) <- c("savvyExamples::Enum", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Enum", "Enum", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -778,7 +778,7 @@ class(`Enum`) <- c("savvyExamples::Enum__bundle", "savvy_savvyExamples__sealed")
   e$.ptr <- ptr
   e$`print` <- `FooEnum_print`(ptr)
 
-  class(e) <- c("savvyExamples::FooEnum", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::FooEnum", "FooEnum", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -847,7 +847,7 @@ class(`FooEnum`) <- c("savvyExamples::FooEnum__bundle", "savvy_savvyExamples__se
   e$.ptr <- ptr
   e$`default_value_method` <- `FooWithDefault_default_value_method`(ptr)
 
-  class(e) <- c("savvyExamples::FooWithDefault", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::FooWithDefault", "FooWithDefault", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -900,7 +900,7 @@ class(`FooWithDefault`) <- c("savvyExamples::FooWithDefault__bundle", "savvy_sav
   e$`name` <- `Person_name`(ptr)
   e$`set_name` <- `Person_set_name`(ptr)
 
-  class(e) <- c("savvyExamples::Person", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Person", "Person", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -953,7 +953,7 @@ class(`Person`) <- c("savvyExamples::Person__bundle", "savvy_savvyExamples__seal
   e$.ptr <- ptr
   e$`name` <- `Person2_name`(ptr)
 
-  class(e) <- c("savvyExamples::Person2", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Person2", "Person2", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -985,7 +985,7 @@ class(`Person2`) <- c("savvyExamples::Person2__bundle", "savvy_savvyExamples__se
   e$.ptr <- ptr
   e$`new_method` <- `StructWithConfig_new_method`(ptr)
 
-  class(e) <- c("savvyExamples::StructWithConfig", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::StructWithConfig", "StructWithConfig", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1035,7 +1035,7 @@ class(`StructWithConfig`) <- c("savvyExamples::StructWithConfig__bundle", "savvy
   e$`get2` <- `Value_get2`(ptr)
   e$`pair` <- `Value_pair`(ptr)
 
-  class(e) <- c("savvyExamples::Value", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::Value", "Value", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1070,7 +1070,7 @@ class(`Value`) <- c("savvyExamples::Value__bundle", "savvy_savvyExamples__sealed
   e$.ptr <- ptr
   e$`print` <- `ValuePair_print`(ptr)
 
-  class(e) <- c("savvyExamples::ValuePair", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::ValuePair", "ValuePair", "savvy_savvyExamples__sealed")
   e
 }
 
@@ -1108,7 +1108,7 @@ class(`ValuePair`) <- c("savvyExamples::ValuePair__bundle", "savvy_savvyExamples
   e$.ptr <- ptr
 
 
-  class(e) <- c("savvyExamples::struct", "savvy_savvyExamples__sealed")
+  class(e) <- c("savvyExamples::struct", "struct", "savvy_savvyExamples__sealed")
   e
 }
 
