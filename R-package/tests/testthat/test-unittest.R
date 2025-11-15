@@ -100,7 +100,7 @@ test_that("functions can handle ALTREP", {
 
 test_that("structs work", {
   x <- Person$new()
-  expect_s3_class(x, "savvyExamples::Person")
+  expect_s3_class(x, "Person")
 
   expect_equal(x$name(), "")
 
@@ -110,26 +110,26 @@ test_that("structs work", {
   expect_equal(Person$associated_function(), "associated_function")
 
   x2 <- Person$new2()
-  expect_s3_class(x2, "savvyExamples::Person")
+  expect_s3_class(x2, "Person")
   expect_equal(x2$name(), "")
 })
 
 test_that("alternative constructor of a struct works", {
   x <- Person$new_with_name("123")
-  expect_s3_class(x, "savvyExamples::Person")
+  expect_s3_class(x, "Person")
   expect_equal(x$name(), "123")
 })
 
 test_that("function that returns a struct works", {
   # bare function
   x <- external_person_new()
-  expect_s3_class(x, "savvyExamples::Person")
+  expect_s3_class(x, "Person")
   x$set_name("foo")
   expect_equal(x$name(), "foo")
 
   # method
   x2 <- x$another_person() # creates Person2 with copying the name
-  expect_s3_class(x2, "savvyExamples::Person2")
+  expect_s3_class(x2, "Person2")
   expect_equal(x2$name(), "foo")
 })
 
