@@ -78,20 +78,26 @@ p$name()
 #> [1] "たかし"
 ```
 
-The instance has the same name of S3 class as the Rust type, so you can implement
-S3 methods such as `print.<your struct>()` if necessary.
+The instance has two S3 claesses that you can use for implementing S3 methods for the class;
+`PKG_NAME::STRUCT_NAME` and `STRUCT_NAME`.
+For example, in this case, if the package name is `savvyExamples`, `p` is a `savvyExamples::Person` and a `Person`.
 
 ```r
 class(p)
-#> [1] "Person"
+#> [1] "savvyExamples::Person"       "Person"                      "savvy_savvyExamples__sealed"
+```
 
-# register print() S3 method for Person
+The short one is handy to use. For example, you can implement a `print.Person` method.
+
+```r
 print.Person <- function(x, ...) print(x$name())
 registerS3method("print", "Person", print.Person)
 
 p
 #> たかし
 ```
+
+In order to avoid name collisions between packages (e.g. since `Person` is very general name, other packages might use the same S3 class name), you can also use the longer one instead.
 
 ### Struct output
 

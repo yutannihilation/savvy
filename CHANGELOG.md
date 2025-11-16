@@ -3,6 +3,9 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+- The R object generated from a Rust struct now has one additional S3 class `PKG_NAME::STRUCT_NAME` in addition to the bare struct name. This is useful if you want to avoid name collisions between packages. Thanks @eitsupi! (#404)
 
 ## [v0.8.14] (2025-10-25)
 
