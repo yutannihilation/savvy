@@ -330,25 +330,6 @@ fn tweak_r_buildignore(path: &Path) {
     }
 }
 
-fn remove_old_wrapper_r(path: &Path) -> std::io::Result<()> {
-    let old = path.join("R/wrappers.R");
-    if old.exists() {
-        eprintln!(
-            "
-
-  !!! WARNING !!!
-  Now the savvy framework generates `000-wrappers.R` instead of `wrappers.R`.
-  Deleting the old wrapper file ({})...
-
-",
-            old.to_string_lossy()
-        );
-
-        std::fs::remove_file(&old)?;
-    }
-    Ok(())
-}
-
 fn update(path: &Path, rust_dir: &Option<PathBuf>) {
     let pkg_metadata = get_pkg_metadata(path);
     let pkg_name = &pkg_metadata.package_name_for_r();
@@ -396,9 +377,6 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
         &path.join(PATH_C_IMPL),
         &generate_c_impl_file(&merged, &pkg_name),
     );
-
-    // TODO: remove this tweak
-    remove_old_wrapper_r(path).expect("Failed to remove the old wrapper.R");
 
     write_file(
         &path.join(PATH_R_IMPL),
