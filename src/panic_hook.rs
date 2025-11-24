@@ -1,5 +1,3 @@
-// PanicInfo is deprecated since 1.82 (PanicHookInfo exists since 1.81)
-// cf. https://github.com/rust-lang/rust/pull/115974/
 type PanicHookInfo<'a> = std::panic::PanicHookInfo<'a>;
 
 pub fn panic_hook(panic_info: &PanicHookInfo) {
