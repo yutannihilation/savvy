@@ -1,9 +1,6 @@
 // PanicInfo is deprecated since 1.82 (PanicHookInfo exists since 1.81)
 // cf. https://github.com/rust-lang/rust/pull/115974/
-#[rustversion::since(1.81)]
 type PanicHookInfo<'a> = std::panic::PanicHookInfo<'a>;
-#[rustversion::before(1.81)]
-type PanicHookInfo<'a> = std::panic::PanicInfo<'a>;
 
 pub fn panic_hook(panic_info: &PanicHookInfo) {
     // Add indent
