@@ -1,11 +1,16 @@
 # Changelog
 
 <!-- next-header -->
+
 ## [Unreleased] (ReleaseDate)
 
 ### New features
 
 - The R object generated from a Rust struct now has one additional S3 class `PKG_NAME::STRUCT_NAME` in addition to the bare struct name. This is useful if you want to avoid name collisions between packages. Thanks @eitsupi! (#404)
+
+### Minor improvements
+
+- Bump MSRV to 1.81 and remove the dependency of rustversion crate (#412).
 
 ## [v0.8.14] (2025-10-25)
 
@@ -941,8 +946,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.14...HEAD
 
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.8.14...HEAD
 [v0.8.14]: https://github.com/yutannihilation/savvy/compare/v0.8.13...v0.8.14
 [v0.8.13]: https://github.com/yutannihilation/savvy/compare/v0.8.12...v0.8.13
 [v0.8.12]: https://github.com/yutannihilation/savvy/compare/v0.8.11...v0.8.12
