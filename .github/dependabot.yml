@@ -11,4 +11,4 @@ updates:
     ignore:
       - dependency-name: "dtolnay/rust-toolchain"
     exclude-paths:
-      - ".github/workflows/release.yaml"
+      - ".github/workflows/release.yml"
