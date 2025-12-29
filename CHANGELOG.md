@@ -1,14 +1,23 @@
 # Changelog
 
 <!-- next-header -->
+
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+- Removed `get_altrep_class_name()` and `get_altrep_package_name()` because the
+  underlying R API, `ATTRIB()` will be unavailable on R 4.6. Note that these
+  functions were available only when the `altrep` feature is enabled, so most of
+  the users shouldn't be affected by this change (#420)
 
 ## [v0.9.0] (2025-11-24)
 
 ### New features
 
-- The R object generated from a Rust struct now has one additional S3 class `PKG_NAME::STRUCT_NAME` in addition to the bare struct name. This is useful if you want to avoid name collisions between packages. Thanks @eitsupi! (#404)
+- The R object generated from a Rust struct now has one additional S3 class
+  `PKG_NAME::STRUCT_NAME` in addition to the bare struct name. This is useful
+  if you want to avoid name collisions between packages. Thanks @eitsupi! (#404)
 
 ### Minor improvements
 
@@ -948,8 +957,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.0...HEAD
 
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.0...HEAD
 [v0.9.0]: https://github.com/yutannihilation/savvy/compare/v0.8.14...v0.9.0
 [v0.8.14]: https://github.com/yutannihilation/savvy/compare/v0.8.13...v0.8.14
 [v0.8.13]: https://github.com/yutannihilation/savvy/compare/v0.8.12...v0.8.13
