@@ -490,32 +490,10 @@ fn init_altrep_class(dll_info: *mut savvy::ffi::DllInfo) -> savvy::Result<()> {
 
 // misc
 
-#[savvy]
-fn get_altrep_class_name(x: IntegerSexp) -> savvy::Result<()> {
-    let c = unsafe { savvy::altrep::get_altrep_class_name(x.0)? };
-    r_println!("{c}");
-    Ok(())
-}
-
-#[savvy]
-fn get_altrep_package_name(x: IntegerSexp) -> savvy::Result<()> {
-    let p = unsafe { savvy::altrep::get_altrep_package_name(x.0)? };
-    r_println!("{p}");
-    Ok(())
-}
-
-// Note: this is just for testing. cast_altrep_unchecked() is usually for the
-// class defined in an external package. If it's an owned class, we can just use
-// `try_from_altrep_*()` as shown above.
+// Note: this is just for testing.
 #[savvy]
 fn print_altint_by_weird_way(x: IntegerSexp) -> savvy::Result<()> {
-    let cls = unsafe { savvy::altrep::get_altrep_class_name(x.0)? };
-    let pkg = unsafe { savvy::altrep::get_altrep_package_name(x.0)? };
-    if cls == MyAltInt::CLASS_NAME && pkg == MyAltInt::PACKAGE_NAME {
-        let out = unsafe { get_altrep_body_ref_unchecked::<MyAltInt>(&x.0)? };
-        r_println!("{out:?}");
-        Ok(())
-    } else {
-        Err(savvy_err!("Not an altint"))
-    }
+    let out = unsafe { get_altrep_body_ref_unchecked::<MyAltInt>(&x.0)? };
+    r_println!("{out:?}");
+    Ok(())
 }

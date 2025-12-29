@@ -209,16 +209,6 @@ SEXP savvy_fun_mod1_1_foo__impl(void) {
     return handle_result(res);
 }
 
-SEXP savvy_get_altrep_class_name__impl(SEXP c_arg__x) {
-    SEXP res = savvy_get_altrep_class_name__ffi(c_arg__x);
-    return handle_result(res);
-}
-
-SEXP savvy_get_altrep_package_name__impl(SEXP c_arg__x) {
-    SEXP res = savvy_get_altrep_package_name__ffi(c_arg__x);
-    return handle_result(res);
-}
-
 SEXP savvy_get_args__impl(SEXP c_arg__args) {
     SEXP res = savvy_get_args__ffi(c_arg__args);
     return handle_result(res);
@@ -822,8 +812,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_foo_a__impl", (DL_FUNC) &savvy_foo_a__impl, 0},
     {"savvy_fun_mod1__impl", (DL_FUNC) &savvy_fun_mod1__impl, 0},
     {"savvy_fun_mod1_1_foo__impl", (DL_FUNC) &savvy_fun_mod1_1_foo__impl, 0},
-    {"savvy_get_altrep_class_name__impl", (DL_FUNC) &savvy_get_altrep_class_name__impl, 1},
-    {"savvy_get_altrep_package_name__impl", (DL_FUNC) &savvy_get_altrep_package_name__impl, 1},
     {"savvy_get_args__impl", (DL_FUNC) &savvy_get_args__impl, 1},
     {"savvy_get_attr_int__impl", (DL_FUNC) &savvy_get_attr_int__impl, 2},
     {"savvy_get_class_int__impl", (DL_FUNC) &savvy_get_class_int__impl, 1},

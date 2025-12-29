@@ -33,8 +33,6 @@ SEXP savvy_fn_w_cfg__ffi(SEXP c_arg__x);
 SEXP savvy_foo_a__ffi(void);
 SEXP savvy_fun_mod1__ffi(void);
 SEXP savvy_fun_mod1_1_foo__ffi(void);
-SEXP savvy_get_altrep_class_name__ffi(SEXP c_arg__x);
-SEXP savvy_get_altrep_package_name__ffi(SEXP c_arg__x);
 SEXP savvy_get_args__ffi(SEXP c_arg__args);
 SEXP savvy_get_attr_int__ffi(SEXP c_arg__x, SEXP c_arg__attr);
 SEXP savvy_get_class_int__ffi(SEXP c_arg__x);
