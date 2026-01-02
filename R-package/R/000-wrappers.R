@@ -260,6 +260,11 @@ NULL
 }
 
 
+`get_obj_class` <- function(`x`) {
+  .Call(savvy_get_obj_class__impl, `x`)
+}
+
+
 `get_var_in_env` <- function(`name`, `env` = NULL) {
   .Call(savvy_get_var_in_env__impl, `name`, `env`)
 }
@@ -272,6 +277,11 @@ NULL
 
 `is_numeric` <- function(`x`) {
   .Call(savvy_is_numeric__impl, `x`)
+}
+
+
+`is_obj` <- function(`x`) {
+  .Call(savvy_is_obj__impl, `x`)
 }
 
 
