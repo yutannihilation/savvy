@@ -12,10 +12,10 @@ repository.workspace = true
 dist = false
 
 [dependencies]
-num-complex = { workspace = true, optional = true }
+num-complex = { version = "0.4.5", optional = true }
 
 [build-dependencies]
-cc = { workspace = true }
+cc = "1.2.9" # 1.2.8 had a problem with webr build
 
 [features]
 default = []
