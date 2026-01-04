@@ -23,7 +23,8 @@ extern "C" {
     pub fn MARK_NOT_MUTABLE(x: SEXP);
 
     pub fn ALTREP(x: SEXP) -> c_int;
-    pub fn ALTREP_CLASS(x: SEXP) -> SEXP;
+    pub fn R_altrep_class_name(x: SEXP) -> SEXP;
+    pub fn R_altrep_class_package(x: SEXP) -> SEXP;
     pub fn R_altrep_inherits(x: SEXP, arg1: R_altrep_class_t) -> Rboolean;
     pub fn R_new_altrep(aclass: R_altrep_class_t, data1: SEXP, data2: SEXP) -> SEXP;
     pub fn R_altrep_data1(x: SEXP) -> SEXP;
