@@ -222,3 +222,8 @@ test_that("get_altrep_body_ref_unchecked() works", {
     fixed = TRUE
   )
 })
+
+test_that("get_altrep_class_name and get_altrep_package_name works", {
+  expect_output(get_altrep_class_name(1:10), "compact_intseq")
+  expect_output(get_altrep_package_name(1:10), "base")
+})
