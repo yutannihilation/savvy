@@ -4,9 +4,14 @@
 
 ## [Unreleased] (ReleaseDate)
 
+### New features
+
+- Added `ObjSexp` to represent an S7 or S4 object. You can now use it as an
+  argument of a function to accept an S7/S4. Thanks @eitsupi! (#422)
+
 ### Minor improvements
 
-- Replace the "non-API" calls, `ATTRIB` and `ALTREP_CLASS`, with
+- Replaced the "non-API" calls, `ATTRIB` and `ALTREP_CLASS`, with
   `R_altrep_class_name` and `R_altrep_class_package` on R > 4.6. (#420, #423)
 
 ## [v0.9.0] (2025-11-24)
