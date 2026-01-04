@@ -15,6 +15,15 @@ pub struct ObjSexp(pub SEXP);
 // implement inner(), len(), empty(), and name()
 impl_common_sexp_ops!(ObjSexp);
 
+impl TryFrom<Sexp> for ObjSexp {
+    type Error = crate::error::Error;
+
+    fn try_from(value: Sexp) -> crate::error::Result<Self> {
+        value.assert_obj()?;
+        Ok(Self(value.0))
+    }
+}
+
 // Conversion into Sexp is infallible as it's just extracting the inner one.
 impl From<ObjSexp> for Sexp {
     fn from(value: ObjSexp) -> Self {

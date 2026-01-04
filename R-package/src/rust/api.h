@@ -41,6 +41,7 @@ SEXP savvy_get_foo_value__ffi(void);
 SEXP savvy_get_name_external__ffi(SEXP c_arg__x);
 SEXP savvy_get_names_int__ffi(SEXP c_arg__x);
 SEXP savvy_get_obj_class__ffi(SEXP c_arg__x);
+SEXP savvy_get_obj_class_typed__ffi(SEXP c_arg__x);
 SEXP savvy_get_var_in_env__ffi(SEXP c_arg__name, SEXP c_arg__env);
 SEXP savvy_init_altrep_class__ffi(DllInfo* c_arg__dll_info);
 SEXP savvy_init_foo_value__ffi(DllInfo* c_arg__dll);

@@ -12,3 +12,8 @@ fn get_obj_class(x: savvy::Sexp) -> savvy::Result<savvy::Sexp> {
         _ => ().try_into(),
     }
 }
+
+#[savvy]
+fn get_obj_class_typed(x: savvy::ObjSexp) -> savvy::Result<savvy::Sexp> {
+    x.get_class().unwrap_or(vec![]).try_into()
+}
