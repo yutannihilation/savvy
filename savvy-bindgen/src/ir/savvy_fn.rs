@@ -128,6 +128,16 @@ impl SavvyInputType {
                         "DllInfo must be `*mut DllInfo`",
                     )),
 
+                    // savvy allows arbitrary types, but this case assumes
+                    // the input is a struct defined in the same package with
+                    // #[savvy] marked. For example, `fn foo(x: Foo)` is
+                    // translated as below, assuming it inherits the
+                    // conventional class.
+                    // 
+                    // `foo` <- function(`x`) {
+                    //   `x` <- .savvy_extract_ptr(`x`, "pkg::Foo")   # This line
+                    //   .Call(savvy_foo__impl, `x`)
+                    // }
                     _ => Ok(Self {
                         category: SavvyInputTypeCategory::UserDefinedType,
                         ty_orig: ty.clone(),
