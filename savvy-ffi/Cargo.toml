@@ -14,6 +14,9 @@ dist = false
 [dependencies]
 num-complex = { version = "0.4.5", optional = true }
 
+[build-dependencies]
+cc = "1.2.9" # 1.2.8 had a problem with webr build
+
 [features]
 default = []
 complex = ["num-complex"]

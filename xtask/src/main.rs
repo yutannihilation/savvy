@@ -186,7 +186,8 @@ fn show() -> Result<(), DynError> {
         // ALTREP
         .allowlist_function("MARK_NOT_MUTABLE")
         .allowlist_function("ALTREP")
-        .allowlist_function("ALTREP_CLASS")
+        .allowlist_function("R_altrep_class_name")
+        .allowlist_function("R_altrep_class_package")
         .allowlist_function("R_new_altrep")
         .allowlist_function("R_altrep_data1")
         .allowlist_function("R_altrep_data2")

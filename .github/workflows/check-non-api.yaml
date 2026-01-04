@@ -28,7 +28,7 @@ jobs:
 
           REGEX=$(Rscript tmp.R)
 
-          NON_API=$(grep -R -w -E "${REGEX}" ./savvy-ffi/src/ || true)
+          NON_API=$(grep -R -w -E "${REGEX}" --exclude-dir="backports" ./savvy-ffi/src/ || true)
 
           echo "Check result:"
           echo

@@ -213,8 +213,16 @@ test_that("altlist works", {
   expect_equal(x, list(one = "A", two = c("a0", "b0", "c0", "-1")))
 })
 
+test_that("get_altrep_class_name and get_altrep_package_name works", {
+  x <- altint()
+
+  expect_output(get_altrep_class_name(x), "MyAltInt")
+  expect_output(get_altrep_package_name(x), "TestPackage")
+})
+
 test_that("get_altrep_body_ref_unchecked() works", {
   x <- altint()
+
   # The same result of print_altint() is archieved by treating MyAltInt as the external class.
   expect_output(
     print_altint_by_weird_way(x),

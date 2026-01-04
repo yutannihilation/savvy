@@ -4,12 +4,10 @@
 
 ## [Unreleased] (ReleaseDate)
 
-### Breaking changes
+### Minor improvements
 
-- Removed `get_altrep_class_name()` and `get_altrep_package_name()` because the
-  underlying R API, `ATTRIB()` will be unavailable on R 4.6. Note that these
-  functions were available only when the `altrep` feature is enabled, so most of
-  the users shouldn't be affected by this change (#420)
+- Replace the "non-API" calls, `ATTRIB` and `ALTREP_CLASS`, with
+  `R_altrep_class_name` and `R_altrep_class_package` on R > 4.6. (#420, #423)
 
 ## [v0.9.0] (2025-11-24)
 
