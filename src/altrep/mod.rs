@@ -16,10 +16,10 @@ use std::{collections::HashMap, sync::Mutex};
 
 use savvy_ffi::{
     altrep::{
-        R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, ALTREP, ALTREP_CLASS,
-        MARK_NOT_MUTABLE,
+        R_altrep_class_name, R_altrep_class_package, R_altrep_class_t, R_altrep_data1,
+        R_altrep_inherits, R_new_altrep, ALTREP, MARK_NOT_MUTABLE,
     },
-    R_NilValue, Rboolean_TRUE, ATTRIB, CADR, CAR, PRINTNAME, SEXP,
+    R_NilValue, Rboolean_TRUE, PRINTNAME, SEXP,
 };
 use std::sync::OnceLock;
 
@@ -85,7 +85,7 @@ pub unsafe fn get_altrep_class_name(x: SEXP) -> crate::error::Result<&'static st
         return Err(savvy_err!("Not an ALTREP"));
     }
 
-    let class_name_symbol = unsafe { CAR(ATTRIB(ALTREP_CLASS(x))) };
+    let class_name_symbol = unsafe { R_altrep_class_name(x) };
     Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
 }
 
@@ -99,7 +99,7 @@ pub unsafe fn get_altrep_package_name(x: SEXP) -> crate::error::Result<&'static 
         return Err(savvy_err!("Not an ALTREP"));
     }
 
-    let class_name_symbol = unsafe { CADR(ATTRIB(ALTREP_CLASS(x))) };
+    let class_name_symbol = unsafe { R_altrep_class_package(x) };
     Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
 }
 
