@@ -14,7 +14,7 @@ rust-version = "1.81"
 [dependencies]
 savvy-ffi = { version = "0.9.0", path = "./savvy-ffi" }
 savvy-macro = { version = "0.9.0", path = "./savvy-macro" }
-num-complex = { version = "0.4.5", optional = true }
+num-complex = { workspace = true, optional = true }
 
 log = { version = "0.4", optional = true }
 env_logger = { version = "0.11", default-features = false, optional = true }
@@ -40,7 +40,11 @@ use-custom-error = []
 savvy-test = []
 
 [build-dependencies]
+cc = { workspace = true }
+
+[workspace.dependencies]
 cc = "1.2.9" # 1.2.8 had a problem with webr build
+num-complex =  "0.4.5"
 
 [package.metadata.docs.rs]
 features = ["complex", "altrep", "logger"]

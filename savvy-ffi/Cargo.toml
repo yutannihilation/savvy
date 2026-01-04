@@ -12,7 +12,10 @@ repository.workspace = true
 dist = false
 
 [dependencies]
-num-complex = { version = "0.4.5", optional = true }
+num-complex = { workspace = true, optional = true }
+
+[build-dependencies]
+cc = { workspace = true }
 
 [features]
 default = []
