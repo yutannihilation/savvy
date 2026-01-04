@@ -18,8 +18,8 @@ test_that("tests for OBJSXP (S4/S7)", {
   expect_null(get_obj_class(1:3))
   expect_null(get_obj_class(data.frame(x = 1:3)))
 
-  expect_error(get_obj_class_typed(1:3))
-  expect_error(get_obj_class_typed(NULL))
+  expect_error(get_obj_class_typed(1:3), "S4/S7 object")
+  expect_error(get_obj_class_typed(NULL), "S4/S7 object")
 
   # Test S7
   skip_if_not_installed("S7")

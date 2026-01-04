@@ -154,6 +154,12 @@ impl Sexp {
 }
 
 unsafe fn get_human_readable_type_name(sexptype: SEXPTYPE) -> &'static str {
+    // R's internal `type2char(OBJSXP)` returns "S4" for historical reasons,
+    // but savvy treats this as the underlying object type for both S4 and S7.
+    // Use a less confusing label in error messages.
+    if sexptype == savvy_ffi::OBJSXP {
+        return "S4/S7 object";
+    }
     unsafe {
         // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
         let c = Rf_type2char(sexptype);
