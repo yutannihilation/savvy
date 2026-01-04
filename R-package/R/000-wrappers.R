@@ -224,6 +224,16 @@ NULL
 }
 
 
+`get_altrep_class_name` <- function(`x`) {
+  invisible(.Call(savvy_get_altrep_class_name__impl, `x`))
+}
+
+
+`get_altrep_package_name` <- function(`x`) {
+  invisible(.Call(savvy_get_altrep_package_name__impl, `x`))
+}
+
+
 `get_args` <- function(`args`) {
   .Call(savvy_get_args__impl, `args`)
 }

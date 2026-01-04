@@ -19,7 +19,7 @@ use savvy_ffi::{
         R_altrep_class_t, R_altrep_data1, R_altrep_inherits, R_new_altrep, ALTREP, ALTREP_CLASS,
         MARK_NOT_MUTABLE,
     },
-    R_NilValue, Rboolean_TRUE, CADR, CAR, PRINTNAME, SEXP,
+    R_NilValue, Rboolean_TRUE, ATTRIB, CADR, CAR, PRINTNAME, SEXP,
 };
 use std::sync::OnceLock;
 
@@ -73,6 +73,34 @@ fn register_altrep_class(
     }
 
     Ok(())
+}
+
+/// Returns the class name of an ALTREP object.
+///
+/// # Safety
+/// This relies on undocumented implementation details of ALTREP, so something
+/// unexpected might happen.
+pub unsafe fn get_altrep_class_name(x: SEXP) -> crate::error::Result<&'static str> {
+    if unsafe { ALTREP(x) } != 1 {
+        return Err(savvy_err!("Not an ALTREP"));
+    }
+
+    let class_name_symbol = unsafe { CAR(ATTRIB(ALTREP_CLASS(x))) };
+    Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
+}
+
+/// Returns the package name of an ALTREP object.
+///
+/// # Safety
+/// This relies on undocumented implementation details of ALTREP, so something
+/// unexpected might happen.
+pub unsafe fn get_altrep_package_name(x: SEXP) -> crate::error::Result<&'static str> {
+    if unsafe { ALTREP(x) } != 1 {
+        return Err(savvy_err!("Not an ALTREP"));
+    }
+
+    let class_name_symbol = unsafe { CADR(ATTRIB(ALTREP_CLASS(x))) };
+    Ok(unsafe { charsxp_to_str(PRINTNAME(class_name_symbol)) })
 }
 
 /// Returns the `data1` of an ALTREP object as `&mut`.

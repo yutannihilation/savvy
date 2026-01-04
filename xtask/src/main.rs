@@ -153,6 +153,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("SETCAR")
         .allowlist_function("SETCDR")
         .allowlist_function("SET_TAG")
+        .allowlist_function("ATTRIB")
         // Function and Environment
         .allowlist_function("Rf_isFunction")
         .allowlist_function("Rf_isEnvironment")
