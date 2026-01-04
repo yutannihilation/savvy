@@ -108,7 +108,7 @@ impl SavvyInputType {
                     // Read-only types
                     "IntegerSexp" | "RealSexp" | "NumericSexp" | "ComplexSexp" | "LogicalSexp"
                     | "RawSexp" | "StringSexp" | "ListSexp" | "FunctionSexp"
-                    | "EnvironmentSexp" => Ok(Self {
+                    | "EnvironmentSexp" | "ObjSexp" => Ok(Self {
                         category: SavvyInputTypeCategory::SexpWrapper,
                         ty_orig: ty.clone(),
                         ty_str,

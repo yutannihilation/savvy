@@ -13,6 +13,7 @@ mod init_vectors;
 mod missing_values;
 mod multiple_defs;
 mod numeric;
+mod obj;
 mod optional_arg;
 mod try_from_iter;
 

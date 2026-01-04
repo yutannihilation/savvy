@@ -8,8 +8,8 @@ use savvy_ffi::{
 
 use crate::{
     EnvironmentSexp, ExternalPointerSexp, FunctionSexp, IntegerSexp, ListSexp, LogicalSexp,
-    NullSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRawSexp, OwnedRealSexp, OwnedStringSexp,
-    RawSexp, RealSexp, StringSexp,
+    NullSexp, ObjSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRawSexp, OwnedRealSexp,
+    OwnedStringSexp, RawSexp, RealSexp, StringSexp,
 };
 
 #[cfg(feature = "complex")]
@@ -23,6 +23,7 @@ pub mod list;
 pub mod logical;
 pub mod na;
 pub mod null;
+pub mod obj;
 pub mod raw;
 pub mod real;
 pub mod scalar;
@@ -114,6 +115,17 @@ impl Sexp {
         unsafe { Rf_isEnvironment(self.0) == Rboolean_TRUE }
     }
 
+    /// Returns `true` if the SEXP is an object SEXP (`OBJSXP`).
+    ///
+    /// # Note
+    ///
+    /// Historically, R's internal API and documentation often refer to this as
+    /// "S4", but the newer S7 OOP system is also built on top of `OBJSXP`.
+    /// Therefore, this method returns `true` for both S4 and S7 objects.
+    pub fn is_obj(&self) -> bool {
+        unsafe { TYPEOF(self.0) == savvy_ffi::OBJSXP }
+    }
+
     fn is_sexp_type(&self, sexptype: SEXPTYPE) -> bool {
         match sexptype {
             savvy_ffi::INTSXP => self.is_integer(),
@@ -128,6 +140,7 @@ impl Sexp {
             // cf. https://github.com/wch/r-source/blob/95ac44a87065d5b42579b621d278adc44641dcf0/src/include/Rinlinedfuns.h#L810-L815
             savvy_ffi::CLOSXP | savvy_ffi::BUILTINSXP | savvy_ffi::SPECIALSXP => self.is_function(),
             savvy_ffi::ENVSXP => self.is_environment(),
+            savvy_ffi::OBJSXP => self.is_obj(),
             savvy_ffi::NILSXP => self.is_null(),
             _ => false,
         }
@@ -141,6 +154,12 @@ impl Sexp {
 }
 
 unsafe fn get_human_readable_type_name(sexptype: SEXPTYPE) -> &'static str {
+    // R's internal `type2char(OBJSXP)` returns "S4" for historical reasons,
+    // but savvy treats this as the underlying object type for both S4 and S7.
+    // Use a less confusing label in error messages.
+    if sexptype == savvy_ffi::OBJSXP {
+        return "S4/S7 object";
+    }
     unsafe {
         // TODO: replace this `R_typeToChar()` which will be introduced in R 4.4
         let c = Rf_type2char(sexptype);
@@ -217,6 +236,17 @@ impl Sexp {
     pub fn assert_environment(&self) -> crate::error::Result<()> {
         impl_sexp_type_assert!(self, ENVSXP)
     }
+
+    /// Returns error when the SEXP is not an object SEXP (`OBJSXP`).
+    ///
+    /// # Note
+    ///
+    /// Historically, R's internal API and documentation often refer to this as
+    /// "S4", but the newer S7 OOP system is also built on top of `OBJSXP`.
+    /// Therefore, this method accepts both S4 and S7 objects.
+    pub fn assert_obj(&self) -> crate::error::Result<()> {
+        impl_sexp_type_assert!(self, OBJSXP)
+    }
 }
 
 #[non_exhaustive]
@@ -234,6 +264,14 @@ pub enum TypedSexp {
     ExternalPointer(ExternalPointerSexp),
     Function(FunctionSexp),
     Environment(EnvironmentSexp),
+    /// An object SEXP (`OBJSXP`).
+    ///
+    /// # Note
+    ///
+    /// Historically, R's internal API and documentation often refer to this as
+    /// "S4", but the newer S7 OOP system is also built on top of `OBJSXP`.
+    /// Therefore, this variant can represent both S4 and S7 objects.
+    Obj(ObjSexp),
     Other(SEXP),
 }
 
@@ -259,6 +297,7 @@ into_typed_sxp!(ExternalPointerSexp, ExternalPointer);
 into_typed_sxp!(FunctionSexp, Function);
 into_typed_sxp!(EnvironmentSexp, Environment);
 into_typed_sxp!(NullSexp, Null);
+into_typed_sxp!(ObjSexp, Obj);
 
 macro_rules! into_typed_sxp_owned {
     ($ty: ty, $variant: ident) => {
@@ -293,6 +332,7 @@ impl From<TypedSexp> for SEXP {
             TypedSexp::ExternalPointer(sxp) => sxp.inner(),
             TypedSexp::Function(sxp) => sxp.inner(),
             TypedSexp::Environment(sxp) => sxp.inner(),
+            TypedSexp::Obj(sxp) => sxp.inner(),
             TypedSexp::Other(sxp) => sxp,
         }
     }
@@ -317,6 +357,7 @@ impl Sexp {
                 TypedSexp::Function(FunctionSexp(self.0))
             }
             savvy_ffi::ENVSXP => TypedSexp::Environment(EnvironmentSexp(self.0)),
+            savvy_ffi::OBJSXP => TypedSexp::Obj(ObjSexp(self.0)),
             savvy_ffi::NILSXP => TypedSexp::Null(NullSexp),
             _ => TypedSexp::Other(self.0),
         }
