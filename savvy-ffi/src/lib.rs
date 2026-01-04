@@ -213,7 +213,6 @@ extern "C" {
     pub fn SETCAR(x: SEXP, y: SEXP) -> SEXP;
     pub fn SETCDR(x: SEXP, y: SEXP) -> SEXP;
     pub fn SET_TAG(x: SEXP, y: SEXP);
-    pub fn ATTRIB(x: SEXP) -> SEXP;
 }
 
 // Function and environment
