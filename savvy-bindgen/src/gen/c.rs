@@ -204,7 +204,7 @@ void R_init_{pkg_name}(DllInfo *dll) {{
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 
-    // Functions for initialzation, if any.
+    // Functions for initialization, if any.
 {initialization}
 }}
 "

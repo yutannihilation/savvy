@@ -960,7 +960,7 @@ void R_init_savvyExamples(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 
-    // Functions for initialzation, if any.
+    // Functions for initialization, if any.
     savvy_init_altrep_class__impl(dll);
     savvy_init_foo_value__impl(dll);
     savvy_init_logger__impl(dll);
