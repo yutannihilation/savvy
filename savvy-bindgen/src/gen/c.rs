@@ -139,9 +139,14 @@ fn generate_c_initialization(fns: &[SavvyFn]) -> String {
 
 pub fn generate_c_impl_file(result: &MergedResult, pkg_name: &str) -> String {
     let common_part = r#"
+// clang-format sorts includes unless SortIncludes: Never. However, the ordering
+// does matter here. So, we need to disable clang-format for safety.
+
+// clang-format off
 #include <stdint.h>
 #include <Rinternals.h>
 #include <R_ext/Parse.h>
+// clang-format on
 
 #include "rust/api.h"
 
