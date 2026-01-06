@@ -30,6 +30,9 @@ echo "using Rust compiler: '${RUSTC_VERSION}'"
 
 if [ "$(uname)" = "Emscripten" ]; then
   TARGET="wasm32-unknown-emscripten"
+# if target is specified via envvar, use it.
+elif [ -n "${SAVVY_TARGET}" ]; then
+  TARGET="${SAVVY_TARGET}"
 fi
 
 # allow overriding profile externally (e.g. on CI)
