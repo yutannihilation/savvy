@@ -25,7 +25,7 @@ This is an example of what a savvy-powered function would look like:
 use savvy::savvy;
 
 /// Convert to Upper-case
-/// 
+///
 /// @param x A character vector.
 /// @export
 #[savvy]
@@ -73,8 +73,9 @@ directory](https://github.com/yutannihilation/savvy/tree/main/R-package).
 
 Savvy is used in the following R packages:
 
-- [prqlr](https://prql.github.io/prqlc-r/)
 - [polars](https://github.com/pola-rs/r-polars)
+- [SedonaDB](https://github.com/apache/sedona-db)
+- [prqlr](https://prql.github.io/prqlc-r/)
 - [string2path](https://yutannihilation.github.io/string2path/)
 
 ## Thanks

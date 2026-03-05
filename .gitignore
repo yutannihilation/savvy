@@ -14,3 +14,5 @@ target
 /R-package/src/rust/Cargo.lock
 /R-package/src/Makevars
 /R-package/src/Makevars.win
+/.quarto/
+**/*.quarto_ipynb
