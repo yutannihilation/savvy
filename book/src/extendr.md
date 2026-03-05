@@ -25,17 +25,6 @@ types (`IntegerSexp`, `OwnedRealSexp`, etc.), and no implicit type conversions h
 This can feel verbose, but it makes the data flow between R and Rust transparent
 and predictable.
 
-#### Type system
-
-extendr provides a general-purpose `Robj` type that can hold any R object, and you
-can inspect or convert it at runtime. This is flexible but means some type errors
-only surface at runtime.
-
-savvy uses separate types for each R vector type (e.g., `IntegerSexp`, `RealSexp`)
-and further distinguishes **read-only** types (for inputs from R) from **owned**
-types (for outputs you create). This separation avoids unnecessary protection and
-ALTREP checks, but is more verbose.
-
 #### API surface
 
 extendr has a broader API surface, covering more R constructs out of the box
