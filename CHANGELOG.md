@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.9.3] (2026-03-31)
+
 ### Minor improvements
 
 - Remove non-API (R >= 4.6) `R_UnboundValue`. (#430)
@@ -968,7 +970,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.3...HEAD
+[v0.9.3]: https://github.com/yutannihilation/savvy/compare/v0.9.2...v0.9.3
 [v0.9.2]: https://github.com/yutannihilation/savvy/compare/v0.9.1...v0.9.2
 
 [v0.9.1]: https://github.com/yutannihilation/savvy/compare/v0.9.0...v0.9.1
