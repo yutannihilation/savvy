@@ -1,6 +1,12 @@
 use std::ffi::CString;
 
-use savvy_ffi::{R_GlobalEnv, R_NilValue, R_UnboundValue, Rboolean_TRUE, SEXP};
+use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
+
+// Note: This is an ugly workaround; since `unwind_protect()` can only return an
+// SEXP, we need some sentinel value to indicate either success or failure. Any
+// SEXP can be used here as long as it's (1) not a user-facing value and (2) not
+// a non-API. I've been using R_UnboundValue, but it's non-API since R 4.6.
+use savvy_ffi::R_MissingArg as THE_SENTINEL_VALUE;
 
 use crate::{savvy_err, Sexp};
 
@@ -43,12 +49,13 @@ impl EnvironmentSexp {
                     // TODO: replace this with R_getVar() when savvy drop supports on R <4.5
                     savvy_ffi::Rf_eval(sym, self.0)
                 } else {
-                    R_UnboundValue
+                    // In this case, THE_SENTINEL_VALUE indicates a failure
+                    THE_SENTINEL_VALUE
                 }
             })?
         };
 
-        if sexp == unsafe { R_UnboundValue } {
+        if sexp == unsafe { THE_SENTINEL_VALUE } {
             Ok(None)
         } else {
             Ok(Some(Sexp(sexp)))
@@ -63,15 +70,12 @@ impl EnvironmentSexp {
         let res = unsafe {
             crate::unwind_protect(|| {
                 if savvy_ffi::R_existsVarInFrame(self.0, sym) == Rboolean_TRUE {
-                    // Note: Since `unwind_protect()` can only return an SEXP,
-                    // this needs to be some sentinel value. Any SEXP can be
-                    // used here as long as it can be used as a signal of a
-                    // success.
-                    R_NilValue
+                    // In this case, THE_SENTINEL_VALUE indicates a success
+                    THE_SENTINEL_VALUE
                 } else {
-                    R_UnboundValue
+                    R_NilValue
                 }
-            })? == R_NilValue
+            })? == THE_SENTINEL_VALUE
         };
 
         Ok(res)
