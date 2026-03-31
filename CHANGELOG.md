@@ -5,7 +5,7 @@
 
 ### Minor improvements
 
-- Remove non-API (R >= 4.6) `R_UnboundValue`
+- Remove non-API (R >= 4.6) `R_UnboundValue`. (#430)
 
 ## [v0.9.2] (2026-01-05)
 
