@@ -1,0 +1,43 @@
+[project]
+site_name = "Savvy - A simple R extension interface using Rust"
+site_url = "https://yutannihilation.github.io/savvy/guide/"
+repo_url = "https://github.com/yutannihilation/savvy"
+docs_dir = "src"
+site_dir = "site"
+
+extra_css = ["stylesheets/extra.css"]
+
+nav = [
+  { "Introduction" = "index.md" },
+  "get_started.md",
+  { "User Guide" = [
+    "key_ideas.md",
+    "savvy_macro.md",
+    "input.md",
+    "output.md",
+    "scalar.md",
+    "optional_arg.md",
+    { "Type-specific Topics" = [
+      "type-overview.md",
+      "atomic_types.md",
+      "list.md",
+      "struct.md",
+      "enum.md",
+    ]},
+    "error.md",
+    { "Handling Attributes" = [
+      "attributes.md",
+      "data_frames.md",
+      "factor.md",
+      "matrix.md",
+    ]},
+    "test.md",
+  ]},
+  { "Advanced Topics" = [
+    "advanced_topics.md",
+    "initialization_routine.md",
+    "altrep.md",
+    "linkage.md",
+  ]},
+  "extendr.md",
+]
