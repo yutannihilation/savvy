@@ -72,12 +72,10 @@ impl SavvyInputType {
                         if let syn::PathArguments::AngleBracketed(
                             syn::AngleBracketedGenericArguments { args, .. },
                         ) = &type_path_last.arguments
+                            && args.len() == 1
+                            && let syn::GenericArgument::Type(ty) = &args.first().unwrap()
                         {
-                            if args.len() == 1 {
-                                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
-                                    return Self::from_type(ty, true);
-                                }
-                            }
+                            return Self::from_type(ty, true);
                         }
 
                         Err(syn::Error::new_spanned(
