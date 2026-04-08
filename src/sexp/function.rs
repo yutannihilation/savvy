@@ -58,6 +58,7 @@ impl FunctionArgs {
         E: Into<crate::error::Error>,
     {
         // Set the arg value
+        #[allow(clippy::question_mark)]
         let v: Sexp = match arg_value.try_into() {
             Ok(sexp) => sexp,
             Err(e) => return Err(e.into()),
