@@ -6,6 +6,7 @@
 ### Minor improvements
 
 - Fix "not terminated with a newline" NOTE (#434).
+- Do not add double new lines to "api.h" (#434).
 
 ## [v0.9.3] (2026-03-31)
 
