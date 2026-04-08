@@ -224,7 +224,6 @@ extern "C" {
     pub fn R_existsVarInFrame(arg1: SEXP, arg2: SEXP) -> Rboolean;
 
     pub static mut R_GlobalEnv: SEXP;
-    pub static mut R_MissingArg: SEXP;
 }
 
 // Parse

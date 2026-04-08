@@ -2,11 +2,12 @@ use std::ffi::CString;
 
 use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
 
-// Note: This is an ugly workaround; since `unwind_protect()` can only return an
-// SEXP, we need some sentinel value to indicate either success or failure. Any
-// SEXP can be used here as long as it's (1) not a user-facing value and (2) not
-// a non-API. I've been using R_UnboundValue, but it's non-API since R 4.6.
-use savvy_ffi::R_MissingArg as THE_SENTINEL_VALUE;
+// Note: Since `unwind_protect()` can only return an SEXP, we need some sentinel
+// value to indicate either success or failure. Any SEXP can be used here as
+// long as it's (1) not a value that Rf_eval() possibly returns, and (2) not a
+// non-API. A null pointer is invalid as an SEXP, but that's why it fits for
+// this usage.
+const THE_SENTINEL_VALUE: SEXP = std::ptr::null_mut() as SEXP;
 
 use crate::{savvy_err, Sexp};
 
@@ -55,7 +56,7 @@ impl EnvironmentSexp {
             })?
         };
 
-        if sexp == unsafe { THE_SENTINEL_VALUE } {
+        if sexp == THE_SENTINEL_VALUE {
             Ok(None)
         } else {
             Ok(Some(Sexp(sexp)))

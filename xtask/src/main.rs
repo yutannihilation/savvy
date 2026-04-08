@@ -160,7 +160,6 @@ fn show() -> Result<(), DynError> {
         .allowlist_var("R_GlobalEnv")
         .allowlist_function("R_existsVarInFrame")
         .allowlist_function("Rf_defineVar")
-        .allowlist_var("R_MissingArg")
         // parse
         .allowlist_function("R_ParseEvalString")
         .allowlist_function("R_compute_identical")
