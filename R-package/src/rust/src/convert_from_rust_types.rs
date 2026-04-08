@@ -100,48 +100,48 @@ fn sum_real(x: RealSexp) -> savvy::Result<savvy::Sexp> {
 
 #[savvy]
 fn rep_int_vec(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<i32> = std::iter::repeat(0).take(x as usize).collect();
+    let result: Vec<i32> = std::iter::repeat_n(0, x as usize).collect();
     result.try_into()
 }
 
 #[savvy]
 fn rep_int_slice(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<i32> = std::iter::repeat(0).take(x as usize).collect();
+    let result: Vec<i32> = std::iter::repeat_n(0, x as usize).collect();
     result.as_slice().try_into()
 }
 
 #[savvy]
 fn rep_real_vec(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<f64> = std::iter::repeat(0.0).take(x as usize).collect();
+    let result: Vec<f64> = std::iter::repeat_n(0.0, x as usize).collect();
     result.try_into()
 }
 
 #[savvy]
 fn rep_real_slice(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<f64> = std::iter::repeat(0.0).take(x as usize).collect();
+    let result: Vec<f64> = std::iter::repeat_n(0.0, x as usize).collect();
     result.as_slice().try_into()
 }
 
 #[savvy]
 fn rep_bool_vec(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<bool> = std::iter::repeat(true).take(x as usize).collect();
+    let result: Vec<bool> = std::iter::repeat_n(true, x as usize).collect();
     result.try_into()
 }
 
 #[savvy]
 fn rep_bool_slice(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<bool> = std::iter::repeat(true).take(x as usize).collect();
+    let result: Vec<bool> = std::iter::repeat_n(true, x as usize).collect();
     result.as_slice().try_into()
 }
 
 #[savvy]
 fn rep_str_vec(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<&str> = std::iter::repeat("foo").take(x as usize).collect();
+    let result: Vec<&str> = std::iter::repeat_n("foo", x as usize).collect();
     result.try_into()
 }
 
 #[savvy]
 fn rep_str_slice(x: i32) -> savvy::Result<savvy::Sexp> {
-    let result: Vec<&str> = std::iter::repeat("foo").take(x as usize).collect();
+    let result: Vec<&str> = std::iter::repeat_n("foo", x as usize).collect();
     result.as_slice().try_into()
 }
