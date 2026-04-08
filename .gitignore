@@ -16,3 +16,4 @@ target
 /R-package/src/Makevars.win
 /.quarto/
 **/*.quarto_ipynb
+.claude/settings.local.json

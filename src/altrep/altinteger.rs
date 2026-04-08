@@ -4,6 +4,9 @@ use std::{
 };
 
 use savvy_ffi::{
+    INTEGER, INTEGER_ELT, INTSXP, R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE,
+    Rboolean_TRUE, Rf_ScalarInteger, Rf_ScalarReal, Rf_coerceVector, Rf_duplicate, Rf_protect,
+    Rf_unprotect, Rf_xlength, SEXP, SEXPTYPE,
     altrep::{
         R_altrep_data2, R_make_altinteger_class, R_set_altinteger_Elt_method,
         R_set_altinteger_Max_method, R_set_altinteger_Min_method, R_set_altinteger_Sum_method,
@@ -11,9 +14,6 @@ use savvy_ffi::{
         R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
         R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_ScalarInteger,
-    Rf_ScalarReal, Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, INTEGER,
-    INTEGER_ELT, INTSXP, SEXP, SEXPTYPE,
 };
 
 use crate::{IntegerSexp, IntoExtPtrSexp, NotAvailableValue};
@@ -308,7 +308,7 @@ pub fn register_altinteger_class<T: AltInteger>(
                         return unsafe { Rf_ScalarInteger(i32::na()) };
                     }
                 } else {
-                    result = result + x as f64;
+                    result += x as f64;
                 }
             }
             result

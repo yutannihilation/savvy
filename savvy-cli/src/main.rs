@@ -22,10 +22,10 @@ use std::path::PathBuf;
 use futures_lite::{io::BufReader, prelude::*};
 
 use savvy_bindgen::{
-    generate_c_header_file, generate_c_impl_file, generate_cargo_toml, generate_cleanup,
-    generate_config_toml, generate_configure, generate_example_lib_rs, generate_gitignore,
-    generate_makevars_in, generate_makevars_win_in, generate_r_impl_file, generate_win_def,
-    ParsedResult,
+    ParsedResult, generate_c_header_file, generate_c_impl_file, generate_cargo_toml,
+    generate_cleanup, generate_config_toml, generate_configure, generate_example_lib_rs,
+    generate_gitignore, generate_makevars_in, generate_makevars_win_in, generate_r_impl_file,
+    generate_win_def,
 };
 
 /// Generate C bindings and R bindings for a Rust library

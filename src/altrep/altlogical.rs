@@ -4,15 +4,15 @@ use std::{
 };
 
 use savvy_ffi::{
+    LGLSXP, LOGICAL, LOGICAL_ELT, R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE,
+    Rboolean_TRUE, Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SEXP,
+    SEXPTYPE,
     altrep::{
         R_altrep_data2, R_make_altlogical_class, R_set_altlogical_Elt_method,
         R_set_altrep_Coerce_method, R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method,
         R_set_altrep_Length_method, R_set_altrep_data2, R_set_altvec_Dataptr_method,
         R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaInt, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, LGLSXP, LOGICAL, LOGICAL_ELT, SEXP,
-    SEXPTYPE,
 };
 
 use crate::{IntoExtPtrSexp, LogicalSexp};

@@ -1,9 +1,9 @@
 use std::ffi::{CStr, CString};
 
 use savvy_ffi::{
-    R_NilValue, Rboolean_TRUE, Rf_getAttrib, Rf_isEnvironment, Rf_isFunction, Rf_isInteger,
-    Rf_isLogical, Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char, Rf_xlength, EXTPTRSXP,
-    INTEGER, RAWSXP, SEXP, SEXPTYPE, TYPEOF, VECSXP,
+    EXTPTRSXP, INTEGER, R_NilValue, RAWSXP, Rboolean_TRUE, Rf_getAttrib, Rf_isEnvironment,
+    Rf_isFunction, Rf_isInteger, Rf_isLogical, Rf_isNumeric, Rf_isReal, Rf_isString, Rf_type2char,
+    Rf_xlength, SEXP, SEXPTYPE, TYPEOF, VECSXP,
 };
 
 use crate::{

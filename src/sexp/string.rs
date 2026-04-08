@@ -2,7 +2,7 @@ use savvy_ffi::{R_NaString, SET_STRING_ELT, SEXP, STRING_ELT, STRSXP};
 
 use super::na::NotAvailableValue;
 use super::utils::{assert_len, charsxp_to_str, str_to_charsxp};
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
+use super::{Sexp, impl_common_sexp_ops, impl_common_sexp_ops_owned};
 use crate::protect::{self, local_protect};
 
 /// An external SEXP of a character vector.

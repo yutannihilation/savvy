@@ -87,7 +87,7 @@ use std::os::raw::c_char;
 pub use error::{Error, Result};
 pub use sexp::environment::EnvironmentSexp;
 pub use sexp::external_pointer::{
-    get_external_pointer_addr, take_external_pointer_value, ExternalPointerSexp, IntoExtPtrSexp,
+    ExternalPointerSexp, IntoExtPtrSexp, get_external_pointer_addr, take_external_pointer_value,
 };
 pub use sexp::function::{FunctionArgs, FunctionSexp};
 pub use sexp::integer::{IntegerSexp, OwnedIntegerSexp};
@@ -110,14 +110,14 @@ pub use savvy_ffi::Complex64;
 
 pub use unwind_protect::unwind_protect;
 
-pub use eval::{assert_eq_r_code, eval_parse_text, EvalResult};
+pub use eval::{EvalResult, assert_eq_r_code, eval_parse_text};
 
 // re-export
 pub use savvy_macro::savvy;
 pub use savvy_macro::savvy_init;
 
 use ffi::SEXP;
-use savvy_ffi::{cetype_t_CE_UTF8, Rf_allocVector, Rf_mkCharLenCE, SEXPTYPE};
+use savvy_ffi::{Rf_allocVector, Rf_mkCharLenCE, SEXPTYPE, cetype_t_CE_UTF8};
 
 fn alloc_vector(arg1: SEXPTYPE, arg2: usize) -> crate::error::Result<SEXP> {
     unsafe { unwind_protect(|| Rf_allocVector(arg1, arg2 as _)) }

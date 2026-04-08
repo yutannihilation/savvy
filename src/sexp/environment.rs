@@ -9,7 +9,7 @@ use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
 // this usage.
 const THE_SENTINEL_VALUE: SEXP = std::ptr::null_mut() as SEXP;
 
-use crate::{savvy_err, Sexp};
+use crate::{Sexp, savvy_err};
 
 use super::utils::str_to_symsxp;
 

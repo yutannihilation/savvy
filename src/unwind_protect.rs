@@ -2,7 +2,7 @@ use std::os::raw::c_void;
 
 use savvy_ffi::SEXP;
 
-extern "C" {
+unsafe extern "C" {
     fn unwind_protect_impl(
         fun: Option<unsafe extern "C" fn(data: *mut c_void) -> SEXP>,
         data: *mut c_void,

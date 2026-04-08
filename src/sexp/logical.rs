@@ -1,6 +1,6 @@
-use savvy_ffi::{R_NaInt, Rboolean_TRUE, LGLSXP, LOGICAL, SET_LOGICAL_ELT, SEXP};
+use savvy_ffi::{LGLSXP, LOGICAL, R_NaInt, Rboolean_TRUE, SET_LOGICAL_ELT, SEXP};
 
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
+use super::{Sexp, impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len};
 use crate::protect::{self, local_protect};
 
 /// An external SEXP of a logical vector.

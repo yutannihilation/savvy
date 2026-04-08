@@ -3,7 +3,7 @@ use savvy_ffi::{
     SEXP,
 };
 
-use crate::{protect::local_protect, Sexp};
+use crate::{Sexp, protect::local_protect};
 
 // Some notes about the design.
 //

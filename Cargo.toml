@@ -9,7 +9,7 @@ repository.workspace = true
 readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
-rust-version = "1.81"
+rust-version = "1.88"
 
 [dependencies]
 savvy-ffi = { version = "0.9.4", path = "./savvy-ffi" }
@@ -22,7 +22,7 @@ env_logger = { version = "0.11", default-features = false, optional = true }
 [features]
 default = []
 
-# Support complex 
+# Support complex
 complex = ["num-complex", "savvy-ffi/complex"]
 
 # Support ALTREP
@@ -67,7 +67,7 @@ resolver = "2"
 
 [workspace.package]
 version = "0.9.4"
-edition = "2021"
+edition = "2024"
 authors = ["Hiroaki Yutani"]
 license = "MIT"
 repository = "https://github.com/yutannihilation/savvy/"

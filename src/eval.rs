@@ -3,8 +3,9 @@ use std::ffi::CString;
 use savvy_ffi::{R_ParseEvalString, R_compute_identical, Rboolean_TRUE, SEXP};
 
 use crate::{
+    Sexp,
     protect::{self},
-    unwind_protect, Sexp,
+    unwind_protect,
 };
 
 /// A result of a function call. Since the result does not yet belong to any

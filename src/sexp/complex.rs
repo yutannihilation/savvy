@@ -4,9 +4,9 @@ use num_complex::Complex64;
 use savvy_ffi::CPLXSXP;
 use savvy_ffi::{COMPLEX, SEXP};
 
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
-use crate::protect::{self, local_protect};
-use crate::NotAvailableValue; // for na()
+use super::{Sexp, impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len};
+use crate::NotAvailableValue;
+use crate::protect::{self, local_protect}; // for na()
 
 /// An external SEXP of a complex vector.
 pub struct ComplexSexp(pub SEXP);
@@ -83,7 +83,7 @@ impl ComplexSexp {
     /// most efficient. However, it seems Rust's slice implementation is very
     /// fast, so probably being efficient for ALTREP is not worth giving up the
     /// benefit.
-    pub fn iter(&self) -> std::slice::Iter<Complex64> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Complex64> {
         self.as_slice().iter()
     }
 
@@ -114,11 +114,11 @@ impl OwnedComplexSexp {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
-    pub fn iter(&self) -> std::slice::Iter<Complex64> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Complex64> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<Complex64> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Complex64> {
         self.as_mut_slice().iter_mut()
     }
 

@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+- Use Rust 2024 edition. Now the MSRV is 1.88 (#438).
+
 ## [v0.9.4] (2026-04-08)
 
 ### Minor improvements

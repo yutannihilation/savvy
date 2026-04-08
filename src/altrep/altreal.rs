@@ -4,15 +4,15 @@ use std::{
 };
 
 use savvy_ffi::{
+    R_NaReal, R_NilValue, R_xlen_t, REAL, REAL_ELT, REALSXP, Rboolean, Rboolean_FALSE,
+    Rboolean_TRUE, Rf_ScalarReal, Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect,
+    Rf_xlength, SEXP, SEXPTYPE,
     altrep::{
         R_altrep_data2, R_make_altreal_class, R_set_altreal_Elt_method, R_set_altreal_Max_method,
         R_set_altreal_Min_method, R_set_altreal_Sum_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
         R_set_altrep_data2, R_set_altvec_Dataptr_method, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NaReal, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_ScalarReal,
-    Rf_coerceVector, Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, REAL, REALSXP, REAL_ELT,
-    SEXP, SEXPTYPE,
 };
 
 use crate::{IntoExtPtrSexp, NotAvailableValue, RealSexp};
@@ -59,7 +59,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result += x as f64;
+                result += x;
             }
         }
 
@@ -83,7 +83,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = f64::min(result, x as f64);
+                result = f64::min(result, x);
             }
         }
 
@@ -107,7 +107,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = f64::max(result, x as f64);
+                result = f64::max(result, x);
             }
         }
 
@@ -291,7 +291,7 @@ pub fn register_altreal_class<T: AltReal>(
                         return unsafe { Rf_ScalarReal(f64::na()) };
                     }
                 } else {
-                    result = result + x;
+                    result += x;
                 }
             }
             result

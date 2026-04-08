@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use crate::{savvy_err, IntegerSexp, NotAvailableValue, RealSexp, Sexp};
+use crate::{IntegerSexp, NotAvailableValue, RealSexp, Sexp, savvy_err};
 
 // --- Utils -------------------------
 
@@ -33,11 +33,7 @@ fn try_cast_f64_to_i32(f: f64) -> crate::Result<i32> {
 }
 
 fn cast_i32_to_f64(i: i32) -> f64 {
-    if i.is_na() {
-        f64::na()
-    } else {
-        i as f64
-    }
+    if i.is_na() { f64::na() } else { i as f64 }
 }
 
 fn try_cast_i32_to_usize(i: i32) -> crate::error::Result<usize> {

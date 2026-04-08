@@ -4,14 +4,14 @@ use std::{
 };
 
 use savvy_ffi::{
+    DATAPTR_RO, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
+    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
+    VECTOR_ELT,
     altrep::{
         R_altrep_data2, R_make_altlist_class, R_set_altlist_Elt_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
         R_set_altrep_data2, R_set_altvec_Dataptr_or_null_method,
     },
-    R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate,
-    Rf_protect, Rf_unprotect, Rf_xlength, DATAPTR_RO, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
-    VECTOR_ELT,
 };
 
 use crate::{IntoExtPtrSexp, ListSexp};

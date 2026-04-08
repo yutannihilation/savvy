@@ -1,7 +1,7 @@
 use proc_macro2::Span;
 use quote::format_ident;
 use syn::{
-    ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt,
+    Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt, ext::IdentExt, parse_quote,
 };
 
 use crate::utils::extract_docs;
@@ -72,12 +72,10 @@ impl SavvyInputType {
                         if let syn::PathArguments::AngleBracketed(
                             syn::AngleBracketedGenericArguments { args, .. },
                         ) = &type_path_last.arguments
+                            && args.len() == 1
+                            && let syn::GenericArgument::Type(ty) = &args.first().unwrap()
                         {
-                            if args.len() == 1 {
-                                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
-                                    return Self::from_type(ty, true);
-                                }
-                            }
+                            return Self::from_type(ty, true);
                         }
 
                         Err(syn::Error::new_spanned(
@@ -438,7 +436,6 @@ impl SavvyFn {
                     match (&fn_type, &ty.category) {
                         // DllInfo is passed as it is
                         (&SavvyFnType::InitFunction, &SavvyInputTypeCategory::DllInfo) => {}
-                        
                         (&SavvyFnType::InitFunction, _) => {
                             return Some(Err(syn::Error::new_spanned(
                                 ty.ty_orig,
@@ -456,10 +453,10 @@ impl SavvyFn {
                         (_, &SavvyInputTypeCategory::Sexp) => {
                             if ty.optional {
                                 stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
-                                stmts_additional.push(parse_quote! { 
-                                    let #pat = if #pat.is_null() { 
+                                stmts_additional.push(parse_quote! {
+                                    let #pat = if #pat.is_null() {
                                         None
-                                     } else { 
+                                     } else {
                                         Some(#pat)
                                     };
                                 })
@@ -474,11 +471,11 @@ impl SavvyFn {
                             let arg_lit = syn::LitStr::new(&pat.unraw().to_string(), Span::call_site());
                             if ty.optional {
                                 stmts_additional.push(parse_quote! { let #pat = savvy::Sexp(#pat); });
-                                stmts_additional.push(parse_quote! { 
-                                    let #pat = if #pat.is_null() { 
+                                stmts_additional.push(parse_quote! {
+                                    let #pat = if #pat.is_null() {
                                         None
-                                     } else { 
-                                        Some(<#ty_ident>::try_from(#pat).map_err(|e| e.with_arg_name(#arg_lit))?) 
+                                     } else {
+                                        Some(<#ty_ident>::try_from(#pat).map_err(|e| e.with_arg_name(#arg_lit))?)
                                     };
                                 })
                             } else {
@@ -657,7 +654,7 @@ You can use .try_into() to convert {wrong_ty} to savvy::Sexp."
                                             return_type: return_type.clone(),
                                             wrapped_with_result: true,
                                         },
-                                    ))
+                                    ));
                                 }
                             }
                         }
