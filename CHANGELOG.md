@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.9.4] (2026-04-08)
+
 ### Minor improvements
 
 - Fix "not terminated with a newline" NOTE (#434).
@@ -975,7 +977,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.9.4...HEAD
+[v0.9.4]: https://github.com/yutannihilation/savvy/compare/v0.9.3...v0.9.4
 [v0.9.3]: https://github.com/yutannihilation/savvy/compare/v0.9.2...v0.9.3
 [v0.9.2]: https://github.com/yutannihilation/savvy/compare/v0.9.1...v0.9.2
 
