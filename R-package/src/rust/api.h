@@ -128,9 +128,6 @@ SEXP savvy_usize_to_string__ffi(SEXP c_arg__x);
 SEXP savvy_usize_to_string_scalar__ffi(SEXP c_arg__x);
 SEXP savvy_var_exists_in_env__ffi(SEXP c_arg__name, SEXP c_arg__env);
 
-// methods and associated functions for Enum
-
-
 // methods and associated functions for FooEnum
 SEXP savvy_FooEnum_print__ffi(SEXP self__);
 
