@@ -4,9 +4,9 @@ use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
 
 // Note: Since `unwind_protect()` can only return an SEXP, we need some sentinel
 // value to indicate either success or failure. Any SEXP can be used here as
-// long as it's (1) not a user-facing value, (2) not a non-API, and (3) not a
-// value that Rf_eval() possibly returns. A null pointer is invalid as an SEXP,
-// but that's why it fits for this usage.
+// long as it's (1) not a value that Rf_eval() possibly returns, and (2) not a
+// non-API. A null pointer is invalid as an SEXP, but that's why it fits for
+// this usage.
 const THE_SENTINEL_VALUE: SEXP = std::ptr::null_mut() as SEXP;
 
 use crate::{savvy_err, Sexp};
