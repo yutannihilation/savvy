@@ -87,30 +87,37 @@ impl SavvyFn {
 }
 
 pub fn generate_c_header_file(result: &MergedResult) -> String {
-    let bare_fns = result
-        .bare_fns
-        .iter()
-        .map(|x| x.to_c_function_for_header())
-        .collect::<Vec<String>>()
-        .join("\n");
+    let mut blocks = Vec::new();
 
-    let impls = result
-        .impls
-        .iter()
-        .map(|(ty, i)| {
-            let fns = i
-                .fns
-                .iter()
-                .map(|x| x.to_c_function_for_header())
-                .collect::<Vec<String>>()
-                .join("\n");
+    if !result.bare_fns.is_empty() {
+        let bare_fns = result
+            .bare_fns
+            .iter()
+            .map(|x| x.to_c_function_for_header())
+            .collect::<Vec<String>>()
+            .join("\n");
 
-            format!("\n// methods and associated functions for {ty}\n{fns}")
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+        blocks.push(bare_fns);
+    }
 
-    format!("{bare_fns}\n{impls}\n")
+    result.impls.iter().for_each(|(ty, i)| {
+        if i.fns.is_empty() {
+            return;
+        }
+
+        let fns = i
+            .fns
+            .iter()
+            .map(|x| x.to_c_function_for_header())
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        blocks.push(format!(
+            "// methods and associated functions for {ty}\n{fns}"
+        ));
+    });
+
+    format!("{}\n", blocks.join("\n\n"))
 }
 
 fn generate_c_function_impl(fns: &[SavvyFn]) -> String {
