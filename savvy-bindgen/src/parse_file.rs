@@ -5,8 +5,8 @@ use quote::format_ident;
 use syn::{ext::IdentExt, parse_quote};
 
 use crate::{
-    extract_docs, ir::ParsedTestCase, utils::add_indent, ParsedResult, SavvyEnum, SavvyFn,
-    SavvyImpl, SavvyStruct,
+    ParsedResult, SavvyEnum, SavvyFn, SavvyImpl, SavvyStruct, extract_docs, ir::ParsedTestCase,
+    utils::add_indent,
 };
 
 fn is_savvified(attrs: &[syn::Attribute]) -> bool {

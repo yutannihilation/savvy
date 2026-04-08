@@ -3,9 +3,9 @@ use std::ops::{Index, IndexMut};
 use savvy_ffi::{REAL, REALSXP, SEXP};
 
 use super::utils::assert_len;
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, Sexp};
-use crate::protect::{self, local_protect};
-use crate::NotAvailableValue; // for na()
+use super::{Sexp, impl_common_sexp_ops, impl_common_sexp_ops_owned};
+use crate::NotAvailableValue;
+use crate::protect::{self, local_protect}; // for na()
 
 /// An external SEXP of a real vector.
 pub struct RealSexp(pub SEXP);

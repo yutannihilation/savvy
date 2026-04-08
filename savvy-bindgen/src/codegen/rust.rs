@@ -1,4 +1,4 @@
-use syn::{parse_quote, Token};
+use syn::{Token, parse_quote};
 
 use crate::ir::savvy_fn::{SavvyFnReturnType, UserDefinedStructReturnType};
 use crate::{SavvyFn, SavvyFnType};

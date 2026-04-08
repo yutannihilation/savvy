@@ -1,4 +1,4 @@
-use savvy_ffi::{REprintf, R_NilValue, Rprintf};
+use savvy_ffi::{R_NilValue, REprintf, Rprintf};
 
 use std::{ffi::CString, io::Write, os::raw::c_char};
 

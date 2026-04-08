@@ -15,15 +15,15 @@ pub use altstring::*;
 use std::{collections::HashMap, sync::Mutex};
 
 use savvy_ffi::{
+    PRINTNAME, R_NilValue, Rboolean_TRUE, SEXP,
     altrep::{
-        R_altrep_class_name, R_altrep_class_package, R_altrep_class_t, R_altrep_data1,
-        R_altrep_inherits, R_new_altrep, ALTREP, MARK_NOT_MUTABLE,
+        ALTREP, MARK_NOT_MUTABLE, R_altrep_class_name, R_altrep_class_package, R_altrep_class_t,
+        R_altrep_data1, R_altrep_inherits, R_new_altrep,
     },
-    R_NilValue, Rboolean_TRUE, PRINTNAME, SEXP,
 };
 use std::sync::OnceLock;
 
-use crate::{protect::local_protect, savvy_err, sexp::utils::charsxp_to_str, IntoExtPtrSexp};
+use crate::{IntoExtPtrSexp, protect::local_protect, savvy_err, sexp::utils::charsxp_to_str};
 
 /// This stores the ALTREP class objects
 static ALTREP_CLASS_CATALOGUE: OnceLock<Mutex<HashMap<&'static str, R_altrep_class_t>>> =

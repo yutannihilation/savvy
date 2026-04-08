@@ -8,7 +8,7 @@ use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
 // a non-API. I've been using R_UnboundValue, but it's non-API since R 4.6.
 use savvy_ffi::R_MissingArg as THE_SENTINEL_VALUE;
 
-use crate::{savvy_err, Sexp};
+use crate::{Sexp, savvy_err};
 
 use super::utils::str_to_symsxp;
 

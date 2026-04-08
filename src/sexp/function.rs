@@ -1,11 +1,12 @@
-use savvy_ffi::{R_NilValue, Rf_cons, Rf_eval, Rf_lcons, CDR, SETCAR, SETCDR, SET_TAG, SEXP};
+use savvy_ffi::{CDR, R_NilValue, Rf_cons, Rf_eval, Rf_lcons, SET_TAG, SETCAR, SETCDR, SEXP};
 
 use crate::{
+    EvalResult, ListSexp,
     protect::{self, local_protect},
-    unwind_protect, EvalResult, ListSexp,
+    unwind_protect,
 };
 
-use super::{utils::str_to_symsxp, Sexp};
+use super::{Sexp, utils::str_to_symsxp};
 
 /// An external SEXP of a function.
 pub struct FunctionSexp(pub SEXP);

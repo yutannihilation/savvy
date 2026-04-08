@@ -4,9 +4,9 @@ use num_complex::Complex64;
 use savvy_ffi::CPLXSXP;
 use savvy_ffi::{COMPLEX, SEXP};
 
-use super::{impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len, Sexp};
-use crate::protect::{self, local_protect};
-use crate::NotAvailableValue; // for na()
+use super::{Sexp, impl_common_sexp_ops, impl_common_sexp_ops_owned, utils::assert_len};
+use crate::NotAvailableValue;
+use crate::protect::{self, local_protect}; // for na()
 
 /// An external SEXP of a complex vector.
 pub struct ComplexSexp(pub SEXP);
