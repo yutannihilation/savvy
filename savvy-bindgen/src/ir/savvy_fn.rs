@@ -133,7 +133,7 @@ impl SavvyInputType {
                     // #[savvy] marked. For example, `fn foo(x: Foo)` is
                     // translated as below, assuming it inherits the
                     // conventional class.
-                    // 
+                    //
                     // `foo` <- function(`x`) {
                     //   `x` <- .savvy_extract_ptr(`x`, "pkg::Foo")   # This line
                     //   .Call(savvy_foo__impl, `x`)
