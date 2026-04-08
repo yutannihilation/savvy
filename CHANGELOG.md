@@ -3,11 +3,15 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+- Fix "not terminated with a newline" NOTE (#434).
+
 ## [v0.9.3] (2026-03-31)
 
 ### Minor improvements
 
-- Remove non-API (R >= 4.6) `R_UnboundValue`. (#430)
+- Remove non-API (R >= 4.6) `R_UnboundValue` (#430).
 
 ## [v0.9.2] (2026-01-05)
 
