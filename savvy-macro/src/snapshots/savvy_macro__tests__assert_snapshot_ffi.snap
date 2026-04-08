@@ -1,9 +1,10 @@
 ---
 source: savvy-macro/src/lib.rs
+assertion_line: 194
 expression: lines
 ---
 - "#[allow(clippy::missing_safety_doc)]"
-- "#[no_mangle]"
+- "#[unsafe(no_mangle)]"
 - "pub unsafe extern \"C\" fn savvy_foo__ffi() -> savvy::ffi::SEXP {"
 - "    match savvy_foo_inner() {"
 - "        Ok(result) => result.0,"
