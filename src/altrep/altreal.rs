@@ -59,7 +59,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result += x as f64;
+                result += x;
             }
         }
 
@@ -83,7 +83,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = f64::min(result, x as f64);
+                result = f64::min(result, x);
             }
         }
 
@@ -107,7 +107,7 @@ pub trait AltReal: Sized + IntoExtPtrSexp {
                     return None;
                 }
             } else {
-                result = f64::max(result, x as f64);
+                result = f64::max(result, x);
             }
         }
 
@@ -291,7 +291,7 @@ pub fn register_altreal_class<T: AltReal>(
                         return unsafe { Rf_ScalarReal(f64::na()) };
                     }
                 } else {
-                    result = result + x;
+                    result += x;
                 }
             }
             result

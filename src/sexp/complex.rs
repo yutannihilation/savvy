@@ -83,7 +83,7 @@ impl ComplexSexp {
     /// most efficient. However, it seems Rust's slice implementation is very
     /// fast, so probably being efficient for ALTREP is not worth giving up the
     /// benefit.
-    pub fn iter(&self) -> std::slice::Iter<Complex64> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Complex64> {
         self.as_slice().iter()
     }
 
@@ -114,11 +114,11 @@ impl OwnedComplexSexp {
         unsafe { std::slice::from_raw_parts_mut(self.raw, self.len) }
     }
 
-    pub fn iter(&self) -> std::slice::Iter<Complex64> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Complex64> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<Complex64> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Complex64> {
         self.as_mut_slice().iter_mut()
     }
 

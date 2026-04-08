@@ -308,7 +308,7 @@ pub fn register_altinteger_class<T: AltInteger>(
                         return unsafe { Rf_ScalarInteger(i32::na()) };
                     }
                 } else {
-                    result = result + x as f64;
+                    result += x as f64;
                 }
             }
             result
