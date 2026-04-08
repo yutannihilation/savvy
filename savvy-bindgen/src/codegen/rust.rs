@@ -175,7 +175,7 @@ impl SavvyFn {
                     parse_quote!(
                         #(#attrs)*
                         #[allow(clippy::missing_safety_doc)]
-                        #[no_mangle]
+                        #[unsafe(no_mangle)]
                         pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                             match #fn_name_inner(self__, #(#args_pat),*) {
                                 Ok(#ok_lhs) => #ok_rhs,
@@ -187,7 +187,7 @@ impl SavvyFn {
                     parse_quote!(
                         #(#attrs)*
                         #[allow(clippy::missing_safety_doc)]
-                        #[no_mangle]
+                        #[unsafe(no_mangle)]
                         pub unsafe extern "C" fn #fn_name_ffi(self__: savvy::ffi::SEXP, #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                             #fn_name_inner(self__, #(#args_pat),*)
                         }
@@ -197,7 +197,7 @@ impl SavvyFn {
             _ => parse_quote!(
                 #(#attrs)*
                 #[allow(clippy::missing_safety_doc)]
-                #[no_mangle]
+                #[unsafe(no_mangle)]
                 pub unsafe extern "C" fn #fn_name_ffi( #(#args_pat: #args_ty),* ) -> savvy::ffi::SEXP {
                     match #fn_name_inner(#(#args_pat),*) {
                         Ok(#ok_lhs) => #ok_rhs,
