@@ -9,7 +9,7 @@ repository.workspace = true
 readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
-rust-version = "1.85"
+rust-version = "1.88"
 
 [dependencies]
 savvy-ffi = { version = "0.9.4", path = "./savvy-ffi" }
