@@ -44,13 +44,11 @@ use savvy::sexp::na::NotAvailableValue;
 
 #[savvy]
 fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
-    cfg!(debug_assertions).try_into()
-}
-
-unsafe fn foo() {
     unsafe {
         savvy_ffi::STRING_PTR(std::ptr::null_mut() as _);
     }
+
+    cfg!(debug_assertions).try_into()
 }
 
 /// Convert Input To Upper-Case
