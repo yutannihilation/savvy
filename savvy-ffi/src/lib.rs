@@ -58,7 +58,10 @@ unsafe extern "C" {
 // NULL
 unsafe extern "C" {
     pub static mut R_NilValue: SEXP;
-    pub static mut R_NamespaceRegistry: SEXP;
+}
+
+unsafe extern "C" {
+    pub fn STRING_PTR(x: SEXP) -> SEXP;
 }
 
 // NA

@@ -33,7 +33,7 @@ mod mod1;
 
 mod log;
 
-use savvy::{r_print, savvy, OwnedListSexp, OwnedRawSexp, RawSexp};
+use savvy::{OwnedListSexp, OwnedRawSexp, RawSexp, r_print, savvy};
 
 use savvy::{
     IntegerSexp, ListSexp, LogicalSexp, OwnedIntegerSexp, OwnedLogicalSexp, OwnedRealSexp,
@@ -48,9 +48,9 @@ fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
 }
 
 unsafe fn foo() {
-    println!("{}", unsafe {
-        savvy_ffi::R_NamespaceRegistry == std::ptr::null_mut()
-    });
+    unsafe {
+        savvy_ffi::STRING_PTR(std::ptr::null_mut() as _);
+    }
 }
 
 /// Convert Input To Upper-Case
