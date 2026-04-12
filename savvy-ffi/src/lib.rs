@@ -58,7 +58,7 @@ unsafe extern "C" {
 // NULL
 unsafe extern "C" {
     pub static mut R_NilValue: SEXP;
-    pub static mut R_UnboundValue: SEXP;
+    pub static mut R_NamespaceRegistry: SEXP;
 }
 
 // NA

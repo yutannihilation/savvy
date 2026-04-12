@@ -49,7 +49,7 @@ fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
 
 unsafe fn foo() {
     println!("{}", unsafe {
-        savvy_ffi::R_UnboundValue == std::ptr::null_mut()
+        savvy_ffi::R_NamespaceRegistry == std::ptr::null_mut()
     });
 }
 
