@@ -47,6 +47,12 @@ fn is_built_with_debug() -> savvy::Result<savvy::Sexp> {
     cfg!(debug_assertions).try_into()
 }
 
+unsafe fn foo() {
+    println!("{}", unsafe {
+        savvy_ffi::R_UnboundValue == std::ptr::null_mut()
+    });
+}
+
 /// Convert Input To Upper-Case
 ///
 /// @param x A character vector.
