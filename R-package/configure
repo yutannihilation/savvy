@@ -47,15 +47,15 @@ if [ -n "${SAVVY_FEATURES}" ]; then
   FEATURE_FLAGS="--features '${SAVVY_FEATURES}'"
 fi
 
-ADDITIONAL_PKG_CFLAGS=""
+ADDITIONAL_PKG_CPPFLAGS=""
 R_STATUS=$("${R_HOME}/bin/R" --vanilla -s -e 'cat(R.version$status)')
 if [ -n "${R_STATUS}" ]; then
-  ADDITIONAL_PKG_CFLAGS="-DNO_LEGACY_NONAPI"
+  ADDITIONAL_PKG_CPPFLAGS="-DNO_LEGACY_NONAPI"
 fi
 
 sed \
   -e "s/@TARGET@/${TARGET}/" \
   -e "s/@PROFILE@/${PROFILE}/" \
   -e "s/@FEATURE_FLAGS@/${FEATURE_FLAGS}/" \
-  -e "s/@ADDITIONAL_PKG_CFLAGS@/${ADDITIONAL_PKG_CFLAGS}/" \
+  -e "s/@ADDITIONAL_PKG_CPPFLAGS@/${ADDITIONAL_PKG_CPPFLAGS}/" \
   src/Makevars.in > src/Makevars
