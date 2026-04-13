@@ -9,7 +9,10 @@ fn main() {
     // typical baseline.
     #[cfg(target_os = "macos")]
     if std::env::var_os("MACOSX_DEPLOYMENT_TARGET").is_none() {
-        std::env::set_var("MACOSX_DEPLOYMENT_TARGET", "11.0");
+        // SAFETY: build.rs runs in a fresh single-threaded process spawned by Cargo.
+        unsafe {
+            std::env::set_var("MACOSX_DEPLOYMENT_TARGET", "11.0");
+        }
     }
 
     // TODO: to pass the build of cargo-dist, this must be built without any errors.
