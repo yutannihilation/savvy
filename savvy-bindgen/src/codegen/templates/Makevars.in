@@ -25,10 +25,10 @@ $(STATLIB):
 	  export CC="$(CC)" && \
 	  export CFLAGS="$(CFLAGS)" && \
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
+	  @BEFORE_CARGO_BUILD@ \
 	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
 	    cargo build $(CARGO_BUILD_ARGS); \
 	  else \
-	    @BEFORE_CARGO_BUILD@ \
 	    export CARGO_PROFILE_DEV_PANIC="abort" && \
 	    export CARGO_PROFILE_RELEASE_PANIC="abort" && \
 	    export RUSTFLAGS="$(RUSTFLAGS) -Zdefault-visibility=hidden" && \
