@@ -77,3 +77,7 @@ jobs:
         env:
           MAKEFLAGS: -j2 # cf. https://github.com/yutannihilation/savvy/issues/355#issuecomment-2740005471
           SAVVY_PROFILE: dev
+
+      - name: debug
+        run: cat ./R-package/check/*.Rcheck/00install.out
+        if: ${{ always() }}
