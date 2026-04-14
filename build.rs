@@ -8,6 +8,11 @@ fn main() {
         cc::Build::new()
             .file("src/unwind_protect_wrapper.c")
             .include(Path::new(d.as_str()))
+            // Disable LTO for this TU. R's gcc-SAN builder injects `-flto=*`
+            // via CFLAGS, which breaks linking against the Rust staticlib.
+            // A trailing `-fno-lto` overrides it; `flag_if_supported` no-ops
+            // on compilers that don't recognize the flag (e.g. MSVC).
+            .flag_if_supported("-fno-lto")
             .compile("unwind_protect");
     } else {
         println!("cargo:warning=R_INCLUDE_DIR envvar should be provided.");
