@@ -8,6 +8,8 @@ fn main() {
         cc::Build::new()
             .file("src/backports/altrep_class.c")
             .include(Path::new(d.as_str()))
+            // See ../build.rs for why this matters under `-flto` in CFLAGS.
+            .flag_if_supported("-ffat-lto-objects")
             .compile("altrep_class");
     } else {
         println!("cargo:warning=R_INCLUDE_DIR envvar should be provided.");
