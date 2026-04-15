@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+- Pass `-ffat-lto-objects` when compiling `unwind_protect_wrapper.c` (and `altrep_class.c` in `savvy-ffi`) on non-macOS platforms. Without this, R build environments that inject `-flto=N` via `CFLAGS` (e.g. the gcc-SAN builder) produce slim LTO objects whose symbols are missing from the archive index after Rust bundles them into the final staticlib, causing `undefined symbol` errors at package load.
+
 ## [v0.10.1] (2026-04-13)
 
 ### Minor improvements
