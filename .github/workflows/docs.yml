@@ -48,12 +48,6 @@ jobs:
 
       - name: Tweak
         run: |
-          # As of v1.0.9, upload-pages-artifact action rejects files with incorrect permissions.
-          # In Rust doc's case, .lock is such a file.
-          #
-          # cf. https://github.com/actions/deploy-pages/issues/188#issuecomment-1597651901
-          rm -f ./target/doc/.lock
-
           mkdir _docs
           mv ./book/site ./_docs/guide
           mv ./target/doc ./_docs/reference
