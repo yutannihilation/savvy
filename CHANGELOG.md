@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+## [v0.10.2] (2026-04-23)
+
 ### Minor improvements
 
 - Pass `-ffat-lto-objects` when compiling `unwind_protect_wrapper.c` (and `altrep_class.c` in `savvy-ffi`) on non-macOS platforms. Without this, R build environments that inject `-flto=N` via `CFLAGS` (e.g. the gcc-SAN builder) produce slim LTO objects whose symbols are missing from the archive index after Rust bundles them into the final staticlib, causing `undefined symbol` errors at package load.
@@ -1000,7 +1002,8 @@ update`
 - `#[savvy]` now accepts `savvy::Sexp` as input.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/yutannihilation/savvy/compare/v0.10.2...HEAD
+[v0.10.2]: https://github.com/yutannihilation/savvy/compare/v0.10.1...v0.10.2
 [v0.10.1]: https://github.com/yutannihilation/savvy/compare/v0.10.0...v0.10.1
 [v0.10.0]: https://github.com/yutannihilation/savvy/compare/v0.9.4...v0.10.0
 [v0.9.4]: https://github.com/yutannihilation/savvy/compare/v0.9.3...v0.9.4
