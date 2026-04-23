@@ -613,10 +613,8 @@ fn get_savvy_return_type(
 
                 if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
                     match ty {
-                        syn::Type::Tuple(type_tuple) => {
-                            if type_tuple.elems.is_empty() {
-                                return Ok(SavvyFnReturnType::Unit(return_type.clone()));
-                            }
+                        syn::Type::Tuple(type_tuple) if type_tuple.elems.is_empty() => {
+                            return Ok(SavvyFnReturnType::Unit(return_type.clone()));
                         }
 
                         syn::Type::Path(type_path) => {

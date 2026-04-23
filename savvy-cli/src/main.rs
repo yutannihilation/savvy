@@ -375,12 +375,12 @@ fn update(path: &Path, rust_dir: &Option<PathBuf>) {
 
     write_file(
         &path.join(PATH_C_IMPL),
-        &generate_c_impl_file(&merged, &pkg_name),
+        &generate_c_impl_file(&merged, pkg_name),
     );
 
     write_file(
         &path.join(PATH_R_IMPL),
-        &generate_r_impl_file(&merged, &pkg_name),
+        &generate_r_impl_file(&merged, pkg_name),
     );
     tweak_r_buildignore(path);
 }
