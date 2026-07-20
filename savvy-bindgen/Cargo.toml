@@ -12,7 +12,7 @@ readme = "README.md"
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
-prettyplease = { version = "0.2", optional = true }
+prettyplease = { version = "0.3", optional = true }
 
 [features]
 default = []
