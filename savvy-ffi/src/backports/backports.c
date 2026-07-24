@@ -14,3 +14,10 @@ SEXP R_altrep_class_package(SEXP x)
     return ALTREP(x) ? CADR(ATTRIB(ALTREP_CLASS(x))) : R_NilValue;
 }
 #endif
+
+#if R_VERSION < R_Version(4, 5, 0)
+const void *VECTOR_PTR_RO(SEXP x)
+{
+    return DATAPTR_RO(x);
+}
+#endif
