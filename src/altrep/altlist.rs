@@ -4,9 +4,9 @@ use std::{
 };
 
 use savvy_ffi::{
-    DATAPTR_RO, R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector,
-    Rf_duplicate, Rf_protect, Rf_unprotect, Rf_xlength, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP,
-    VECTOR_ELT,
+    R_NilValue, R_xlen_t, Rboolean, Rboolean_FALSE, Rboolean_TRUE, Rf_coerceVector, Rf_duplicate,
+    Rf_protect, Rf_unprotect, Rf_xlength, SET_VECTOR_ELT, SEXP, SEXPTYPE, VECSXP, VECTOR_ELT,
+    VECTOR_PTR_RO,
     altrep::{
         R_altrep_data2, R_make_altlist_class, R_set_altlist_Elt_method, R_set_altrep_Coerce_method,
         R_set_altrep_Duplicate_method, R_set_altrep_Inspect_method, R_set_altrep_Length_method,
@@ -142,7 +142,7 @@ pub fn register_altlist_class<T: AltList>(
         crate::log::trace!("DATAPTR_OR_NULL({}) is called", T::CLASS_NAME);
 
         match get_materialized_sexp::<T>(&mut x, false) {
-            Some(materialized) => unsafe { DATAPTR_RO(materialized) as _ },
+            Some(materialized) => unsafe { VECTOR_PTR_RO(materialized) as _ },
             // Returning C NULL (not R NULL!) is the convention
             None => std::ptr::null_mut(),
         }

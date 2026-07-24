@@ -8,7 +8,7 @@ fn main() {
     if let Ok(d) = r_include_dir {
         let mut build = cc::Build::new();
         build
-            .file("src/backports/altrep_class.c")
+            .file("src/backports/backports.c")
             .include(Path::new(d.as_str()));
 
         // See ../build.rs for why this matters under `-flto` in CFLAGS.
@@ -21,6 +21,6 @@ fn main() {
         println!("cargo:warning=R_INCLUDE_DIR envvar should be provided.");
     }
 
-    println!("cargo:rerun-if-changed=src/backports/altrep_class.c");
+    println!("cargo:rerun-if-changed=src/backports/backports.c");
     println!("cargo:rerun-if-env-changed=R_INCLUDE_DIR");
 }
