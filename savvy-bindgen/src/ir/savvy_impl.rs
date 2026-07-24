@@ -39,12 +39,10 @@ impl SavvyImpl {
                     let ty = self_ty.clone();
                     let fn_type = match impl_item_fn.sig.inputs.first() {
                         Some(syn::FnArg::Receiver(syn::Receiver {
-                            reference,
-                            mutability,
-                            ..
+                            kind, mutability, ..
                         })) => SavvyFnType::Method {
                             ty,
-                            reference: reference.is_some(),
+                            reference: matches!(kind, syn::ReceiverKind::Reference(..)),
                             mutability: mutability.is_some(),
                         },
                         _ => SavvyFnType::AssociatedFunction(ty),

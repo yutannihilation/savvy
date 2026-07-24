@@ -162,7 +162,7 @@ impl SavvyInputType {
                     ));
                 }
 
-                if mutability.is_none() {
+                if !matches!(mutability, syn::PointerMutability::Mut(_)) {
                     return Err(syn::Error::new_spanned(
                         ty.clone(),
                         "DllInfo must be `*mut DllInfo`",
