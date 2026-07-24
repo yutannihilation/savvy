@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Minor improvements
+
+- Update the syn crate to v3 (#455).
+
 ## [v0.10.2] (2026-04-23)
 
 ### Minor improvements
