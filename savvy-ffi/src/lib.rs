@@ -187,7 +187,7 @@ unsafe extern "C" {
 
 // List
 unsafe extern "C" {
-    pub fn VECTOR_PTR_RO(x: SEXP) -> *const ::std::os::raw::c_void; // TODO: replace this to VECTOR_PTR_RO()
+    pub fn VECTOR_PTR_RO(x: SEXP) -> *const ::std::os::raw::c_void;
     pub fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP;
 }
