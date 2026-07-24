@@ -38,15 +38,20 @@ impl SavvyImpl {
                 syn::ImplItem::Fn(impl_item_fn) => {
                     let ty = self_ty.clone();
                     let fn_type = match impl_item_fn.sig.inputs.first() {
-                        Some(syn::FnArg::Receiver(syn::Receiver {
-                            reference,
-                            mutability,
-                            ..
-                        })) => SavvyFnType::Method {
-                            ty,
-                            reference: reference.is_some(),
-                            mutability: mutability.is_some(),
-                        },
+                        // Note: in v3, the `mutability` field in `Receiver`
+                        // seems only for non-reference cases (e.g. mut T). In
+                        // reference cases (e.g. &mut T), the `mut` is included
+                        // inside `kind`.
+                        Some(syn::FnArg::Receiver(syn::Receiver { kind, .. })) => {
+                            SavvyFnType::Method {
+                                ty,
+                                reference: matches!(kind, syn::ReceiverKind::Reference(..)),
+                                mutability: matches!(
+                                    kind,
+                                    syn::ReceiverKind::Reference(_, _, Some(_))
+                                ),
+                            }
+                        }
                         _ => SavvyFnType::AssociatedFunction(ty),
                     };
 

@@ -11,8 +11,8 @@ readme = "README.md"
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "2", features = ["full", "extra-traits"] }
-prettyplease = { version = "0.2", optional = true }
+syn = { version = "3", features = ["full", "extra-traits"] }
+prettyplease = { version = "0.3", optional = true }
 
 [features]
 default = []
