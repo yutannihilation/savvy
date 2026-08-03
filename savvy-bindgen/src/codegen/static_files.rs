@@ -20,6 +20,10 @@ pub fn generate_makevars_win_in(crate_name: &str) -> String {
     )
 }
 
+pub fn generate_rustarch_r() -> String {
+    include_str!("./templates/rustarch.R").to_string()
+}
+
 pub fn generate_configure_win() -> String {
     include_str!("./templates/configure.win").to_string()
 }
