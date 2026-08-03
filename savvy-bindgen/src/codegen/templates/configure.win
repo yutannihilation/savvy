@@ -21,6 +21,8 @@ RUSTC_VERSION="$(rustc --version || true)"
 echo "using Rust package manager: '${CARGO_VERSION}'"
 echo "using Rust compiler: '${RUSTC_VERSION}'"
 
+TARGET="$("${R_HOME}/bin${R_ARCH_BIN}/Rscript" "tools/rustarch.R")"
+
 # allow overriding profile externally (e.g. on CI)
 if [ -n "${SAVVY_PROFILE}" ]; then
   PROFILE="${SAVVY_PROFILE}"
@@ -37,7 +39,7 @@ if [ -n "${SAVVY_FEATURES}" ]; then
 fi
 
 sed \
-  -e "s/@TARGET@/x86_64-pc-windows-gnu/" \
+  -e "s/@TARGET@/${TARGET}/" \
   -e "s/@PROFILE@/${PROFILE}/" \
   -e "s/@FEATURE_FLAGS@/${FEATURE_FLAGS}/" \
   src/Makevars.win.in > src/Makevars.win
