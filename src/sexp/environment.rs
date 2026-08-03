@@ -1,12 +1,15 @@
 use std::ffi::CString;
 
-use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_TRUE, SEXP};
+use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_FALSE, Rboolean_TRUE, SEXP};
 
 // Note: Since `unwind_protect()` can only return an SEXP, we need some sentinel
 // value to indicate either success or failure. Any SEXP can be used here as
-// long as it's (1) not a value that Rf_eval() possibly returns, and (2) not a
-// non-API. A null pointer is invalid as an SEXP, but that's why it fits for
-// this usage.
+// long as it's (1) not a value that R possibly returns, and (2) not a non-API.
+// A null pointer is invalid as an SEXP, but that's why it fits for this usage.
+//
+// This is also used as the `ifnotfound` argument of R_getVarEx(), which returns
+// it as is without touching it (this is the same assumption as
+// unwind_protect_wrapper.c, which passes this value through R_UnwindProtect()).
 const THE_SENTINEL_VALUE: SEXP = std::ptr::null_mut() as SEXP;
 
 use crate::{Sexp, savvy_err};
@@ -46,13 +49,8 @@ impl EnvironmentSexp {
         // need protection.
         let sexp = unsafe {
             crate::unwind_protect(|| {
-                if savvy_ffi::R_existsVarInFrame(self.0, sym) == Rboolean_TRUE {
-                    // TODO: replace this with R_getVar() when savvy drop supports on R <4.5
-                    savvy_ffi::Rf_eval(sym, self.0)
-                } else {
-                    // In this case, THE_SENTINEL_VALUE indicates a failure
-                    THE_SENTINEL_VALUE
-                }
+                // THE_SENTINEL_VALUE is returned when the variable is not found
+                savvy_ffi::R_getVarEx(sym, self.0, Rboolean_FALSE, THE_SENTINEL_VALUE)
             })?
         };
 

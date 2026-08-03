@@ -3,6 +3,13 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+- savvy now requires R >= 4.5. `EnvironmentSexp::get()` now uses `R_getVarEx()`,
+  which is available since R 4.5, instead of `R_existsVarInFrame()` and
+  `Rf_eval()`. Accordingly, the backport of `VECTOR_PTR_RO()` for R < 4.5 is
+  removed. Building against an older R now fails with an explicit error.
+
 ### Minor improvements
 
 - Update the syn crate to v3 (#455).
