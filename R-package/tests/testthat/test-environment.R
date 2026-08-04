@@ -21,4 +21,13 @@ test_that("environment", {
   # global env
   .GlobalEnv$global_obj <- "ABC"
   expect_equal(get_var_in_env("global_obj"), "ABC")
+
+  # a promise is forced
+  e3 <- new.env(parent = emptyenv())
+  delayedAssign("d", "lazy", assign.env = e3)
+  expect_equal(get_var_in_env("d", e3), "lazy")
+
+  # an error while forcing a promise is propagated
+  delayedAssign("e", stop("boom"), assign.env = e3)
+  expect_error(get_var_in_env("e", e3), "boom")
 })

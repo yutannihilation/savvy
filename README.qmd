@@ -72,6 +72,11 @@ to_upper(c("a", "b", "c"))
 
 [extendr]: https://extendr.github.io/
 
+## Requirements
+
+- R >= 4.5
+- Rust >= 1.88
+
 ## Documents
 
 - [user guide](https://yutannihilation.github.io/savvy/guide/)

@@ -222,6 +222,7 @@ unsafe extern "C" {
     pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn Rf_defineVar(arg1: SEXP, arg2: SEXP, arg3: SEXP);
     pub fn R_existsVarInFrame(arg1: SEXP, arg2: SEXP) -> Rboolean;
+    pub fn R_getVarEx(arg1: SEXP, arg2: SEXP, arg3: Rboolean, arg4: SEXP) -> SEXP;
 
     pub static mut R_GlobalEnv: SEXP;
 }

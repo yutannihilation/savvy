@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
+### Breaking changes
+
+- savvy now requires R >= 4.5. Building against an older R now fails with an explicit error (#458).
+
 ### Minor improvements
 
 - Update the syn crate to v3 (#455).

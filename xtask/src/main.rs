@@ -159,6 +159,7 @@ fn show() -> Result<(), DynError> {
         .allowlist_function("Rf_eval")
         .allowlist_var("R_GlobalEnv")
         .allowlist_function("R_existsVarInFrame")
+        .allowlist_function("R_getVarEx")
         .allowlist_function("Rf_defineVar")
         // parse
         .allowlist_function("R_ParseEvalString")

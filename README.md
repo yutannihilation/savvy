@@ -57,6 +57,11 @@ to_upper(c("a", "b", "c"))
 #> [1] "A" "B" "C"
 ```
 
+## Requirements
+
+- R \>= 4.5
+- Rust \>= 1.88
+
 ## Documents
 
 - [user guide](https://yutannihilation.github.io/savvy/guide/)
