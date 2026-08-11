@@ -3,6 +3,7 @@ name = "savvy-ffi"
 description = "Minimal FFI bindings for R's C API"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 homepage.workspace = true

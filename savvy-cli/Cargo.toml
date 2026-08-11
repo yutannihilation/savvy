@@ -9,8 +9,9 @@ repository.workspace = true
 homepage.workspace = true
 readme = "README.md"
 
-# Unlike the savvy crate (MSRV 1.81), savvy-cli requires a newer Rust because
-# the dependencies (e.g. clap, toml) use Rust 2024 edition.
+# Unlike the savvy crate, savvy-cli can require a newer Rust; it's compiled on
+# CI and distributed as binaries, so this is not what the users compile. The
+# dependencies (e.g. clap, toml) require a newer Rust anyway.
 rust-version = "1.88"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
