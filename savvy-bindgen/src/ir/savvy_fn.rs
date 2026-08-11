@@ -69,15 +69,8 @@ impl SavvyInputType {
                             ));
                         }
 
-                        if let syn::PathArguments::AngleBracketed(
-                            syn::AngleBracketedGenericArguments { args, .. },
-                        ) = &type_path_last.arguments
-                        {
-                            if args.len() == 1 {
-                                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
-                                    return Self::from_type(ty, true);
-                                }
-                            }
+                        if let Some(ty) = single_generic_type(&type_path_last.arguments) {
+                            return Self::from_type(ty, true);
                         }
 
                         Err(syn::Error::new_spanned(
@@ -604,69 +597,72 @@ fn get_savvy_return_type(
 
             // Check `T`` in savvy::Result<T>
 
-            if let syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
-                args,
-                ..
-            }) = path_args
-            {
-                if args.len() != 1 {
-                    return e;
-                }
+            if let Some(ty) = single_generic_type(path_args) {
+                match ty {
+                    syn::Type::Tuple(type_tuple) if type_tuple.elems.is_empty() => {
+                        return Ok(SavvyFnReturnType::Unit(return_type.clone()));
+                    }
 
-                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
-                    match ty {
-                        syn::Type::Tuple(type_tuple) if type_tuple.elems.is_empty() => {
-                            return Ok(SavvyFnReturnType::Unit(return_type.clone()));
-                        }
+                    syn::Type::Path(type_path) => {
+                        let last_ident = &type_path.path.segments.last().unwrap().ident;
+                        match last_ident.to_string().as_str() {
+                            "Sexp" => return Ok(SavvyFnReturnType::Sexp(return_type.clone())),
 
-                        syn::Type::Path(type_path) => {
-                            let last_ident = &type_path.path.segments.last().unwrap().ident;
-                            match last_ident.to_string().as_str() {
-                                "Sexp" => return Ok(SavvyFnReturnType::Sexp(return_type.clone())),
-
-                                // if it's `savvy::Result<Self>`, replace `Self` with the actual type
-                                "Self" => {
-                                    if let Some(ty_actual) = self_ty_to_actual_ty(self_ty) {
-                                        return Ok(SavvyFnReturnType::UserDefinedStruct(
-                                            UserDefinedStructReturnType {
-                                                ty: ty_actual,
-                                                return_type: parse_quote!(-> savvy::Result<#self_ty>),
-                                                wrapped_with_result: true,
-                                            },
-                                        ));
-                                    }
-                                }
-
-                                // catch common mistakes
-                                wrong_ty @ ("String" | "i32" | "usize" | "f64" | "bool") => {
-                                    let msg = format!(
-"Return type must be either (), savvy::Sexp, or a user-defined type.
-You can use .try_into() to convert {wrong_ty} to savvy::Sexp."
-                                    );
-                                    return Err(syn::Error::new_spanned(type_path, msg));
-                                }
-
-                                // if it's the actual type, use it as it is.
-                                _ => {
+                            // if it's `savvy::Result<Self>`, replace `Self` with the actual type
+                            "Self" => {
+                                if let Some(ty_actual) = self_ty_to_actual_ty(self_ty) {
                                     return Ok(SavvyFnReturnType::UserDefinedStruct(
                                         UserDefinedStructReturnType {
-                                            ty: last_ident.clone(),
-                                            return_type: return_type.clone(),
+                                            ty: ty_actual,
+                                            return_type: parse_quote!(-> savvy::Result<#self_ty>),
                                             wrapped_with_result: true,
                                         },
                                     ));
                                 }
                             }
-                        }
 
-                        _ => {}
+                            // catch common mistakes
+                            wrong_ty @ ("String" | "i32" | "usize" | "f64" | "bool") => {
+                                let msg = format!(
+"Return type must be either (), savvy::Sexp, or a user-defined type.
+You can use .try_into() to convert {wrong_ty} to savvy::Sexp."
+                                    );
+                                return Err(syn::Error::new_spanned(type_path, msg));
+                            }
+
+                            // if it's the actual type, use it as it is.
+                            _ => {
+                                return Ok(SavvyFnReturnType::UserDefinedStruct(
+                                    UserDefinedStructReturnType {
+                                        ty: last_ident.clone(),
+                                        return_type: return_type.clone(),
+                                        wrapped_with_result: true,
+                                    },
+                                ));
+                            }
+                        }
                     }
+
+                    _ => {}
                 }
             }
 
             e
         }
     }
+}
+
+/// Extracts `T` if the path arguments are exactly `<T>`
+fn single_generic_type(path_args: &syn::PathArguments) -> Option<&syn::Type> {
+    if let syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+        args, ..
+    }) = path_args
+    {
+        if let (1, Some(syn::GenericArgument::Type(ty))) = (args.len(), args.first()) {
+            return Some(ty);
+        }
+    }
+    None
 }
 
 /// check if the type path either starts with `savvy::` or no qualifier
