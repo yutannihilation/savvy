@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use syn::Ident;
 use syn::ext::IdentExt;
+use syn::Ident;
 
 use crate::ir::SavvyMergedImpl;
 use crate::utils::add_indent;

@@ -1,7 +1,7 @@
 use proc_macro2::Span;
 use quote::format_ident;
 use syn::{
-    Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt, ext::IdentExt, parse_quote,
+    ext::IdentExt, parse_quote, Attribute, FnArg::Typed, Pat::Ident, PatType, Signature, Stmt,
 };
 
 use crate::utils::extract_docs;
@@ -72,10 +72,12 @@ impl SavvyInputType {
                         if let syn::PathArguments::AngleBracketed(
                             syn::AngleBracketedGenericArguments { args, .. },
                         ) = &type_path_last.arguments
-                            && args.len() == 1
-                            && let syn::GenericArgument::Type(ty) = &args.first().unwrap()
                         {
-                            return Self::from_type(ty, true);
+                            if args.len() == 1 {
+                                if let syn::GenericArgument::Type(ty) = &args.first().unwrap() {
+                                    return Self::from_type(ty, true);
+                                }
+                            }
                         }
 
                         Err(syn::Error::new_spanned(

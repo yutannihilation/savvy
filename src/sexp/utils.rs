@@ -3,9 +3,9 @@ use std::{
     os::raw::c_char,
 };
 
-use savvy_ffi::{R_CHAR, Rf_mkCharLenCE, Rf_xlength, SEXP, cetype_t_CE_UTF8};
+use savvy_ffi::{cetype_t_CE_UTF8, Rf_mkCharLenCE, Rf_xlength, R_CHAR, SEXP};
 
-use crate::{NotAvailableValue, savvy_err};
+use crate::{savvy_err, NotAvailableValue};
 
 pub(crate) fn assert_len(len: usize, i: usize) -> crate::error::Result<()> {
     if i >= len {

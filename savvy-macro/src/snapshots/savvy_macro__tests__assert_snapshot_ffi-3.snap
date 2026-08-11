@@ -4,7 +4,7 @@ assertion_line: 194
 expression: lines
 ---
 - "#[allow(clippy::missing_safety_doc)]"
-- "#[unsafe(no_mangle)]"
+- "#[no_mangle]"
 - "pub unsafe extern \"C\" fn savvy_foo__ffi("
 - "    x: savvy::ffi::SEXP,"
 - "    y: savvy::ffi::SEXP,"

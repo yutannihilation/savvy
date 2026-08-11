@@ -12,7 +12,7 @@ use savvy_ffi::{R_GlobalEnv, R_NilValue, Rboolean_FALSE, Rboolean_TRUE, SEXP};
 // unwind_protect_wrapper.c, which passes this value through R_UnwindProtect()).
 const THE_SENTINEL_VALUE: SEXP = std::ptr::null_mut() as SEXP;
 
-use crate::{Sexp, savvy_err};
+use crate::{savvy_err, Sexp};
 
 use super::utils::str_to_symsxp;
 

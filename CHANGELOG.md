@@ -9,6 +9,10 @@
 
 ### Minor improvements
 
+- Lower the MSRV of the savvy crate to 1.81 by reverting to Rust 2021 edition.
+  The generated packages also use Rust 2021 edition now. Note that this doesn't
+  apply to savvy-cli, whose dependencies require a newer Rust; use the prebuilt
+  binaries if your toolchain is old.
 - Update the syn crate to v3 (#455).
 - `savvy-cli init` now generates configuration files complatible with [ARM64 Windows] (`aarch64-pc-windows-gnullvm` target). Note that this change is not automatically reflected by `savvy-cli update`, so please update these files manually: [`configure.win`] (#459).
 
