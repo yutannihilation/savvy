@@ -75,7 +75,7 @@ to_upper(c("a", "b", "c"))
 ## Requirements
 
 - R >= 4.5
-- Rust >= 1.88
+- Rust >= 1.81
 
 ## Documents
 
