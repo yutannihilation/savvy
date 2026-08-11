@@ -21,8 +21,6 @@ RUSTC_VERSION="$(rustc --version || true)"
 echo "using Rust package manager: '${CARGO_VERSION}'"
 echo "using Rust compiler: '${RUSTC_VERSION}'"
 
-TARGET="$("${R_HOME}/bin${R_ARCH_BIN}/Rscript" "tools/rustarch.R")"
-
 # allow overriding profile externally (e.g. on CI)
 if [ -n "${SAVVY_PROFILE}" ]; then
   PROFILE="${SAVVY_PROFILE}"
@@ -37,6 +35,18 @@ fi
 if [ -n "${SAVVY_FEATURES}" ]; then
   FEATURE_FLAGS="--features '${SAVVY_FEATURES}'"
 fi
+
+# cf. https://github.com/apache/sedona-db/pull/1137
+CC="$("${R_HOME}/bin/R" CMD config CC)"
+case "$($CC -dumpmachine)" in
+  aarch64*|arm64*)
+    TARGET="aarch64-pc-windows-gnullvm"
+    ;;
+  *)
+    TARGET="x86_64-pc-windows-gnu"
+    ;;
+esac
+echo "using Rust target: '${TARGET}'"
 
 sed \
   -e "s/@TARGET@/${TARGET}/" \

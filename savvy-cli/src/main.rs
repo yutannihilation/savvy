@@ -4,7 +4,6 @@ mod utils;
 use parse_manifest::*;
 use savvy_bindgen::generate_cleanup_win;
 use savvy_bindgen::generate_configure_win;
-use savvy_bindgen::generate_rustarch_r;
 use utils::*;
 
 use async_process::Stdio;
@@ -144,8 +143,6 @@ const PATH_MAKEVARS_IN: &str = "src/Makevars.in";
 const PATH_CONFIGURE: &str = "configure";
 const PATH_CLEANUP: &str = "cleanup";
 const PATH_MAKEVARS_WIN_IN: &str = "src/Makevars.win.in";
-const PATH_TOOLS_DIR: &str = "tools";
-const PATH_RUSTARCH_R: &str = "tools/rustarch.R";
 const PATH_CONFIGURE_WIN: &str = "configure.win";
 const PATH_CLEANUP_WIN: &str = "cleanup.win";
 const PATH_GITIGNORE: &str = "src/.gitignore";
@@ -430,8 +427,6 @@ savvy = "*""#,
         &path.join(PATH_MAKEVARS_WIN_IN),
         &generate_makevars_win_in(&pkg_metadata.package_name_for_rust()),
     );
-    std::fs::create_dir(&path.join(PATH_TOOLS_DIR)).expect("failed to create tools/ dir");
-    write_file(&path.join(PATH_RUSTARCH_R), &generate_rustarch_r());
     write_file(&path.join(PATH_CONFIGURE_WIN), &generate_configure_win());
     write_file(&path.join(PATH_CLEANUP_WIN), &generate_cleanup_win());
 

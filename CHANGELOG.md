@@ -10,11 +10,10 @@
 ### Minor improvements
 
 - Update the syn crate to v3 (#455).
-- `savvy-cli init` now generates configuration files complatible with [ARM64 Windows] (`aarch64-pc-windows-gnullvm` target). Note that this change is not automatically reflected by `savvy-cli update`, so please update these files manually: [`configure.win`] and [`tools/rustarch.R`] (#455).
+- `savvy-cli init` now generates configuration files complatible with [ARM64 Windows] (`aarch64-pc-windows-gnullvm` target). Note that this change is not automatically reflected by `savvy-cli update`, so please update these files manually: [`configure.win`] (#459).
 
 [ARM64 Windows]: https://contributor.r-project.org/windows-arm64/#rust-support
 [`configure.win`]: https://github.com/yutannihilation/savvy/blob/main/savvy-bindgen/src/codegen/templates/configure.win
-[`tools/rustarch.R`]: https://github.com/yutannihilation/savvy/blob/main/savvy-bindgen/src/codegen/templates/rustarch.R
 
 ## [v0.10.2] (2026-04-23)
 
