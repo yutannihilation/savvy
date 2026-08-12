@@ -23,14 +23,15 @@ jobs:
       matrix:
         config:
           # prettier-ignore
-          - { os: "macos-latest",     r: "release", rust: "stable" }
-          - { os: "macos-15-intel",   r: "release", rust: "stable" }
-          - { os: "windows-latest",   r: "release", rust: "stable" }
-          - { os: "windows-11-arm",   r: "release", rust: "stable", rust_target: "aarch64-pc-windows-gnullvm" }
-          - { os: "ubuntu-latest",    r: "release", rust: "stable" }
-          - { os: "ubuntu-latest",    r: "devel",   rust: "stable", http-user-agent: "release" }
-          - { os: "ubuntu-latest",    r: "release", rust: "nightly" }
-          - { os: "ubuntu-24.04-arm", r: "release", rust: "stable", rspm: "false"}
+          - { os: "macos-latest",     r: "release",  rust: "stable" }
+          - { os: "macos-15-intel",   r: "release",  rust: "stable" }
+          - { os: "windows-latest",   r: "release",  rust: "stable" }
+          - { os: "windows-11-arm",   r: "release",  rust: "stable", rust_target: "aarch64-pc-windows-gnullvm" }
+          - { os: "ubuntu-latest",    r: "release",  rust: "stable" }
+          - { os: "ubuntu-latest",    r: "devel",    rust: "stable", http-user-agent: "release" }
+          - { os: "ubuntu-latest",    r: "release",  rust: "nightly" }
+          - { os: "ubuntu-latest",    r: "oldrel-4", rust: "stable", no_altrep: true }
+          - { os: "ubuntu-24.04-arm", r: "release",  rust: "stable", rspm: "false"}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -58,6 +59,19 @@ jobs:
             github::yutannihilation/savvy-helper-R-package
           needs: check
           working-directory: R-package
+
+      # TODO: The `altrep` feature requires R >= 4.3.
+      - name: Remove ALTREP from R-package
+        if: ${{ matrix.config.no_altrep }}
+        run: |
+          sed -i 's/^savvy = { path = "..\/..\/..\/", features = \[.*\] }$/savvy = { path = "..\/..\/..\/", features = ["complex", "logger"] }/' R-package/src/rust/Cargo.toml
+          sed -i '/^mod altrep;$/d' R-package/src/rust/src/lib.rs
+          rm R-package/src/rust/src/altrep.rs
+          rm R-package/tests/testthat/test-altrep.R
+
+          cargo run --manifest-path ./savvy-cli/Cargo.toml -- update ./R-package
+
+          git diff --stat
 
       - name: Run cargo test
         run: |

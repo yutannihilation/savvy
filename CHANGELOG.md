@@ -3,10 +3,10 @@
 <!-- next-header -->
 ## [Unreleased] (ReleaseDate)
 
-### Breaking changes
+### Major changes
 
-- savvy now requires R >= 4.5. Building against an older R now fails with an explicit error (#458).
-- Lower the MSRV of the savvy crate to 1.81 by reverting to Rust 2021 edition.
+- Savvy supports older R (>= 4.2) and Rust (>= 1.81), reverting the Rust edition to 2021 (#461).
+  - Note that, while most of the features work with R >= 4.2, the `altrep` feature requires R >= 4.3.
 
 ### Minor improvements
 

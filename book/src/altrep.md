@@ -11,6 +11,16 @@ You can implement an ALTREP class using savvy.
   the vector is materialized (i.e., allocated as a normal `SEXP` and put into
   the `data2` slot of the ALTREP object).
 
+* **The `altrep` feature requires R >= 4.3.** While savvy itself supports R >=
+  4.2, the ALTLIST API (which `AltList` relies on) was added in R 4.3.0. The
+  Rust code still compiles against R 4.2, but the package fails to load with an
+  undefined symbol error like `_R_make_altlist_class`. If you need to support R
+  4.2, don't enable the `altrep` feature.
+
+  ```toml
+  savvy = { version = "...", features = ["altrep"] } # requires R >= 4.3
+  ```
+
 ## Using ALTREP
 
 Savvy currently provides only the following traits for ALTREP. The other ALTREPs
