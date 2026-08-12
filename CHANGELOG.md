@@ -6,6 +6,7 @@
 ### Breaking changes
 
 - savvy now requires R >= 4.5. Building against an older R now fails with an explicit error (#458).
+- Lower the MSRV of the savvy crate to 1.81 by reverting to Rust 2021 edition.
 
 ### Minor improvements
 

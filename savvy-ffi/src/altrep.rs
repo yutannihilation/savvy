@@ -17,7 +17,7 @@ pub struct R_altrep_class_t {
 unsafe impl Send for R_altrep_class_t {}
 unsafe impl Sync for R_altrep_class_t {}
 
-unsafe extern "C" {
+extern "C" {
     // Note: this function is not limited to ALTREP, but this is placed here
     // because it's currently needed only for ALTREP.
     pub fn MARK_NOT_MUTABLE(x: SEXP);
@@ -35,7 +35,7 @@ unsafe extern "C" {
 
 // general
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_set_altrep_Unserialize_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: SEXP) -> SEXP>,
@@ -74,7 +74,7 @@ unsafe extern "C" {
 
 // vector common
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_set_altvec_Dataptr_method(
         cls: R_altrep_class_t,
         fun: Option<unsafe extern "C" fn(arg1: SEXP, arg2: Rboolean) -> *mut c_void>,
@@ -88,7 +88,7 @@ unsafe extern "C" {
 
 // integer
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altinteger_class(
         cname: *const c_char,
         pname: *const c_char,
@@ -133,7 +133,7 @@ unsafe extern "C" {
 
 // real
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altreal_class(
         cname: *const c_char,
         pname: *const c_char,
@@ -178,7 +178,7 @@ unsafe extern "C" {
 
 // logical
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altlogical_class(
         cname: *const c_char,
         pname: *const c_char,
@@ -214,7 +214,7 @@ unsafe extern "C" {
 }
 
 // raw
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altraw_class(
         cname: *const c_char,
         pname: *const c_char,
@@ -239,7 +239,7 @@ unsafe extern "C" {
 
 // string
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altstring_class(
         cname: *const c_char,
         pname: *const c_char,
@@ -265,7 +265,7 @@ unsafe extern "C" {
 
 // list
 
-unsafe extern "C" {
+extern "C" {
     pub fn R_make_altlist_class(
         cname: *const c_char,
         pname: *const c_char,

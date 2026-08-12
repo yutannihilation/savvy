@@ -9,7 +9,7 @@ repository.workspace = true
 readme = "README.md"
 exclude = ["/book", "/R-package", "README.qmd"]
 
-rust-version = "1.88"
+rust-version.workspace = true
 
 [dependencies]
 savvy-ffi = { version = "0.10.2", path = "./savvy-ffi" }
@@ -67,7 +67,9 @@ resolver = "2"
 
 [workspace.package]
 version = "0.10.2"
-edition = "2024"
+edition = "2021"
+# std::panic::PanicHookInfo, which savvy relies on, is introduced in 1.81
+rust-version = "1.81"
 authors = ["Hiroaki Yutani"]
 license = "MIT"
 repository = "https://github.com/yutannihilation/savvy/"

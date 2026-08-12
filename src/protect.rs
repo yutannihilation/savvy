@@ -32,8 +32,8 @@
 // worry that there still exists another instance on dropping it.
 
 use savvy_ffi::{
-    CAR, CDR, R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, SET_TAG, SETCAR,
-    SETCDR, SEXP,
+    R_NilValue, R_PreserveObject, Rf_cons, Rf_protect, Rf_unprotect, CAR, CDR, SETCAR, SETCDR,
+    SET_TAG, SEXP,
 };
 use std::sync::OnceLock;
 

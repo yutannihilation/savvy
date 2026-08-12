@@ -49,19 +49,19 @@ pub const RAWSXP: SEXPTYPE = 24;
 pub const OBJSXP: SEXPTYPE = 25;
 
 // pre-defined symbols
-unsafe extern "C" {
+extern "C" {
     pub static mut R_NamesSymbol: SEXP;
     pub static mut R_ClassSymbol: SEXP;
     pub static mut R_DimSymbol: SEXP;
 }
 
 // NULL
-unsafe extern "C" {
+extern "C" {
     pub static mut R_NilValue: SEXP;
 }
 
 // NA
-unsafe extern "C" {
+extern "C" {
     pub static mut R_NaInt: ::std::os::raw::c_int;
     pub static mut R_NaReal: f64;
     pub static mut R_NaString: SEXP;
@@ -70,7 +70,7 @@ unsafe extern "C" {
 }
 
 // Allocation and attributes
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_xlength(arg1: SEXP) -> R_xlen_t;
     pub fn Rf_allocVector(arg1: SEXPTYPE, arg2: R_xlen_t) -> SEXP;
     pub fn Rf_getAttrib(arg1: SEXP, arg2: SEXP) -> SEXP;
@@ -78,13 +78,13 @@ unsafe extern "C" {
 }
 
 // Symbol
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_install(arg1: *const ::std::os::raw::c_char) -> SEXP;
     pub fn PRINTNAME(x: SEXP) -> SEXP;
 }
 
 // Integer
-unsafe extern "C" {
+extern "C" {
     pub fn INTEGER(x: SEXP) -> *mut ::std::os::raw::c_int;
     pub fn INTEGER_RO(x: SEXP) -> *const ::std::os::raw::c_int;
     pub fn INTEGER_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
@@ -94,7 +94,7 @@ unsafe extern "C" {
 }
 
 // Real
-unsafe extern "C" {
+extern "C" {
     pub fn REAL(x: SEXP) -> *mut f64;
     pub fn REAL_RO(x: SEXP) -> *const f64;
     pub fn REAL_ELT(x: SEXP, i: R_xlen_t) -> f64;
@@ -109,7 +109,7 @@ unsafe extern "C" {
 // c_char.
 //
 // [1]: https://doc.rust-lang.org/stable/core/ffi/type.c_uchar.html
-unsafe extern "C" {
+extern "C" {
     pub fn RAW(x: SEXP) -> *mut u8;
     pub fn RAW_RO(x: SEXP) -> *const u8;
     pub fn RAW_ELT(x: SEXP, i: R_xlen_t) -> u8;
@@ -120,7 +120,7 @@ unsafe extern "C" {
 }
 
 // Numeric
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_isNumeric(arg1: SEXP) -> Rboolean;
 }
 
@@ -141,7 +141,7 @@ unsafe extern "C" {
 //
 // cf. https://gitlab.com/petsc/petsc-rs/-/issues/1
 #[cfg(feature = "complex")]
-unsafe extern "C" {
+extern "C" {
     pub fn COMPLEX(x: SEXP) -> *mut num_complex::Complex64;
     pub fn COMPLEX_RO(x: SEXP) -> *mut num_complex::Complex64;
     pub fn COMPLEX_ELT(x: SEXP, i: R_xlen_t) -> num_complex::Complex64;
@@ -151,7 +151,7 @@ unsafe extern "C" {
 }
 
 // Logical
-unsafe extern "C" {
+extern "C" {
     pub fn LOGICAL(x: SEXP) -> *mut ::std::os::raw::c_int;
     pub fn LOGICAL_RO(x: SEXP) -> *const ::std::os::raw::c_int;
     pub fn LOGICAL_ELT(x: SEXP, i: R_xlen_t) -> ::std::os::raw::c_int;
@@ -170,7 +170,7 @@ pub const cetype_t_CE_SYMBOL: cetype_t = 5;
 pub const cetype_t_CE_ANY: cetype_t = 99;
 pub type cetype_t = ::std::os::raw::c_int;
 
-unsafe extern "C" {
+extern "C" {
     pub fn STRING_PTR_RO(x: SEXP) -> *const SEXP;
     pub fn STRING_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_STRING_ELT(x: SEXP, i: R_xlen_t, v: SEXP);
@@ -186,7 +186,7 @@ unsafe extern "C" {
 }
 
 // List
-unsafe extern "C" {
+extern "C" {
     pub fn VECTOR_PTR_RO(x: SEXP) -> *const ::std::os::raw::c_void;
     pub fn VECTOR_ELT(x: SEXP, i: R_xlen_t) -> SEXP;
     pub fn SET_VECTOR_ELT(x: SEXP, i: R_xlen_t, v: SEXP) -> SEXP;
@@ -195,7 +195,7 @@ unsafe extern "C" {
 // External pointer
 
 pub type R_CFinalizer_t = Option<unsafe extern "C" fn(arg1: SEXP)>;
-unsafe extern "C" {
+extern "C" {
     pub fn R_MakeExternalPtr(p: *mut ::std::os::raw::c_void, tag: SEXP, prot: SEXP) -> SEXP;
     pub fn R_ExternalPtrAddr(s: SEXP) -> *mut ::std::os::raw::c_void;
     pub fn R_ClearExternalPtr(s: SEXP);
@@ -204,7 +204,7 @@ unsafe extern "C" {
 }
 
 // Pairlist
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_cons(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn Rf_lcons(arg1: SEXP, arg2: SEXP) -> SEXP;
     pub fn CAR(e: SEXP) -> SEXP;
@@ -216,7 +216,7 @@ unsafe extern "C" {
 }
 
 // Function and environment
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_isFunction(arg1: SEXP) -> Rboolean;
     pub fn Rf_isEnvironment(arg1: SEXP) -> Rboolean;
     pub fn Rf_eval(arg1: SEXP, arg2: SEXP) -> SEXP;
@@ -228,20 +228,20 @@ unsafe extern "C" {
 }
 
 // Parse
-unsafe extern "C" {
+extern "C" {
     pub fn R_ParseEvalString(arg1: *const ::std::os::raw::c_char, arg2: SEXP) -> SEXP;
     pub fn R_compute_identical(arg1: SEXP, arg2: SEXP, arg3: ::std::os::raw::c_int) -> Rboolean;
 }
 
 // Protection
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_protect(arg1: SEXP) -> SEXP;
     pub fn Rf_unprotect(arg1: ::std::os::raw::c_int);
     pub fn R_PreserveObject(arg1: SEXP);
 }
 
 // Type
-unsafe extern "C" {
+extern "C" {
     // Note: For some reason, the return type of TYPEOF() is defined as int in
     // RInternals.h and memory.c. However, the actual implementation is
     //
@@ -260,20 +260,20 @@ unsafe extern "C" {
 }
 
 // Error
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_errorcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char, ...) -> !;
     pub fn Rf_warningcall(arg1: SEXP, arg2: *const ::std::os::raw::c_char, ...);
 }
 
 // I/O
-unsafe extern "C" {
+extern "C" {
     pub fn Rprintf(arg1: *const ::std::os::raw::c_char, ...);
     pub fn REprintf(arg1: *const ::std::os::raw::c_char, ...);
 }
 
 // misc
 pub type DllInfo = *mut ::std::os::raw::c_void;
-unsafe extern "C" {
+extern "C" {
     pub fn Rf_coerceVector(arg1: SEXP, arg2: SEXPTYPE) -> SEXP;
     pub fn Rf_duplicate(arg1: SEXP) -> SEXP;
 }

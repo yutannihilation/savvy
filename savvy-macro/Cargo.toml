@@ -3,6 +3,7 @@ name = "savvy-macro"
 description = "Generate R-ready Rust functions by adding `#[savvy]` macro"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true

@@ -30,11 +30,16 @@ show            show bindgen-generated bindings
 fn show() -> Result<(), DynError> {
     println!("cargo:rerun-if-changed=wrapper.h");
 
-    let builder = bindgen::Builder::default().header("wrapper.h").clang_args([
-        // TODO: this works only on my Windows laptop...
-        format!("-I{}", "C:/Program Files/R/R-devel/include"),
-        // format!("--target={target}"),
-    ]);
+    let builder = bindgen::Builder::default()
+        .header("wrapper.h")
+        // Match savvy's MSRV so that the generated bindings don't contain
+        // newer syntax (e.g. `unsafe extern` blocks, which require 1.82)
+        .rust_target(bindgen::RustTarget::stable(81, 0).map_err(|e| e.to_string())?)
+        .clang_args([
+            // TODO: this works only on my Windows laptop...
+            format!("-I{}", "C:/Program Files/R/R-devel/include"),
+            // format!("--target={target}"),
+        ]);
 
     let builder = builder
         // Basic types and variables

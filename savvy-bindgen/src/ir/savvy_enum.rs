@@ -1,4 +1,4 @@
-use syn::{ItemEnum, ItemImpl, parse_quote};
+use syn::{parse_quote, ItemEnum, ItemImpl};
 
 use crate::extract_docs;
 
