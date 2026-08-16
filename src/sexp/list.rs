@@ -1,6 +1,9 @@
 use savvy_ffi::{R_NamesSymbol, Rf_setAttrib, SET_VECTOR_ELT, SEXP, VECSXP, VECTOR_ELT};
 
-use crate::{protect, OwnedStringSexp};
+use crate::{
+    protect::{self, local_protect},
+    OwnedStringSexp,
+};
 
 use super::{utils::assert_len, utils::str_to_charsxp, Sexp};
 
@@ -175,9 +178,15 @@ impl OwnedListSexp {
         k: &str,
         v: T,
     ) -> crate::error::Result<()> {
+        // set_name might cause GC, so, convert to SEXP first, and PROTECT it
+        // cf. https://github.com/yutannihilation/savvy/issues/462
+        let v_sexp: SEXP = v.into().0;
+        let _sexp_guard = local_protect(v_sexp);
+
         self.set_name(i, k)?;
+
         // cast unchecked function since set_name already does bounds check.
-        unsafe { self.set_value_unchecked(i, v.into().0) };
+        unsafe { self.set_value_unchecked(i, v_sexp) };
         Ok(())
     }
 
