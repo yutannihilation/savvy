@@ -18,7 +18,7 @@ proc-macro2 = "1"
 quote = "1"
 syn = { version = "3", features = ["full", "extra-traits"] }
 
-savvy-bindgen = { version = "0.10.2", path = "../savvy-bindgen" }
+savvy-bindgen = { version = "0.10.3-rc.1", path = "../savvy-bindgen" }
 
 [dev-dependencies]
 trybuild = "1"
