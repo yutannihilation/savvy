@@ -16,6 +16,10 @@
 [ARM64 Windows]: https://contributor.r-project.org/windows-arm64/#rust-support
 [`configure.win`]: https://github.com/yutannihilation/savvy/blob/main/savvy-bindgen/src/codegen/templates/configure.win
 
+### Bug fixes
+
+- `OwnedListSexp::set_name_and_value()` now protects the input value from getting GC-ed (#462).
+
 ## [v0.10.2] (2026-04-23)
 
 ### Minor improvements
