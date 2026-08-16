@@ -185,8 +185,6 @@ impl OwnedListSexp {
 
         self.set_name(i, k)?;
 
-        drop(_sexp_guard);
-
         // cast unchecked function since set_name already does bounds check.
         unsafe { self.set_value_unchecked(i, v_sexp) };
         Ok(())
