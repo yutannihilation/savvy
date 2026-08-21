@@ -26,7 +26,7 @@ jobs:
           - { os: "macos-latest",     r: "release",  rust: "stable" }
           - { os: "macos-15-intel",   r: "release",  rust: "stable" }
           - { os: "windows-latest",   r: "release",  rust: "stable" }
-          - { os: "windows-11-arm",   r: "release",  rust: "stable", rust_target: "aarch64-pc-windows-gnullvm" }
+          - { os: "windows-11-vs2026-arm", r: "release",  rust: "stable", rust_target: "aarch64-pc-windows-gnullvm" }
           - { os: "ubuntu-latest",    r: "release",  rust: "stable" }
           - { os: "ubuntu-latest",    r: "devel",    rust: "stable", http-user-agent: "release" }
           - { os: "ubuntu-latest",    r: "release",  rust: "nightly" }
