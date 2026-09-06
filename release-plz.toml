@@ -1,0 +1,8 @@
+[workspace]
+# release-plz creates the tag
+git_tag_enable = true
+# cargo-dist creates the GitHub Release
+git_release_enable = false
+
+# I prefer manually update the CHANGELOG for now
+changelog_update = false
