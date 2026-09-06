@@ -1,8 +1,14 @@
 [workspace]
-# release-plz creates the tag
-git_tag_enable = true
+# release-plz creates the tag, but we only need one tag. So, set the workspace
+# setting of git_tag_enable to false, and set this true only on the savvy crate.
+git_tag_enable = false
 # cargo-dist creates the GitHub Release
 git_release_enable = false
 
 # I prefer manually update the CHANGELOG for now
 changelog_update = false
+
+[[package]]
+name = "savvy"
+git_tag_enable = true
+git_tag_name = "v{{ version }}"
