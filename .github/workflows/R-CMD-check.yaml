@@ -27,10 +27,10 @@ jobs:
           - { os: "macos-15-intel",   r: "release",  rust: "stable" }
           - { os: "windows-latest",   r: "release",  rust: "stable" }
           - { os: "windows-11-arm",   r: "release",  rust: "stable", rust_target: "aarch64-pc-windows-gnullvm" }
-          - { os: "ubuntu-26.04",    r: "release",  rust: "stable" }
-          - { os: "ubuntu-26.04",    r: "devel",    rust: "stable", http-user-agent: "release" }
-          - { os: "ubuntu-26.04",    r: "release",  rust: "nightly" }
-          - { os: "ubuntu-26.04",    r: "oldrel-4", rust: "stable", no_altrep: true }
+          - { os: "ubuntu-latest",    r: "release",  rust: "stable" }
+          - { os: "ubuntu-latest",    r: "devel",    rust: "stable", http-user-agent: "release" }
+          - { os: "ubuntu-latest",    r: "release",  rust: "nightly" }
+          - { os: "ubuntu-latest",    r: "oldrel-4", rust: "stable", no_altrep: true }
           - { os: "ubuntu-26.04-arm", r: "release",  rust: "stable", rspm: "false"}
 
     env:

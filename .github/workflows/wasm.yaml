@@ -9,7 +9,7 @@ name: Check WASM build
 
 jobs:
   build-wasm:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

@@ -8,7 +8,7 @@ name: Check so-called "non-API" APIs
 
 jobs:
   check-non-api:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
