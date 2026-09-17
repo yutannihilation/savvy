@@ -31,7 +31,7 @@ jobs:
           - { os: "ubuntu-latest",    r: "devel",    rust: "stable", http-user-agent: "release" }
           - { os: "ubuntu-latest",    r: "release",  rust: "nightly" }
           - { os: "ubuntu-latest",    r: "oldrel-4", rust: "stable", no_altrep: true }
-          - { os: "ubuntu-24.04-arm", r: "release",  rust: "stable", rspm: "false"}
+          - { os: "ubuntu-26.04-arm", r: "release",  rust: "stable", rspm: "false"}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
