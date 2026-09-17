@@ -9,7 +9,7 @@ name: check MSRV
 jobs:
   # check at least it can build
   check-msrv:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
 

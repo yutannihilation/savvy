@@ -9,7 +9,7 @@ jobs:
   # Release unpublished packages.
   release-plz-release:
     name: Release-plz release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: ${{ github.repository_owner == 'yutannihilation' }} # Do not run this on a fork
     permissions:
       contents: write
@@ -42,7 +42,7 @@ jobs:
   # Create a PR with the new versions and changelog, preparing the next release.
   release-plz-pr:
     name: Release-plz PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: ${{ github.repository_owner == 'yutannihilation' }} # Do not run this on a fork
     permissions:
       contents: write
